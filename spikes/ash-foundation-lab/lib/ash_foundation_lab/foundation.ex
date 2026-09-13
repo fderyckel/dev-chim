@@ -6,6 +6,7 @@ defmodule AshFoundationLab.Foundation do
   use Ash.Domain, otp_app: :ash_foundation_lab
 
   resources do
+    resource AshFoundationLab.Actor
     resource AshFoundationLab.FoundationRecord
   end
 end

@@ -10,6 +10,8 @@
 - Ash Foundation Lab pressure-test and scorecard.
 - Security/privacy threat model and abuse cases.
 - Approved numeric quality-attribute targets.
+- Workload-driven tenant-placement profiles and a five-school capacity decision backed by synthetic evidence.
+- A module lifecycle contract that separates release, entitlement, activation, and authorization.
 - Reproducible local toolchain and one verification command.
 - Review record with decisions, conditions, owners, and expiry dates.
 
@@ -23,6 +25,8 @@ The local toolchain and environment smoke tests pass. They demonstrate that cont
 - [Risk register](risk-register.md)
 - [Review record](review-record.md)
 - [Evidence index](evidence/README.md)
+- [Tenant placement and workload capacity](../architecture/tenant-placement-and-capacity.md)
+- [Module activation and lifecycle](../architecture/module-activation-and-lifecycle.md)
 - [Implementation plan](../plans/phase-0-implementation-plan.md)
 
 No production business module, user interface, scheduler, runtime AI service, analytics plane, or file/report service belongs in this phase.

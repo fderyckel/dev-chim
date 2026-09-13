@@ -40,7 +40,7 @@ Propose testing Ash JSON:API first because it can derive from the candidate doma
 
 ## Security, privacy, operability, and migration effects
 
-Every request establishes actor, tenant, scope, assurance, purpose, and correlation context. Fields and query results remain policy-filtered. Errors must not reveal cross-tenant existence.
+Every request establishes actor, tenant, scope, assurance, purpose, and correlation context. Trusted placement is resolved from that authenticated tenant, never from a request-selected repository. Release availability, entitlement, module activation, and actor authorization are enforced server-side. Fields and query results remain policy-filtered. Errors must not reveal cross-tenant existence or placement.
 
 ## Validation evidence
 
@@ -59,4 +59,3 @@ Use thin REST/OpenAPI adapters over explicit domain actions. Preserve action sem
 
 - [ADR 0002](0002-ash-adoption-criteria-and-fallback.md)
 - [ADR 0005](0005-domain-action-and-state-transition-convention.md)
-

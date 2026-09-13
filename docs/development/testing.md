@@ -6,7 +6,10 @@
 - Unit tests cover deterministic logic without services.
 - Integration tests use the local synthetic PostgreSQL database and exercise Ash/PostgreSQL behaviour.
 - Security tests include negative authorization and cross-tenant cases alongside positive cases.
-- Later end-to-end, accessibility, performance, recovery, and adversarial tests are added when their platform capability exists.
+- Placement tests prove that authenticated tenant context, not request input, selects database, queue, storage, cache, and projection namespaces; stale or missing routing fails closed.
+- Module-lifecycle tests keep release availability, entitlement, activation, and actor authorization independent and cover concurrent deactivation, drain, retained data, and reactivation.
+- Performance tests model synchronized bursts, batch distributions, write amplification, retries, corrections, permission revocation, mixed reports, pool pressure, and noisy neighbours rather than relying on average annual volume.
+- Later end-to-end, accessibility, full performance, recovery, and adversarial tests are added when their platform capability exists.
 
 ## Commands
 
@@ -34,6 +37,9 @@ cd spikes/ash-foundation-lab && mise exec -- mix dialyzer
 - Database tests use SQL Sandbox transactions where possible.
 - Test names describe behaviour and expected denial, not implementation details.
 - Every policy change needs a permitted case, a denied case, a cross-tenant case, and a missing-context case where applicable.
+- Every placement-routing change needs pooled and dedicated positive cases plus wrong-tenant, request-selected, stale-version, missing-placement, spawned-task, and job-context negative cases.
+- Every module gate change needs independent entitlement, activation, and authorization cases; no test may infer one from another.
+- A benchmark report states its data shape, time distribution, hardware, PostgreSQL settings, connections, repeated-run variance, and limitations. Row-count arithmetic alone is not benchmark evidence.
 - Do not weaken an assertion to make an unsafe implementation pass.
 - Record an intentionally skipped test with its owner and unblock condition.
 

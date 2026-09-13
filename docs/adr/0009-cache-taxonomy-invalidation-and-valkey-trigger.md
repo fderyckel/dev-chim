@@ -24,7 +24,7 @@ Caching can improve latency but can also leak restricted data or preserve revoke
 
 ## Decision
 
-Propose explicit cache classes, ownership, tenant-aware/versioned keys, TTL, invalidation event, bypass, and observability. Begin with public/browser caching where safe and ETS behind an adapter. Do not deploy Valkey until cross-node reuse or coordination has a measured requirement.
+Propose explicit cache classes, ownership, tenant-aware/versioned keys, TTL, invalidation event, bypass, and observability. Placement and module-lifecycle versions participate in keys or namespaces where movement or deactivation could otherwise serve stale data. Begin with public/browser caching where safe and ETS behind an adapter. Do not deploy Valkey until cross-node reuse or coordination has a measured requirement.
 
 ## Consequences
 
@@ -40,7 +40,7 @@ Propose explicit cache classes, ownership, tenant-aware/versioned keys, TTL, inv
 
 ## Security, privacy, operability, and migration effects
 
-Restricted data is prohibited from shared cache by default. Authorization is re-evaluated where required, invalidation is durable, and cache failure must degrade to authoritative reads without weakening policy.
+Restricted data is prohibited from shared cache by default. Authorization and module gates are re-evaluated where required, invalidation is durable, and cache failure must degrade to authoritative reads without weakening policy. A tenant move or module deactivation invalidates affected namespaces; unknown placement state cannot fall back to a shared cache.
 
 ## Validation evidence
 
@@ -54,9 +54,10 @@ Disable or bypass caching safely. Introduce Valkey only through an ADR update wi
 
 - Multi-node cache reuse becomes a measured bottleneck.
 - A stale authorization or cross-tenant cache finding occurs.
+- A tenant-movement or module-deactivation rehearsal serves stale data.
 
 ## Related records
 
 - [ADR 0007](0007-transactional-outbox-and-event-envelope.md)
 - [ADR 0003](0003-tenant-model-and-optional-postgresql-rls.md)
-
+- [Module activation and lifecycle](../architecture/module-activation-and-lifecycle.md)

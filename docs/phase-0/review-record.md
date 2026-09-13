@@ -17,6 +17,8 @@
 - Ash pressure-test scorecard and commands.
 - Threat model, abuse cases, and residual risks.
 - Numeric quality targets and accountable owners.
+- Tenant-placement capacity profile, five-school decision, routing/movement tests, and recovery evidence.
+- Module lifecycle, dependency, deactivation-drain, retained-data, and reactivation evidence.
 - Clean-checkout `make check` result.
 
 ## Decisions
@@ -34,4 +36,3 @@ Every condition or residual-risk acceptance requires an owner, deadline, expiry,
 ## Phase 1 authorization
 
 Phase 1 is not authorized until the Phase 0 exit checklist is complete.
-

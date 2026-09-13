@@ -26,6 +26,8 @@ Post-commit jobs, projections, cache invalidation, search, webhooks, and notific
 
 Propose a transactional outbox written with domain state. A versioned envelope includes event ID, type, schema version, tenant, actor/service context, correlation, causation, occurrence time, classification, and a minimal payload. Consumers are registered, idempotent, replayable, and observable.
 
+Each outbox belongs to a trusted database placement. Dispatchers validate the tenant and current routing version rather than treating an event-supplied destination as authority. Tenant movement must quiesce, drain, or reconcile outbox cursors explicitly so events are neither lost nor processed in two placements.
+
 ## Consequences
 
 ### Positive
@@ -40,7 +42,7 @@ Propose a transactional outbox written with domain state. A versioned envelope i
 
 ## Security, privacy, operability, and migration effects
 
-Events carry the minimum necessary data, never become an authorization source, and preserve tenant/classification context. Operations need lag, retries, dead-letter handling, replay controls, and redacted diagnostics.
+Events carry the minimum necessary data, never become an authorization or placement source, and preserve tenant/classification context. Operations need per-placement lag, retries, dead-letter handling, replay controls, movement reconciliation, and redacted diagnostics. Module deactivation must preserve mandatory audit, retention, and outbox processing even when ordinary module consumers are drained or parked.
 
 ## Validation evidence
 
@@ -54,9 +56,10 @@ Add a broker only when measured throughput, retention, or consumer isolation can
 
 - Measured outbox throughput or retention limit.
 - A consumer requires incompatible delivery or isolation semantics.
+- Tenant movement, database routing, or module-lifecycle semantics change.
 
 ## Related records
 
 - [ADR 0005](0005-domain-action-and-state-transition-convention.md)
+- [ADR 0003](0003-tenant-model-and-optional-postgresql-rls.md)
 - [Deferred choices](../architecture/deferred-choices.md)
-

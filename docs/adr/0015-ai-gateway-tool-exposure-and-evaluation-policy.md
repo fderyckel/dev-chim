@@ -24,7 +24,7 @@ AI can assist users and development, but models must not gain implicit database 
 
 ## Decision
 
-Propose a gateway outside domain authority. It may expose curated Ash actions through typed tools using the real actor, tenant, classification, purpose, and confirmation state. Models cannot verify evidence, bypass policy, access raw SQL, or write without an explicitly approved action.
+Propose a gateway outside domain authority. It may expose curated Ash actions through typed tools using the real actor, tenant, classification, purpose, confirmation state, module gates, and trusted placement resolved by the platform. Models cannot select a database or cell, activate a module, verify evidence, bypass policy, access raw SQL, or write without an explicitly approved action.
 
 ## Consequences
 
@@ -59,4 +59,3 @@ Disable runtime AI without disabling deterministic platform actions. Provider ad
 
 - [ADR 0003](0003-tenant-model-and-optional-postgresql-rls.md)
 - [ADR 0014](0014-primary-api-and-generated-typescript-client.md)
-

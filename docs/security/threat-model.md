@@ -24,6 +24,8 @@ See [data classification](data-classification.md).
 5. Core scheduling contract to the solver runtime.
 6. Core authorized tools to the AI gateway and external model provider.
 7. Platform support tooling to a selected tenant.
+8. Authenticated tenant context to the placement registry and database, queue, storage, cache, search, analytics, and telemetry routing.
+9. Module release, entitlement, activation, dependency, and authorization gates to every interface and asynchronous consumer.
 
 Every boundary authenticates the caller or service, propagates tenant and correlation context, minimizes data, and records safe evidence. No projection, cache, solver, renderer, provider, or interface grants authority independently.
 
@@ -41,12 +43,17 @@ Every boundary authenticates the caller or service, propagates tenant and correl
 | TM-08 | AI prompt injection, cross-tenant retrieval, or unverified write | Critical | Provider-neutral gateway, curated tools, real actor/tenant, minimization, confirmation, kill switch | Adversarial AI evaluation in Phase 11 | Security architecture |
 | TM-09 | Sensitive logs, traces, events, or evidence | High | Minimal payloads, classification, source redaction, safe identifiers | Captured telemetry assertions and event-schema review | Platform engineering |
 | TM-10 | State commits without durable side-effect fact, or event without state | High | Transactional outbox and rollback | Injected transaction-failure test | Platform engineering |
+| TM-11 | Forged, stale, or conflicting placement routes a tenant to another database, queue, or storage namespace | Critical | Authenticated versioned registry, placement membership constraint, least-privilege credentials, no default fallback | Cross-placement, spawned-task/job, stale-version, movement, and rollback tests | Security architecture |
+| TM-12 | A synchronized write burst or noisy pooled tenant denies service or delays authorization, outbox, and recovery work | High | Per-tenant fairness, bounded bulk actions, pool budgets, backpressure, mixed-load targets, dedicated-placement escape path | Period-start burst, report-overlap, pool-exhaustion, backup, and restore tests | Platform engineering and operations |
+| TM-13 | Module activation bypasses authorization, or deactivation loses data, audit, jobs, events, or compliance access | Critical | Independent server-side gates, explicit dependencies, controlled drain, retained-data ownership, replay/reconciliation | Gate matrix, concurrent deactivation, drain, retained-data, and reactivation tests | Platform engineering and security architecture |
 
 ## Assumptions and scope limits
 
 - Phase 0 contains synthetic data and a local spike only.
 - Identity-provider, file, report, analytics, AI, and scheduler implementations are not present yet; their controls are architectural requirements, not completed evidence.
 - Application policy is the proposed authorization layer. RLS remains an evidence-driven backstop decision.
+- The five-school topology and attendance calculations are planning hypotheses, not accepted production sizing or placement evidence.
+- The placement registry and module lifecycle are Phase 0 contracts only; production implementations are outside this phase.
 - The local developer account and device security remain outside repository enforcement, but secrets and production data are prohibited.
 
 ## Residual-risk process
@@ -57,7 +64,9 @@ High or critical residual risk needs a named accountable acceptor, expiry, mitig
 
 - [Abuse cases](abuse-cases.md)
 - [ADR 0003](../adr/0003-tenant-model-and-optional-postgresql-rls.md)
+- [ADR 0001](../adr/0001-modular-monolith-and-service-boundaries.md)
 - [ADR 0009](../adr/0009-cache-taxonomy-invalidation-and-valkey-trigger.md)
 - [ADR 0010](../adr/0010-file-ownership-storage-pipeline-and-external-drives.md)
 - [ADR 0015](../adr/0015-ai-gateway-tool-exposure-and-evaluation-policy.md)
-
+- [Tenant placement and workload capacity](../architecture/tenant-placement-and-capacity.md)
+- [Module activation and lifecycle](../architecture/module-activation-and-lifecycle.md)

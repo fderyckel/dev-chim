@@ -7,10 +7,11 @@ The platform is a security-first modular monolith around Phoenix, Ash under eval
 
 - [System context](system-context.md)
 - [Service boundaries](service-boundaries.md)
+- [Tenant placement and workload capacity](tenant-placement-and-capacity.md)
+- [Module activation and lifecycle](module-activation-and-lifecycle.md)
 - [Quality-attribute targets](quality-attribute-targets.md)
 - [Deferred choices](deferred-choices.md)
 - [Architecture decisions](../adr/README.md)
 - [Threat model](../security/threat-model.md)
 
 An architectural statement remains Proposed until its ADR is accepted. The source roadmap guides Phase 0 but does not replace evidence or review.
-

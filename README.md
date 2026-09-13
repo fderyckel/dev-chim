@@ -29,6 +29,7 @@ These commands are the project contract. Editor tasks and future CI jobs must ca
 - Phoenix/PostgreSQL and the modular-monolith shape are the firm base.
 - Ash is a candidate under pressure-test, not yet an accepted production dependency.
 - Roles and access scopes are tenant-defined data, never a fixed list of school job titles.
+- Logical tenant controls remain mandatory in pooled databases, dedicated databases, and dedicated cells; physical placement is evidence-driven.
+- Module release availability, entitlement, tenant activation, and actor authorization are separate server-side gates.
 - All examples and tests use synthetic data.
 - Production modules, web applications, scheduler services, runtime AI, and analytics remain outside Phase 0.
-

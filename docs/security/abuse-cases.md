@@ -15,6 +15,8 @@
 | AC-08 | A cache key collides across tenant/classification or survives access revocation | Include tenant and version; invalidate durably; bypass shared cache for restricted data |
 | AC-09 | Uploaded text or external content injects instructions into an AI client | Treat content as data, use curated tools, minimize context, confirm writes, and deny over-broad access |
 | AC-10 | Logs, traces, or evidence contain secrets or restricted payloads | Redact at source and test captured telemetry |
+| AC-11 | A caller supplies another tenant's repository, cell, queue, schema, bucket, or stale routing version | Ignore untrusted placement input; resolve authenticated tenant placement centrally and fail closed on conflict or staleness |
+| AC-12 | One pooled tenant floods period-start writes or reports until other tenants cannot authorize or commit work | Enforce bounded batches, per-tenant fairness, connection budgets, backpressure, and a tested dedicated-placement path |
+| AC-13 | A tenant or client treats module activation as permission, bypasses entitlement, or deactivates while work is in flight | Enforce all gates server-side; drain or park work deterministically; preserve audit, outbox, retained data, and compliance access |
 
 Each implemented capability must convert relevant abuse cases into automated negative tests and link them from the threat model.
-

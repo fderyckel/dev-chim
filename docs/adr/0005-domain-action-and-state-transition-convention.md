@@ -44,7 +44,7 @@ Protected state cannot change through a generic update. Critical invariants are 
 
 ## Validation evidence
 
-The Ash spike must prove one named transition, stale-state conflict, denial, constraint, and atomic rollback.
+The [Ash pressure-test](../phase-0/evidence/ash-pressure-test.md) now proves one named transition, capability and tenant denial, invalid-state validation, an optimistic-lock conflict, and database constraints. Atomic audit/outbox rollback and generated-interface preservation remain required before this ADR can leave Proposed.
 
 ## Fallback and exit cost
 
@@ -59,4 +59,3 @@ The convention survives an Ash fallback through explicit Phoenix/Ecto action mod
 
 - [ADR 0002](0002-ash-adoption-criteria-and-fallback.md)
 - [ADR 0007](0007-transactional-outbox-and-event-envelope.md)
-

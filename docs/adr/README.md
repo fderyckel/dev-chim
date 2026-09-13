@@ -18,9 +18,9 @@ ADRs record decisions that shape stable platform boundaries. Every record starts
 | ADR | Title | Status | Owner | Evidence |
 | --- | --- | --- | --- | --- |
 | [0000](0000-template.md) | ADR template | Template | Architecture review group | Not applicable |
-| [0001](0001-modular-monolith-and-service-boundaries.md) | Modular monolith and permitted service boundaries | Proposed | Architecture review group | Context and boundary review |
+| [0001](0001-modular-monolith-and-service-boundaries.md) | Modular monolith and permitted service boundaries | Proposed | Architecture review group | Context, boundary, and module-lifecycle review |
 | [0002](0002-ash-adoption-criteria-and-fallback.md) | Ash adoption criteria and fallback | Proposed | Platform engineering | Ash pressure-test |
-| [0003](0003-tenant-model-and-optional-postgresql-rls.md) | Tenant model and optional PostgreSQL RLS | Proposed | Security architecture | Threat model and tenancy tests |
+| [0003](0003-tenant-model-and-optional-postgresql-rls.md) | Tenant model, placement profiles, and optional PostgreSQL RLS | Proposed | Security architecture | Threat model, routing, tenancy, capacity, movement, and recovery tests |
 | [0005](0005-domain-action-and-state-transition-convention.md) | Domain action and state-transition convention | Proposed | Platform engineering | Named-action spike tests |
 | [0007](0007-transactional-outbox-and-event-envelope.md) | Transactional outbox and event envelope | Proposed | Platform engineering | Atomic rollback test |
 | [0009](0009-cache-taxonomy-invalidation-and-valkey-trigger.md) | Cache taxonomy, invalidation, and Valkey trigger | Proposed | Platform engineering | Classification and trigger review |
@@ -31,4 +31,3 @@ ADRs record decisions that shape stable platform boundaries. Every record starts
 | [0016](0016-scheduling-service-contract-and-publication-boundary.md) | Scheduling service contract and publication boundary | Proposed | Platform and scheduling engineering | Contract review |
 
 Allowed decision statuses are Proposed, Accepted, Conditionally Accepted, Rejected, Superseded, and Deferred. `Template` is reserved for ADR 0000.
-

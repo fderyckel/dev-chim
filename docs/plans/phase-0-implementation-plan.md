@@ -13,7 +13,9 @@ Phase 0 will turn the architecture direction into reviewable decisions and evide
 - a small, navigable documentation and ADR workspace;
 - an approved set of foundational architecture decisions;
 - a threat model covering the platform's highest-risk trust boundaries;
-- measurable capacity, latency, recovery, and availability targets;
+- measurable per-domain burst, retained-footprint, tenant-placement, latency, recovery, and availability targets;
+- a reviewed cell and database-placement contract with a five-school evidence record;
+- a module lifecycle contract separating release, entitlement, activation, and authorization;
 - a disposable Ash pressure-test with negative tenant and authorization tests;
 - a repeatable Phase 0 verification command; and
 - an architecture review record that either accepts Ash or names and approves a fallback.
@@ -47,7 +49,10 @@ Ruff is included, but only for Python support scripts and tests. It cannot lint 
 - Ash remains provisional until the pressure-test passes.
 - All mutations are named actions; generic CRUD is not the domain contract.
 - Tenant context is mandatory and non-null at every tested boundary.
+- Logical tenant controls remain mandatory across pooled databases, dedicated databases, and dedicated cells. Trusted authenticated context selects placement and missing or stale routing fails closed.
+- Tenant placement is based on per-domain volume, burst, amplification, retention, reporting, integrations, recovery, residency, and isolation evidence. Student count alone is not a placement rule.
 - Production roles are tenant-defined, hierarchical, nested, renameable, and composable data. Terms such as learner, guardian, and educator may describe principals or relationships, but must not become hard-coded role names.
+- Release availability, entitlement, tenant activation, and actor authorization are independent server-side gates. Deactivation never drops shared tables or implicitly erases retained tenant data.
 - Policies must protect reads and writes. UI hiding is never evidence of authorization.
 - Domain state and durable post-commit facts use an atomic transaction and an outbox model.
 - Sensitive or restricted data must not enter shared caches, broad search projections, logs, or AI tools by default.
@@ -81,6 +86,8 @@ dev-chim/
 │   │   ├── README.md
 │   │   ├── system-context.md
 │   │   ├── service-boundaries.md
+│   │   ├── tenant-placement-and-capacity.md
+│   │   ├── module-activation-and-lifecycle.md
 │   │   ├── quality-attribute-targets.md
 │   │   └── deferred-choices.md
 │   ├── adr/
@@ -110,6 +117,8 @@ dev-chim/
 │           ├── README.md
 │           ├── ash-pressure-test.md
 │           ├── threat-model-review.md
+│           ├── tenant-placement-capacity.md
+│           ├── module-lifecycle.md
 │           └── quality-targets-approval.md
 ├── spikes/
 │   └── ash-foundation-lab/
@@ -193,9 +202,9 @@ All records begin as Proposed. Only the architecture review may mark them Accept
 
 | ADR | Decision required in Phase 0 | Required evidence or boundary |
 | --- | --- | --- |
-| 0001 | Modular monolith and permitted service boundaries | Context map; capability and transaction ownership; explicit triggers for adding a deployment unit |
+| 0001 | Modular monolith, permitted service boundaries, and module lifecycle | Context map; independent release/entitlement/activation/authorization gates; dependencies; drain; retained-data and reactivation tests |
 | 0002 | Ash adoption criteria and fallback | Pressure-test scorecard; upgrade review; fallback shape using Phoenix/Ecto with explicit domain contracts |
-| 0003 | Tenant model and optional PostgreSQL RLS | Threats, connection-pooling and job-context analysis; application-policy and RLS trade-off |
+| 0003 | Tenant model, placement profiles, trusted routing, and optional PostgreSQL RLS | Per-domain capacity model; routing and cross-placement tests; movement, backup, restore, connection-pool and job-context analysis; application-policy and RLS trade-off |
 | 0005 | Domain action and state-transition convention | One named transition; invariant, policy, concurrency, error, and transaction evidence |
 | 0007 | Transactional outbox and event envelope | Atomic write design; envelope versioning; minimal payload and replay/idempotency rules |
 | 0009 | Cache taxonomy, invalidation, and Valkey trigger | Classification rules; tenant-aware key standard; explicit measured trigger for shared L2 cache |
@@ -208,7 +217,8 @@ All records begin as Proposed. Only the architecture review may mark them Accept
 Required decision discipline:
 
 - ADR 0002 cannot be accepted before the pressure-test evidence is complete.
-- ADR 0003 must not hard-code school job titles as platform roles.
+- ADR 0001 must keep module activation separate from entitlement and authorization, and must define safe deactivation without implicit data deletion.
+- ADR 0003 must not hard-code school job titles as platform roles, infer placement from student count, or trust request-selected routing.
 - ADR 0009 should accept an L1 abstraction and measurable Valkey trigger, not deploy Valkey speculatively.
 - ADR 0014 should test the preferred generated REST or JSON:API path first. GraphQL remains deferred unless a concrete use case fails without it.
 - ADRs 0010, 0012, 0015, and 0016 define contracts and boundaries only; their production services are not Phase 0 deliverables.
@@ -238,6 +248,8 @@ Actions:
    - the scheduling boundary;
    - the AI gateway, providers, and tools; and
    - support and break-glass access.
+   - the trusted tenant-placement registry and every routed database, queue, storage, cache, search, analytics, and telemetry namespace; and
+   - module release, entitlement, activation, dependency, deactivation, and retained-data paths.
 4. Record threats and abuse cases, including:
    - cross-tenant read, mutation, inference, and subscription leaks;
    - confused-deputy and missing-tenant context failures;
@@ -249,6 +261,9 @@ Actions:
    - search result leakage before policy filtering;
    - prompt injection, over-broad tools, provider retention, and unverified AI writes; and
    - audit tampering or sensitive logging.
+   - cross-placement routing, stale routing versions, unsafe movement, credential fan-out, and default-database fallback;
+   - synchronized write bursts and pooled-tenant resource starvation; and
+   - activation-as-authorization, entitlement bypass, unsafe deactivation, abandoned work, and retained data without an owner.
 5. Map each high or critical threat to a preventive control, detection, negative test, owner, residual risk, and ADR.
 6. Record out-of-scope threats and assumptions explicitly.
 7. Review the model with architecture, security/privacy, and operations representatives.
@@ -258,7 +273,9 @@ Acceptance criteria:
 - All required Phase 0 trust boundaries are shown and described.
 - Every high or critical threat has an owner and testable treatment.
 - Tenant isolation covers HTTP, generated APIs, jobs, events, caches, files, search, realtime, exports, telemetry, and AI tools.
+- Tenant isolation covers pooled and dedicated placements, movement, routing-version conflict, and separate operational identities.
 - The role model remains tenant-defined and relationship-aware.
+- Module availability, entitlement, activation, and actor authorization remain independent at every applicable boundary.
 - Residual risk is accepted by an accountable person, not silently marked resolved.
 
 ### P0.4 - Approve measurable quality-attribute targets
@@ -282,18 +299,21 @@ The following targets are mandatory before Phase 0 exits:
 | Area | Decision to obtain | Evidence expected later |
 | --- | --- | --- |
 | Interactive latency | API read/mutation and user-visible targets, including percentile and target network/device | Repeatable benchmark definition |
-| Scale | Expected launch and planning-horizon tenants, users per tenant, active sessions, and concurrency | Capacity profile and synthetic dataset shape |
+| Scale | Expected launch and planning-horizon tenants, users per tenant, active sessions, concurrency, and per-domain retained footprint | Capacity profile and synthetic dataset shape |
+| Peak domain writes | Committed facts/second, batch latency/error, synchronized window, retries, corrections, permission revocation, write amplification, and zero unauthorized partial commits | Repeatable mixed-load burst benchmark |
+| Tenant placement | Pool wait/saturation, noisy-neighbour effect, routing conflict, movement interruption, reconciliation, backup, and restore by candidate profile | Pooled and dedicated synthetic placement scenarios |
 | Reports | Maximum campaign count, page complexity, completion deadline, retry budget, and concurrency | Gotenberg benchmark scenario |
 | Files | Maximum upload size, allowed types, derivative limits, scan deadline, and retention assumptions | Malicious-file and large-file test profiles |
 | Recovery | PostgreSQL and object-storage RPO/RTO, restore verification interval, and legal-hold constraints | Restore-drill protocol |
 | Availability | Service-level objective, maintenance assumptions, and dependency degradation rules | SLO/error-budget definition |
 
-Do not invent final business numbers in code. Provisional spike values must be labelled hypotheses. Phase 0 cannot close while a mandatory row is blank or `TBD`.
+Do not invent final business numbers in code. Provisional spike values must be labelled hypotheses. Attendance row-count arithmetic is a workload input, not a benchmark or placement decision. Phase 0 cannot close while a mandatory row is blank or `TBD`.
 
 Acceptance criteria:
 
 - Every mandatory target is numeric, measurable, owned, and dated.
 - Each performance target states the load shape and environment, not just a percentile.
+- Placement evidence covers peak distribution, write and storage amplification, connection pools, mixed reports, retention, movement, backup, restore, and accepted isolation requirements.
 - Recovery covers the database and object storage together.
 - The Ash pressure-test uses only targets relevant to its slice; later capacity tests retain their roadmap phase.
 
@@ -329,6 +349,8 @@ Use a named action such as `submit_for_review` or `approve_record`. Do not expos
 10. Telemetry carries correlation and safe tenant identifiers without record contents or restricted data.
 11. A generated migration is inspected for tenant keys, compound uniqueness, foreign keys, constraints, indexes, reversibility, and expand-and-contract compatibility.
 12. A time-boxed dependency upgrade exercise records changed code, migration output, warnings, and test results.
+13. A neutral trusted-routing slice selects pooled and dedicated test databases from authenticated tenant context, ignores request-selected placement, propagates through spawned tasks and jobs, and fails closed on missing or stale routing.
+14. A neutral synthetic module proves that release availability, entitlement, activation, and actor authorization are independent, and that concurrent deactivation drains safely without losing required audit or outbox work.
 
 #### Ash evaluation scorecard
 
@@ -336,7 +358,9 @@ Each category is Mandatory Pass, Pass with bounded remediation, or Fail:
 
 - action, field, filter, and relationship policy expressiveness;
 - non-optional tenant scoping and failure behaviour;
+- trusted placement routing across request, task, transaction, and job boundaries;
 - tenant-defined hierarchical capability resolution;
+- independent module entitlement, activation, and authorization gates;
 - explicit state transitions, invariants, optimistic concurrency, and errors;
 - transaction and rollback ergonomics;
 - migration readability and operational safety;
@@ -385,9 +409,9 @@ Create a root `pyproject.toml` and `uv.lock` for repository support tooling. Con
 The intended commands are:
 
 ```sh
-uv sync --group dev --locked
-uv run ruff format --check tools tests/tools
-uv run ruff check tools tests/tools
+mise exec -- uv sync --group dev --locked
+mise exec -- uv run ruff format --check tools tests/tools
+mise exec -- uv run ruff check tools tests/tools
 ```
 
 The exact pinned versions are resolved during implementation against the selected runtimes and committed lock files.
@@ -421,11 +445,12 @@ Include dependency and security audit checks supported by the selected package s
 Expose the wrapper through these stable commands:
 
 ```sh
-make bootstrap-phase0
+make bootstrap
 make format
 make lint
 make test
-make phase0-check
+make docs-check
+make check
 ```
 
 The core script must be CI-provider-neutral. Add a GitHub, GitLab, or other CI adapter only after the hosting choice is known.
@@ -445,18 +470,22 @@ Purpose: make the decision explicit and preserve its evidence for Phase 1.
 Actions:
 
 1. Freeze the Phase 0 evidence set for review.
-2. Run `make phase0-check` from a clean checkout with a disposable database.
+2. Run `make check` from a clean checkout with a disposable database.
 3. Review the ADR set, threat model, unresolved risks, quality targets, and Ash scorecard.
-4. Record attendees, accountable approvers, date, decisions, conditions, exceptions, and expiry dates in `docs/phase-0/review-record.md`.
-5. Mark ADRs Accepted, Deferred with a measurable trigger, Rejected, or Superseded. Do not leave required records Proposed.
-6. If Ash is rejected, approve its replacement and update every dependent proposed record before beginning Phase 1.
-7. Create the Phase 1 input list from accepted decisions without starting the production workspace in the same change.
+4. Review the five-school workload assumptions, placement candidates, routing/movement evidence, and recovery results.
+5. Review the module lifecycle, dependency, drain, retained-data, and reactivation evidence.
+6. Record attendees, accountable approvers, date, decisions, conditions, exceptions, and expiry dates in `docs/phase-0/review-record.md`.
+7. Mark ADRs Accepted, Deferred with a measurable trigger, Rejected, or Superseded. Do not leave required records Proposed.
+8. If Ash is rejected, approve its replacement and update every dependent proposed record before beginning Phase 1.
+9. Create the Phase 1 input list from accepted decisions without starting the production workspace in the same change.
 
 Acceptance criteria:
 
 - The review record names the decision outcome and accountable approvers.
 - Ash is Accepted, Conditionally Accepted with bounded prerequisites, or replaced; there is no ambiguous "continue evaluating" outcome.
 - Every required quality target is approved and numeric.
+- The five-school placement decision is based on approved workload, recovery, residency, cost, and isolation evidence rather than student count.
+- Module activation, entitlement, authorization, deactivation, retained-data, and reactivation semantics are approved.
 - Every high or critical threat has an accepted treatment or explicit residual-risk acceptance.
 - All required ADRs have an exit status and evidence.
 - The full Phase 0 verification command passes from a clean checkout.
@@ -469,10 +498,10 @@ Implement Phase 0 as small, reviewable slices:
 | Slice | Contents | Depends on | Review focus |
 | --- | --- | --- | --- |
 | 0A | Repository initialization, indexes, guardrails, minimal toolchain shell | Root confirmation | Scope and navigability |
-| 0B | ADR template, index, decision register, initial Proposed records | 0A | Decision quality and completeness |
-| 0C | Threat model, classifications, abuse cases | 0A; drafts of 0001/0003/0010/0015 | Trust boundaries and child-data risk |
-| 0D | Quality-attribute target workshop and approved targets | 0A | Ownership and measurability |
-| 0E | Ash pressure-test and evidence | Drafts of 0002/0003/0005/0014; target test shape | Negative tests and framework fitness |
+| 0B | ADR template, index, decision register, initial Proposed records | 0A | Decision quality, tenant placement, and module lifecycle completeness |
+| 0C | Threat model, classifications, abuse cases | 0A; drafts of 0001/0003/0010/0015 | Trust boundaries, routed placement, module lifecycle, and child-data risk |
+| 0D | Quality-attribute and per-domain capacity workshop; five-school placement decision | 0A; draft 0003 | Ownership, burst shape, retained footprint, recovery, and measurability |
+| 0E | Ash, trusted-routing, and neutral module-lifecycle pressure-tests and evidence | Drafts of 0001/0002/0003/0005/0014; target test shape | Negative tests, routing safety, independent gates, and framework fitness |
 | 0F | Ruff, Elixir checks, documentation validator, provider-neutral gate | 0A; evolves with 0B-0E | Reproducibility and useful failure output |
 | 0G | ADR finalization and architecture review | 0B-0F | Accept, conditionally accept, or replace |
 
@@ -484,7 +513,9 @@ Slices 0C, 0D, and the non-Ash portion of 0F can proceed in parallel after 0A. S
 | --- | --- | --- |
 | ADR completeness | Documentation validator and human review | Missing option, consequence, owner, evidence, or fallback |
 | Tenant isolation | Cross-tenant Ash tests | Unscoped read/write or data inference |
+| Tenant placement | Pooled/dedicated routing, task/job propagation, movement, backup, and restore tests | Request-selected, stale, missing, or conflicting route; wrong placement; irreconcilable move |
 | Tenant-defined roles | Rename/composition test | Hard-coded job-title or school-wide role branch |
+| Module lifecycle | Independent gate matrix, dependency, concurrent drain, retained-data, and reactivation tests | Activation grants permission; deactivation loses data/work or leaves access open |
 | Named actions | API and domain tests | Generic update bypasses transition or policy |
 | Atomicity | Injected failure test | State commits without audit/outbox fact or vice versa |
 | Migration safety | Generated migration review and apply/rollback test | Missing tenant constraint, unsafe data rewrite, or unreadable migration |
@@ -492,6 +523,7 @@ Slices 0C, 0D, and the non-Ash portion of 0F can proceed in parallel after 0A. S
 | Telemetry safety | Captured telemetry assertions | Restricted content or secret logged |
 | Threat traceability | Threat-control-test matrix | High/critical threat lacks owner or verification |
 | Quality targets | Schema check and approval record | Blank, subjective, unowned, or environment-free target |
+| Peak capacity | Synchronized mixed-load benchmark | Annual average hides burst, amplification, pool starvation, or report overlap |
 | Python support quality | Ruff and support-tool tests | Syntax, import, bug-pattern, or formatter drift |
 | Elixir spike quality | Formatter, Credo, Dialyzer, tests | Static or runtime defect hidden by happy-path demo |
 | Phase boundary | Repository-structure check and review | Business module or production service scaffold appears early |
@@ -505,6 +537,9 @@ Slices 0C, 0D, and the non-Ash portion of 0F can proceed in parallel after 0A. S
 | Ash passes only a happy-path demonstration | Pre-register the scorecard and require negative tenant, policy, rollback, migration, API, and upgrade tests | ADR 0002 |
 | The spike becomes accidental production code | Keep it under `spikes/`, document disposability, and prohibit direct promotion | Phase 1 review |
 | Tenant roles become hard-coded | Model roles/capabilities as tenant data and test rename/composition | ADR 0003 and spike tests |
+| Student count becomes a database-placement shortcut | Require per-domain burst, retained-footprint, mixed-load, recovery, and isolation evidence | ADR 0003 and capacity approval |
+| Trusted placement routing becomes a confused deputy | Resolve authenticated tenant centrally, constrain placement membership, fail closed, and rehearse movement | Threat-model and routing tests |
+| Module activation becomes authorization or unsafe deletion | Enforce independent gates and controlled drain with retained-data ownership | ADR 0001 and lifecycle tests |
 | Ruff creates false confidence | Scope Ruff explicitly; require language-specific and documentation checks | `phase0-check` output |
 | Quality numbers are guessed by engineers | Require named business/operations owners and label temporary spike values as hypotheses | Target approval |
 | Threats remain prose without proof | Link high/critical threats to negative tests and evidence | Threat-model review |
@@ -520,7 +555,10 @@ Slices 0C, 0D, and the non-Ash portion of 0F can proceed in parallel after 0A. S
 - [ ] Ash is accepted, conditionally accepted with bounded prerequisites, or replaced.
 - [ ] Threat boundaries, classifications, abuse cases, mitigations, and residual risks are reviewed.
 - [ ] Interactive latency, scale, report, file, recovery, and availability targets are numeric and approved.
-- [ ] `make phase0-check` passes from a clean checkout and disposable database.
+- [ ] Peak domain-write, retained-footprint, tenant-placement, and movement targets are numeric and approved.
+- [ ] The five-school database/cell decision has workload, recovery, residency, cost, isolation, and rollback evidence.
+- [ ] Module release, entitlement, activation, authorization, dependency, drain, retained-data, and reactivation semantics are approved.
+- [ ] `make check` passes from a clean checkout and disposable database.
 - [ ] Ruff passes for repository Python tooling.
 - [ ] Elixir formatter, Credo, Dialyzer, migrations, and tests pass for the spike.
 - [ ] No production data, business module, or premature production service scaffold exists.

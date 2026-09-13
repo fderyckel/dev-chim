@@ -14,7 +14,10 @@ make check
 
 All records are synthetic. PostgreSQL database names begin with `ash_foundation_lab_` and may be overridden through standard `PGHOST`, `PGUSER`, and `PGDATABASE` variables.
 
+## Implemented slice
+
+The lab currently includes a tenant-owned actor/role/capability graph and a capability-protected `submit_for_review` action. Focused tests cover allowed, denied, cross-tenant, missing-context, renamed/composed-role, invalid-state, stale-write, and database-constraint paths.
+
 ## Evidence rule
 
 Passing smoke tests proves only the scenarios those tests name. Ash remains Proposed until every mandatory category in [the evidence scorecard](../../docs/phase-0/evidence/ash-pressure-test.md) has direct evidence and ADR 0002 is reviewed.
-

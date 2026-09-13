@@ -27,11 +27,38 @@ defmodule AshFoundationLab.FoundationRecord do
       primary? true
       accept [:name]
     end
+
+    update :submit_for_review do
+      accept []
+      require_atomic? false
+
+      validate attribute_equals(:status, :draft) do
+        message "record must be in draft state"
+      end
+
+      change set_attribute(:status, :in_review)
+      change optimistic_lock(:lock_version)
+    end
   end
 
   policies do
     policy always() do
+      forbid_unless actor_present()
+      forbid_unless AshFoundationLab.Policy.TenantMatchesActor
       authorize_if always()
+    end
+
+    policy action(:read) do
+      authorize_if {AshFoundationLab.Policy.HasCapability, capability: "foundation_record.read"}
+    end
+
+    policy action(:create) do
+      authorize_if {AshFoundationLab.Policy.HasCapability, capability: "foundation_record.create"}
+    end
+
+    policy action(:submit_for_review) do
+      authorize_if {AshFoundationLab.Policy.HasCapability,
+                    capability: "foundation_record.submit_for_review"}
     end
   end
 
@@ -47,6 +74,20 @@ defmodule AshFoundationLab.FoundationRecord do
       allow_nil? false
       public? true
       constraints min_length: 1, max_length: 120
+    end
+
+    attribute :status, :atom do
+      allow_nil? false
+      default :draft
+      public? true
+      constraints one_of: [:draft, :in_review]
+    end
+
+    attribute :lock_version, :integer do
+      allow_nil? false
+      default 1
+      public? true
+      constraints min: 1
     end
 
     create_timestamp :inserted_at

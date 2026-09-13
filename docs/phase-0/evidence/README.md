@@ -15,4 +15,5 @@ Each evidence note records:
 - [Ash pressure-test](ash-pressure-test.md)
 - [Threat-model review](threat-model-review.md)
 - [Quality-target approval](quality-targets-approval.md)
-
+- [Tenant-placement capacity](tenant-placement-capacity.md)
+- [Module lifecycle](module-lifecycle.md)

@@ -24,7 +24,7 @@ School files contain sensitive data, while parsers and renderers create a large 
 
 ## Decision
 
-Propose PostgreSQL/Ash ownership, relationships, classification, version, retention, checksum, and lifecycle metadata with S3-compatible binary storage. New uploads remain quarantined through type validation, scanning, extraction, and safe derivative generation. External drives are connectors, not the platform policy engine.
+Propose PostgreSQL/Ash ownership, relationships, classification, version, retention, checksum, and lifecycle metadata with S3-compatible binary storage. New uploads remain quarantined through type validation, scanning, extraction, and safe derivative generation. External drives are connectors, not the platform policy engine. Storage namespaces come from trusted tenant placement and routing version, never a request path or module-supplied bucket.
 
 ## Consequences
 
@@ -40,7 +40,7 @@ Propose PostgreSQL/Ash ownership, relationships, classification, version, retent
 
 ## Security, privacy, operability, and migration effects
 
-Object keys are opaque. Signed URLs are short-lived and issued only after policy evaluation. Parser containers receive resource/network limits. Deletion, legal hold, versioning, and metadata/object reconciliation require runbooks.
+Object keys are opaque and tenant-qualified. Signed URLs are short-lived and issued only after policy, entitlement, and activation evaluation where applicable. Parser containers receive resource/network limits. Tenant movement requires metadata/object reconciliation before routing changes become final. Deletion, legal hold, versioning, deactivation, and metadata/object reconciliation require runbooks.
 
 ## Validation evidence
 
@@ -54,9 +54,9 @@ The S3-compatible contract permits provider replacement. A connector may remain 
 
 - Storage or external-drive provider selection.
 - A parser vulnerability, residency rule, or new file class.
+- Tenant placement, movement, or module-retained-data semantics change.
 
 ## Related records
 
 - [ADR 0003](0003-tenant-model-and-optional-postgresql-rls.md)
 - [ADR 0015](0015-ai-gateway-tool-exposure-and-evaluation-policy.md)
-
