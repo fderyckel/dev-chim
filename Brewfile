@@ -1,0 +1,5 @@
+brew "gh"
+brew "git"
+brew "mise"
+brew "postgresql@18"
+brew "shellcheck"

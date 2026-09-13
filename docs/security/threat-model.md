@@ -1,0 +1,63 @@
+# Phase 0 threat model
+
+- Status: Proposed
+- Owner: Security architecture
+- Review trigger: architecture review or any new trust boundary/data class
+
+## Assets
+
+- tenant identity, actor identity, sessions, credentials, and service accounts;
+- tenant-defined roles, capabilities, relationships, and support grants;
+- child, safeguarding, education, employment, and operational records;
+- uploaded files, derivatives, reports, exports, evidence, and audit history;
+- outbox events, jobs, projections, search documents, caches, and telemetry; and
+- AI prompts, retrieved context, tool inputs/results, and provider traces.
+
+See [data classification](data-classification.md).
+
+## Trust boundaries
+
+1. Browser or integration to Next.js/Phoenix edge.
+2. Phoenix/Ash action boundary to PostgreSQL and Oban.
+3. Core metadata to object storage, ClamAV, Tika, Gotenberg, and external drives.
+4. Core state to caches, search, realtime, read models, and analytics publications.
+5. Core scheduling contract to the solver runtime.
+6. Core authorized tools to the AI gateway and external model provider.
+7. Platform support tooling to a selected tenant.
+
+Every boundary authenticates the caller or service, propagates tenant and correlation context, minimizes data, and records safe evidence. No projection, cache, solver, renderer, provider, or interface grants authority independently.
+
+## High and critical threats
+
+| ID | Threat | Severity | Primary treatment | Verification | Owner |
+| --- | --- | --- | --- | --- | --- |
+| TM-01 | Cross-tenant read, mutation, inference, or subscription | Critical | Mandatory tenant context, compound constraints, Ash policies, optional RLS backstop | Ash cross-tenant and missing-context tests; later interface-path suites | Security architecture |
+| TM-02 | Authorization escalation through relationship or role composition | Critical | Tenant-defined capability graph, cycle/privilege validation, policy matrix | Renamed/composed-role positive and negative tests | Security architecture |
+| TM-03 | Unbounded or unattributable support access | Critical | Explicit tenant, strong assurance, purpose, expiry, least privilege, enhanced audit | Support-access negative suite in Phase 2 | Security architecture |
+| TM-04 | Restricted data cached or served after revocation | Critical | Classification policy, tenant/version keys, durable invalidation, bypass | Adversarial cache suite in Phase 5 | Platform engineering |
+| TM-05 | Malicious upload or parser/render exploit | High | Quarantine, type validation, scanning, isolation, patching, resource/network limits | Malicious-file corpus in Phase 6 | Security engineering |
+| TM-06 | Over-broad or replayable export | High | Read-equivalent policy, step-up, bounded manifest, expiry, audit | Unauthorized export suite in Phase 10 | Platform engineering |
+| TM-07 | Search, realtime, or read-model authorization drift | Critical | Tenant-filter before retrieval, re-authorization on access, rebuild/deletion controls | Restricted-result and stale-access tests | Platform engineering |
+| TM-08 | AI prompt injection, cross-tenant retrieval, or unverified write | Critical | Provider-neutral gateway, curated tools, real actor/tenant, minimization, confirmation, kill switch | Adversarial AI evaluation in Phase 11 | Security architecture |
+| TM-09 | Sensitive logs, traces, events, or evidence | High | Minimal payloads, classification, source redaction, safe identifiers | Captured telemetry assertions and event-schema review | Platform engineering |
+| TM-10 | State commits without durable side-effect fact, or event without state | High | Transactional outbox and rollback | Injected transaction-failure test | Platform engineering |
+
+## Assumptions and scope limits
+
+- Phase 0 contains synthetic data and a local spike only.
+- Identity-provider, file, report, analytics, AI, and scheduler implementations are not present yet; their controls are architectural requirements, not completed evidence.
+- Application policy is the proposed authorization layer. RLS remains an evidence-driven backstop decision.
+- The local developer account and device security remain outside repository enforcement, but secrets and production data are prohibited.
+
+## Residual-risk process
+
+High or critical residual risk needs a named accountable acceptor, expiry, mitigation owner, and review date in the Phase 0 review record. A planned later-phase test does not mean the threat is already mitigated.
+
+## Related records
+
+- [Abuse cases](abuse-cases.md)
+- [ADR 0003](../adr/0003-tenant-model-and-optional-postgresql-rls.md)
+- [ADR 0009](../adr/0009-cache-taxonomy-invalidation-and-valkey-trigger.md)
+- [ADR 0010](../adr/0010-file-ownership-storage-pipeline-and-external-drives.md)
+- [ADR 0015](../adr/0015-ai-gateway-tool-exposure-and-evaluation-policy.md)
+

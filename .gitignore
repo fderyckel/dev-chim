@@ -1,0 +1,46 @@
+# macOS and editors
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python
+.python-version.local
+.venv/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+*.py[cod]
+.coverage
+htmlcov/
+
+# Elixir
+_build/
+deps/
+cover/
+erl_crash.dump
+*.ez
+
+# JavaScript and Java (later phases)
+node_modules/
+.next/
+dist/
+.gradle/
+build/
+
+# Local services and generated evidence
+*.db
+*.db-shm
+*.db-wal
+tmp/
+log/
+docs/phase-0/evidence/generated/
+

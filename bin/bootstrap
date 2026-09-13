@@ -1,0 +1,47 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(cd "$(dirname "$0")/.." && pwd -P)
+spike_dir="$repo_root/spikes/ash-foundation-lab"
+
+require_command() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "Missing required command: $1" >&2
+    exit 1
+  fi
+}
+
+require_command brew
+require_command git
+
+git -C "$repo_root" config core.hooksPath .githooks
+git -C "$repo_root" config fetch.prune true
+git -C "$repo_root" config pull.ff only
+git -C "$repo_root" config push.autoSetupRemote true
+
+if ! brew bundle check --file="$repo_root/Brewfile" >/dev/null 2>&1; then
+  brew bundle install --no-upgrade --file="$repo_root/Brewfile"
+fi
+
+require_command mise
+require_command pg_isready
+
+mise trust "$repo_root/mise.toml" >/dev/null
+mise install
+
+if ! pg_isready >/dev/null 2>&1; then
+  brew services start postgresql@18
+fi
+
+mise exec -- uv sync --group dev --locked
+mise exec -- mix local.hex --force
+mise exec -- mix local.rebar --force
+
+(
+  cd "$spike_dir"
+  mise exec -- mix deps.get
+  mise exec -- env MIX_ENV=test mix ecto.create --quiet
+  mise exec -- env MIX_ENV=test mix ecto.migrate --quiet
+)
+
+echo "Phase 0 local environment is ready. Run: make check"

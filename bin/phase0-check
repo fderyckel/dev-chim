@@ -1,0 +1,58 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(cd "$(dirname "$0")/.." && pwd -P)
+spike_dir="$repo_root/spikes/ash-foundation-lab"
+
+cd "$repo_root"
+
+if ! pg_isready >/dev/null 2>&1; then
+  echo "PostgreSQL is not ready. Run: make bootstrap" >&2
+  exit 1
+fi
+
+echo "[1/10] Python formatting"
+mise exec -- uv run ruff format --check tools tests/tools
+
+echo "[2/10] Python lint"
+mise exec -- uv run ruff check tools tests/tools
+
+echo "[3/10] Shell lint"
+shellcheck .githooks/pre-push bin/bootstrap bin/phase0-check
+
+echo "[4/10] Repository and documentation conventions"
+mise exec -- uv run python tools/check_phase0.py
+
+echo "[5/10] Python tests"
+mise exec -- uv run pytest
+
+echo "[6/10] Elixir formatting and lint"
+(
+  cd "$spike_dir"
+  mise exec -- mix format --check-formatted
+  mise exec -- mix credo --strict
+)
+
+echo "[7/10] Elixir dependency audit"
+(
+  cd "$spike_dir"
+  mise exec -- mix hex.audit
+  mise exec -- mix deps.unlock --check-unused
+)
+
+echo "[8/10] Elixir type analysis"
+(
+  cd "$spike_dir"
+  mise exec -- mix dialyzer
+)
+
+echo "[9/10] Elixir and PostgreSQL tests"
+(
+  cd "$spike_dir"
+  mise exec -- env MIX_ENV=test mix test
+)
+
+echo "[10/10] Git whitespace check"
+git diff --check
+
+echo "Phase 0 local verification passed."
