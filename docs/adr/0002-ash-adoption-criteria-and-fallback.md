@@ -44,7 +44,7 @@ Negative cross-tenant, missing-context, relationship-policy, and rollback tests 
 
 ## Validation evidence
 
-See [Ash pressure-test evidence](../phase-0/evidence/ash-pressure-test.md). The current environment smoke test proves installation and basic tenant filtering only; it does not yet satisfy the adoption gate.
+See [Ash pressure-test evidence](../phase-0/evidence/ash-pressure-test.md) and the [dependency upgrade exercise](../phase-0/evidence/ash-upgrade-exercise.md). The current spike proves direct and generated-interface tenancy/policy behaviour, a named action, atomic outbox rollback, sanitized correlated telemetry, generated-baseline migration inspection, and a compatible three-package patch upgrade. Warning remediation, a non-patch upgrade, and the remaining scorecard categories still prevent an adoption decision.
 
 ## Fallback and exit cost
 
@@ -61,4 +61,3 @@ Fallback is Phoenix/Ecto with explicit action modules, policy services, schemas,
 - [ADR 0003](0003-tenant-model-and-optional-postgresql-rls.md)
 - [ADR 0005](0005-domain-action-and-state-transition-convention.md)
 - [ADR 0014](0014-primary-api-and-generated-typescript-client.md)
-

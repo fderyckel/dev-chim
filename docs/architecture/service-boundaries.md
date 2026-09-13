@@ -28,4 +28,4 @@ Activating a module does not create a service, schema, database, or cell. Moving
 
 Adding a service requires an ADR naming the unmet capability, transaction boundary, data ownership, authentication, tenant propagation, failure model, observability, operational owner, and exit cost.
 
-See [tenant placement and workload capacity](tenant-placement-and-capacity.md) and [module activation and lifecycle](module-activation-and-lifecycle.md).
+See [tenant placement and workload capacity](tenant-placement-and-capacity.md), [PostgreSQL availability, recovery, and read routing](postgresql-availability-recovery-and-read-routing.md), and [module activation and lifecycle](module-activation-and-lifecycle.md).

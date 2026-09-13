@@ -18,5 +18,6 @@
 | AC-11 | A caller supplies another tenant's repository, cell, queue, schema, bucket, or stale routing version | Ignore untrusted placement input; resolve authenticated tenant placement centrally and fail closed on conflict or staleness |
 | AC-12 | One pooled tenant floods period-start writes or reports until other tenants cannot authorize or commit work | Enforce bounded batches, per-tenant fairness, connection budgets, backpressure, and a tested dedicated-placement path |
 | AC-13 | A tenant or client treats module activation as permission, bypasses entitlement, or deactivates while work is in flight | Enforce all gates server-side; drain or park work deterministically; preserve audit, outbox, retained data, and compliance access |
+| AC-14 | A lagging replica still shows a revoked permission, old tenant placement, inactive module, or omits a just-committed attendance change | Keep security decisions and bounded read-your-write interactions on the writer; lag-gate approved stale reads and fail closed or delay them |
 
 Each implemented capability must convert relevant abuse cases into automated negative tests and link them from the threat model.

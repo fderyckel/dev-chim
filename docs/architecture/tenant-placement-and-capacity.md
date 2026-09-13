@@ -46,6 +46,10 @@ retained_oltp_bytes = facts x row_and_index_bytes x retention_and_bloat_factors
 
 The profile also records concurrent submissions, batch-size distribution, correction rate, idempotent retries, audit and outbox amplification, report overlap, projection lag, connection count, autovacuum behaviour, backup growth, and restore duration. Results without these inputs cannot justify a placement decision.
 
+For orientation only, one period creates 5,000 logical facts for the large school and 8,200 across all five schools. A 30-second window is approximately 166.7 and 273.3 logical facts per second respectively. With an illustrative average batch of 25 learners, the all-school case becomes about 328 tenant-qualified attendance-session transactions per period, or 10.9 transactions per second in 30 seconds. These figures do not include physical write amplification and are not performance targets.
+
+The infrastructure implication is to preserve one authoritative writer and reduce avoidable transaction and connection amplification through bounded session batches. A read replica cannot absorb writes. High availability, stale-tolerant read scaling, point-in-time recovery, and regional disaster recovery remain separate decisions governed by [ADR 0017](../adr/0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md) and [database operations and read routing](postgresql-availability-recovery-and-read-routing.md).
+
 ## Placement profiles
 
 | Profile | Isolation and capacity boundary | Appropriate when | Limitation |
@@ -120,6 +124,7 @@ Range partitioning by date or academic period remains evidence-driven. PostgreSQ
 - Cross-placement negative tests for HTTP, tasks, jobs, events, files, caches, search, exports, telemetry, support, and AI tools.
 - A placement-movement rehearsal with version conflict, rollback, and reconciliation evidence.
 - A five-school decision signed by architecture, security/privacy, and operations owners; the arithmetic alone is insufficient.
+- Availability evidence that distinguishes writer failover, replica lag, point-in-time restore, and regional recovery, with an explicit connection budget and read-consistency classification.
 
 The evidence template is [tenant-placement capacity evidence](../phase-0/evidence/tenant-placement-capacity.md).
 
@@ -131,4 +136,3 @@ The evidence template is [tenant-placement capacity evidence](../phase-0/evidenc
 - [Oban isolation](https://oban.hexdocs.pm/isolation.html) requires a separate Oban instance for each dynamic repository instance.
 - [PostgreSQL row security](https://www.postgresql.org/docs/current/ddl-rowsecurity.html) documents default-deny policy behaviour, bypass roles, owner behaviour, and operations outside RLS coverage.
 - [PostgreSQL table partitioning](https://www.postgresql.org/docs/current/ddl-partitioning.html) documents workload-dependent benefits, maintenance trade-offs, and uniqueness limitations.
-

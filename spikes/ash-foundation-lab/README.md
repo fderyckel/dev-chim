@@ -16,7 +16,11 @@ All records are synthetic. PostgreSQL database names begin with `ash_foundation_
 
 ## Implemented slice
 
-The lab currently includes a tenant-owned actor/role/capability graph and a capability-protected `submit_for_review` action. Focused tests cover allowed, denied, cross-tenant, missing-context, renamed/composed-role, invalid-state, stale-write, and database-constraint paths.
+The lab currently includes a tenant-owned actor/role/capability graph and a capability-protected `submit_for_review` action. That action writes its audit reference and a minimal outbox fact in the same transaction. A generated JSON:API router exposes only the named transition and consumes actor and tenant data from trusted connection-private context. Its dispatch telemetry uses an exact metadata allowlist with correlation and a one-way tenant reference, never request or record payloads. Focused tests cover allowed, denied, cross-tenant existence-shape, missing-context, generic-update-bypass, renamed/composed-role, invalid-state, stale-write, atomic rollback, minimal-envelope, telemetry redaction, and database-constraint paths.
+
+The resource definitions also declare their tenant indexes, compound identities, restrictive foreign keys, and database check constraints. A generated baseline and resource snapshots live under [`priv/generated_migration_review`](priv/generated_migration_review/) as review evidence, separate from the executable handwritten migration chain. `make check` fails if those snapshots drift, and focused tests inspect the generated migration's safety primitives and additive `up` path.
+
+The completed [dependency upgrade exercise](../../docs/phase-0/evidence/ash-upgrade-exercise.md) compares the immediately preceding framework patches with the current lock in a disposable copy. It records package changes, compile warnings, security-audit results, migration output, and the same 21-test compatibility result without turning network-dependent freshness checks into the local verification contract.
 
 ## Evidence rule
 

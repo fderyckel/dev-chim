@@ -1,6 +1,6 @@
 # Ash pressure-test evidence
 
-- Status: Named-action and tenant-role slice passed; adoption scorecard incomplete
+- Status: Dependency upgrade exercise passed with bounded remediation; adoption scorecard incomplete
 - Owner: Platform engineering
 - Decision: [ADR 0002](../../adr/0002-ash-adoption-criteria-and-fallback.md)
 
@@ -10,13 +10,13 @@
 - Host: Apple silicon macOS 26.6.2
 - Project runtimes: Erlang/OTP 29.0.5, Elixir 1.20.3, Python 3.14.5, uv 0.12.13
 - Services: PostgreSQL 18.6 over the local Unix socket
-- Framework packages: Ash 3.33.3, AshPostgres 2.13.1, AshJsonApi 1.7.1, Phoenix 1.8.13
+- Framework packages: Ash 3.33.3, AshPostgres 2.13.1, AshJsonApi 1.7.1, OpenApiSpex 3.22.4, Phoenix 1.8.13
 - Commands: `make bootstrap`, `make format`, `make check`, and `mix dialyzer`
-- Results: 3 repository-tool tests passed; 10 Ash/PostgreSQL tests passed; Ruff, ShellCheck, documentation validation, Credo, dependency audit, Dialyzer, formatting, migrations, and Git whitespace checks passed.
+- Results: 4 repository-tool tests passed; 21 Ash/PostgreSQL/JSON:API/migration-review tests passed; Ruff, ShellCheck, documentation validation, generated-migration drift detection, Credo, dependency audit, Dialyzer, formatting, migrations, and Git whitespace checks passed.
 
-The Ash tests currently prove attribute-based tenant filtering, cross-tenant denial without an existence signal, actor and tenant fail-closed behaviour, capability denial, tenant-defined role composition and rename independence, a named `submit_for_review` transition, invalid-state validation, optimistic-lock conflicts, compound tenant foreign keys, and database constraints against alternate unsafe writes.
+The Ash tests currently prove attribute-based tenant filtering, cross-tenant denial without an existence signal, actor and tenant fail-closed behaviour, capability denial, tenant-defined role composition and rename independence, a named `submit_for_review` transition, invalid-state validation, optimistic-lock conflicts, compound tenant foreign keys, atomic state/audit/outbox rollback, required correlation and causation context, minimal event payloads, database constraints against alternate unsafe writes, generated JSON:API preservation of the action and policy boundary, and allowlisted correlated telemetry without raw tenant, actor, record, or payload data.
 
-The first clean compilation emitted warnings inside current third-party Ash/Phoenix dependency code under Elixir 1.20/OTP 29. None originated in the spike modules, and the required checks pass, but the warning volume is evidence to consider under upgrade and maintenance ergonomics rather than suppressing or ignoring it.
+Dependency compilation emitted warnings inside current third-party Ash/Phoenix/OpenApiSpex code under Elixir 1.20/OTP 29. None originated in the spike modules, and the required checks pass, but the warning volume is evidence to consider under upgrade and maintenance ergonomics rather than suppressing or ignoring it.
 
 ## Named-action and tenant-role slice
 
@@ -33,27 +33,99 @@ The access model stores tenant-owned actors, roles, capabilities, actor-role ass
 
 The named update uses Ash validation plus optimistic locking inside the data-layer transaction. Ash 3.33.3/AshPostgres 2.13.1 could not compile the custom validation error into a fully atomic SQL expression, so the spike explicitly uses `require_atomic? false`. Concurrency still fails closed through the lock-version predicate, but the atomic-expression limitation remains framework-fit evidence for the final scorecard.
 
+## Transactional outbox slice
+
+- Date: 2026-09-13
+- Code: [`record_outbox.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/change/record_outbox.ex), [`outbox_event.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/outbox_event.ex), and the extended [`foundation_record.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/foundation_record.ex)
+- Database artifact: [`20260913020000_add_transactional_outbox.exs`](../../../spikes/ash-foundation-lab/priv/repo/migrations/20260913020000_add_transactional_outbox.exs)
+- Tests: [`foundation_record_test.exs`](../../../spikes/ash-foundation-lab/test/ash_foundation_lab/foundation_record_test.exs)
+- Focused command: `mise exec -- env MIX_ENV=test mix test test/ash_foundation_lab/foundation_record_test.exs`
+- Focused result: 12 tests passed.
+- Migration commands: `mise exec -- env MIX_ENV=test mix ecto.rollback --step 1` and `mise exec -- env MIX_ENV=test mix ecto.migrate`
+- Migration result: the transactional-outbox migration rolled back and reapplied successfully against the synthetic test database.
+
+The `submit_for_review` action now requires typed correlation and causation IDs, writes a record audit reference, and inserts one immutable tenant-owned outbox fact from an Ash `after_action` hook inside the same database transaction. The event records actor, tenant, aggregate, type, schema version, correlation, causation, classification, occurrence time, and only the minimal state-transition payload; it does not copy the synthetic record name.
+
+The negative test injects an error after the outbox insert. Ash rolls back the record status, lock-version increment, audit reference, and outbox row together. A separate negative test proves missing correlation and causation inputs prevent the transition before any state or event write.
+
+## Generated JSON:API policy slice
+
+- Date: 2026-09-13
+- Code: [`json_api_router.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/json_api_router.ex), the extended [`foundation.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/foundation.ex), and the extended [`foundation_record.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/foundation_record.ex)
+- Tests: [`foundation_record_test.exs`](../../../spikes/ash-foundation-lab/test/ash_foundation_lab/foundation_record_test.exs)
+- Focused command: `mise exec -- env MIX_ENV=test mix test test/ash_foundation_lab/foundation_record_test.exs`
+- Focused result: 18 tests passed.
+
+The generated router exposes one `PATCH /foundation-records/:id/submit-for-review` route and no generic create, read, update, or delete route. It receives the actor and tenant through Ash's connection-private context; request payloads do not select a tenant or placement. The successful HTTP test proves that the adapter invokes the same capability-protected action, preserves typed correlation and causation IDs into the outbox fact, and excludes the private tenant key from serialized output.
+
+Negative HTTP tests prove capability denial, actor and tenant fail-closed behaviour, and absence of a generic update bypass. A tenant-B actor receives the same normalized not-found error shape for an existing tenant-A identifier and a random identifier, so the response does not disclose cross-tenant existence. Every denied path leaves the record and outbox unchanged.
+
+AshJsonApi 1.7.1 calls its optional OpenAPI module while deriving the request-validation schema for this update route, even without serving an OpenAPI endpoint. The first request attempt therefore failed until the documented compatible `open_api_spex` dependency was installed; this coupling is retained as framework-fit evidence. A missing-tenant request is rejected safely, but AshJsonApi logs that `Ash.Error.Invalid.TenantRequired` has no specific JSON:API error implementation. Stable error mapping remains an acceptance gap.
+
+## Telemetry and redaction slice
+
+- Date: 2026-09-13
+- Code: [`telemetry.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/telemetry.ex) and the instrumented [`json_api_router.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/json_api_router.ex)
+- Tests: [`foundation_record_test.exs`](../../../spikes/ash-foundation-lab/test/ash_foundation_lab/foundation_record_test.exs)
+- Focused command: `mise exec -- env MIX_ENV=test mix test test/ash_foundation_lab/foundation_record_test.exs`
+- Focused result: 19 tests passed.
+
+The JSON:API dispatch hook emits one versioned `[:ash_foundation_lab, :json_api, :dispatch]` event from an explicit metadata allowlist. It carries the trusted correlation ID, action, transport, classification, count, and a stable 96-bit hexadecimal reference derived one-way from the tenant context. It does not emit the connection, actor, raw tenant key, route parameters, request body, record identifier, or record contents.
+
+The capture test observes both an allowed request and a policy-denied request. It requires the exact measurement and metadata key sets, proves the tenant reference is stable across the two requests, and asserts that raw actor and tenant identifiers, record identifiers, and a synthetic restricted-content marker are absent. This proves the pre-dispatch event's safety; response outcome/duration instrumentation and third-party logger redaction remain separate work.
+
+## Generated migration review slice
+
+- Date: 2026-09-13
+- Resource declarations: [`tenant.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/tenant.ex), [`actor.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/actor.ex), [`foundation_record.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/foundation_record.ex), and [`outbox_event.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/outbox_event.ex)
+- Generated artifact: [`20260913205401_phase0_generated_baseline_review.exs`](../../../spikes/ash-foundation-lab/priv/generated_migration_review/migrations/20260913205401_phase0_generated_baseline_review.exs) and its [`resource snapshots`](../../../spikes/ash-foundation-lab/priv/generated_migration_review/resource_snapshots/)
+- Inspection tests: [`generated_migration_review_test.exs`](../../../spikes/ash-foundation-lab/test/ash_foundation_lab/generated_migration_review_test.exs)
+- Generation command: `mise exec -- mix ash_postgres.generate_migrations --name phase0_generated_baseline_review --migration-path priv/generated_migration_review/migrations --snapshot-path priv/generated_migration_review/resource_snapshots`
+- Drift command: `mise exec -- mix ash_postgres.generate_migrations --check --migration-path priv/generated_migration_review/migrations --snapshot-path priv/generated_migration_review/resource_snapshots`
+- Focused result: 2 migration-inspection tests passed and the drift check passed.
+- Disposable-database result: the generated baseline applied, rolled back completely, and reapplied successfully in `ash_foundation_lab_generated_review_20260913_2054`; PostgreSQL catalog inspection confirmed all three tenant-owned tables have non-null tenant keys, the five declared foreign keys exist with restrictive deletion, both cross-resource references match actor or aggregate ID together with tenant ID, and all declared indexes and check constraints exist. The disposable database was dropped after verification.
+
+An initial dry run omitted tenant indexes, compound identities, foreign keys, and database checks because those invariants were present only in the handwritten migration. The resource DSL now declares them explicitly. Regeneration then produced the required non-null tenant columns, tenant lookup indexes, unique `(id, tenant_id)` identities, `MATCH FULL` compound outbox foreign keys, restrictive tenant foreign keys, partial audit uniqueness, and state/envelope checks. This is important framework-fit evidence: the generator preserves declared database safety, but does not infer repository conventions that the resources omit.
+
+The generated `up` path is additive: it creates tables, indexes, foreign keys, and constraints and contains no drop or remove operation. Its explicit `down` path removes constraints before their tables and completed successfully. The generator still prints a destructive-operation warning because rolling back this initial baseline drops its tables; that is expected only for the empty disposable review database and is not approval for destructive production rollouts.
+
+This artifact is isolated from the executable handwritten migration chain. It is evidence for generator readability and baseline reversibility, not a replacement migration. It also exposes a type difference: Ash emits PostgreSQL `bigint` for the integer resource attributes that the handwritten spike migration currently defines as `integer`. Upgrade, data backfill, locking, and live expand-and-contract behaviour therefore remain unproven and are the next separate migration concerns.
+
+## Dependency upgrade slice
+
+- Date: 2026-09-13
+- Detailed report: [Ash dependency upgrade exercise](ash-upgrade-exercise.md)
+- Previous patch set: Ash 3.33.2, AshPostgres 2.13.0, AshJsonApi 1.7.0
+- Candidate/current set: Ash 3.33.3, AshPostgres 2.13.1, AshJsonApi 1.7.1
+- Result: both sets compiled and passed 21 tests; the candidate required no application changes, changed only three direct lock entries, passed the dependency audit, and produced a byte-for-byte identical generated baseline migration.
+
+The exercise used a disposable copy because the repository was already at every latest compatible release. It upgraded the preceding patch set onto the same synthetic database schema, then removed the database and temporary copy. Third-party compile warnings and the missing-tenant AshJsonApi warning remained, so upgrade ergonomics pass only with the warning and error-mapping remediation bounded in the detailed report.
+
 ## Scorecard
 
 | Category | Required result | Current result | Evidence |
 | --- | --- | --- | --- |
-| Action and policy expressiveness | Mandatory pass | Partial pass | [Named create/read/transition policies](#named-action-and-tenant-role-slice); generated interface still pending |
+| Action and policy expressiveness | Mandatory pass | Partial pass | [Named create/read/transition policies](#named-action-and-tenant-role-slice) and [generated action preservation](#generated-jsonapi-policy-slice); relationship and field-policy scenarios still pending |
 | Tenant scoping and missing-context failure | Mandatory pass | Partial pass | [Actor/tenant denial, cross-tenant invisibility, and compound foreign-key tests](#named-action-and-tenant-role-slice); other interfaces still pending |
 | Tenant-defined hierarchical capability resolution | Mandatory pass | Partial pass | [Recursive composition, rename independence, denial, and cross-tenant assignment tests](#named-action-and-tenant-role-slice); cycle rejection still pending |
 | State transitions, concurrency, and errors | Mandatory pass | Partial pass | [Named transition, invalid-state, and optimistic-lock tests](#named-action-and-tenant-role-slice); stable transport error mapping still pending |
-| Transaction and rollback ergonomics | Mandatory pass | Not evaluated | Planned failure injection |
-| Migration readability and safety | Mandatory pass | Partial pass | [Non-null tenant keys, compound foreign keys, indexes, state constraints, and rollback/reapply](#named-action-and-tenant-role-slice); generated-migration review still pending |
-| Generated API policy preservation | Mandatory pass | Not evaluated | Planned JSON:API tests |
-| Telemetry and redaction | Mandatory pass | Not evaluated | Planned capture assertions |
+| Transaction and rollback ergonomics | Mandatory pass | Mandatory pass | [Successful atomic state/audit/event write and injected rollback](#transactional-outbox-slice) |
+| Migration readability and safety | Mandatory pass | Partial pass | [Generated baseline inspection, drift detection, catalog proof, and rollback/reapply](#generated-migration-review-slice); live upgrade, backfill, lock, and expand-and-contract evidence still pending |
+| Generated API policy preservation | Mandatory pass | Partial pass | [Single named route, allowed/denied, cross-tenant existence-shape, missing-context, serialization, and generic-update-bypass tests](#generated-jsonapi-policy-slice); stable errors, pagination, versioning, idempotency, contract export, and client generation still pending |
+| Telemetry and redaction | Mandatory pass | Mandatory pass | [Captured allowlist assertions on allowed and denied generated-interface requests](#telemetry-and-redaction-slice) |
 | Test and maintenance ergonomics | Pass or bounded remediation | Not evaluated | Review notes |
-| Upgrade effort and dependency health | Pass or bounded remediation | Not evaluated | Upgrade exercise |
+| Upgrade effort and dependency health | Pass or bounded remediation | Pass with bounded remediation | [Three-package patch update with zero application or migration diff and 21 passing tests](ash-upgrade-exercise.md) |
 
 The environment smoke test must not be used to accept Ash. Every mandatory category needs direct evidence.
 
 ## Limits
 
 - Role-composition cycle rejection and administration policies are not implemented yet.
-- No audit/outbox transaction, generated JSON:API route, or telemetry assertion is implemented yet.
+- Outbox dispatch, retry, replay, retention, and placement-movement reconciliation remain later-phase work.
+- Stable JSON:API errors, pagination, versioning, idempotency, contract export, and generated TypeScript client behaviour are not implemented yet.
+- Response outcome/duration telemetry and third-party logger-redaction assertions remain outside this pre-dispatch telemetry proof.
+- The generated migration proof covers a fresh disposable baseline, not a live upgrade with retained data, backfill, lock, or mixed-version compatibility.
+- The JSON:API request validator currently requires the optional OpenApiSpex dependency, and missing-tenant rejection emits an unmapped-error warning in third-party code.
 - The named action is not fully atomic because the locked framework pair cannot translate the custom validation error; the current fallback path is transaction-backed with optimistic locking.
-- No dependency upgrade exercise has been completed.
+- A patch upgrade passes, but a non-patch framework upgrade and a machine-normalized warning-delta gate remain untested.
 - No clean-machine or CI-host rehearsal has been completed.

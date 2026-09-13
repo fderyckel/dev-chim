@@ -27,6 +27,7 @@ This establishes a planning input only. It does not establish actual peak throug
 | Active OLTP retention, archive, legal hold, and analytical retention | TARGET_REQUIRED | OWNER_REQUIRED |
 | Mixed report and integration workload during period starts | TARGET_REQUIRED | OWNER_REQUIRED |
 | RPO, RTO, residency, accepted breach blast radius, and isolation terms | TARGET_REQUIRED | OWNER_REQUIRED |
+| Writer/HA topology, connection budget, read-consistency classes, and replica-lag limits | TARGET_REQUIRED | OWNER_REQUIRED |
 
 ## Benchmark protocol
 
@@ -43,7 +44,9 @@ At minimum, exercise:
 7. connection-pool exhaustion and one noisy tenant;
 8. index growth, WAL, autovacuum, projection lag, and retained-footprint measurements;
 9. backup and restore at the planning-horizon volume; and
-10. stale, conflicting, unavailable, and malicious placement-routing inputs.
+10. stale, conflicting, unavailable, and malicious placement-routing inputs;
+11. HA failover during a synchronized burst with idempotent retry and outbox continuity; and
+12. replica lag or outage without stale authorization, missing read-your-write results, or an uncontrolled writer fallback surge.
 
 The bulk action must prove that all rows are within one validated tenant and authorization scope before commit. An unauthorized row cannot produce a partial unauthorized submission.
 
@@ -57,4 +60,4 @@ The bulk action must prove that all rows are within one validated tenant and aut
 
 The final record must name the deciders, date, accepted targets, evidence links, residual risks, review trigger, and rollback or movement plan. Student count alone cannot close the decision.
 
-See [tenant placement and workload capacity](../../architecture/tenant-placement-and-capacity.md) and [ADR 0003](../../adr/0003-tenant-model-and-optional-postgresql-rls.md).
+See [tenant placement and workload capacity](../../architecture/tenant-placement-and-capacity.md), [PostgreSQL availability and burst evidence](postgresql-availability-and-burst.md), [ADR 0003](../../adr/0003-tenant-model-and-optional-postgresql-rls.md), and [ADR 0017](../../adr/0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md).

@@ -14,6 +14,7 @@ Phase 0 will turn the architecture direction into reviewable decisions and evide
 - an approved set of foundational architecture decisions;
 - a threat model covering the platform's highest-risk trust boundaries;
 - measurable per-domain burst, retained-footprint, tenant-placement, latency, recovery, and availability targets;
+- a distinct PostgreSQL writer, HA, read-scaling, connection-budget, point-in-time-recovery, and regional-recovery contract;
 - a reviewed cell and database-placement contract with a five-school evidence record;
 - a module lifecycle contract separating release, entitlement, activation, and authorization;
 - a disposable Ash pressure-test with negative tenant and authorization tests;
@@ -30,7 +31,7 @@ Implementation checkpoint on 2026-09-13:
 
 - P0.0 is implemented locally except for remote hosting and branch protection.
 - P0.1 ADR governance and the initial Proposed record set are implemented.
-- P0.5 has a working Ash/PostgreSQL environment smoke test; the adoption scorecard remains incomplete.
+- P0.5 scenarios 1-12 have direct Ash/PostgreSQL evidence, including generated migration and patch-upgrade review; trusted routing, module lifecycle, and the adoption scorecard remain incomplete.
 - P0.6 local toolchain, Ruff, ShellCheck, documentation validation, Credo, dependency audit, Dialyzer, database migrations, and test entrypoints are implemented and passing.
 - P0.3, P0.4, and P0.7 still require accountable human review and approved decisions before Phase 0 can close.
 
@@ -213,6 +214,7 @@ All records begin as Proposed. Only the architecture review may mark them Accept
 | 0014 | Primary API and generated TypeScript client | Generated API spike; error, pagination, versioning, idempotency, and policy-preservation review |
 | 0015 | AI gateway tool exposure and evaluation policy | No implicit database authority; actor/tenant propagation; read allowlist and confirmed-write boundary |
 | 0016 | Scheduling service contract and publication boundary | Versioned input/output ownership; cancellation, reproducibility, and core-only publication rule |
+| 0017 | PostgreSQL availability, recovery, and consistency-aware read routing | Writer/HA/read/recovery separation; consistency classes; burst batching; connection budget; lag, failover, and restore evidence |
 
 Required decision discipline:
 
@@ -222,6 +224,7 @@ Required decision discipline:
 - ADR 0009 should accept an L1 abstraction and measurable Valkey trigger, not deploy Valkey speculatively.
 - ADR 0014 should test the preferred generated REST or JSON:API path first. GraphQL remains deferred unless a concrete use case fails without it.
 - ADRs 0010, 0012, 0015, and 0016 define contracts and boundaries only; their production services are not Phase 0 deliverables.
+- ADR 0017 defines a production-topology hypothesis and evidence gates only; Phase 0 does not provision production database infrastructure or assume a read replica is required.
 
 Acceptance criteria:
 
@@ -263,6 +266,9 @@ Actions:
    - audit tampering or sensitive logging.
    - cross-placement routing, stale routing versions, unsafe movement, credential fan-out, and default-database fallback;
    - synchronized write bursts and pooled-tenant resource starvation; and
+   - stale or misrouted replica reads affecting authorization, placement, module gates, or immediate read-after-write confirmation;
+   - connection fan-out across application nodes, Ecto repositories, Oban, and database placements;
+   - failover, backup, restore, and regional recovery being treated as interchangeable; and
    - activation-as-authorization, entitlement bypass, unsafe deactivation, abandoned work, and retained data without an owner.
 5. Map each high or critical threat to a preventive control, detection, negative test, owner, residual risk, and ADR.
 6. Record out-of-scope threats and assumptions explicitly.
@@ -302,9 +308,12 @@ The following targets are mandatory before Phase 0 exits:
 | Scale | Expected launch and planning-horizon tenants, users per tenant, active sessions, concurrency, and per-domain retained footprint | Capacity profile and synthetic dataset shape |
 | Peak domain writes | Committed facts/second, batch latency/error, synchronized window, retries, corrections, permission revocation, write amplification, and zero unauthorized partial commits | Repeatable mixed-load burst benchmark |
 | Tenant placement | Pool wait/saturation, noisy-neighbour effect, routing conflict, movement interruption, reconciliation, backup, and restore by candidate profile | Pooled and dedicated synthetic placement scenarios |
+| Database connections | Writer/reader/job pools, checkout wait, rejection, application-node and placement fan-out, administration/replication reserve, and pooler trigger | Per-placement connection budget and exhaustion scenario |
+| Read consistency | Primary-required, read-your-write, bounded-staleness, and analytical classes; maximum replica lag; stale authorization and fallback behaviour | Replica-lag/outage and read-after-write scenarios |
 | Reports | Maximum campaign count, page complexity, completion deadline, retry budget, and concurrency | Gotenberg benchmark scenario |
 | Files | Maximum upload size, allowed types, derivative limits, scan deadline, and retention assumptions | Malicious-file and large-file test profiles |
-| Recovery | PostgreSQL and object-storage RPO/RTO, restore verification interval, and legal-hold constraints | Restore-drill protocol |
+| Database HA | Commit durability, writer failover RPO/RTO, reconnect time, idempotent retry, and outbox continuity | Failover-during-burst protocol |
+| Recovery | PostgreSQL point-in-time and object-storage RPO/RTO, restore verification interval, reconciliation, and legal-hold constraints | Restore-drill protocol |
 | Availability | Service-level objective, maintenance assumptions, and dependency degradation rules | SLO/error-budget definition |
 
 Do not invent final business numbers in code. Provisional spike values must be labelled hypotheses. Attendance row-count arithmetic is a workload input, not a benchmark or placement decision. Phase 0 cannot close while a mandatory row is blank or `TBD`.
@@ -315,6 +324,8 @@ Acceptance criteria:
 - Each performance target states the load shape and environment, not just a percentile.
 - Placement evidence covers peak distribution, write and storage amplification, connection pools, mixed reports, retention, movement, backup, restore, and accepted isolation requirements.
 - Recovery covers the database and object storage together.
+- Availability evidence distinguishes an HA standby, read replica, recoverable backup, and cross-region disaster-recovery replica.
+- A read replica or pooler remains unapproved until its measured trigger and consistency or compatibility gate passes.
 - The Ash pressure-test uses only targets relevant to its slice; later capacity tests retain their roadmap phase.
 
 ### P0.5 - Build the disposable Ash Foundation Lab pressure-test
@@ -473,11 +484,12 @@ Actions:
 2. Run `make check` from a clean checkout with a disposable database.
 3. Review the ADR set, threat model, unresolved risks, quality targets, and Ash scorecard.
 4. Review the five-school workload assumptions, placement candidates, routing/movement evidence, and recovery results.
-5. Review the module lifecycle, dependency, drain, retained-data, and reactivation evidence.
-6. Record attendees, accountable approvers, date, decisions, conditions, exceptions, and expiry dates in `docs/phase-0/review-record.md`.
-7. Mark ADRs Accepted, Deferred with a measurable trigger, Rejected, or Superseded. Do not leave required records Proposed.
-8. If Ash is rejected, approve its replacement and update every dependent proposed record before beginning Phase 1.
-9. Create the Phase 1 input list from accepted decisions without starting the production workspace in the same change.
+5. Review PostgreSQL consistency classes, connection budgets, synchronized-burst results, failover/reconnection, replica-lag behaviour, point-in-time restore, and the read-replica/pooler decisions.
+6. Review the module lifecycle, dependency, drain, retained-data, and reactivation evidence.
+7. Record attendees, accountable approvers, date, decisions, conditions, exceptions, and expiry dates in `docs/phase-0/review-record.md`.
+8. Mark ADRs Accepted, Deferred with a measurable trigger, Rejected, or Superseded. Do not leave required records Proposed.
+9. If Ash is rejected, approve its replacement and update every dependent proposed record before beginning Phase 1.
+10. Create the Phase 1 input list from accepted decisions without starting the production workspace in the same change.
 
 Acceptance criteria:
 
@@ -485,6 +497,7 @@ Acceptance criteria:
 - Ash is Accepted, Conditionally Accepted with bounded prerequisites, or replaced; there is no ambiguous "continue evaluating" outcome.
 - Every required quality target is approved and numeric.
 - The five-school placement decision is based on approved workload, recovery, residency, cost, and isolation evidence rather than student count.
+- PostgreSQL HA, recovery, read routing, connection, backpressure, and degradation targets are approved without confusing a read replica with write scaling or backup.
 - Module activation, entitlement, authorization, deactivation, retained-data, and reactivation semantics are approved.
 - Every high or critical threat has an accepted treatment or explicit residual-risk acceptance.
 - All required ADRs have an exit status and evidence.
@@ -500,7 +513,7 @@ Implement Phase 0 as small, reviewable slices:
 | 0A | Repository initialization, indexes, guardrails, minimal toolchain shell | Root confirmation | Scope and navigability |
 | 0B | ADR template, index, decision register, initial Proposed records | 0A | Decision quality, tenant placement, and module lifecycle completeness |
 | 0C | Threat model, classifications, abuse cases | 0A; drafts of 0001/0003/0010/0015 | Trust boundaries, routed placement, module lifecycle, and child-data risk |
-| 0D | Quality-attribute and per-domain capacity workshop; five-school placement decision | 0A; draft 0003 | Ownership, burst shape, retained footprint, recovery, and measurability |
+| 0D | Quality-attribute and per-domain capacity workshop; five-school placement plus PostgreSQL availability/read-routing decisions | 0A; drafts 0003/0017 | Ownership, burst shape, batching, connections, consistency, failover, retained footprint, recovery, and measurability |
 | 0E | Ash, trusted-routing, and neutral module-lifecycle pressure-tests and evidence | Drafts of 0001/0002/0003/0005/0014; target test shape | Negative tests, routing safety, independent gates, and framework fitness |
 | 0F | Ruff, Elixir checks, documentation validator, provider-neutral gate | 0A; evolves with 0B-0E | Reproducibility and useful failure output |
 | 0G | ADR finalization and architecture review | 0B-0F | Accept, conditionally accept, or replace |
@@ -524,6 +537,10 @@ Slices 0C, 0D, and the non-Ash portion of 0F can proceed in parallel after 0A. S
 | Threat traceability | Threat-control-test matrix | High/critical threat lacks owner or verification |
 | Quality targets | Schema check and approval record | Blank, subjective, unowned, or environment-free target |
 | Peak capacity | Synchronized mixed-load benchmark | Annual average hides burst, amplification, pool starvation, or report overlap |
+| Database consistency | Replica-lag/outage and read-after-write tests | Stale authorization, placement/module state, or contradictory confirmation is served |
+| Database availability | Failover-during-burst and application-reconnection drill | Committed work is lost beyond RPO, retry duplicates state, placement opens, or outbox continuity breaks |
+| Database recovery | Isolated point-in-time restore and integrity/reconciliation drill | HA is mistaken for backup or the retained data cannot meet RPO/RTO |
+| Connection control | Per-placement budget and exhaustion test | App/reader/Oban pools exceed capacity or overload reaches the writer unbounded |
 | Python support quality | Ruff and support-tool tests | Syntax, import, bug-pattern, or formatter drift |
 | Elixir spike quality | Formatter, Credo, Dialyzer, tests | Static or runtime defect hidden by happy-path demo |
 | Phase boundary | Repository-structure check and review | Business module or production service scaffold appears early |
@@ -538,6 +555,8 @@ Slices 0C, 0D, and the non-Ash portion of 0F can proceed in parallel after 0A. S
 | The spike becomes accidental production code | Keep it under `spikes/`, document disposability, and prohibit direct promotion | Phase 1 review |
 | Tenant roles become hard-coded | Model roles/capabilities as tenant data and test rename/composition | ADR 0003 and spike tests |
 | Student count becomes a database-placement shortcut | Require per-domain burst, retained-footprint, mixed-load, recovery, and isolation evidence | ADR 0003 and capacity approval |
+| A read replica is treated as write scaling, current authorization, or backup | Require explicit consistency classes and separate HA, read-scaling, PITR, and DR evidence | ADR 0017 and threat-model review |
+| Application autoscaling multiplies connections without a database budget | Calculate all Ecto/Oban/placement pools and reserve; load-test backpressure before adding a pooler | ADR 0017 and capacity approval |
 | Trusted placement routing becomes a confused deputy | Resolve authenticated tenant centrally, constrain placement membership, fail closed, and rehearse movement | Threat-model and routing tests |
 | Module activation becomes authorization or unsafe deletion | Enforce independent gates and controlled drain with retained-data ownership | ADR 0001 and lifecycle tests |
 | Ruff creates false confidence | Scope Ruff explicitly; require language-specific and documentation checks | `phase0-check` output |
@@ -556,6 +575,8 @@ Slices 0C, 0D, and the non-Ash portion of 0F can proceed in parallel after 0A. S
 - [ ] Threat boundaries, classifications, abuse cases, mitigations, and residual risks are reviewed.
 - [ ] Interactive latency, scale, report, file, recovery, and availability targets are numeric and approved.
 - [ ] Peak domain-write, retained-footprint, tenant-placement, and movement targets are numeric and approved.
+- [ ] PostgreSQL connection, consistency, failover, restore, replica-lag, backpressure, and asynchronous-continuity targets are numeric and approved.
+- [ ] Read-replica, pooler, partitioning, dedicated-placement, and cross-region-DR decisions record measured triggers rather than assumptions.
 - [ ] The five-school database/cell decision has workload, recovery, residency, cost, isolation, and rollback evidence.
 - [ ] Module release, entitlement, activation, authorization, dependency, drain, retained-data, and reactivation semantics are approved.
 - [ ] `make check` passes from a clean checkout and disposable database.

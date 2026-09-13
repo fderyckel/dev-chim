@@ -101,4 +101,5 @@ Adopt RLS as a backstop if application-only controls cannot meet the accepted th
 - [ADR 0001](0001-modular-monolith-and-service-boundaries.md)
 - [ADR 0007](0007-transactional-outbox-and-event-envelope.md)
 - [ADR 0009](0009-cache-taxonomy-invalidation-and-valkey-trigger.md)
+- [ADR 0017](0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md)
 - [Data classification](../security/data-classification.md)

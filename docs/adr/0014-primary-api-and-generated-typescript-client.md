@@ -44,7 +44,7 @@ Every request establishes actor, tenant, scope, assurance, purpose, and correlat
 
 ## Validation evidence
 
-The Ash pressure-test will link generated-interface tests in [its evidence record](../phase-0/evidence/ash-pressure-test.md).
+The [generated JSON:API policy slice](../phase-0/evidence/ash-pressure-test.md#generated-jsonapi-policy-slice) proves that the candidate adapter exposes the named transition without a generic update route, preserves actor/capability and tenant policy, fails closed on missing trusted context, and omits the tenant key from output. Stable error mapping, pagination, versioning, idempotency, contract export, and TypeScript client generation remain unevaluated.
 
 ## Fallback and exit cost
 

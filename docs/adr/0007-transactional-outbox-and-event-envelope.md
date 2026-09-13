@@ -46,7 +46,7 @@ Events carry the minimum necessary data, never become an authorization or placem
 
 ## Validation evidence
 
-The pressure-test must prove an injected failure rolls back state and outbox fact together. Full consumer replay belongs to Phase 3.
+The [Ash pressure-test](../phase-0/evidence/ash-pressure-test.md#transactional-outbox-slice) proves a successful action writes state, audit reference, and one minimal event fact together, while an injected failure after the event insert rolls all three back. It also proves missing correlation and causation context prevents the transition. Full consumer dispatch, retry, replay, retention, and placement-movement reconciliation belong to later phases.
 
 ## Fallback and exit cost
 

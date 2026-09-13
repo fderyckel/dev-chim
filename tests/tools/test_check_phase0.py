@@ -37,3 +37,15 @@ def test_exit_review_rejects_unresolved_phase_zero_state() -> None:
 
     assert any("TARGET_REQUIRED" in error for error in errors)
     assert any("still Proposed" in error for error in errors)
+
+
+def test_exit_review_rejects_unresolved_postgresql_availability_evidence() -> None:
+    errors = CHECKER.exit_review_errors(ROOT)
+
+    assert any(
+        "docs/phase-0/evidence/postgresql-availability-and-burst.md" in error
+        and "EVIDENCE_REQUIRED" in error
+        and "DECISION_REQUIRED" in error
+        and "NOT_RUN" in error
+        for error in errors
+    )

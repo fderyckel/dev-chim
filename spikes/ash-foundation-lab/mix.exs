@@ -26,7 +26,9 @@ defmodule AshFoundationLab.MixProject do
       {:ash_json_api, "~> 1.7"},
       {:ash_postgres, "~> 2.13"},
       {:jason, "~> 1.4"},
+      {:open_api_spex, "~> 3.16"},
       {:picosat_elixir, "~> 0.2.3"},
+      {:telemetry, "~> 1.4"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false}
     ]

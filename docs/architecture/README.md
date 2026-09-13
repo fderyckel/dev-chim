@@ -8,6 +8,7 @@ The platform is a security-first modular monolith around Phoenix, Ash under eval
 - [System context](system-context.md)
 - [Service boundaries](service-boundaries.md)
 - [Tenant placement and workload capacity](tenant-placement-and-capacity.md)
+- [PostgreSQL availability, recovery, and read routing](postgresql-availability-recovery-and-read-routing.md)
 - [Module activation and lifecycle](module-activation-and-lifecycle.md)
 - [Quality-attribute targets](quality-attribute-targets.md)
 - [Deferred choices](deferred-choices.md)

@@ -26,10 +26,13 @@ mise exec -- uv run python tools/check_phase0.py
 echo "[5/10] Python tests"
 mise exec -- uv run pytest
 
-echo "[6/10] Elixir formatting and lint"
+echo "[6/10] Elixir formatting, generated migration drift, and lint"
 (
   cd "$spike_dir"
   mise exec -- mix format --check-formatted
+  mise exec -- mix ash_postgres.generate_migrations --check \
+    --migration-path priv/generated_migration_review/migrations \
+    --snapshot-path priv/generated_migration_review/resource_snapshots
   mise exec -- mix credo --strict
 )
 

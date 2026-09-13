@@ -18,6 +18,7 @@
 - Threat model, abuse cases, and residual risks.
 - Numeric quality targets and accountable owners.
 - Tenant-placement capacity profile, five-school decision, routing/movement tests, and recovery evidence.
+- PostgreSQL availability, consistency routing, connection budget, synchronized-burst, failover, replica-lag, and point-in-time-restore evidence.
 - Module lifecycle, dependency, deactivation-drain, retained-data, and reactivation evidence.
 - Clean-checkout `make check` result.
 

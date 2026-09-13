@@ -31,6 +31,7 @@ REQUIRED_PATHS = (
     "docs/README.md",
     "docs/architecture/README.md",
     "docs/architecture/module-activation-and-lifecycle.md",
+    "docs/architecture/postgresql-availability-recovery-and-read-routing.md",
     "docs/architecture/quality-attribute-targets.md",
     "docs/architecture/tenant-placement-and-capacity.md",
     "docs/adr/README.md",
@@ -38,7 +39,9 @@ REQUIRED_PATHS = (
     "docs/security/threat-model.md",
     "docs/phase-0/README.md",
     "docs/phase-0/decision-register.md",
+    "docs/phase-0/evidence/ash-upgrade-exercise.md",
     "docs/phase-0/evidence/module-lifecycle.md",
+    "docs/phase-0/evidence/postgresql-availability-and-burst.md",
     "docs/phase-0/evidence/tenant-placement-capacity.md",
     "docs/phase-0/review-record.md",
     "spikes/ash-foundation-lab/mix.exs",
@@ -57,6 +60,7 @@ REQUIRED_ADR_NUMBERS = {
     "0014",
     "0015",
     "0016",
+    "0017",
 }
 
 REQUIRED_ADR_HEADINGS = (
@@ -183,7 +187,7 @@ def threat_model_errors(root: Path) -> list[str]:
     body = path.read_text(encoding="utf-8")
     errors: list[str] = []
 
-    for threat_number in range(1, 14):
+    for threat_number in range(1, 15):
         threat_id = f"TM-{threat_number:02d}"
         matching_lines = [line for line in body.splitlines() if line.startswith(f"| {threat_id} |")]
         if len(matching_lines) != 1:
@@ -202,11 +206,19 @@ def exit_review_errors(root: Path) -> list[str]:
     governed = (
         root / "docs/architecture/quality-attribute-targets.md",
         root / "docs/phase-0/evidence/module-lifecycle.md",
+        root / "docs/phase-0/evidence/postgresql-availability-and-burst.md",
         root / "docs/phase-0/evidence/quality-targets-approval.md",
         root / "docs/phase-0/evidence/tenant-placement-capacity.md",
         root / "docs/phase-0/review-record.md",
     )
-    placeholders = ("TARGET_REQUIRED", "OWNER_REQUIRED", "DATE_REQUIRED")
+    placeholders = (
+        "TARGET_REQUIRED",
+        "OWNER_REQUIRED",
+        "DATE_REQUIRED",
+        "EVIDENCE_REQUIRED",
+        "DECISION_REQUIRED",
+        "NOT_RUN",
+    )
 
     for path in governed:
         body = path.read_text(encoding="utf-8")
