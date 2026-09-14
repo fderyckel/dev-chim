@@ -2,6 +2,7 @@ defmodule AshFoundationLab.FoundationRecordTest do
   use ExUnit.Case, async: true
 
   alias AshFoundationLab.Actor
+  alias AshFoundationLab.ApiRouter
   alias AshFoundationLab.FoundationRecord
   alias AshFoundationLab.JsonApiRouter
   alias AshFoundationLab.Repo
@@ -55,13 +56,241 @@ defmodule AshFoundationLab.FoundationRecordTest do
     refute Map.has_key?(event.payload, "name")
   end
 
-  test "the generated interface exposes only the named transition route" do
+  test "the generated interface exposes only versioned read and named-transition routes" do
     assert [
+             %{verb: :get, path: "/api/v1/foundation-records"},
              %{
                verb: :patch,
-               path: "/foundation-records/:id/submit-for-review"
+               path: "/api/v1/foundation-records/:id/submit-for-review"
              }
-           ] = AshJsonApi.Router.formatted_routes(JsonApiRouter)
+           ] =
+             JsonApiRouter
+             |> AshJsonApi.Router.formatted_routes()
+             |> Enum.map(&Map.take(&1, [:verb, :path]))
+  end
+
+  test "unversioned generated routes are unavailable", fixture do
+    record = create_record(fixture.tenant_a, fixture.authorized_actor)
+
+    response =
+      json_api_request(record,
+        actor: fixture.authorized_actor,
+        tenant: fixture.tenant_a,
+        route: "/foundation-records/#{record.id}/submit-for-review"
+      )
+
+    assert response.status == 404
+    assert Plug.Conn.get_resp_header(response, "x-api-version") == ["v1"]
+    assert_record_remains_draft(record, fixture)
+  end
+
+  test "generated errors use stable versioned codes without internal details", fixture do
+    record = create_record(fixture.tenant_a, fixture.authorized_actor)
+
+    forbidden =
+      json_api_request(record,
+        actor: fixture.read_only_actor,
+        tenant: fixture.tenant_a
+      )
+
+    assert_public_error(
+      forbidden,
+      403,
+      "forbidden",
+      "Forbidden",
+      "The request is not authorized."
+    )
+
+    missing_tenant = json_api_request(record, actor: fixture.authorized_actor)
+
+    assert_public_error(
+      missing_tenant,
+      400,
+      "missing_tenant_context",
+      "MissingTenantContext",
+      "Trusted tenant context is required."
+    )
+
+    unknown_record = %{record | id: UUID.generate()}
+
+    not_found =
+      json_api_request(unknown_record,
+        actor: fixture.other_tenant_actor,
+        tenant: fixture.tenant_b
+      )
+
+    assert_public_error(
+      not_found,
+      404,
+      "not_found",
+      "NotFound",
+      "The requested resource was not found."
+    )
+
+    conflict =
+      json_api_request(record,
+        actor: fixture.authorized_actor,
+        tenant: fixture.tenant_a,
+        expected_version: 99
+      )
+
+    assert_public_error(
+      conflict,
+      409,
+      "conflict",
+      "Conflict",
+      "The resource changed before this action completed."
+    )
+
+    invalid_record = create_record(fixture.tenant_a, fixture.authorized_actor)
+    submitted = submit!(invalid_record, fixture.tenant_a, fixture.authorized_actor)
+
+    validation =
+      json_api_request(submitted,
+        actor: fixture.authorized_actor,
+        tenant: fixture.tenant_a
+      )
+
+    assert_public_error(
+      validation,
+      422,
+      "validation_failed",
+      "ValidationFailed",
+      "The request failed validation."
+    )
+
+    for response <- [forbidden, missing_tenant, not_found, conflict, validation] do
+      serialized = response.resp_body
+      refute serialized =~ "AshFoundationLab"
+      refute serialized =~ fixture.tenant_a
+      refute serialized =~ fixture.authorized_actor.id
+    end
+
+    assert_record_remains_draft(record, fixture)
+  end
+
+  test "unrecognized adapter errors fail closed without preserving their details" do
+    error = %AshJsonApi.Error{
+      id: UUID.generate(),
+      status_code: 418,
+      code: "unexpected_adapter_error",
+      title: "UnexpectedAdapterError",
+      detail: "restricted implementation detail"
+    }
+
+    normalized = AshFoundationLab.JsonApiContract.handle_error(error, %{})
+
+    assert normalized.status_code == 500
+    assert normalized.code == "internal_error"
+    assert normalized.title == "InternalError"
+    assert normalized.detail == "An internal error occurred."
+    assert normalized.meta == %{"api_version" => "v1"}
+    refute inspect(normalized) =~ "restricted implementation detail"
+  end
+
+  test "the versioned list action uses bounded tenant-safe keyset pagination", fixture do
+    Enum.each(1..4, fn sequence ->
+      create_record(fixture.tenant_a, fixture.authorized_actor, "Page record #{sequence}")
+    end)
+
+    create_record(fixture.tenant_b, fixture.other_tenant_actor, "Other tenant page record")
+
+    first_response =
+      json_api_list(
+        actor: fixture.authorized_actor,
+        tenant: fixture.tenant_a,
+        query: "page[limit]=2"
+      )
+
+    assert first_response.status == 200
+    assert Plug.Conn.get_resp_header(first_response, "x-api-version") == ["v1"]
+
+    assert %{"data" => first_page, "links" => %{"next" => next_url}} =
+             Jason.decode!(first_response.resp_body)
+
+    assert length(first_page) == 2
+    refute first_response.resp_body =~ "Other tenant page record"
+
+    second_response =
+      json_api_list(
+        actor: fixture.authorized_actor,
+        tenant: fixture.tenant_a,
+        route: request_path(next_url)
+      )
+
+    assert second_response.status == 200
+    assert %{"data" => second_page} = Jason.decode!(second_response.resp_body)
+    assert length(second_page) == 2
+
+    first_ids = MapSet.new(first_page, & &1["id"])
+    second_ids = MapSet.new(second_page, & &1["id"])
+    assert MapSet.disjoint?(first_ids, second_ids)
+
+    oversized =
+      json_api_list(
+        actor: fixture.authorized_actor,
+        tenant: fixture.tenant_a,
+        query: "page[limit]=4"
+      )
+
+    assert_public_error(
+      oversized,
+      400,
+      "invalid_pagination",
+      "InvalidPagination",
+      "The requested page limit is invalid."
+    )
+
+    for invalid_limit <- ["0", "-1", "not-an-integer"] do
+      invalid =
+        json_api_list(
+          actor: fixture.authorized_actor,
+          tenant: fixture.tenant_a,
+          query: "page[limit]=#{invalid_limit}"
+        )
+
+      assert_public_error(
+        invalid,
+        400,
+        "invalid_pagination",
+        "InvalidPagination",
+        "The requested page limit is invalid."
+      )
+    end
+  end
+
+  test "the generated OpenAPI document records the versioned bounded contract" do
+    response =
+      conn(:get, "/api/v1/openapi.json", nil)
+      |> ApiRouter.call([])
+
+    assert response.status == 200
+    assert Plug.Conn.get_resp_header(response, "x-api-version") == ["v1"]
+
+    specification = Jason.decode!(response.resp_body)
+    assert specification["info"] == %{"title" => "Ash Foundation Lab API", "version" => "1.0.0"}
+    assert specification["servers"] == [%{"url" => "/", "variables" => %{}}]
+
+    assert Map.keys(specification["paths"]) |> Enum.sort() == [
+             "/api/v1/foundation-records",
+             "/api/v1/foundation-records/{id}/submit-for-review"
+           ]
+
+    page_parameter =
+      specification["paths"]["/api/v1/foundation-records"]["get"]["parameters"]
+      |> Enum.find(&(&1["name"] == "page"))
+
+    assert page_parameter["schema"]["properties"]["limit"] == %{
+             "maximum" => 3,
+             "minimum" => 1,
+             "type" => "integer"
+           }
+
+    transition =
+      specification["paths"]["/api/v1/foundation-records/{id}/submit-for-review"]["patch"]
+
+    request_schema = transition["requestBody"]["content"]["application/vnd.api+json"]["schema"]
+    assert inspect(request_schema) =~ "expected_version"
   end
 
   test "an authorized JSON:API request performs the named transition", fixture do
@@ -300,6 +529,59 @@ defmodule AshFoundationLab.FoundationRecordTest do
     assert submitted.status == :in_review
   end
 
+  test "field and relationship policies preserve narrower audit capabilities", fixture do
+    record = create_record(fixture.tenant_a, fixture.authorized_actor)
+    submitted = submit!(record, fixture.tenant_a, fixture.authorized_actor)
+
+    assert [authorized_view] =
+             FoundationRecord
+             |> Ash.Query.set_tenant(fixture.tenant_a)
+             |> Ash.read!(actor: fixture.authorized_actor)
+
+    assert authorized_view.audit_reference == submitted.audit_reference
+
+    authorized_view =
+      Ash.load!(authorized_view, :outbox_events,
+        tenant: fixture.tenant_a,
+        actor: fixture.authorized_actor
+      )
+
+    assert [%{event_type: "foundation_record.submitted_for_review"}] =
+             authorized_view.outbox_events
+
+    assert [read_only_view] =
+             FoundationRecord
+             |> Ash.Query.set_tenant(fixture.tenant_a)
+             |> Ash.read!(actor: fixture.read_only_actor)
+
+    assert %Ash.ForbiddenField{field: :audit_reference} = read_only_view.audit_reference
+
+    read_only_view =
+      Ash.load!(read_only_view, :outbox_events,
+        tenant: fixture.tenant_a,
+        actor: fixture.read_only_actor
+      )
+
+    assert %Ash.ForbiddenField{field: :outbox_events} = read_only_view.outbox_events
+  end
+
+  test "the audit relationship fails closed for missing and cross-tenant context", fixture do
+    record = create_record(fixture.tenant_a, fixture.authorized_actor)
+    _submitted = submit!(record, fixture.tenant_a, fixture.authorized_actor)
+
+    assert_raise Ash.Error.Forbidden, fn ->
+      AshFoundationLab.OutboxEvent
+      |> Ash.Query.set_tenant(fixture.tenant_a)
+      |> Ash.read!()
+    end
+
+    assert_raise Ash.Error.Forbidden, fn ->
+      AshFoundationLab.OutboxEvent
+      |> Ash.Query.set_tenant(fixture.tenant_a)
+      |> Ash.read!(actor: fixture.other_tenant_actor)
+    end
+  end
+
   test "missing actor or tenant context fails closed", fixture do
     assert_raise Ash.Error.Invalid, fn ->
       Ash.read!(FoundationRecord, actor: fixture.authorized_actor)
@@ -439,6 +721,11 @@ defmodule AshFoundationLab.FoundationRecordTest do
     read_a = insert_capability(tenant_a, "foundation_record.read")
     create_a = insert_capability(tenant_a, "foundation_record.create")
     submit_a = insert_capability(tenant_a, "foundation_record.submit_for_review")
+
+    audit_reference_a =
+      insert_capability(tenant_a, "foundation_record.audit_reference.read")
+
+    audit_trail_a = insert_capability(tenant_a, "foundation_record.audit_trail.read")
     read_b = insert_capability(tenant_b, "foundation_record.read")
     create_b = insert_capability(tenant_b, "foundation_record.create")
     submit_b = insert_capability(tenant_b, "foundation_record.submit_for_review")
@@ -449,11 +736,15 @@ defmodule AshFoundationLab.FoundationRecordTest do
     included_role = insert_role(tenant_a, "Included transition role")
     other_tenant_role = insert_role(tenant_b, "Other tenant role")
 
-    Enum.each([read_a, create_a, submit_a], &insert_role_capability(tenant_a, direct_role, &1))
+    Enum.each(
+      [read_a, create_a, submit_a, audit_reference_a, audit_trail_a],
+      &insert_role_capability(tenant_a, direct_role, &1)
+    )
+
     insert_role_capability(tenant_a, read_only_role, read_a)
 
     Enum.each(
-      [read_a, create_a, submit_a],
+      [read_a, create_a, submit_a, audit_reference_a, audit_trail_a],
       &insert_role_capability(tenant_a, included_role, &1)
     )
 
@@ -490,12 +781,15 @@ defmodule AshFoundationLab.FoundationRecordTest do
   defp json_api_request(record, options) do
     correlation_id = Keyword.get(options, :correlation_id, UUID.generate())
     causation_id = Keyword.get(options, :causation_id, UUID.generate())
-    route = Keyword.get(options, :route, "/foundation-records/#{record.id}/submit-for-review")
+
+    route =
+      Keyword.get(options, :route, "/api/v1/foundation-records/#{record.id}/submit-for-review")
 
     attributes =
       Keyword.get(options, :attributes, %{
         "correlation_id" => correlation_id,
-        "causation_id" => causation_id
+        "causation_id" => causation_id,
+        "expected_version" => Keyword.get(options, :expected_version, record.lock_version)
       })
 
     body =
@@ -518,7 +812,26 @@ defmodule AshFoundationLab.FoundationRecordTest do
       purpose: :phase_0_framework_evaluation,
       correlation_id: correlation_id
     })
-    |> JsonApiRouter.call([])
+    |> ApiRouter.call([])
+  end
+
+  defp json_api_list(options) do
+    route =
+      case Keyword.get(options, :route) do
+        nil -> "/api/v1/foundation-records?#{Keyword.get(options, :query, "")}"
+        route -> route
+      end
+
+    conn(:get, route, nil)
+    |> put_req_header("accept", "application/vnd.api+json")
+    |> maybe_set_actor(options[:actor])
+    |> maybe_set_tenant(options[:tenant])
+    |> Ash.PlugHelpers.set_context(%{
+      assurance: :synthetic_test,
+      purpose: :phase_0_framework_evaluation,
+      correlation_id: UUID.generate()
+    })
+    |> ApiRouter.call([])
   end
 
   defp maybe_set_actor(conn, nil), do: conn
@@ -538,13 +851,40 @@ defmodule AshFoundationLab.FoundationRecordTest do
     end)
   end
 
-  defp assert_record_remains_draft(record, fixture) do
-    assert [persisted_record] =
-             FoundationRecord
-             |> Ash.Query.set_tenant(fixture.tenant_a)
-             |> Ash.read!(actor: fixture.authorized_actor)
+  defp assert_public_error(response, status, code, title, detail) do
+    assert response.status == status
+    assert Plug.Conn.get_resp_header(response, "x-api-version") == ["v1"]
 
-    assert persisted_record.id == record.id
+    assert %{
+             "errors" => [
+               %{
+                 "id" => error_id,
+                 "status" => serialized_status,
+                 "code" => ^code,
+                 "title" => ^title,
+                 "detail" => ^detail,
+                 "meta" => %{"api_version" => "v1"}
+               }
+             ]
+           } = Jason.decode!(response.resp_body)
+
+    assert {:ok, _uuid} = UUID.cast(error_id)
+    assert serialized_status == Integer.to_string(status)
+  end
+
+  defp request_path(url) do
+    uri = URI.parse(url)
+    uri.path <> if(uri.query, do: "?#{uri.query}", else: "")
+  end
+
+  defp assert_record_remains_draft(record, fixture) do
+    persisted_record =
+      FoundationRecord
+      |> Ash.Query.set_tenant(fixture.tenant_a)
+      |> Ash.read!(actor: fixture.authorized_actor)
+      |> Enum.find(&(&1.id == record.id))
+
+    assert persisted_record
     assert persisted_record.status == :draft
     assert persisted_record.lock_version == 1
     assert is_nil(persisted_record.audit_reference)
@@ -561,12 +901,16 @@ defmodule AshFoundationLab.FoundationRecordTest do
          record,
          tenant_id,
          correlation_id \\ UUID.generate(),
-         causation_id \\ UUID.generate()
+         causation_id \\ UUID.generate(),
+         expected_version \\ nil
        ) do
+    expected_version = expected_version || record.lock_version
+
     record
     |> Ash.Changeset.for_update(:submit_for_review, %{
       correlation_id: correlation_id,
-      causation_id: causation_id
+      causation_id: causation_id,
+      expected_version: expected_version
     })
     |> Ash.Changeset.set_tenant(tenant_id)
   end

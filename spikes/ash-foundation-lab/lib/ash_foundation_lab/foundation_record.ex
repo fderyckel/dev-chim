@@ -62,6 +62,12 @@ defmodule AshFoundationLab.FoundationRecord do
       define_attribute? false
       public? false
     end
+
+    has_many :outbox_events, AshFoundationLab.OutboxEvent do
+      destination_attribute :aggregate_id
+      allow_forbidden_field? true
+      public? false
+    end
   end
 
   json_api do
@@ -70,6 +76,15 @@ defmodule AshFoundationLab.FoundationRecord do
 
   actions do
     defaults [:read]
+
+    read :list_paginated do
+      pagination keyset?: true,
+                 required?: true,
+                 default_limit: 2,
+                 max_page_size: AshFoundationLab.JsonApiContract.maximum_page_size()
+
+      prepare build(sort: [inserted_at: :asc, id: :asc])
+    end
 
     create :create do
       primary? true
@@ -88,6 +103,13 @@ defmodule AshFoundationLab.FoundationRecord do
         allow_nil? false
       end
 
+      argument :expected_version, :integer do
+        allow_nil? false
+        constraints min: 1
+      end
+
+      validate AshFoundationLab.Validation.ExpectedVersion
+
       validate attribute_equals(:status, :draft) do
         message "record must be in draft state"
       end
@@ -105,7 +127,7 @@ defmodule AshFoundationLab.FoundationRecord do
       authorize_if always()
     end
 
-    policy action(:read) do
+    policy action_type(:read) do
       authorize_if {AshFoundationLab.Policy.HasCapability, capability: "foundation_record.read"}
     end
 
@@ -116,6 +138,17 @@ defmodule AshFoundationLab.FoundationRecord do
     policy action(:submit_for_review) do
       authorize_if {AshFoundationLab.Policy.HasCapability,
                     capability: "foundation_record.submit_for_review"}
+    end
+  end
+
+  field_policies do
+    field_policy :audit_reference do
+      authorize_if {AshFoundationLab.Policy.HasCapability,
+                    capability: "foundation_record.audit_reference.read"}
+    end
+
+    field_policy :* do
+      authorize_if always()
     end
   end
 

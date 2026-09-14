@@ -33,6 +33,11 @@ echo "[6/10] Elixir formatting, generated migration drift, and lint"
   mise exec -- mix ash_postgres.generate_migrations --check \
     --migration-path priv/generated_migration_review/migrations \
     --snapshot-path priv/generated_migration_review/resource_snapshots
+  mise exec -- env MIX_ENV=test mix openapi.spec.json \
+    --spec AshFoundationLab.JsonApiRouter \
+    --check \
+    --pretty=true \
+    --filename priv/openapi/phase0-v1.json
   mise exec -- mix credo --strict
 )
 

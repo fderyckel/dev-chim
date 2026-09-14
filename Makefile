@@ -23,6 +23,7 @@ lint:
 	shellcheck .githooks/pre-push bin/bootstrap bin/phase0-check
 	cd spikes/ash-foundation-lab && mise exec -- mix format --check-formatted
 	cd spikes/ash-foundation-lab && mise exec -- mix ash_postgres.generate_migrations --check --migration-path priv/generated_migration_review/migrations --snapshot-path priv/generated_migration_review/resource_snapshots
+	cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix openapi.spec.json --spec AshFoundationLab.JsonApiRouter --check --pretty=true --filename priv/openapi/phase0-v1.json
 	cd spikes/ash-foundation-lab && mise exec -- mix credo --strict
 	cd spikes/ash-foundation-lab && mise exec -- mix hex.audit
 	cd spikes/ash-foundation-lab && mise exec -- mix deps.unlock --check-unused

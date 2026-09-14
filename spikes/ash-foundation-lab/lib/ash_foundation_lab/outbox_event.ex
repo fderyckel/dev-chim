@@ -2,13 +2,15 @@ defmodule AshFoundationLab.OutboxEvent do
   @moduledoc """
   Immutable, tenant-owned event fact used only by the Phase 0 transaction spike.
 
-  It intentionally exposes no Ash actions; dispatch and replay remain later-phase work.
+  Its read action exists only to pressure-test policy preservation across a relationship.
+  Dispatch and replay remain later-phase work.
   """
 
   use Ash.Resource,
     otp_app: :ash_foundation_lab,
     domain: AshFoundationLab.Foundation,
-    data_layer: AshPostgres.DataLayer
+    data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer]
 
   postgres do
     table "outbox_events"
@@ -91,6 +93,23 @@ defmodule AshFoundationLab.OutboxEvent do
       destination_attribute :id
       define_attribute? false
       public? false
+    end
+  end
+
+  actions do
+    defaults [:read]
+  end
+
+  policies do
+    policy always() do
+      forbid_unless actor_present()
+      forbid_unless AshFoundationLab.Policy.TenantMatchesActor
+      authorize_if always()
+    end
+
+    policy action(:read) do
+      authorize_if {AshFoundationLab.Policy.HasCapability,
+                    capability: "foundation_record.audit_trail.read"}
     end
   end
 

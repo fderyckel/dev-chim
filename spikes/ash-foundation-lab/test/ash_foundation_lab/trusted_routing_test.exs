@@ -13,7 +13,8 @@ defmodule AshFoundationLab.TrustedRoutingTest do
     {20_260_913_000_000, AshFoundationLab.Repo.Migrations.CreateFoundationRecords},
     {20_260_913_010_000, AshFoundationLab.Repo.Migrations.AddAccessModelAndRecordWorkflow},
     {20_260_913_020_000, AshFoundationLab.Repo.Migrations.AddTransactionalOutbox},
-    {20_260_913_030_000, AshFoundationLab.Repo.Migrations.AddSyntheticModuleLifecycle}
+    {20_260_913_030_000, AshFoundationLab.Repo.Migrations.AddSyntheticModuleLifecycle},
+    {20_260_913_040_000, AshFoundationLab.Repo.Migrations.AddRoleGraphIntegrity}
   ]
 
   setup_all do
@@ -319,7 +320,9 @@ defmodule AshFoundationLab.TrustedRoutingTest do
       {AshFoundationLab.Repo.Migrations.AddTransactionalOutbox,
        "20260913020000_add_transactional_outbox.exs"},
       {AshFoundationLab.Repo.Migrations.AddSyntheticModuleLifecycle,
-       "20260913030000_add_synthetic_module_lifecycle.exs"}
+       "20260913030000_add_synthetic_module_lifecycle.exs"},
+      {AshFoundationLab.Repo.Migrations.AddRoleGraphIntegrity,
+       "20260913040000_add_role_graph_integrity.exs"}
     ]
 
     Enum.each(migration_files, fn {migration, filename} ->

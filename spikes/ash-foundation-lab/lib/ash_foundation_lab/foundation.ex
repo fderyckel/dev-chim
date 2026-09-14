@@ -9,9 +9,11 @@ defmodule AshFoundationLab.Foundation do
 
   json_api do
     authorize? true
+    error_handler {AshFoundationLab.JsonApiContract, :handle_error, []}
 
     routes do
-      base_route "/foundation-records", AshFoundationLab.FoundationRecord do
+      base_route "/api/v1/foundation-records", AshFoundationLab.FoundationRecord do
+        index :list_paginated
         patch :submit_for_review, route: "/:id/submit-for-review"
       end
     end

@@ -9,5 +9,10 @@ defmodule AshFoundationLab.JsonApiRouter do
 
   use AshJsonApi.Router,
     domains: [AshFoundationLab.Foundation],
-    before_dispatch: {AshFoundationLab.Telemetry, :before_json_api_dispatch, []}
+    before_dispatch: {AshFoundationLab.JsonApiContract, :before_dispatch, []},
+    modify_open_api: {AshFoundationLab.JsonApiContract, :modify_open_api, []},
+    open_api: "/api/v1/openapi.json",
+    open_api_title: "Ash Foundation Lab API",
+    open_api_version: "1.0.0",
+    open_api_servers: ["/"]
 end

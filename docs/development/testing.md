@@ -30,6 +30,7 @@ cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix test
 cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix test test/ash_foundation_lab/trusted_routing_test.exs
 cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix test test/ash_foundation_lab/synthetic_module_lifecycle_test.exs
 cd spikes/ash-foundation-lab && mise exec -- mix ash_postgres.generate_migrations --check --migration-path priv/generated_migration_review/migrations --snapshot-path priv/generated_migration_review/resource_snapshots
+cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix openapi.spec.json --spec AshFoundationLab.JsonApiRouter --check --pretty=true --filename priv/openapi/phase0-v1.json
 cd spikes/ash-foundation-lab && mise exec -- mix credo --strict
 cd spikes/ash-foundation-lab && mise exec -- mix dialyzer
 ```

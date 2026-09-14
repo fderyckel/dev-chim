@@ -15,6 +15,8 @@
 
 - ADR index and decision register.
 - Ash pressure-test scorecard and commands.
+- Versioned generated-interface routes, stable-error, keyset-pagination, and checked-in OpenAPI drift evidence.
+- Tenant-defined authorization graph, cycle, field-policy, and relationship-policy evidence.
 - Threat model, abuse cases, and residual risks.
 - Numeric quality targets and accountable owners.
 - Tenant-placement capacity profile, five-school decision, routing/movement tests, and recovery evidence.

@@ -44,7 +44,7 @@ Every request establishes actor, tenant, scope, assurance, purpose, and correlat
 
 ## Validation evidence
 
-The [generated JSON:API policy slice](../phase-0/evidence/ash-pressure-test.md#generated-jsonapi-policy-slice) proves that the candidate adapter exposes the named transition without a generic update route, preserves actor/capability and tenant policy, fails closed on missing trusted context, and omits the tenant key from output. Stable error mapping, pagination, versioning, idempotency, contract export, and TypeScript client generation remain unevaluated.
+The [generated JSON:API policy slice](../phase-0/evidence/ash-pressure-test.md#generated-jsonapi-policy-slice) proves explicit `/api/v1` list and named-transition routes without a generic update route, actor/capability and tenant policy preservation, stable core public errors, required optimistic request versions, tenant-safe keyset pagination, and a checked-in OpenAPI document with drift detection. The tested adapter did not enforce or document the resource's maximum page size, so a thin public gate and supported OpenAPI modifier are required. Idempotency, the remaining error categories, and generated TypeScript client behaviour remain unevaluated.
 
 ## Fallback and exit cost
 

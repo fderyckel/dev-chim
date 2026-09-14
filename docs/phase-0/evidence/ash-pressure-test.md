@@ -12,9 +12,9 @@
 - Services: PostgreSQL 18.6 over the local Unix socket
 - Framework packages: Ash 3.33.3, AshPostgres 2.13.1, AshJsonApi 1.7.1, OpenApiSpex 3.22.4, Phoenix 1.8.13
 - Commands: `make bootstrap`, `make format`, `make check`, and `mix dialyzer`
-- Results: 4 repository-tool tests passed; 43 Ash/PostgreSQL/JSON:API/migration-review/routing/lifecycle tests passed; Ruff, ShellCheck, documentation validation, generated-migration drift detection, Credo, dependency audit, Dialyzer, formatting, migrations, and Git whitespace checks passed.
+- Results: 4 repository-tool tests passed; 60 Ash/PostgreSQL/JSON:API/migration-review/routing/lifecycle/role-graph tests passed; Ruff, ShellCheck, documentation validation, generated-migration and OpenAPI drift detection, Credo, dependency audit, Dialyzer, formatting, migrations, and Git whitespace checks passed.
 
-The tests currently prove attribute-based tenant filtering, cross-tenant denial without an existence signal, actor and tenant fail-closed behaviour, capability denial, tenant-defined role composition and rename independence, a named `submit_for_review` transition, invalid-state validation, optimistic-lock conflicts, compound tenant foreign keys, atomic state/audit/outbox rollback, required correlation and causation context, minimal event payloads, database constraints against alternate unsafe writes, generated JSON:API preservation of the action and policy boundary, allowlisted correlated telemetry without raw tenant, actor, record, or payload data, trusted pooled/dedicated database routing across requests, tasks, and job envelopes, and independent module gates with serialized deactivation, drain, retained data, mandatory work, and compatible reactivation.
+The tests currently prove attribute-based tenant filtering, cross-tenant denial without an existence signal, actor and tenant fail-closed behaviour, capability denial, field and relationship policies, tenant-defined role composition and rename independence, direct/indirect/concurrent cycle rejection, governed role administration, named transitions, optimistic-lock conflicts, compound tenant foreign keys, atomic state/audit/outbox rollback, minimal event payloads, database constraints against alternate unsafe writes, generated JSON:API preservation of the action and policy boundary, versioned routes, bounded tenant-safe keyset pagination, stable core public errors, checked-in OpenAPI drift detection, tenant-safe telemetry, trusted pooled/dedicated routing, and independent module gates with serialized deactivation, drain, retained data, mandatory work, and compatible reactivation.
 
 Dependency compilation emitted warnings inside current third-party Ash/Phoenix/OpenApiSpex code under Elixir 1.20/OTP 29. None originated in the spike modules, and the required checks pass, but the warning volume is evidence to consider under upgrade and maintenance ergonomics rather than suppressing or ignoring it.
 
@@ -33,6 +33,24 @@ The access model stores tenant-owned actors, roles, capabilities, actor-role ass
 
 The named update uses Ash validation plus optimistic locking inside the data-layer transaction. Ash 3.33.3/AshPostgres 2.13.1 could not compile the custom validation error into a fully atomic SQL expression, so the spike explicitly uses `require_atomic? false`. Concurrency still fails closed through the lock-version predicate, but the atomic-expression limitation remains framework-fit evidence for the final scorecard.
 
+## Authorization graph integrity and policy-matrix slice
+
+- Date: 2026-09-14
+- Code: [`role_administration.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/role_administration.ex), the field policy in [`foundation_record.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/foundation_record.ex), and the relationship policy in [`outbox_event.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/outbox_event.ex)
+- Database artifact: [`20260913040000_add_role_graph_integrity.exs`](../../../spikes/ash-foundation-lab/priv/repo/migrations/20260913040000_add_role_graph_integrity.exs)
+- Tests: [`role_administration_test.exs`](../../../spikes/ash-foundation-lab/test/ash_foundation_lab/role_administration_test.exs) and [`foundation_record_test.exs`](../../../spikes/ash-foundation-lab/test/ash_foundation_lab/foundation_record_test.exs)
+- Focused command: `mise exec -- env MIX_ENV=test mix test test/ash_foundation_lab/role_administration_test.exs test/ash_foundation_lab/foundation_record_test.exs`
+- Focused result: 31 tests passed against the standard synthetic test database and a separate role-graph database with two independent repository pools.
+- Migration result: the role-graph migration applied, rolled back completely, and reapplied in the disposable database; catalog assertions confirmed the optimistic version, trigger, compound foreign keys, and constraints.
+
+The spike exposes only two named role-administration actions: optimistic rename and inclusion. Both require trusted actor, tenant, and correlation context plus the tenant-defined `role.manage` capability. Authorization happens before role lookup, tenant mismatch fails closed, compound foreign keys reject cross-tenant links, and every successful action writes matching audit and outbox facts in the state transaction. An injected failure after event insertion rolls back the role change and both facts.
+
+The trusted inclusion path takes a tenant-qualified transaction advisory lock before writing. A forced two-connection race proves opposing inclusions serialize: one edge commits and the other returns the stable `role_cycle` result. A recursive PostgreSQL trigger rejects direct and indirect cycles again for alternate writes. Role names remain mutable data, and a composed capability survives a rename without code changes.
+
+The Ash policy matrix now has explicit field and relationship evidence. An actor with record-read authority but without the narrower audit-reference capability receives `%Ash.ForbiddenField{}` for that field. Loading the outbox relationship requires its own audit-trail capability; the same record remains readable while the forbidden relationship is masked, and direct missing-context or cross-tenant event reads fail closed.
+
+This is pressure-test evidence, not a production role API. Role removal, assignment administration, idempotent retries, bulk graph changes, and user-facing transport contracts remain outside this slice.
+
 ## Transactional outbox slice
 
 - Date: 2026-09-13
@@ -50,17 +68,24 @@ The negative test injects an error after the outbox insert. Ash rolls back the r
 
 ## Generated JSON:API policy slice
 
-- Date: 2026-09-13
-- Code: [`json_api_router.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/json_api_router.ex), the extended [`foundation.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/foundation.ex), and the extended [`foundation_record.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/foundation_record.ex)
+- Date: 2026-09-14
+- Public edge and contract: [`api_router.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/api_router.ex), [`json_api_contract.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/json_api_contract.ex), [`json_api_page_limit.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/json_api_page_limit.ex), and [`json_api_router.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/json_api_router.ex)
+- Domain declarations: the extended [`foundation.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/foundation.ex), [`foundation_record.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/foundation_record.ex), and [`expected_version.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/validation/expected_version.ex)
+- Contract artifact: [`phase0-v1.json`](../../../spikes/ash-foundation-lab/priv/openapi/phase0-v1.json)
 - Tests: [`foundation_record_test.exs`](../../../spikes/ash-foundation-lab/test/ash_foundation_lab/foundation_record_test.exs)
 - Focused command: `mise exec -- env MIX_ENV=test mix test test/ash_foundation_lab/foundation_record_test.exs`
-- Focused result: 18 tests passed.
+- Focused result: 26 tests passed.
+- Contract generation: `mise exec -- env MIX_ENV=test mix openapi.spec.json --spec AshFoundationLab.JsonApiRouter --pretty=true --filename priv/openapi/phase0-v1.json`
+- Contract drift check: `mise exec -- env MIX_ENV=test mix openapi.spec.json --spec AshFoundationLab.JsonApiRouter --check --pretty=true --filename priv/openapi/phase0-v1.json`
+- Contract result: generation and immediate drift verification passed.
 
-The generated router exposes one `PATCH /foundation-records/:id/submit-for-review` route and no generic create, read, update, or delete route. It receives the actor and tenant through Ash's connection-private context; request payloads do not select a tenant or placement. The successful HTTP test proves that the adapter invokes the same capability-protected action, preserves typed correlation and causation IDs into the outbox fact, and excludes the private tenant key from serialized output.
+The generated router exposes only `GET /api/v1/foundation-records` and `PATCH /api/v1/foundation-records/:id/submit-for-review`; the unversioned transition and generic create, update, and delete routes are unavailable. It receives the actor and tenant through Ash's connection-private context; request payloads do not select a tenant or placement. The successful HTTP test proves that the adapter invokes the same capability-protected action, preserves typed correlation and causation IDs into the outbox fact, and excludes the private tenant key from serialized output.
 
-Negative HTTP tests prove capability denial, actor and tenant fail-closed behaviour, and absence of a generic update bypass. A tenant-B actor receives the same normalized not-found error shape for an existing tenant-A identifier and a random identifier, so the response does not disclose cross-tenant existence. Every denied path leaves the record and outbox unchanged.
+The transition requires the caller's `expected_version`. Tests map stale state to stable `409 conflict`, invalid state to `422 validation_failed`, policy denial to `403 forbidden`, hidden or absent records to `404 not_found`, and missing trusted tenant context to `400 missing_tenant_context`. Public details and metadata are versioned and contain no framework module, actor identifier, or raw tenant identifier. A tenant-B actor receives the same normalized not-found shape for an existing tenant-A identifier and a random identifier, so the response does not disclose cross-tenant existence. Every denied path leaves the record and outbox unchanged.
 
-AshJsonApi 1.7.1 calls its optional OpenAPI module while deriving the request-validation schema for this update route, even without serving an OpenAPI endpoint. The first request attempt therefore failed until the documented compatible `open_api_spex` dependency was installed; this coupling is retained as framework-fit evidence. A missing-tenant request is rejected safely, but AshJsonApi logs that `Ash.Error.Invalid.TenantRequired` has no specific JSON:API error implementation. Stable error mapping remains an acceptance gap.
+The list action uses deterministic `(inserted_at, id)` keyset order with a default page size of two. Two-page assertions prove disjoint results and tenant isolation. Despite the resource's declared maximum, AshJsonApi 1.7.1 passed a requested `page[limit]=4` through and returned four records; its generated OpenAPI schema also omitted the maximum. The thin public edge therefore rejects non-integer, non-positive, and above-three limits before generated dispatch, while the supported OpenAPI modifier records `maximum: 3`. This bounded escape hatch is evidence against treating generation as a complete public boundary.
+
+The checked-in OpenAPI document records the two versioned paths, the pagination maximum, and required correlation, causation, and optimistic-version inputs. Its drift check is part of `make check`. AshJsonApi still calls the optional OpenAPI module while deriving request validation, so the compatible `open_api_spex` dependency remains a framework coupling. Explicit error implementations now remove the prior missing-tenant mapping warning. Idempotency and generated TypeScript client behaviour remain outside this slice.
 
 ## Telemetry and redaction slice
 
@@ -133,14 +158,14 @@ An optimistic lifecycle version and `FOR UPDATE` lock serialize an ordinary muta
 
 | Category | Required result | Current result | Evidence |
 | --- | --- | --- | --- |
-| Action and policy expressiveness | Mandatory pass | Partial pass | [Named create/read/transition policies](#named-action-and-tenant-role-slice) and [generated action preservation](#generated-jsonapi-policy-slice); relationship and field-policy scenarios still pending |
+| Action and policy expressiveness | Mandatory pass | Mandatory pass | [Named actions, field masking, and relationship-policy enforcement](#authorization-graph-integrity-and-policy-matrix-slice), plus [generated action preservation](#generated-jsonapi-policy-slice) |
 | Tenant scoping and missing-context failure | Mandatory pass | Partial pass | [Actor/tenant denial, cross-tenant invisibility, and compound foreign-key tests](#named-action-and-tenant-role-slice), plus [pooled/dedicated request, task, and job routing](#trusted-tenant-placement-routing-slice); other interfaces and movement remain pending |
-| Tenant-defined hierarchical capability resolution | Mandatory pass | Partial pass | [Recursive composition, rename independence, denial, and cross-tenant assignment tests](#named-action-and-tenant-role-slice); cycle rejection still pending |
+| Tenant-defined hierarchical capability resolution | Mandatory pass | Mandatory pass | [Recursive composition, rename independence, governed administration, cross-tenant denial, and direct/indirect/concurrent cycle rejection](#authorization-graph-integrity-and-policy-matrix-slice) |
 | Independent module gates and safe drain | Mandatory pass | Mandatory pass | [Release/entitlement/activation/authorization matrix, dependency denial, both concurrency lock orders, drain, retained data, mandatory work, and reactivation](#module-lifecycle-slice) |
-| State transitions, concurrency, and errors | Mandatory pass | Partial pass | [Named transition, invalid-state, and optimistic-lock tests](#named-action-and-tenant-role-slice); stable transport error mapping still pending |
+| State transitions, concurrency, and errors | Mandatory pass | Partial pass | [Named transition, optimistic request version, and stable validation/forbidden/conflict/not-found/missing-tenant mappings](#generated-jsonapi-policy-slice); rate-limited, retryable-dependency, and forced-internal paths remain pending |
 | Transaction and rollback ergonomics | Mandatory pass | Mandatory pass | [Successful atomic state/audit/event write and injected rollback](#transactional-outbox-slice) |
 | Migration readability and safety | Mandatory pass | Partial pass | [Generated baseline inspection, drift detection, catalog proof, and rollback/reapply](#generated-migration-review-slice); live upgrade, backfill, lock, and expand-and-contract evidence still pending |
-| Generated API policy preservation | Mandatory pass | Partial pass | [Single named route, allowed/denied, cross-tenant existence-shape, missing-context, serialization, and generic-update-bypass tests](#generated-jsonapi-policy-slice); stable errors, pagination, versioning, idempotency, contract export, and client generation still pending |
+| Generated API policy preservation | Mandatory pass | Partial pass | [Versioned named routes, stable core errors, tenant-safe keyset pagination, checked-in OpenAPI, cross-tenant existence-shape, serialization, and generic-update-bypass tests](#generated-jsonapi-policy-slice); idempotency and generated-client behaviour remain pending |
 | Telemetry and redaction | Mandatory pass | Mandatory pass | [Captured allowlist assertions on allowed and denied generated-interface requests](#telemetry-and-redaction-slice) |
 | Test and maintenance ergonomics | Pass or bounded remediation | Not evaluated | Review notes |
 | Upgrade effort and dependency health | Pass or bounded remediation | Pass with bounded remediation | [Three-package patch update with zero application or migration diff and 21 passing tests](ash-upgrade-exercise.md) |
@@ -149,15 +174,16 @@ The environment smoke test must not be used to accept Ash. Every mandatory categ
 
 ## Limits
 
-- Role-composition cycle rejection and administration policies are not implemented yet.
+- Role removal, assignment administration, idempotent role-action retries, bulk graph changes, and role-management transport contracts are not implemented; this slice proves only the bounded graph and policy matrix.
 - Outbox dispatch, retry, deduplication, retention, and placement-movement reconciliation remain later-phase work; lifecycle replay is modeled only as transactional cursor and work-item state.
 - The trusted routing registry and job runner are pressure-test components; production control-plane availability, movement, Oban integration, and external namespace enforcement remain unimplemented.
 - The lifecycle release manifest, registry rows, work items, projections, replay, and reconciliation are synthetic contract models rather than production services or live external integrations.
 - Lifecycle idempotency-key retries are not exercised and remain an ADR 0001 acceptance gap.
-- Stable JSON:API errors, pagination, versioning, idempotency, contract export, and generated TypeScript client behaviour are not implemented yet.
+- Rate-limited, retryable-dependency, and forced-internal JSON:API paths remain untested; idempotency and generated TypeScript client behaviour are not implemented yet.
+- AshJsonApi does not enforce or document the declared maximum page size at this generated interface in the tested version. The Phase 0 edge gate and OpenAPI modifier close the public contract locally but add adapter ownership and upgrade-drift risk.
 - Response outcome/duration telemetry and third-party logger-redaction assertions remain outside this pre-dispatch telemetry proof.
 - The generated migration proof covers a fresh disposable baseline, not a live upgrade with retained data, backfill, lock, or mixed-version compatibility.
-- The JSON:API request validator currently requires the optional OpenApiSpex dependency, and missing-tenant rejection emits an unmapped-error warning in third-party code.
+- The JSON:API request validator requires the optional OpenApiSpex dependency; the prior missing-tenant mapping warning is closed by an explicit protocol implementation.
 - The named action is not fully atomic because the locked framework pair cannot translate the custom validation error; the current fallback path is transaction-backed with optimistic locking.
 - A patch upgrade passes, but a non-patch framework upgrade and a machine-normalized warning-delta gate remain untested.
 - No clean-machine or CI-host rehearsal has been completed.
