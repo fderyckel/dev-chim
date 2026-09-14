@@ -14,6 +14,7 @@ Each evidence note records:
 
 - [Ash pressure-test](ash-pressure-test.md)
 - [Ash dependency upgrade exercise](ash-upgrade-exercise.md)
+- [Trusted tenant-placement routing](trusted-routing.md)
 - [Threat-model review](threat-model-review.md)
 - [Quality-target approval](quality-targets-approval.md)
 - [Tenant-placement capacity](tenant-placement-capacity.md)

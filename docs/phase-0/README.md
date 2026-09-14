@@ -23,11 +23,11 @@ This page is the Phase 0 progress entry point. Follow the evidence and decision 
 | Area | Current state | Authoritative detail |
 | --- | --- | --- |
 | Repository and local verification | Current working-tree `make check` passes | [Development workflow](../development/testing.md) |
-| Ash Foundation Lab | Scenarios 1-12 now have evidence, including a generated migration review and a patch dependency upgrade with no application or migration diff; warning remediation, trusted routing, module lifecycle, and the wider adoption scorecard remain incomplete | [Ash pressure-test and scorecard](evidence/ash-pressure-test.md) |
+| Ash Foundation Lab | Scenarios 1-14 now have evidence, including fail-closed pooled/dedicated routing and independent module gates with concurrent deactivation; warning remediation, placement movement, and the wider adoption scorecard remain incomplete | [Ash pressure-test and scorecard](evidence/ash-pressure-test.md), [routing evidence](evidence/trusted-routing.md), and [module-lifecycle evidence](evidence/module-lifecycle.md) |
 | Architecture decisions | Required ADRs are drafted and remain Proposed | [Decision register](decision-register.md) |
 | Security and privacy | Threats, classifications, and abuse cases are drafted; accountable review remains required | [Threat-model review](evidence/threat-model-review.md) |
 | Capacity, placement, and PostgreSQL recovery | Contracts and synthetic planning envelopes exist; measured evidence and owner approvals remain required | [Tenant-placement evidence](evidence/tenant-placement-capacity.md) and [PostgreSQL evidence](evidence/postgresql-availability-and-burst.md) |
-| Module lifecycle | Contract is drafted; executable gate, drain, retained-data, and reactivation evidence remains required | [Module-lifecycle evidence](evidence/module-lifecycle.md) |
+| Module lifecycle | Focused gate, dependency, concurrency, drain, retained-data, mandatory-work, and reactivation evidence passes; accountable review remains required | [Module-lifecycle evidence](evidence/module-lifecycle.md) |
 | Phase 0 exit | Not ready: the architecture review is not scheduled and no required ADR has an accepted exit status | [Review record](review-record.md) |
 
 Passing local checks proves the repository and implemented slices are internally consistent. It does not accept Ash, approve the architecture, or authorize Phase 1.

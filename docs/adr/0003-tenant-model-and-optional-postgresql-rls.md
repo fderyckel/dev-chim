@@ -77,9 +77,9 @@ Range partitioning for append-heavy resources is decided per resource after benc
 
 ## Validation evidence
 
-See the [tenant placement and workload capacity model](../architecture/tenant-placement-and-capacity.md), [tenant-placement capacity evidence](../phase-0/evidence/tenant-placement-capacity.md), [threat model](../security/threat-model.md), and Ash tenancy tests.
+See the [tenant placement and workload capacity model](../architecture/tenant-placement-and-capacity.md), [tenant-placement capacity evidence](../phase-0/evidence/tenant-placement-capacity.md), [trusted pooled/dedicated routing evidence](../phase-0/evidence/trusted-routing.md), [threat model](../security/threat-model.md), and Ash tenancy tests.
 
-Acceptance requires synthetic tests for pooled and dedicated routing, cross-placement denial, spawned tasks and jobs, stale routing versions, synchronized workload bursts, concurrent permission revocation, pool exhaustion, tenant movement, backup, and restore. Attendance calculations alone are not acceptance evidence.
+The focused routing slice passes pooled and dedicated selection, cross-placement denial, explicit spawned-task and job propagation, stale and missing routing, untrusted request input, repository-type validation, and process cleanup. Acceptance still requires synchronized workload bursts, concurrent permission revocation, pool exhaustion, tenant movement, backup, and restore. Attendance calculations alone are not acceptance evidence.
 
 ## Fallback and exit cost
 

@@ -6,7 +6,6 @@ defmodule AshFoundationLab.AccessControl do
   """
 
   alias AshFoundationLab.Repo
-  alias Ecto.Adapters.SQL
   alias Ecto.UUID
 
   @spec actor_has_capability?(map(), String.t()) :: boolean()
@@ -16,8 +15,7 @@ defmodule AshFoundationLab.AccessControl do
     tenant_id = UUID.dump!(tenant_id)
 
     %{rows: [[granted?]]} =
-      SQL.query!(
-        Repo,
+      Repo.query!(
         """
         WITH RECURSIVE granted_roles(role_id) AS (
           SELECT actor_roles.role_id

@@ -43,6 +43,7 @@ REQUIRED_PATHS = (
     "docs/phase-0/evidence/module-lifecycle.md",
     "docs/phase-0/evidence/postgresql-availability-and-burst.md",
     "docs/phase-0/evidence/tenant-placement-capacity.md",
+    "docs/phase-0/evidence/trusted-routing.md",
     "docs/phase-0/review-record.md",
     "spikes/ash-foundation-lab/mix.exs",
     "spikes/ash-foundation-lab/mix.lock",

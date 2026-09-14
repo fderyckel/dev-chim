@@ -22,6 +22,10 @@ The resource definitions also declare their tenant indexes, compound identities,
 
 The completed [dependency upgrade exercise](../../docs/phase-0/evidence/ash-upgrade-exercise.md) compares the immediately preceding framework patches with the current lock in a disposable copy. It records package changes, compile warnings, security-audit results, migration output, and the same 21-test compatibility result without turning network-dependent freshness checks into the local verification contract.
 
+The neutral [`TrustedRouting`](lib/ash_foundation_lab/trusted_routing.ex) slice resolves authenticated tenant context through a versioned registry into real pooled or dedicated test databases and tenant-qualified infrastructure namespaces. Requests cannot select placement, spawned tasks require explicit propagation, jobs re-resolve current placement from an allowlisted envelope, and every missing, stale, unavailable, or mismatched route fails before work begins. The [routing evidence](../../docs/phase-0/evidence/trusted-routing.md) records the limits of this disposable control-plane stand-in.
+
+The neutral [`SyntheticModuleLifecycle`](lib/ash_foundation_lab/synthetic_module_lifecycle.ex) slice keeps release availability, tenant entitlement, activation state, and actor capability independent. Named lifecycle actions serialize ordinary mutations against deactivation, park ordinary work, preserve mandatory work and replay cursors, retain data, atomically record audit/outbox facts, and reopen only after compatible reactivation and reconciliation. The [module-lifecycle evidence](../../docs/phase-0/evidence/module-lifecycle.md) distinguishes this transactional contract proof from a production module registry or real queue/search integrations.
+
 ## Evidence rule
 
 Passing smoke tests proves only the scenarios those tests name. Ash remains Proposed until every mandatory category in [the evidence scorecard](../../docs/phase-0/evidence/ash-pressure-test.md) has direct evidence and ADR 0002 is reviewed.

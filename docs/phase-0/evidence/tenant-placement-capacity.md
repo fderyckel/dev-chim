@@ -15,6 +15,8 @@ The synthetic five-school arithmetic is internally consistent under the stated a
 
 This establishes a planning input only. It does not establish actual peak throughput, physical storage, database cost, recovery time, or a final placement.
 
+The [trusted-routing pressure test](trusted-routing.md) now proves authenticated pooled and dedicated database selection, cross-placement denial, stale and missing routing failure, and explicit task/job propagation. It closes the routing-input part of benchmark scenario 10, but not movement, capacity, recovery, or final placement.
+
 ## Inputs requiring accountable approval
 
 | Input | Current status | Owner |

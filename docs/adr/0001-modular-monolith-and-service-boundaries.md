@@ -59,7 +59,7 @@ Module boundaries, deployment cells, and tenant database placements are orthogon
 
 ## Validation evidence
 
-See [service boundaries](../architecture/service-boundaries.md), [module activation and lifecycle](../architecture/module-activation-and-lifecycle.md), [module-lifecycle evidence](../phase-0/evidence/module-lifecycle.md), and the Phase 0 architecture review record. A neutral synthetic lifecycle test must prove independent gates, dependency handling, concurrent deactivation, safe job/event drain, retained-data access, and reactivation.
+See [service boundaries](../architecture/service-boundaries.md), [module activation and lifecycle](../architecture/module-activation-and-lifecycle.md), [module-lifecycle evidence](../phase-0/evidence/module-lifecycle.md), and the Phase 0 architecture review record. The neutral synthetic lifecycle test now proves independent gates, dependency handling, both concurrent deactivation lock orders, safe modeled job/event drain, retained-data access, and compatible reactivation. Accountable review of the evidence and its documented limits remains required.
 
 ## Fallback and exit cost
 

@@ -1,20 +1,20 @@
 # Ash pressure-test evidence
 
-- Status: Dependency upgrade exercise passed with bounded remediation; adoption scorecard incomplete
+- Status: All 14 planned scenarios have focused evidence; adoption scorecard incomplete
 - Owner: Platform engineering
 - Decision: [ADR 0002](../../adr/0002-ash-adoption-criteria-and-fallback.md)
 
 ## Environment proof
 
-- Date: 2026-09-13
+- Date: 2026-09-14
 - Host: Apple silicon macOS 26.6.2
 - Project runtimes: Erlang/OTP 29.0.5, Elixir 1.20.3, Python 3.14.5, uv 0.12.13
 - Services: PostgreSQL 18.6 over the local Unix socket
 - Framework packages: Ash 3.33.3, AshPostgres 2.13.1, AshJsonApi 1.7.1, OpenApiSpex 3.22.4, Phoenix 1.8.13
 - Commands: `make bootstrap`, `make format`, `make check`, and `mix dialyzer`
-- Results: 4 repository-tool tests passed; 21 Ash/PostgreSQL/JSON:API/migration-review tests passed; Ruff, ShellCheck, documentation validation, generated-migration drift detection, Credo, dependency audit, Dialyzer, formatting, migrations, and Git whitespace checks passed.
+- Results: 4 repository-tool tests passed; 43 Ash/PostgreSQL/JSON:API/migration-review/routing/lifecycle tests passed; Ruff, ShellCheck, documentation validation, generated-migration drift detection, Credo, dependency audit, Dialyzer, formatting, migrations, and Git whitespace checks passed.
 
-The Ash tests currently prove attribute-based tenant filtering, cross-tenant denial without an existence signal, actor and tenant fail-closed behaviour, capability denial, tenant-defined role composition and rename independence, a named `submit_for_review` transition, invalid-state validation, optimistic-lock conflicts, compound tenant foreign keys, atomic state/audit/outbox rollback, required correlation and causation context, minimal event payloads, database constraints against alternate unsafe writes, generated JSON:API preservation of the action and policy boundary, and allowlisted correlated telemetry without raw tenant, actor, record, or payload data.
+The tests currently prove attribute-based tenant filtering, cross-tenant denial without an existence signal, actor and tenant fail-closed behaviour, capability denial, tenant-defined role composition and rename independence, a named `submit_for_review` transition, invalid-state validation, optimistic-lock conflicts, compound tenant foreign keys, atomic state/audit/outbox rollback, required correlation and causation context, minimal event payloads, database constraints against alternate unsafe writes, generated JSON:API preservation of the action and policy boundary, allowlisted correlated telemetry without raw tenant, actor, record, or payload data, trusted pooled/dedicated database routing across requests, tasks, and job envelopes, and independent module gates with serialized deactivation, drain, retained data, mandatory work, and compatible reactivation.
 
 Dependency compilation emitted warnings inside current third-party Ash/Phoenix/OpenApiSpex code under Elixir 1.20/OTP 29. None originated in the spike modules, and the required checks pass, but the warning volume is evidence to consider under upgrade and maintenance ergonomics rather than suppressing or ignoring it.
 
@@ -101,13 +101,42 @@ This artifact is isolated from the executable handwritten migration chain. It is
 
 The exercise used a disposable copy because the repository was already at every latest compatible release. It upgraded the preceding patch set onto the same synthetic database schema, then removed the database and temporary copy. Third-party compile warnings and the missing-tenant AshJsonApi warning remained, so upgrade ergonomics pass only with the warning and error-mapping remediation bounded in the detailed report.
 
+## Trusted tenant-placement routing slice
+
+- Date: 2026-09-13
+- Code: [`trusted_routing.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/trusted_routing.ex)
+- Tests: [`trusted_routing_test.exs`](../../../spikes/ash-foundation-lab/test/ash_foundation_lab/trusted_routing_test.exs)
+- Detailed report: [Trusted tenant-placement routing evidence](trusted-routing.md)
+- Focused command: `mise exec -- env MIX_ENV=test mix test test/ash_foundation_lab/trusted_routing_test.exs`
+- Focused result: 7 tests passed against separate pooled and dedicated disposable PostgreSQL databases; both databases were removed after the run.
+
+The trusted registry selects the live repository, database profile, cell, and tenant-qualified queue, storage, cache, and projection namespaces from authenticated tenant context and a matching routing version. Request placement fields cannot influence the selection. Missing, unknown, stale, unavailable, and wrong-repository inputs fail before the operation runs and never fall back to the default database.
+
+Dynamic repository selection is process-local. A plain spawned task therefore has no route, while the explicit task wrapper resolves context in the child. Serialized job arguments carry an allowlist without repository data and re-resolve the current registry at execution, causing stale jobs to fail closed. Normal and exceptional execution both restore prior process state.
+
+## Module lifecycle slice
+
+- Date: 2026-09-14
+- Code: [`synthetic_module_lifecycle.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/synthetic_module_lifecycle.ex) and the dynamic-repository-safe capability query in [`access_control.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/access_control.ex)
+- Database artifact: [`20260913030000_add_synthetic_module_lifecycle.exs`](../../../spikes/ash-foundation-lab/priv/repo/migrations/20260913030000_add_synthetic_module_lifecycle.exs)
+- Tests: [`synthetic_module_lifecycle_test.exs`](../../../spikes/ash-foundation-lab/test/ash_foundation_lab/synthetic_module_lifecycle_test.exs)
+- Detailed report: [Module-lifecycle evidence](module-lifecycle.md)
+- Focused command: `mise exec -- env MIX_ENV=test mix test test/ash_foundation_lab/synthetic_module_lifecycle_test.exs`
+- Focused result: 15 tests passed against a disposable PostgreSQL database; concurrency cases used two independent repository pools.
+- Migration result: the executable lifecycle migration applied, rolled back completely, and reapplied successfully.
+
+The neutral module boundary gets release availability only from a validated trusted manifest, stores entitlement and activation independently, and resolves actor authority from tenant-defined capability data. Request-selected gate and tenant values are ignored. Separate capabilities govern ordinary use, lifecycle management, and mandatory work after deactivation.
+
+An optimistic lifecycle version and `FOR UPDATE` lock serialize an ordinary mutation against deactivation. Tests force both lock orders: the first transition commits its entire record/lifecycle/audit/outbox change, while the stale or newly inactive competitor fails without a partial write. Deactivation rejects active dependents, parks ordinary work, preserves the replay cursor and retained record, invalidates the disposable projection, and leaves narrower mandatory work available. Reactivation remains inactive after incompatibility or an injected reconciliation failure and opens ordinary work only after the compatible rebuild/replay/reconcile transaction commits.
+
 ## Scorecard
 
 | Category | Required result | Current result | Evidence |
 | --- | --- | --- | --- |
 | Action and policy expressiveness | Mandatory pass | Partial pass | [Named create/read/transition policies](#named-action-and-tenant-role-slice) and [generated action preservation](#generated-jsonapi-policy-slice); relationship and field-policy scenarios still pending |
-| Tenant scoping and missing-context failure | Mandatory pass | Partial pass | [Actor/tenant denial, cross-tenant invisibility, and compound foreign-key tests](#named-action-and-tenant-role-slice); other interfaces still pending |
+| Tenant scoping and missing-context failure | Mandatory pass | Partial pass | [Actor/tenant denial, cross-tenant invisibility, and compound foreign-key tests](#named-action-and-tenant-role-slice), plus [pooled/dedicated request, task, and job routing](#trusted-tenant-placement-routing-slice); other interfaces and movement remain pending |
 | Tenant-defined hierarchical capability resolution | Mandatory pass | Partial pass | [Recursive composition, rename independence, denial, and cross-tenant assignment tests](#named-action-and-tenant-role-slice); cycle rejection still pending |
+| Independent module gates and safe drain | Mandatory pass | Mandatory pass | [Release/entitlement/activation/authorization matrix, dependency denial, both concurrency lock orders, drain, retained data, mandatory work, and reactivation](#module-lifecycle-slice) |
 | State transitions, concurrency, and errors | Mandatory pass | Partial pass | [Named transition, invalid-state, and optimistic-lock tests](#named-action-and-tenant-role-slice); stable transport error mapping still pending |
 | Transaction and rollback ergonomics | Mandatory pass | Mandatory pass | [Successful atomic state/audit/event write and injected rollback](#transactional-outbox-slice) |
 | Migration readability and safety | Mandatory pass | Partial pass | [Generated baseline inspection, drift detection, catalog proof, and rollback/reapply](#generated-migration-review-slice); live upgrade, backfill, lock, and expand-and-contract evidence still pending |
@@ -121,7 +150,10 @@ The environment smoke test must not be used to accept Ash. Every mandatory categ
 ## Limits
 
 - Role-composition cycle rejection and administration policies are not implemented yet.
-- Outbox dispatch, retry, replay, retention, and placement-movement reconciliation remain later-phase work.
+- Outbox dispatch, retry, deduplication, retention, and placement-movement reconciliation remain later-phase work; lifecycle replay is modeled only as transactional cursor and work-item state.
+- The trusted routing registry and job runner are pressure-test components; production control-plane availability, movement, Oban integration, and external namespace enforcement remain unimplemented.
+- The lifecycle release manifest, registry rows, work items, projections, replay, and reconciliation are synthetic contract models rather than production services or live external integrations.
+- Lifecycle idempotency-key retries are not exercised and remain an ADR 0001 acceptance gap.
 - Stable JSON:API errors, pagination, versioning, idempotency, contract export, and generated TypeScript client behaviour are not implemented yet.
 - Response outcome/duration telemetry and third-party logger-redaction assertions remain outside this pre-dispatch telemetry proof.
 - The generated migration proof covers a fresh disposable baseline, not a live upgrade with retained data, backfill, lock, or mixed-version compatibility.

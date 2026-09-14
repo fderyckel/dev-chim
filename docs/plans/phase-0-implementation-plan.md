@@ -27,11 +27,11 @@ Phase 0 does not build a school business module. It also does not build the prod
 
 Before this plan was added, the target directory existed but was not a Git repository and contained no project files. That makes it safe to establish conventions, but repository initialization and remote hosting still need an explicit implementation action.
 
-Implementation checkpoint on 2026-09-13:
+Implementation checkpoint on 2026-09-14:
 
 - P0.0 is implemented locally except for remote hosting and branch protection.
 - P0.1 ADR governance and the initial Proposed record set are implemented.
-- P0.5 scenarios 1-12 have direct Ash/PostgreSQL evidence, including generated migration and patch-upgrade review; trusted routing, module lifecycle, and the adoption scorecard remain incomplete.
+- P0.5 scenarios 1-14 have direct Ash/PostgreSQL evidence, including generated migration, patch-upgrade, trusted pooled/dedicated routing, and module-lifecycle concurrency/drain review; the wider adoption scorecard remains incomplete.
 - P0.6 local toolchain, Ruff, ShellCheck, documentation validation, Credo, dependency audit, Dialyzer, database migrations, and test entrypoints are implemented and passing.
 - P0.3, P0.4, and P0.7 still require accountable human review and approved decisions before Phase 0 can close.
 
@@ -362,6 +362,8 @@ Use a named action such as `submit_for_review` or `approve_record`. Do not expos
 12. A time-boxed dependency upgrade exercise records changed code, migration output, warnings, and test results.
 13. A neutral trusted-routing slice selects pooled and dedicated test databases from authenticated tenant context, ignores request-selected placement, propagates through spawned tasks and jobs, and fails closed on missing or stale routing.
 14. A neutral synthetic module proves that release availability, entitlement, activation, and actor authorization are independent, and that concurrent deactivation drains safely without losing required audit or outbox work.
+
+Scenarios 1-14 now have focused evidence. Scenario 14 is recorded in [module-lifecycle evidence](../phase-0/evidence/module-lifecycle.md); this does not by itself complete the Ash scorecard or approve ADR 0001.
 
 #### Ash evaluation scorecard
 
