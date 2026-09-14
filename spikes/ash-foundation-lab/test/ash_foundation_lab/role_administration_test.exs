@@ -16,7 +16,8 @@ defmodule AshFoundationLab.RoleAdministrationTest do
     {20_260_913_010_000, AshFoundationLab.Repo.Migrations.AddAccessModelAndRecordWorkflow},
     {20_260_913_020_000, AshFoundationLab.Repo.Migrations.AddTransactionalOutbox},
     {20_260_913_030_000, AshFoundationLab.Repo.Migrations.AddSyntheticModuleLifecycle},
-    {20_260_913_040_000, AshFoundationLab.Repo.Migrations.AddRoleGraphIntegrity}
+    {20_260_913_040_000, AshFoundationLab.Repo.Migrations.AddRoleGraphIntegrity},
+    {20_260_914_050_000, AshFoundationLab.Repo.Migrations.AddActionIdempotency}
   ]
 
   setup_all do
@@ -541,11 +542,12 @@ defmodule AshFoundationLab.RoleAdministrationTest do
     rollback_verified? =
       with_repository(primary_repository, fn ->
         Ecto.Migrator.run(Repo, @migrations, :up, all: true, log: false)
-        Ecto.Migrator.run(Repo, @migrations, :down, step: 1, log: false)
+        Ecto.Migrator.run(Repo, @migrations, :down, step: 2, log: false)
 
-        [[events_table, lock_version, trigger_function]] =
+        [[idempotency_table, events_table, lock_version, trigger_function]] =
           Repo.query!("""
           SELECT
+            to_regclass('action_idempotency_keys') IS NULL,
             to_regclass('role_administration_events') IS NULL,
             NOT EXISTS (
               SELECT 1
@@ -556,7 +558,7 @@ defmodule AshFoundationLab.RoleAdministrationTest do
           """).rows
 
         Ecto.Migrator.run(Repo, @migrations, :up, all: true, log: false)
-        events_table and lock_version and trigger_function
+        idempotency_table and events_table and lock_version and trigger_function
       end)
 
     {:ok, secondary_repository} = Repo.start_link(Keyword.put(config, :name, nil))
@@ -596,7 +598,9 @@ defmodule AshFoundationLab.RoleAdministrationTest do
       {AshFoundationLab.Repo.Migrations.AddSyntheticModuleLifecycle,
        "20260913030000_add_synthetic_module_lifecycle.exs"},
       {AshFoundationLab.Repo.Migrations.AddRoleGraphIntegrity,
-       "20260913040000_add_role_graph_integrity.exs"}
+       "20260913040000_add_role_graph_integrity.exs"},
+      {AshFoundationLab.Repo.Migrations.AddActionIdempotency,
+       "20260914050000_add_action_idempotency.exs"}
     ]
 
     Enum.each(migration_files, fn {migration, filename} ->

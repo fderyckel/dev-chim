@@ -108,15 +108,14 @@ defmodule AshFoundationLab.FoundationRecord do
         constraints min: 1
       end
 
-      validate AshFoundationLab.Validation.ExpectedVersion
-
-      validate attribute_equals(:status, :draft) do
-        message "record must be in draft state"
+      argument :idempotency_key, :uuid do
+        allow_nil? false
       end
 
       change set_attribute(:status, :in_review)
       change optimistic_lock(:lock_version)
       change AshFoundationLab.Change.RecordOutbox
+      change AshFoundationLab.Change.IdempotentSubmission
     end
   end
 

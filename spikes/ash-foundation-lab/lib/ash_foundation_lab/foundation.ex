@@ -24,5 +24,6 @@ defmodule AshFoundationLab.Foundation do
     resource AshFoundationLab.Actor
     resource AshFoundationLab.FoundationRecord
     resource AshFoundationLab.OutboxEvent
+    resource AshFoundationLab.ActionIdempotency
   end
 end

@@ -44,7 +44,7 @@ Protected state cannot change through a generic update. Critical invariants are 
 
 ## Validation evidence
 
-The [Ash pressure-test](../phase-0/evidence/ash-pressure-test.md) now proves one named transition, capability and tenant denial, invalid-state validation, a caller-supplied optimistic version, database constraints, atomic state/audit/outbox rollback, and preservation of that named action through the generated JSON:API adapter. Stable public mappings now cover validation, forbidden, conflict, not found, and missing tenant context without internal disclosure. Rate-limited, retryable-dependency, and forced-internal paths remain required before this ADR can leave Proposed.
+The [Ash pressure-test](../phase-0/evidence/ash-pressure-test.md) now proves one named transition, capability and tenant denial, invalid-state validation, a caller-supplied optimistic version and idempotency key, database constraints, concurrent exact-retry serialization, exact committed-result replay, changed-request conflict, tenant isolation, atomic state/audit/outbox/idempotency rollback, and preservation of that named action through the generated JSON:API adapter and typed client. Stable public mappings now cover validation, forbidden, conflict, idempotency conflict, not found, and missing tenant context without internal disclosure. Rate-limited, retryable-dependency, and forced-internal paths remain required before this ADR can leave Proposed.
 
 ## Fallback and exit cost
 

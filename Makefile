@@ -28,10 +28,13 @@ lint:
 	cd spikes/ash-foundation-lab && mise exec -- mix hex.audit
 	cd spikes/ash-foundation-lab && mise exec -- mix deps.unlock --check-unused
 	cd spikes/ash-foundation-lab && mise exec -- mix dialyzer
+	cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm run generate:check
+	cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm run typecheck
 
 test:
 	mise exec -- uv run pytest
 	cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix test
+	cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm test
 
 docs-check:
 	mise exec -- uv run python tools/check_phase0.py

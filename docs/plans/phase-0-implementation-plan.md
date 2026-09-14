@@ -31,8 +31,8 @@ Implementation checkpoint on 2026-09-14:
 
 - P0.0 is implemented locally except for remote hosting and branch protection.
 - P0.1 ADR governance and the initial Proposed record set are implemented.
-- P0.5 scenarios 1-14 have direct Ash/PostgreSQL evidence, including generated migration, patch-upgrade, trusted pooled/dedicated routing, and module-lifecycle concurrency/drain review; the wider adoption scorecard remains incomplete.
-- P0.6 local toolchain, Ruff, ShellCheck, documentation validation, Credo, dependency audit, Dialyzer, database migrations, and test entrypoints are implemented and passing.
+- P0.5 scenarios 1-14 have direct Ash/PostgreSQL evidence, including generated migration, patch-upgrade, trusted pooled/dedicated routing, module-lifecycle concurrency/drain review, action idempotency, and generated-client contract review; the wider adoption scorecard remains incomplete.
+- P0.6 local toolchain, Ruff, ShellCheck, documentation validation, Credo, TypeScript contract checks, dependency audits, Dialyzer, database migrations, and test entrypoints are implemented and passing.
 - P0.3, P0.4, and P0.7 still require accountable human review and approved decisions before Phase 0 can close.
 
 The roadmap separates two concerns:
@@ -42,7 +42,7 @@ The roadmap separates two concerns:
 
 This plan keeps that boundary. It creates only the lightweight repository structure needed to execute and review Phase 0. It does not disguise Phase 1 scaffolding as Phase 0 progress.
 
-Ruff is included, but only for Python support scripts and tests. It cannot lint Elixir or TypeScript. Elixir code in the Ash spike will use `mix format`, Credo, Dialyzer, and tests. TypeScript tooling will be selected when the web workspace is created in Phase 1.
+Ruff is included only for Python support scripts and tests. Elixir code in the Ash spike uses `mix format`, Credo, Dialyzer, and tests. The Phase 0 client-review harness pins only the TypeScript tools needed to evaluate ADR 0014; selection of the production web workspace and its complete lint/build toolchain remains a Phase 1 decision.
 
 ## 3. Governing constraints
 

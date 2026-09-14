@@ -15,7 +15,7 @@
 
 - ADR index and decision register.
 - Ash pressure-test scorecard and commands.
-- Versioned generated-interface routes, stable-error, keyset-pagination, and checked-in OpenAPI drift evidence.
+- Versioned generated-interface routes, stable errors, keyset pagination, transactional idempotency, and checked-in OpenAPI/TypeScript client drift evidence.
 - Tenant-defined authorization graph, cycle, field-policy, and relationship-policy evidence.
 - Threat model, abuse cases, and residual risks.
 - Numeric quality targets and accountable owners.

@@ -47,6 +47,8 @@ REQUIRED_PATHS = (
     "docs/phase-0/review-record.md",
     "spikes/ash-foundation-lab/mix.exs",
     "spikes/ash-foundation-lab/mix.lock",
+    "spikes/ash-foundation-lab/typescript-client-review/package.json",
+    "spikes/ash-foundation-lab/typescript-client-review/package-lock.json",
 )
 
 REQUIRED_ADR_NUMBERS = {
@@ -85,6 +87,8 @@ FORBIDDEN_PHASE0_DIRECTORIES = (
     "services/scheduler",
     "web",
 )
+
+IGNORED_DIRECTORY_NAMES = {".git", ".venv", "_build", "deps", "node_modules"}
 
 LINK_PATTERN = re.compile(r"(?<!!)\[[^]]+\]\(([^)]+)\)")
 STATUS_PATTERN = re.compile(r"^- Status: (.+)$", re.MULTILINE)
@@ -188,7 +192,7 @@ def threat_model_errors(root: Path) -> list[str]:
     body = path.read_text(encoding="utf-8")
     errors: list[str] = []
 
-    for threat_number in range(1, 15):
+    for threat_number in range(1, 16):
         threat_id = f"TM-{threat_number:02d}"
         matching_lines = [line for line in body.splitlines() if line.startswith(f"| {threat_id} |")]
         if len(matching_lines) != 1:
@@ -253,7 +257,7 @@ def validate_repository(root: Path, *, exit_review: bool = False) -> list[str]:
             errors.append(f"Phase 0 forbidden directory exists: {relative_path}")
 
     for path in sorted(root.rglob("*.md")):
-        if any(part in {".git", ".venv", "deps", "_build"} for part in path.parts):
+        if any(part in IGNORED_DIRECTORY_NAMES for part in path.parts):
             continue
         errors.extend(markdown_errors(path, root))
 

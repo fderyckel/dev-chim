@@ -6,6 +6,7 @@
 - Unit tests cover deterministic logic without services.
 - Integration tests use the local synthetic PostgreSQL database and exercise Ash/PostgreSQL behaviour.
 - Security tests include negative authorization and cross-tenant cases alongside positive cases.
+- Contract tests drift-check the OpenAPI-derived TypeScript declarations, compile invalid-call assertions, and exercise the thin client's request and retry behaviour without creating a production web workspace.
 - Placement tests prove that authenticated tenant context, not request input, selects database, queue, storage, cache, and projection namespaces; stale or missing routing fails closed.
 - Module-lifecycle tests keep release availability, entitlement, activation, and actor authorization independent and cover concurrent deactivation, drain, retained data, and reactivation.
 - Performance tests model synchronized bursts, batch distributions, write amplification, retries, corrections, permission revocation, mixed reports, pool pressure, and noisy neighbours rather than relying on average annual volume.
@@ -33,6 +34,9 @@ cd spikes/ash-foundation-lab && mise exec -- mix ash_postgres.generate_migration
 cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix openapi.spec.json --spec AshFoundationLab.JsonApiRouter --check --pretty=true --filename priv/openapi/phase0-v1.json
 cd spikes/ash-foundation-lab && mise exec -- mix credo --strict
 cd spikes/ash-foundation-lab && mise exec -- mix dialyzer
+cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm run generate:check
+cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm run typecheck
+cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm test
 ```
 
 ## Rules
@@ -45,6 +49,7 @@ cd spikes/ash-foundation-lab && mise exec -- mix dialyzer
 - Every placement-routing change needs pooled and dedicated positive cases plus wrong-tenant, request-selected, stale-version, missing-placement, spawned-task, and job-context negative cases.
 - Every module gate change needs independent entitlement, activation, and authorization cases; no test may infer one from another.
 - Every read-routing change needs writer-required, read-your-write, bounded-staleness, lagging-reader, unavailable-reader, and prohibited request-selected-repository cases where applicable.
+- Every generated-client change must start from the checked-in OpenAPI artifact, reject contract drift, keep tenant placement out of caller input, and prove whether write retries are explicit or automatic.
 - Every pool or application-node change must recalculate the per-placement connection budget, including writer, reader, Oban, administration, monitoring, replication, and failover reserve.
 - A benchmark report states its data shape, time distribution, hardware, PostgreSQL settings, connections, repeated-run variance, and limitations. Row-count arithmetic alone is not benchmark evidence.
 - Do not weaken an assertion to make an unsafe implementation pass.

@@ -5,7 +5,6 @@ defmodule AshFoundationLab.Change.RecordOutbox do
 
   alias Ash.Error.Changes.InvalidChanges
   alias AshFoundationLab.Repo
-  alias Ecto.Adapters.SQL
   alias Ecto.UUID
 
   @event_type "foundation_record.submitted_for_review"
@@ -20,24 +19,32 @@ defmodule AshFoundationLab.Change.RecordOutbox do
     changeset
     |> Ash.Changeset.force_change_attribute(:audit_reference, audit_reference)
     |> Ash.Changeset.after_action(fn changeset, record ->
-      actor = changeset.context[:private][:actor]
-
-      insert_event!(
-        event_id,
-        record,
-        actor,
-        audit_reference,
-        Ash.Changeset.get_argument(changeset, :correlation_id),
-        Ash.Changeset.get_argument(changeset, :causation_id)
-      )
-
-      if changeset.context[:inject_outbox_failure?] do
-        {:error,
-         InvalidChanges.exception(message: "injected failure after transactional outbox insert")}
-      else
+      if changeset.context[:idempotent_replay?] do
         {:ok, record}
+      else
+        record_event(changeset, record, event_id, audit_reference)
       end
     end)
+  end
+
+  defp record_event(changeset, record, event_id, audit_reference) do
+    actor = changeset.context[:private][:actor]
+
+    insert_event!(
+      event_id,
+      record,
+      actor,
+      audit_reference,
+      Ash.Changeset.get_argument(changeset, :correlation_id),
+      Ash.Changeset.get_argument(changeset, :causation_id)
+    )
+
+    if changeset.context[:inject_outbox_failure?] do
+      {:error,
+       InvalidChanges.exception(message: "injected failure after transactional outbox insert")}
+    else
+      {:ok, record}
+    end
   end
 
   defp insert_event!(
@@ -48,8 +55,7 @@ defmodule AshFoundationLab.Change.RecordOutbox do
          correlation_id,
          causation_id
        ) do
-    SQL.query!(
-      Repo,
+    Repo.query!(
       """
       INSERT INTO outbox_events (
         id,

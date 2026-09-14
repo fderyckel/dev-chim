@@ -1,0 +1,21 @@
+{
+  "name": "@chimwemwe/phase0-typescript-client-review",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "openapi-typescript ../priv/openapi/phase0-v1.json --output generated/schema.d.ts --alphabetize --immutable",
+    "generate:check": "openapi-typescript ../priv/openapi/phase0-v1.json --output generated/schema.d.ts --alphabetize --immutable --check",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "check": "npm run generate:check && npm run typecheck && npm test"
+  },
+  "dependencies": {
+    "openapi-fetch": "0.17.0"
+  },
+  "devDependencies": {
+    "openapi-typescript": "7.13.0",
+    "typescript": "5.9.3",
+    "vitest": "5.0.0"
+  }
+}

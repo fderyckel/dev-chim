@@ -290,7 +290,22 @@ defmodule AshFoundationLab.FoundationRecordTest do
       specification["paths"]["/api/v1/foundation-records/{id}/submit-for-review"]["patch"]
 
     request_schema = transition["requestBody"]["content"]["application/vnd.api+json"]["schema"]
-    assert inspect(request_schema) =~ "expected_version"
+
+    action_attributes =
+      request_schema["properties"]["data"]["properties"]["attributes"]
+
+    assert MapSet.new(action_attributes["required"]) ==
+             MapSet.new([
+               "causation_id",
+               "correlation_id",
+               "expected_version",
+               "idempotency_key"
+             ])
+
+    assert action_attributes["properties"]["idempotency_key"] == %{
+             "format" => "uuid",
+             "type" => "string"
+           }
   end
 
   test "an authorized JSON:API request performs the named transition", fixture do
@@ -331,6 +346,141 @@ defmodule AshFoundationLab.FoundationRecordTest do
     assert event.correlation_id == correlation_id
     assert event.causation_id == causation_id
     assert event.audit_reference == audit_reference
+  end
+
+  test "an exact JSON:API retry returns the committed result without another transition",
+       fixture do
+    record = create_record(fixture.tenant_a, fixture.authorized_actor)
+    idempotency_key = UUID.generate()
+    correlation_id = UUID.generate()
+    causation_id = UUID.generate()
+
+    options = [
+      actor: fixture.authorized_actor,
+      tenant: fixture.tenant_a,
+      idempotency_key: idempotency_key,
+      correlation_id: correlation_id,
+      causation_id: causation_id
+    ]
+
+    first = json_api_request(record, options)
+    replay = json_api_request(record, options)
+
+    assert first.status == 200
+    assert replay.status == 200
+    assert Jason.decode!(replay.resp_body)["data"] == Jason.decode!(first.resp_body)["data"]
+    assert length(outbox_events(fixture.tenant_a, record.id)) == 1
+
+    assert [claim] = idempotency_claims(fixture.tenant_a, idempotency_key)
+    assert claim.action_name == "foundation_record.submit_for_review"
+    assert claim.actor_id == fixture.authorized_actor.id
+    assert claim.aggregate_id == record.id
+    assert claim.status == "completed"
+    assert claim.result_lock_version == 2
+
+    assert claim.result_audit_reference ==
+             Jason.decode!(first.resp_body)["data"]["attributes"]["audit_reference"]
+  end
+
+  test "an idempotency key cannot be reused for changed payload or actor", fixture do
+    record = create_record(fixture.tenant_a, fixture.authorized_actor)
+    idempotency_key = UUID.generate()
+    correlation_id = UUID.generate()
+    causation_id = UUID.generate()
+
+    first =
+      json_api_request(record,
+        actor: fixture.authorized_actor,
+        tenant: fixture.tenant_a,
+        idempotency_key: idempotency_key,
+        correlation_id: correlation_id,
+        causation_id: causation_id
+      )
+
+    assert first.status == 200
+
+    changed_payload =
+      json_api_request(record,
+        actor: fixture.authorized_actor,
+        tenant: fixture.tenant_a,
+        idempotency_key: idempotency_key,
+        correlation_id: correlation_id,
+        causation_id: UUID.generate()
+      )
+
+    changed_actor =
+      json_api_request(record,
+        actor: fixture.composed_actor,
+        tenant: fixture.tenant_a,
+        idempotency_key: idempotency_key,
+        correlation_id: correlation_id,
+        causation_id: causation_id
+      )
+
+    for response <- [changed_payload, changed_actor] do
+      assert_public_error(
+        response,
+        409,
+        "idempotency_conflict",
+        "IdempotencyConflict",
+        "The idempotency key was already used for a different request."
+      )
+    end
+
+    assert length(outbox_events(fixture.tenant_a, record.id)) == 1
+    assert length(idempotency_claims(fixture.tenant_a, idempotency_key)) == 1
+  end
+
+  test "the same idempotency key is isolated between tenants", fixture do
+    idempotency_key = UUID.generate()
+    tenant_a_record = create_record(fixture.tenant_a, fixture.authorized_actor)
+    tenant_b_record = create_record(fixture.tenant_b, fixture.other_tenant_actor)
+
+    tenant_a_response =
+      json_api_request(tenant_a_record,
+        actor: fixture.authorized_actor,
+        tenant: fixture.tenant_a,
+        idempotency_key: idempotency_key
+      )
+
+    tenant_b_response =
+      json_api_request(tenant_b_record,
+        actor: fixture.other_tenant_actor,
+        tenant: fixture.tenant_b,
+        idempotency_key: idempotency_key
+      )
+
+    assert tenant_a_response.status == 200
+    assert tenant_b_response.status == 200
+    assert length(idempotency_claims(fixture.tenant_a, idempotency_key)) == 1
+    assert length(idempotency_claims(fixture.tenant_b, idempotency_key)) == 1
+    assert length(outbox_events(fixture.tenant_a, tenant_a_record.id)) == 1
+    assert length(outbox_events(fixture.tenant_b, tenant_b_record.id)) == 1
+  end
+
+  test "the generated transition requires an idempotency key", fixture do
+    record = create_record(fixture.tenant_a, fixture.authorized_actor)
+
+    response =
+      json_api_request(record,
+        actor: fixture.authorized_actor,
+        tenant: fixture.tenant_a,
+        attributes: %{
+          "correlation_id" => UUID.generate(),
+          "causation_id" => UUID.generate(),
+          "expected_version" => record.lock_version
+        }
+      )
+
+    assert_public_error(
+      response,
+      422,
+      "validation_failed",
+      "ValidationFailed",
+      "The request failed validation."
+    )
+
+    assert_record_remains_draft(record, fixture)
   end
 
   test "the generated interface denies an actor without the transition capability", fixture do
@@ -633,10 +783,19 @@ defmodule AshFoundationLab.FoundationRecordTest do
 
   test "an injected failure rolls back state, audit reference, and outbox fact", fixture do
     record = create_record(fixture.tenant_a, fixture.authorized_actor)
+    idempotency_key = UUID.generate()
+    correlation_id = UUID.generate()
+    causation_id = UUID.generate()
 
     assert {:error, %Ash.Error.Invalid{} = error} =
              record
-             |> submission_changeset(fixture.tenant_a)
+             |> submission_changeset(
+               fixture.tenant_a,
+               correlation_id,
+               causation_id,
+               record.lock_version,
+               idempotency_key
+             )
              |> Ash.Changeset.set_context(%{inject_outbox_failure?: true})
              |> Ash.update(actor: fixture.authorized_actor)
 
@@ -652,6 +811,22 @@ defmodule AshFoundationLab.FoundationRecordTest do
     assert persisted_record.lock_version == 1
     assert is_nil(persisted_record.audit_reference)
     assert [] == outbox_events(fixture.tenant_a, record.id)
+    assert [] == idempotency_claims(fixture.tenant_a, idempotency_key)
+
+    assert {:ok, submitted} =
+             record
+             |> submission_changeset(
+               fixture.tenant_a,
+               correlation_id,
+               causation_id,
+               record.lock_version,
+               idempotency_key
+             )
+             |> Ash.update(actor: fixture.authorized_actor)
+
+    assert submitted.status == :in_review
+    assert length(outbox_events(fixture.tenant_a, record.id)) == 1
+    assert [%{status: "completed"}] = idempotency_claims(fixture.tenant_a, idempotency_key)
   end
 
   test "missing correlation and causation context prevents the transition", fixture do
@@ -789,7 +964,8 @@ defmodule AshFoundationLab.FoundationRecordTest do
       Keyword.get(options, :attributes, %{
         "correlation_id" => correlation_id,
         "causation_id" => causation_id,
-        "expected_version" => Keyword.get(options, :expected_version, record.lock_version)
+        "expected_version" => Keyword.get(options, :expected_version, record.lock_version),
+        "idempotency_key" => Keyword.get(options, :idempotency_key, UUID.generate())
       })
 
     body =
@@ -902,15 +1078,18 @@ defmodule AshFoundationLab.FoundationRecordTest do
          tenant_id,
          correlation_id \\ UUID.generate(),
          causation_id \\ UUID.generate(),
-         expected_version \\ nil
+         expected_version \\ nil,
+         idempotency_key \\ nil
        ) do
     expected_version = expected_version || record.lock_version
+    idempotency_key = idempotency_key || UUID.generate()
 
     record
     |> Ash.Changeset.for_update(:submit_for_review, %{
       correlation_id: correlation_id,
       causation_id: causation_id,
-      expected_version: expected_version
+      expected_version: expected_version,
+      idempotency_key: idempotency_key
     })
     |> Ash.Changeset.set_tenant(tenant_id)
   end
@@ -961,6 +1140,41 @@ defmodule AshFoundationLab.FoundationRecordTest do
         audit_reference: load_uuid(audit_reference),
         classification: classification,
         payload: payload
+      }
+    end)
+  end
+
+  defp idempotency_claims(tenant_id, idempotency_key) do
+    Repo.query!(
+      """
+      SELECT
+        actor_id::text,
+        action_name,
+        aggregate_id::text,
+        status,
+        result_lock_version,
+        result_audit_reference::text
+      FROM action_idempotency_keys
+      WHERE tenant_id = $1 AND idempotency_key = $2
+      ORDER BY inserted_at, id
+      """,
+      [dump_uuid(tenant_id), dump_uuid(idempotency_key)]
+    ).rows
+    |> Enum.map(fn [
+                     actor_id,
+                     action_name,
+                     aggregate_id,
+                     status,
+                     result_lock_version,
+                     result_audit_reference
+                   ] ->
+      %{
+        actor_id: actor_id,
+        action_name: action_name,
+        aggregate_id: aggregate_id,
+        status: status,
+        result_lock_version: result_lock_version,
+        result_audit_reference: result_audit_reference
       }
     end)
   end

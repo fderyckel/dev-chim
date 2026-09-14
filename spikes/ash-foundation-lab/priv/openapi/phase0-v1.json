@@ -946,12 +946,19 @@
                             "type": "integer",
                             "x-struct": null,
                             "x-validate": null
+                          },
+                          "idempotency_key": {
+                            "format": "uuid",
+                            "type": "string",
+                            "x-struct": null,
+                            "x-validate": null
                           }
                         },
                         "required": [
                           "correlation_id",
                           "causation_id",
-                          "expected_version"
+                          "expected_version",
+                          "idempotency_key"
                         ],
                         "type": "object",
                         "x-struct": null,

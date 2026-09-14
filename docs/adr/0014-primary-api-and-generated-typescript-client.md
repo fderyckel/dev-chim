@@ -44,7 +44,11 @@ Every request establishes actor, tenant, scope, assurance, purpose, and correlat
 
 ## Validation evidence
 
-The [generated JSON:API policy slice](../phase-0/evidence/ash-pressure-test.md#generated-jsonapi-policy-slice) proves explicit `/api/v1` list and named-transition routes without a generic update route, actor/capability and tenant policy preservation, stable core public errors, required optimistic request versions, tenant-safe keyset pagination, and a checked-in OpenAPI document with drift detection. The tested adapter did not enforce or document the resource's maximum page size, so a thin public gate and supported OpenAPI modifier are required. Idempotency, the remaining error categories, and generated TypeScript client behaviour remain unevaluated.
+The [generated JSON:API policy slice](../phase-0/evidence/ash-pressure-test.md#generated-jsonapi-policy-slice) proves explicit `/api/v1` list and named-transition routes without a generic update route, actor/capability and tenant policy preservation, stable core public errors, required optimistic request versions, tenant-safe keyset pagination, and a checked-in OpenAPI document with drift detection. The tested adapter did not enforce or document the resource's maximum page size, so a thin public gate and supported OpenAPI modifier are required.
+
+The [idempotency and generated-client slice](../phase-0/evidence/ash-pressure-test.md#idempotency-and-generated-typescript-client-slice) proves a caller-supplied UUID key, tenant-and-action uniqueness, actor/aggregate/request binding, exact replay of the committed result, stable conflict on changed reuse, tenant isolation, two-connection serialization, and claim/state/outbox rollback as one transaction. Its isolated TypeScript harness generates immutable declarations from the checked-in OpenAPI artifact, rejects missing keys and unversioned routes at compile time, and tests the exact request envelope without automatic write retries or caller-selected tenant placement. The harness pins TypeScript 5.9 because `openapi-typescript` 7.13 declares a TypeScript 5.x peer range; production web tooling remains a Phase 1 decision.
+
+The remaining rate-limited, retryable-dependency, and forced-internal error categories plus accountable acceptance of the thin adapters still prevent this ADR from leaving Proposed.
 
 ## Fallback and exit cost
 

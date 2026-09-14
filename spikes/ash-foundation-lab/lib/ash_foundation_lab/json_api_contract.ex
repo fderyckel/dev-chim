@@ -79,6 +79,16 @@ defmodule AshFoundationLab.JsonApiContract do
     )
   end
 
+  @doc false
+  def idempotency_conflict_error do
+    stable_error(
+      409,
+      "idempotency_conflict",
+      "IdempotencyConflict",
+      "The idempotency key was already used for a different request."
+    )
+  end
+
   defp normalize_error(%Error{code: code} = error) when code in @validation_codes do
     %{
       error
@@ -127,6 +137,15 @@ defmodule AshFoundationLab.JsonApiContract do
     }
   end
 
+  defp normalize_error(%Error{code: "idempotency_conflict"} = error) do
+    %{
+      error
+      | status_code: 409,
+        title: "IdempotencyConflict",
+        detail: "The idempotency key was already used for a different request."
+    }
+  end
+
   defp normalize_error(%Error{status_code: status_code} = error) when status_code >= 500 do
     %{
       error
@@ -165,4 +184,9 @@ end
 
 defimpl AshJsonApi.ToJsonApiError, for: Ash.Error.Changes.StaleRecord do
   def to_json_api_error(_error), do: AshFoundationLab.JsonApiContract.stale_record_error()
+end
+
+defimpl AshJsonApi.ToJsonApiError, for: AshFoundationLab.Error.IdempotencyConflict do
+  def to_json_api_error(_error),
+    do: AshFoundationLab.JsonApiContract.idempotency_conflict_error()
 end
