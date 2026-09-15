@@ -17,4 +17,4 @@ mise exec -- npm test
 
 `npm run generate` intentionally updates [`generated/schema.d.ts`](generated/schema.d.ts) after an approved OpenAPI change. The repository-wide `make check` only verifies that the generated file is current.
 
-The compile-time contract checks prove that the versioned route and caller-supplied idempotency key are required. Runtime tests prove the request path and body, explicit same-key retry behaviour, omission of tenant input, and the absence of hidden automatic write retries.
+The compile-time contract checks prove that the versioned route and caller-supplied idempotency key are required. Runtime tests prove the request path and body, explicit same-key retry behaviour, omission of tenant input, and the absence of hidden automatic write retries for transport, rate-limit, dependency, and internal failures. Transient retry guidance is surfaced to the caller; the thin client never acts on it automatically.

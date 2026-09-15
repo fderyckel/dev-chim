@@ -3,6 +3,7 @@
 ## Test layers
 
 - Repository tests validate documentation, ADR structure, links, and phase boundaries.
+- Production core tests validate trusted actor/placement source separation, fail-closed execution context, tenant agreement, and the global Ash authorization setting.
 - Unit tests cover deterministic logic without services.
 - Integration tests use the local synthetic PostgreSQL database and exercise Ash/PostgreSQL behaviour.
 - Security tests include negative authorization and cross-tenant cases alongside positive cases.
@@ -37,6 +38,8 @@ cd spikes/ash-foundation-lab && mise exec -- mix dialyzer
 cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm run generate:check
 cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm run typecheck
 cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm test
+mise exec -- env MIX_ENV=test mix test
+./bin/core-check
 ```
 
 ## Rules
@@ -46,6 +49,7 @@ cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm test
 - Database tests use SQL Sandbox transactions where possible.
 - Test names describe behaviour and expected denial, not implementation details.
 - Every policy change needs a permitted case, a denied case, a cross-tenant case, and a missing-context case where applicable.
+- Every core execution-context change needs complete, missing, raw-map, malformed, stale-routing, and tenant-mismatch cases where applicable.
 - Every placement-routing change needs pooled and dedicated positive cases plus wrong-tenant, request-selected, stale-version, missing-placement, spawned-task, and job-context negative cases.
 - Every module gate change needs independent entitlement, activation, and authorization cases; no test may infer one from another.
 - Every read-routing change needs writer-required, read-your-write, bounded-staleness, lagging-reader, unavailable-reader, and prohibited request-selected-repository cases where applicable.
@@ -55,4 +59,4 @@ cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm test
 - Do not weaken an assertion to make an unsafe implementation pass.
 - Record an intentionally skipped test with its owner and unblock condition.
 
-`make check` is the required pre-push proof. A clean exit means the current Phase 0 checks passed; it does not certify later foundation gates that have not been implemented.
+`make check` is the required pre-push proof. A clean exit means the current Phase 0 working checks and provisional Phase 1 core checks passed; it does not close Phase 0, accept an ADR, or certify later foundation gates that have not been implemented.

@@ -95,4 +95,68 @@ describe("generated Phase 0 client boundary", () => {
     await expect(client.submitForReview(input)).rejects.toThrow("synthetic network failure");
     expect(fetch).toHaveBeenCalledTimes(1);
   });
+
+  it.each([
+    {
+      code: "rate_limited",
+      detail: "Request capacity is temporarily unavailable.",
+      retryAfter: "5",
+      status: 429,
+      title: "RateLimited",
+    },
+    {
+      code: "dependency_unavailable",
+      detail: "A required dependency is temporarily unavailable.",
+      retryAfter: "2",
+      status: 503,
+      title: "DependencyUnavailable",
+    },
+    {
+      code: "internal_error",
+      detail: "An internal error occurred.",
+      retryAfter: undefined,
+      status: 500,
+      title: "InternalError",
+    },
+  ])("surfaces the $status error without an automatic write retry", async (failure) => {
+    const retrySeconds = failure.retryAfter ? Number.parseInt(failure.retryAfter, 10) : undefined;
+    const errorDocument = {
+      errors: [
+        {
+          code: failure.code,
+          detail: failure.detail,
+          id: "00000000-0000-0000-0000-000000000006",
+          meta: retrySeconds
+            ? { api_version: "v1", retry_after_seconds: retrySeconds, retryable: true }
+            : { api_version: "v1" },
+          status: failure.status.toString(),
+          title: failure.title,
+        },
+      ],
+    };
+    const headers: Record<string, string> = {
+      "cache-control": "no-store",
+      "content-type": "application/vnd.api+json",
+    };
+
+    if (failure.retryAfter) {
+      headers["retry-after"] = failure.retryAfter;
+    }
+
+    const fetch = vi.fn<typeof globalThis.fetch>(async () =>
+      new Response(JSON.stringify(errorDocument), {
+        headers,
+        status: failure.status,
+      }),
+    );
+    const client = createFoundationClient({ baseUrl: "https://phase0.invalid", fetch });
+
+    const result = await client.submitForReview(input);
+
+    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(result.error).toEqual(errorDocument);
+    expect(result.response.status).toBe(failure.status);
+    expect(result.response.headers.get("cache-control")).toBe("no-store");
+    expect(result.response.headers.get("retry-after") ?? undefined).toBe(failure.retryAfter);
+  });
 });

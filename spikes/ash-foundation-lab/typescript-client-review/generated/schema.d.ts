@@ -147,6 +147,37 @@ export interface paths {
                         };
                     };
                 };
+                /** @description Request capacity is temporarily unavailable */
+                readonly 429: {
+                    headers: {
+                        /** @description Minimum whole seconds before a caller-controlled retry */
+                        readonly "Retry-After": number;
+                        readonly [name: string]: unknown;
+                    };
+                    content: {
+                        readonly "application/vnd.api+json": components["schemas"]["errors"];
+                    };
+                };
+                /** @description Internal failure */
+                readonly 500: {
+                    headers: {
+                        readonly [name: string]: unknown;
+                    };
+                    content: {
+                        readonly "application/vnd.api+json": components["schemas"]["errors"];
+                    };
+                };
+                /** @description Required dependency is temporarily unavailable */
+                readonly 503: {
+                    headers: {
+                        /** @description Minimum whole seconds before a caller-controlled retry */
+                        readonly "Retry-After": number;
+                        readonly [name: string]: unknown;
+                    };
+                    content: {
+                        readonly "application/vnd.api+json": components["schemas"]["errors"];
+                    };
+                };
                 readonly default: components["responses"]["errors"];
             };
         };

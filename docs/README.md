@@ -11,8 +11,9 @@ Documentation is part of the platform contract and changes with the code or deci
   - [Code conventions](development/code-conventions.md)
   - [Git and push conventions](development/git-workflow.md)
 - [Phase 0](phase-0/README.md): scope, decision register, risks, review, and evidence.
+- [Phase 1](phase-1/README.md): provisional core-foundation scope and unresolved entry conditions.
 - [Security](security/threat-model.md): data classification, trust boundaries, and abuse cases.
-- [Plans](plans/phase-0-implementation-plan.md): proposed or active implementation plans.
+- Plans: [Phase 0](plans/phase-0-implementation-plan.md) and the provisional [Phase 1 core foundation](plans/phase-1-core-foundation-plan.md).
 
 ## Documentation conventions
 

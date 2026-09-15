@@ -2,12 +2,14 @@
 
 ## Read before changing code
 
-Read `README.md`, `docs/phase-0/README.md`, `docs/architecture/README.md`, and `docs/adr/README.md`. For structural or security-sensitive work, read every linked ADR and threat-model section first.
+Read `README.md`, `docs/phase-0/README.md`, `docs/phase-1/README.md`, `docs/architecture/README.md`, and `docs/adr/README.md`. For structural or security-sensitive work, read every linked ADR and threat-model section first.
 
 ## Scope
 
 - Phase 0 may add architecture evidence, repository tooling, and the disposable Ash pressure-test.
-- Do not add a school business module or production application shell during Phase 0.
+- Phase 1 slice 1A may add only the production core foundation under `apps/chimwemwe_core`, as bounded by `docs/plans/phase-1-core-foundation-plan.md`.
+- Phase 0 remains incomplete. The Phase 1 core is provisional under the user's working Ash assumption and does not accept any Proposed ADR.
+- Do not add a school business module, web shell, scheduler, AI gateway, analytics plane, production infrastructure, or other production app until its later slice is explicitly authorized.
 - Do not treat spike code as a production framework API.
 - Preserve unrelated user changes and never commit, push, clean, or rewrite history without an explicit request.
 

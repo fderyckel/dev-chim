@@ -1,6 +1,6 @@
 # Toolchain contract
 
-- Status: Active for Phase 0
+- Status: Active for Phase 0 and provisional Phase 1 core slice 1A
 - Owner: Platform engineering
 - Review trigger: runtime security advisory, package incompatibility, or Phase 1 workspace start
 
@@ -12,6 +12,7 @@
 | language runtime versions | mise | `mise.toml` |
 | Python virtual environment and packages | uv | `pyproject.toml` and `uv.lock` |
 | Elixir dependencies | Mix/Hex | spike `mix.exs` and `mix.lock` |
+| Production core Elixir dependencies | Mix/Hex | root `mix.exs`, `mix.lock`, and `apps/chimwemwe_core/mix.exs` |
 | project commands | Make and scripts | `Makefile` and `bin/` |
 
 ## Verified Phase 0 versions
@@ -29,7 +30,7 @@
 | Ruff | 0.16.7 | Yes |
 | pytest | 9.1.1 | Yes |
 | ShellCheck | 0.11.0 | Yes |
-| Node.js | 24.15.0 | Pinned now; used from Phase 1 |
+| Node.js | 24.15.0 | Yes for the Phase 0 generated-client review |
 
 Java and a container runtime are not Phase 0 dependencies. Select and pin a supported JDK before the scheduling-service spike, and select a supported container runtime before tests require Gotenberg, Tika, ClamAV, or S3-compatible services. Their absence must not be hidden by a passing Phase 0 check.
 
@@ -39,5 +40,5 @@ Java and a container runtime are not Phase 0 dependencies. Select and pin a supp
 - Update runtime declarations and lock files together.
 - Read release and security notes, run `make check`, and record migration or compatibility effects.
 - For Ash or another architectural dependency, attach upgrade evidence to ADR 0002.
+- Keep the production core on the exact pressure-tested Ash release until an explicit dependency-review slice changes it.
 - Do not perform broad dependency upgrades inside an unrelated feature change.
-

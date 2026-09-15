@@ -6,6 +6,7 @@
 The platform is a security-first modular monolith around Phoenix, Ash under evaluation, and PostgreSQL. Human interfaces, integrations, jobs, and AI call the same named domain actions and authorization boundary.
 
 - [System context](system-context.md)
+- [Core foundation boundary](core-foundation-boundary.md)
 - [Service boundaries](service-boundaries.md)
 - [Tenant placement and workload capacity](tenant-placement-and-capacity.md)
 - [PostgreSQL availability, recovery, and read routing](postgresql-availability-recovery-and-read-routing.md)

@@ -49,3 +49,24 @@ def test_exit_review_rejects_unresolved_postgresql_availability_evidence() -> No
         and "NOT_RUN" in error
         for error in errors
     )
+
+
+def test_phase_one_core_requires_a_start_record_and_rejects_other_apps(
+    tmp_path: Path,
+) -> None:
+    apps = tmp_path / "apps"
+    (apps / "chimwemwe_core").mkdir(parents=True)
+
+    assert CHECKER.phase_boundary_errors(tmp_path) == ["Phase 0 forbidden directory exists: apps"]
+
+    start_record = tmp_path / CHECKER.PHASE1_CORE_START_RECORD
+    start_record.parent.mkdir(parents=True)
+    start_record.write_text("# Phase 1\n", encoding="utf-8")
+
+    assert CHECKER.phase_boundary_errors(tmp_path) == []
+
+    (apps / "attendance").mkdir()
+
+    assert CHECKER.phase_boundary_errors(tmp_path) == [
+        "Phase 1 slice 1A permits only apps/chimwemwe_core; unexpected apps: attendance"
+    ]

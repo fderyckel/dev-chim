@@ -30,6 +30,7 @@ REQUIRED_PATHS = (
     "uv.lock",
     "docs/README.md",
     "docs/architecture/README.md",
+    "docs/architecture/core-foundation-boundary.md",
     "docs/architecture/module-activation-and-lifecycle.md",
     "docs/architecture/postgresql-availability-recovery-and-read-routing.md",
     "docs/architecture/quality-attribute-targets.md",
@@ -45,6 +46,13 @@ REQUIRED_PATHS = (
     "docs/phase-0/evidence/tenant-placement-capacity.md",
     "docs/phase-0/evidence/trusted-routing.md",
     "docs/phase-0/review-record.md",
+    "docs/phase-1/README.md",
+    "docs/plans/phase-1-core-foundation-plan.md",
+    "apps/chimwemwe_core/mix.exs",
+    "apps/chimwemwe_core/lib/chimwemwe/platform.ex",
+    "apps/chimwemwe_core/lib/chimwemwe/platform/execution_context.ex",
+    "config/config.exs",
+    "mix.exs",
     "spikes/ash-foundation-lab/mix.exs",
     "spikes/ash-foundation-lab/mix.lock",
     "spikes/ash-foundation-lab/typescript-client-review/package.json",
@@ -87,6 +95,9 @@ FORBIDDEN_PHASE0_DIRECTORIES = (
     "services/scheduler",
     "web",
 )
+
+PHASE1_CORE_START_RECORD = "docs/phase-1/README.md"
+PHASE1_ALLOWED_APPS = {"chimwemwe_core"}
 
 IGNORED_DIRECTORY_NAMES = {".git", ".venv", "_build", "deps", "node_modules"}
 
@@ -244,6 +255,31 @@ def exit_review_errors(root: Path) -> list[str]:
     return errors
 
 
+def phase_boundary_errors(root: Path) -> list[str]:
+    """Keep the explicit early Phase 1 exception narrow and reviewable."""
+    errors: list[str] = []
+    phase1_started = (root / PHASE1_CORE_START_RECORD).exists()
+
+    for relative_path in FORBIDDEN_PHASE0_DIRECTORIES:
+        path = root / relative_path
+        if not path.exists():
+            continue
+
+        if relative_path == "apps" and phase1_started:
+            app_names = {entry.name for entry in path.iterdir() if entry.is_dir()}
+            unexpected_apps = sorted(app_names - PHASE1_ALLOWED_APPS)
+            if unexpected_apps:
+                errors.append(
+                    "Phase 1 slice 1A permits only apps/chimwemwe_core; "
+                    f"unexpected apps: {', '.join(unexpected_apps)}"
+                )
+            continue
+
+        errors.append(f"Phase 0 forbidden directory exists: {relative_path}")
+
+    return errors
+
+
 def validate_repository(root: Path, *, exit_review: bool = False) -> list[str]:
     """Validate the repository contract and return all discovered errors."""
     errors: list[str] = []
@@ -252,9 +288,7 @@ def validate_repository(root: Path, *, exit_review: bool = False) -> list[str]:
         if not (root / relative_path).exists():
             errors.append(f"missing required path: {relative_path}")
 
-    for relative_path in FORBIDDEN_PHASE0_DIRECTORIES:
-        if (root / relative_path).exists():
-            errors.append(f"Phase 0 forbidden directory exists: {relative_path}")
+    errors.extend(phase_boundary_errors(root))
 
     for path in sorted(root.rglob("*.md")):
         if any(part in IGNORED_DIRECTORY_NAMES for part in path.parts):

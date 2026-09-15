@@ -1039,6 +1039,64 @@
             },
             "description": "Success"
           },
+          "429": {
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errors"
+                }
+              }
+            },
+            "description": "Request capacity is temporarily unavailable",
+            "headers": {
+              "Retry-After": {
+                "description": "Minimum whole seconds before a caller-controlled retry",
+                "required": true,
+                "schema": {
+                  "example": 5,
+                  "minimum": 0,
+                  "type": "integer",
+                  "x-struct": null,
+                  "x-validate": null
+                },
+                "style": "simple"
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errors"
+                }
+              }
+            },
+            "description": "Internal failure"
+          },
+          "503": {
+            "content": {
+              "application/vnd.api+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errors"
+                }
+              }
+            },
+            "description": "Required dependency is temporarily unavailable",
+            "headers": {
+              "Retry-After": {
+                "description": "Minimum whole seconds before a caller-controlled retry",
+                "required": true,
+                "schema": {
+                  "example": 2,
+                  "minimum": 0,
+                  "type": "integer",
+                  "x-struct": null,
+                  "x-validate": null
+                },
+                "style": "simple"
+              }
+            }
+          },
           "default": {
             "$ref": "#/components/responses/errors"
           }

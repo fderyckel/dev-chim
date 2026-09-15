@@ -3,7 +3,7 @@
 .PHONY: help bootstrap format lint test docs-check check
 
 help:
-	@echo "bootstrap  Install and prepare local Phase 0 dependencies"
+	@echo "bootstrap  Install and prepare local workspace dependencies"
 	@echo "format     Format maintained source files"
 	@echo "lint       Run non-mutating static checks"
 	@echo "test       Run Python and Elixir tests"
@@ -15,6 +15,7 @@ bootstrap:
 
 format:
 	mise exec -- uv run ruff format tools tests/tools
+	mise exec -- mix format
 	cd spikes/ash-foundation-lab && mise exec -- mix format
 
 lint:
@@ -30,14 +31,22 @@ lint:
 	cd spikes/ash-foundation-lab && mise exec -- mix dialyzer
 	cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm run generate:check
 	cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm run typecheck
+	mise exec -- mix format --check-formatted
+	mise exec -- env MIX_ENV=test mix compile --warnings-as-errors
+	cd apps/chimwemwe_core && mise exec -- mix credo --strict
+	cd apps/chimwemwe_core && mise exec -- mix hex.audit
+	cd apps/chimwemwe_core && mise exec -- mix deps.unlock --check-unused
+	cd apps/chimwemwe_core && mise exec -- mix dialyzer
 
 test:
 	mise exec -- uv run pytest
 	cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix test
 	cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm test
+	mise exec -- env MIX_ENV=test mix test
 
 docs-check:
 	mise exec -- uv run python tools/check_phase0.py
 
 check:
 	./bin/phase0-check
+	./bin/core-check

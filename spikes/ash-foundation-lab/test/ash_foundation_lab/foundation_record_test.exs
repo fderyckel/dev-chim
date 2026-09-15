@@ -188,6 +188,113 @@ defmodule AshFoundationLab.FoundationRecordTest do
     refute inspect(normalized) =~ "restricted implementation detail"
   end
 
+  test "trusted synthetic transient failures use stable retryable public envelopes", fixture do
+    for {failure, status, code, title, detail, retry_after, private_marker} <- [
+          {:rate_limited, 429, "rate_limited", "RateLimited",
+           "Request capacity is temporarily unavailable.", "5",
+           "phase0 capacity partition alpha"},
+          {:dependency_unavailable, 503, "dependency_unavailable", "DependencyUnavailable",
+           "A required dependency is temporarily unavailable.", "2",
+           "phase0 dependency pool beta"}
+        ] do
+      record = create_record(fixture.tenant_a, fixture.authorized_actor)
+      idempotency_key = UUID.generate()
+
+      response =
+        json_api_request(record,
+          actor: fixture.authorized_actor,
+          tenant: fixture.tenant_a,
+          idempotency_key: idempotency_key,
+          context: %{phase0_failure_probe: failure}
+        )
+
+      assert_public_error(response, status, code, title, detail, %{
+        "retry_after_seconds" => String.to_integer(retry_after),
+        "retryable" => true
+      })
+
+      assert Plug.Conn.get_resp_header(response, "retry-after") == [retry_after]
+      assert Plug.Conn.get_resp_header(response, "cache-control") == ["no-store"]
+      refute response.resp_body =~ private_marker
+      assert_record_remains_draft(record, fixture)
+      assert idempotency_claims(fixture.tenant_a, idempotency_key) == []
+    end
+  end
+
+  test "a forced internal failure is generic, non-cacheable, and leaves no state", fixture do
+    record = create_record(fixture.tenant_a, fixture.authorized_actor)
+    idempotency_key = UUID.generate()
+
+    response =
+      json_api_request(record,
+        actor: fixture.authorized_actor,
+        tenant: fixture.tenant_a,
+        idempotency_key: idempotency_key,
+        context: %{phase0_failure_probe: :forced_internal}
+      )
+
+    assert_public_error(
+      response,
+      500,
+      "internal_error",
+      "InternalError",
+      "An internal error occurred."
+    )
+
+    assert Plug.Conn.get_resp_header(response, "retry-after") == []
+    assert Plug.Conn.get_resp_header(response, "cache-control") == ["no-store"]
+    refute response.resp_body =~ "phase0 restricted implementation marker"
+    assert_record_remains_draft(record, fixture)
+    assert idempotency_claims(fixture.tenant_a, idempotency_key) == []
+  end
+
+  test "failure probes cannot bypass authorization or be selected through request input",
+       fixture do
+    record = create_record(fixture.tenant_a, fixture.authorized_actor)
+
+    denied =
+      json_api_request(record,
+        actor: fixture.read_only_actor,
+        tenant: fixture.tenant_a,
+        context: %{phase0_failure_probe: :rate_limited}
+      )
+
+    assert_public_error(
+      denied,
+      403,
+      "forbidden",
+      "Forbidden",
+      "The request is not authorized."
+    )
+
+    untrusted_input =
+      json_api_request(record,
+        actor: fixture.authorized_actor,
+        tenant: fixture.tenant_a,
+        attributes: %{
+          "correlation_id" => UUID.generate(),
+          "causation_id" => UUID.generate(),
+          "expected_version" => record.lock_version,
+          "idempotency_key" => UUID.generate(),
+          "phase0_failure_probe" => "forced_internal"
+        }
+      )
+
+    assert_public_error(
+      untrusted_input,
+      422,
+      "validation_failed",
+      "ValidationFailed",
+      "The request failed validation."
+    )
+
+    for response <- [denied, untrusted_input] do
+      assert Plug.Conn.get_resp_header(response, "retry-after") == []
+    end
+
+    assert_record_remains_draft(record, fixture)
+  end
+
   test "the versioned list action uses bounded tenant-safe keyset pagination", fixture do
     Enum.each(1..4, fn sequence ->
       create_record(fixture.tenant_a, fixture.authorized_actor, "Page record #{sequence}")
@@ -288,6 +395,29 @@ defmodule AshFoundationLab.FoundationRecordTest do
 
     transition =
       specification["paths"]["/api/v1/foundation-records/{id}/submit-for-review"]["patch"]
+
+    assert Map.keys(transition["responses"]) |> Enum.sort() == [
+             "200",
+             "429",
+             "500",
+             "503",
+             "default"
+           ]
+
+    for {status, retry_after} <- [{"429", 5}, {"503", 2}] do
+      assert transition["responses"][status]["headers"]["Retry-After"] == %{
+               "description" => "Minimum whole seconds before a caller-controlled retry",
+               "required" => true,
+               "schema" => %{
+                 "example" => retry_after,
+                 "minimum" => 0,
+                 "type" => "integer"
+               },
+               "style" => "simple"
+             }
+    end
+
+    assert transition["responses"]["500"]["description"] == "Internal failure"
 
     request_schema = transition["requestBody"]["content"]["application/vnd.api+json"]["schema"]
 
@@ -983,11 +1113,16 @@ defmodule AshFoundationLab.FoundationRecordTest do
     |> put_req_header("content-type", "application/vnd.api+json")
     |> maybe_set_actor(options[:actor])
     |> maybe_set_tenant(options[:tenant])
-    |> Ash.PlugHelpers.set_context(%{
-      assurance: :synthetic_test,
-      purpose: :phase_0_framework_evaluation,
-      correlation_id: correlation_id
-    })
+    |> Ash.PlugHelpers.set_context(
+      Map.merge(
+        %{
+          assurance: :synthetic_test,
+          purpose: :phase_0_framework_evaluation,
+          correlation_id: correlation_id
+        },
+        Keyword.get(options, :context, %{})
+      )
+    )
     |> ApiRouter.call([])
   end
 
@@ -1027,7 +1162,7 @@ defmodule AshFoundationLab.FoundationRecordTest do
     end)
   end
 
-  defp assert_public_error(response, status, code, title, detail) do
+  defp assert_public_error(response, status, code, title, detail, extra_meta \\ %{}) do
     assert response.status == status
     assert Plug.Conn.get_resp_header(response, "x-api-version") == ["v1"]
 
@@ -1039,13 +1174,14 @@ defmodule AshFoundationLab.FoundationRecordTest do
                  "code" => ^code,
                  "title" => ^title,
                  "detail" => ^detail,
-                 "meta" => %{"api_version" => "v1"}
+                 "meta" => meta
                }
              ]
            } = Jason.decode!(response.resp_body)
 
     assert {:ok, _uuid} = UUID.cast(error_id)
     assert serialized_status == Integer.to_string(status)
+    assert meta == Map.put(extra_meta, "api_version", "v1")
   end
 
   defp request_path(url) do

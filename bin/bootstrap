@@ -50,4 +50,9 @@ mise exec -- mix local.rebar --force
   mise exec -- npm ci
 )
 
-echo "Phase 0 local environment is ready. Run: make check"
+(
+  cd "$repo_root"
+  mise exec -- mix deps.get
+)
+
+echo "Phase 0 and provisional Phase 1 core environments are ready. Run: make check"

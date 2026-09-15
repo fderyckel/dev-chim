@@ -8,10 +8,9 @@ node = "24.15.0"
 uv = "0.12.13"
 
 [tasks.bootstrap]
-description = "Install dependencies and prepare the Phase 0 test database"
+description = "Install dependencies and prepare the local workspace"
 run = "./bin/bootstrap"
 
 [tasks.check]
 description = "Run the complete local quality and test suite"
-run = "./bin/phase0-check"
-
+run = "make check"

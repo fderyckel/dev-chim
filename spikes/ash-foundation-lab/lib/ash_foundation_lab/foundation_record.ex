@@ -112,6 +112,7 @@ defmodule AshFoundationLab.FoundationRecord do
         allow_nil? false
       end
 
+      change AshFoundationLab.Change.SyntheticFailureProbe
       change set_attribute(:status, :in_review)
       change optimistic_lock(:lock_version)
       change AshFoundationLab.Change.RecordOutbox
