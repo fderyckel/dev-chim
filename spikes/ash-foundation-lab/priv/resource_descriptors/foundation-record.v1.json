@@ -1,0 +1,120 @@
+{
+  "actions": [
+    {
+      "arguments": [],
+      "kind": "read",
+      "pagination": {
+        "default_limit": 2,
+        "keyset": true,
+        "max_page_size": 3,
+        "required": true
+      },
+      "ref": "foundation_record.list"
+    },
+    {
+      "arguments": [
+        {
+          "allow_nil": false,
+          "constraints": {},
+          "ref": "correlation_id",
+          "type": "uuid"
+        },
+        {
+          "allow_nil": false,
+          "constraints": {},
+          "ref": "causation_id",
+          "type": "uuid"
+        },
+        {
+          "allow_nil": false,
+          "constraints": {
+            "min": 1
+          },
+          "ref": "expected_version",
+          "type": "integer"
+        },
+        {
+          "allow_nil": false,
+          "constraints": {},
+          "ref": "idempotency_key",
+          "type": "uuid"
+        }
+      ],
+      "kind": "mutation",
+      "ref": "foundation_record.submit_for_review"
+    }
+  ],
+  "datasets": [
+    {
+      "action_ref": "foundation_record.list",
+      "classification": "internal",
+      "fields": [
+        "foundation_record.id",
+        "foundation_record.name",
+        "foundation_record.status",
+        "foundation_record.lock_version"
+      ],
+      "filter_fields": [
+        "foundation_record.status"
+      ],
+      "group_fields": [
+        "foundation_record.status"
+      ],
+      "ref": "foundation_records.list"
+    }
+  ],
+  "fields": [
+    {
+      "allow_nil": false,
+      "classification": "internal",
+      "constraints": {},
+      "primary_key": true,
+      "ref": "foundation_record.id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil": false,
+      "classification": "internal",
+      "constraints": {
+        "allow_empty?": false,
+        "max_length": 120,
+        "min_length": 1,
+        "trim?": true
+      },
+      "primary_key": false,
+      "ref": "foundation_record.name",
+      "type": "string"
+    },
+    {
+      "allow_nil": false,
+      "classification": "internal",
+      "constraints": {
+        "one_of": [
+          "draft",
+          "in_review"
+        ]
+      },
+      "primary_key": false,
+      "ref": "foundation_record.status",
+      "type": "enum"
+    },
+    {
+      "allow_nil": false,
+      "classification": "internal",
+      "constraints": {
+        "min": 1
+      },
+      "primary_key": false,
+      "ref": "foundation_record.lock_version",
+      "type": "integer"
+    }
+  ],
+  "model_version": 1,
+  "resource_ref": "foundation_record",
+  "revision": "sha256:94b18a8aff31c5948a723360ac83201e2334ac2335e3edca8c721081b1751a75",
+  "schema_version": 1,
+  "tenant_scope": {
+    "kind": "tenant_owned",
+    "required": true
+  }
+}

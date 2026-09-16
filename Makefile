@@ -1,11 +1,12 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help bootstrap format lint test docs-check check
+.PHONY: help bootstrap format lint test-fast test docs-check check
 
 help:
 	@echo "bootstrap  Install and prepare local workspace dependencies"
 	@echo "format     Format maintained source files"
 	@echo "lint       Run non-mutating static checks"
+	@echo "test-fast  Run the provisional production-core tests only"
 	@echo "test       Run Python and Elixir tests"
 	@echo "docs-check Validate repository and ADR documentation"
 	@echo "check      Run the complete local verification suite"
@@ -25,7 +26,9 @@ lint:
 	cd spikes/ash-foundation-lab && mise exec -- mix format --check-formatted
 	cd spikes/ash-foundation-lab && mise exec -- mix ash_postgres.generate_migrations --check --migration-path priv/generated_migration_review/migrations --snapshot-path priv/generated_migration_review/resource_snapshots
 	cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix openapi.spec.json --spec AshFoundationLab.JsonApiRouter --check --pretty=true --filename priv/openapi/phase0-v1.json
+	cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix phase0.descriptor.check
 	cd spikes/ash-foundation-lab && mise exec -- mix credo --strict
+	mise exec -- uv run python tools/check_ash_dependency_warnings.py
 	cd spikes/ash-foundation-lab && mise exec -- mix hex.audit
 	cd spikes/ash-foundation-lab && mise exec -- mix deps.unlock --check-unused
 	cd spikes/ash-foundation-lab && mise exec -- mix dialyzer
@@ -37,6 +40,9 @@ lint:
 	cd apps/chimwemwe_core && mise exec -- mix hex.audit
 	cd apps/chimwemwe_core && mise exec -- mix deps.unlock --check-unused
 	cd apps/chimwemwe_core && mise exec -- mix dialyzer
+
+test-fast:
+	mise exec -- env MIX_ENV=test mix test
 
 test:
 	mise exec -- uv run pytest

@@ -30,5 +30,7 @@ ADRs record decisions that shape stable platform boundaries. Every record starts
 | [0015](0015-ai-gateway-tool-exposure-and-evaluation-policy.md) | AI gateway tool exposure and evaluation policy | Proposed | Security architecture | AI threat model |
 | [0016](0016-scheduling-service-contract-and-publication-boundary.md) | Scheduling service contract and publication boundary | Proposed | Platform and scheduling engineering | Contract review |
 | [0017](0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md) | PostgreSQL availability, recovery, and consistency-aware read routing | Proposed | Platform engineering and operations | Availability, burst, lag, failover, connection, and restore evidence |
+| [0019](0019-domain-model-authoring-and-governed-metadata.md) | Domain model authoring and governed metadata | Proposed | Platform engineering | [Authoring and metadata scenario](../phase-0/evidence/resource-authoring-and-governed-metadata.md) |
+| [0020](0020-human-interface-experience-and-client-platform-boundary.md) | Human-interface experience and client-platform boundary | Proposed | Product experience and platform engineering | Journey research, prototypes, accessibility checks, and public-client contract tests |
 
 Allowed decision statuses are Proposed, Accepted, Conditionally Accepted, Rejected, Superseded, and Deferred. `Template` is reserved for ADR 0000.

@@ -9,7 +9,7 @@ The platform serves human users acting within one or more tenant contexts, platf
 
 ## System boundary
 
-The authoritative application boundary is a Phoenix/Ash/PostgreSQL modular monolith released as one immutable product. A small kernel governs tenant context, policy, module lifecycle, and shared platform contracts. A Next.js experience, durable jobs, files and reports, analytics, scheduling, integrations, and AI are clients or bounded supporting planes. They do not receive independent authority over domain state.
+The authoritative application boundary is a Phoenix/Ash/PostgreSQL modular monolith released as one immutable product. A small kernel governs tenant context, policy, module lifecycle, and shared platform contracts. The proposed Next.js browser experience and companion native-mobile experience, durable jobs, files and reports, analytics, scheduling, integrations, and AI are clients or bounded supporting planes. They do not receive independent authority over domain state.
 
 The product may run in several deployment cells. Within a cell, tenants can use a pooled database or dedicated databases; a tenant can receive a dedicated cell when approved evidence requires it. Every profile preserves the same tenant-keyed logical model and domain policies. A trusted routing registry contains placement metadata only and resolves tenant context to database, queue, storage, and supporting namespaces.
 

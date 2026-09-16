@@ -48,7 +48,7 @@ defmodule Chimwemwe.Platform.ExecutionContextTest do
              end)
   end
 
-  test "revalidates context before work and rejects stale routing state" do
+  test "revalidates context before work and rejects an invalid routing version" do
     actor = trusted_actor(@tenant_id)
     placement = trusted_placement(@tenant_id)
 
@@ -59,11 +59,11 @@ defmodule Chimwemwe.Platform.ExecutionContextTest do
         locale: "en-MW"
       )
 
-    stale_context = put_in(context.placement.routing_version, 0)
+    invalid_context = put_in(context.placement.routing_version, 0)
 
     assert {:error, %ContextError{code: :invalid_placement_context, field: :routing_version}} =
-             ExecutionContext.with_validated(stale_context, fn _context ->
-               flunk("stale placement must fail before operation")
+             ExecutionContext.with_validated(invalid_context, fn _context ->
+               flunk("invalid placement must fail before operation")
              end)
   end
 
@@ -93,7 +93,14 @@ defmodule Chimwemwe.Platform.ExecutionContextTest do
 
   test "the production Ash domain always runs authorization" do
     assert Application.fetch_env!(:chimwemwe_core, :ash_domains) == [Chimwemwe.Platform]
+
+    assert Application.fetch_env!(:chimwemwe_core, :base_resources) == [
+             Chimwemwe.Platform.Resource
+           ]
+
     assert Info.authorize(Chimwemwe.Platform) == :always
+    assert Info.require_actor?(Chimwemwe.Platform)
+    assert Info.resources(Chimwemwe.Platform) == []
   end
 
   defp trusted_actor(tenant_id) do

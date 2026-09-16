@@ -3,7 +3,7 @@
 - Status: Active guardrail
 - Owner: Architecture review group
 
-The following remain deferred: Kafka, Kubernetes, continuous CDC, a dedicated search cluster, a vector database, full event sourcing, a universal workflow language, per-domain microservices, GraphQL without a concrete unmet use case, shared Valkey before measured need, a final embedded BI product, schema-per-tenant as the strategic default, and a complete stack per tenant without workload, recovery, residency, or isolation evidence.
+The following remain deferred: Kafka, Kubernetes, continuous CDC, a dedicated search cluster, a vector database, full event sourcing, a universal workflow language, runtime-defined domain schemas, a visual model builder, a custom model compiler, a general custom-field store, per-domain microservices, GraphQL without a concrete unmet use case, shared Valkey before measured need, a final embedded BI product, schema-per-tenant as the strategic default, and a complete stack per tenant without workload, recovery, residency, or isolation evidence.
 
 A proposal to introduce one must include:
 

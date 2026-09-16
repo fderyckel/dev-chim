@@ -1,0 +1,436 @@
+{
+  "schema_version": 1,
+  "status": "phase0_evidence",
+  "owner": "Platform engineering",
+  "reviewed_on": "2026-09-15",
+  "scope": {
+    "command": [
+      "mix",
+      "deps.compile",
+      "--force"
+    ],
+    "packages": {
+      "ash": "3.33.3",
+      "ash_json_api": "1.7.1",
+      "ash_postgres": "2.13.1",
+      "ash_sql": "0.7.3",
+      "bunt": "1.0.0",
+      "conv_case": "0.2.3",
+      "credo": "1.7.19",
+      "crux": "0.1.4",
+      "db_connection": "2.10.2",
+      "decimal": "3.1.1",
+      "dialyxir": "1.4.8",
+      "ecto": "3.14.2",
+      "ecto_sql": "3.14.0",
+      "elixir_make": "0.10.0",
+      "erlex": "0.2.9",
+      "ets": "0.9.0",
+      "file_system": "1.1.1",
+      "iterex": "0.1.2",
+      "jason": "1.4.5",
+      "json_xema": "0.6.5",
+      "mime": "2.0.7",
+      "multigraph": "0.16.1-mg.4",
+      "open_api_spex": "3.22.4",
+      "phoenix": "1.8.13",
+      "phoenix_pubsub": "2.3.0",
+      "phoenix_template": "1.0.4",
+      "picosat_elixir": "0.2.3",
+      "plug": "1.20.3",
+      "plug_crypto": "2.2.0",
+      "postgrex": "0.22.4",
+      "reactor": "1.0.6",
+      "spark": "2.7.2",
+      "splode": "0.3.2",
+      "stream_data": "1.4.0",
+      "telemetry": "1.4.2",
+      "websock": "0.5.3",
+      "websock_adapter": "0.6.0",
+      "xema": "0.17.9",
+      "yamerl": "0.10.0",
+      "yaml_elixir": "2.12.2",
+      "ymlr": "5.1.6"
+    },
+    "mix_lock_sha256": "dd7fe42c86f41a292f2d80eb271e04b1b6daf7dc24b3d20ad5e1c441748f052a",
+    "toolchain": {
+      "elixir": "1.20.3",
+      "otp": "29"
+    }
+  },
+  "allowed_delta": {
+    "added": 0,
+    "removed": 0
+  },
+  "warnings": [
+    {
+      "package": "ash",
+      "message": "Igniter.Code.Module.move_to_use/2 is undefined (module Igniter.Code.Module is not available or is yet to be defined)",
+      "locations": [
+        {
+          "path": "lib/mix/tasks/helpers.ex",
+          "line": 89,
+          "column": 46,
+          "subject": "Ash.Mix.Tasks.Helpers.discover_domains/1"
+        }
+      ]
+    },
+    {
+      "package": "ash",
+      "message": "Igniter.Project.Module.find_all_matching_modules/2 is undefined (module Igniter.Project.Module is not available or is yet to be defined)",
+      "locations": [
+        {
+          "path": "lib/mix/tasks/helpers.ex",
+          "line": 88,
+          "column": 30,
+          "subject": "Ash.Mix.Tasks.Helpers.discover_domains/1"
+        }
+      ]
+    },
+    {
+      "package": "ash",
+      "message": "the following clause cannot match because the previous clauses already matched all possible values:",
+      "locations": [
+        {
+          "path": "lib/ash/actions/read/read.ex",
+          "line": 2776,
+          "subject": "Ash.Actions.Read.for_read/5"
+        }
+      ]
+    },
+    {
+      "package": "ash",
+      "message": "the following clause cannot match because the previous clauses already matched all possible values:",
+      "locations": [
+        {
+          "path": "lib/ash/actions/read/read.ex",
+          "line": 2785,
+          "subject": "Ash.Actions.Read.for_read/5"
+        }
+      ]
+    },
+    {
+      "package": "ash",
+      "message": "the following clause is redundant:",
+      "locations": [
+        {
+          "path": "lib/ash/filter/filter.ex",
+          "line": 3512,
+          "column": 8,
+          "subject": "Ash.Filter.add_expression_part/4"
+        }
+      ]
+    },
+    {
+      "package": "ash_json_api",
+      "message": "comparison between distinct types found:",
+      "locations": [
+        {
+          "path": "lib/ash_json_api/serializer.ex",
+          "line": 350,
+          "subject": "AshJsonApi.Serializer.put_page_params/2"
+        }
+      ]
+    },
+    {
+      "package": "ash_json_api",
+      "message": "the following clause cannot match because the previous clauses already matched all possible values:",
+      "locations": [
+        {
+          "path": "lib/ash_json_api/json_schema/open_api.ex",
+          "line": 1387,
+          "subject": "AshJsonApi.OpenApi.resource_relationships/1"
+        }
+      ]
+    },
+    {
+      "package": "ash_json_api",
+      "message": "the following clause cannot match because the previous clauses already matched all possible values:",
+      "locations": [
+        {
+          "path": "lib/ash_json_api/json_schema/json_schema.ex",
+          "line": 347,
+          "subject": "AshJsonApi.JsonSchema.resource_relationships/1"
+        }
+      ]
+    },
+    {
+      "package": "ash_json_api",
+      "message": "the following clause is redundant:",
+      "locations": [
+        {
+          "path": "lib/ash_json_api/request.ex",
+          "line": 1246,
+          "column": 23,
+          "subject": "AshJsonApi.Request.parse_attributes/1"
+        }
+      ]
+    },
+    {
+      "package": "ash_json_api",
+      "message": "the following conditional expression:",
+      "locations": [
+        {
+          "path": "lib/ash_json_api/controllers/router.ex",
+          "line": 200,
+          "subject": "AshJsonApi.Controllers.Router.open_api_request?/2"
+        }
+      ]
+    },
+    {
+      "package": "ash_json_api",
+      "message": "the right-hand side of || will never be executed:",
+      "locations": [
+        {
+          "path": "lib/ash_json_api/serializer.ex",
+          "line": 488,
+          "subject": "AshJsonApi.Serializer.prev_page/1"
+        }
+      ]
+    },
+    {
+      "package": "ash_json_api",
+      "message": "unused require Ash.Query",
+      "locations": [
+        {
+          "path": "lib/ash_json_api/request.ex",
+          "line": 26,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "package": "ash_json_api",
+      "message": "unused require Logger",
+      "locations": [
+        {
+          "path": "lib/ash_json_api/request.ex",
+          "line": 7,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "package": "ash_json_api",
+      "message": "unused require Logger",
+      "locations": [
+        {
+          "path": "lib/mix/tasks/ash_json_api.routes.ex",
+          "line": 8,
+          "column": 3
+        }
+      ]
+    },
+    {
+      "package": "ash_json_api",
+      "message": "unused require Logger",
+      "locations": [
+        {
+          "path": "lib/ash_json_api/json_schema/open_api.ex",
+          "line": 57,
+          "column": 5
+        }
+      ]
+    },
+    {
+      "package": "ash_postgres",
+      "message": "Igniter.Inflex.pluralize/1 is undefined (module Igniter.Inflex is not available or is yet to be defined)",
+      "locations": [
+        {
+          "path": "lib/resource_generator/spec.ex",
+          "line": 808,
+          "column": 23,
+          "subject": "AshPostgres.ResourceGenerator.Spec.safe_pluralize/1"
+        }
+      ]
+    },
+    {
+      "package": "ash_postgres",
+      "message": "Igniter.Inflex.singularize/1 is undefined (module Igniter.Inflex is not available or is yet to be defined)",
+      "locations": [
+        {
+          "path": "lib/resource_generator/spec.ex",
+          "line": 784,
+          "column": 25,
+          "subject": "AshPostgres.ResourceGenerator.Spec.build_has_relationship/4"
+        },
+        {
+          "path": "lib/resource_generator/spec.ex",
+          "line": 807,
+          "column": 23,
+          "subject": "AshPostgres.ResourceGenerator.Spec.safe_pluralize/1"
+        },
+        {
+          "path": "lib/resource_generator/spec.ex",
+          "line": 1037,
+          "column": 27,
+          "subject": "AshPostgres.ResourceGenerator.Spec.build_alternative_name/2"
+        },
+        {
+          "path": "lib/resource_generator/spec.ex",
+          "line": 1042,
+          "column": 36,
+          "subject": "AshPostgres.ResourceGenerator.Spec.build_alternative_name/2"
+        },
+        {
+          "path": "lib/resource_generator/spec.ex",
+          "line": 1057,
+          "column": 23,
+          "subject": "AshPostgres.ResourceGenerator.Spec.default_belongs_to_name/2"
+        }
+      ]
+    },
+    {
+      "package": "ash_postgres",
+      "message": "Owl.IO.input/1 is undefined (module Owl.IO is not available or is yet to be defined)",
+      "locations": [
+        {
+          "path": "lib/resource_generator/spec.ex",
+          "line": 997,
+          "column": 12,
+          "subject": "AshPostgres.ResourceGenerator.Spec.prompt_relationship_name/4"
+        }
+      ]
+    },
+    {
+      "package": "ash_postgres",
+      "message": "Owl.IO.puts/1 is undefined (module Owl.IO is not available or is yet to be defined)",
+      "locations": [
+        {
+          "path": "lib/resource_generator/spec.ex",
+          "line": 974,
+          "column": 12,
+          "subject": "AshPostgres.ResourceGenerator.Spec.prompt_relationship_name/4"
+        }
+      ]
+    },
+    {
+      "package": "ash_sql",
+      "message": "incompatible types given to Map.get/3:",
+      "locations": [
+        {"path": "lib/expr.ex", "line": 2929, "column": 14, "subject": "AshSql.Expr.default_dynamic_expr/6"}
+      ]
+    },
+    {
+      "package": "ash_sql",
+      "message": "the following clause cannot match because the previous clauses already matched all possible values:",
+      "locations": [
+        {"path": "lib/expr.ex", "line": 4235, "column": 22, "subject": "AshSql.Expr.maybe_type_expr/6"}
+      ]
+    },
+    {
+      "package": "ash_sql",
+      "message": "the following clause is redundant:",
+      "locations": [
+        {"path": "lib/expr.ex", "line": 3470, "column": 30, "subject": "AshSql.Expr.reverse_engineer_type/1"}
+      ]
+    },
+    {
+      "package": "ash_sql",
+      "message": "the following clause will never match:",
+      "locations": [
+        {"path": "lib/expr.ex", "line": 4250, "subject": "AshSql.Expr.maybe_type_expr/6"}
+      ]
+    },
+    {
+      "package": "ash_sql",
+      "message": "unused require Ash.Query",
+      "locations": [{"path": "lib/aggregate.ex", "line": 9, "column": 3}]
+    },
+    {
+      "package": "crux",
+      "message": "unused require Crux.Expression",
+      "locations": [{"path": "lib/crux.ex", "line": 20, "column": 3}]
+    },
+    {
+      "package": "multigraph",
+      "message": "the following clause is redundant:",
+      "locations": [
+        {"path": "lib/multigraph.ex", "line": 2935, "column": 8, "subject": "Multigraph.include_edge_for_filtered_partitions?/4"}
+      ]
+    },
+    {
+      "package": "open_api_spex",
+      "message": "\"xref: [exclude: ...]\" in your mix.exs file is deprecated, instead use: \"elixirc_options: [no_warn_undefined: ...]\"",
+      "locations": []
+    },
+    {
+      "package": "open_api_spex",
+      "message": "the following clause is redundant:",
+      "locations": [
+        {"path": "lib/open_api_spex/deprecated_cast.ex", "line": 107, "column": 7, "subject": "OpenApiSpex.DeprecatedCast.cast/3"}
+      ]
+    },
+    {
+      "package": "open_api_spex",
+      "message": "the following clause is redundant:",
+      "locations": [
+        {"path": "lib/open_api_spex/deprecated_cast.ex", "line": 115, "column": 7, "subject": "OpenApiSpex.DeprecatedCast.cast/3"}
+      ]
+    },
+    {
+      "package": "open_api_spex",
+      "message": "the following clause is redundant:",
+      "locations": [
+        {"path": "lib/open_api_spex/schema_resolver.ex", "line": 152, "column": 8, "subject": "OpenApiSpex.SchemaResolver.resolve_schema_modules_from_media_type/2"}
+      ]
+    },
+    {
+      "package": "open_api_spex",
+      "message": "the right-hand side of || will never be executed:",
+      "locations": [
+        {"path": "lib/open_api_spex/controller.ex", "line": 184, "subject": "OpenApiSpex.Controller.__api_operation__/2"}
+      ]
+    },
+    {
+      "package": "open_api_spex",
+      "message": "the right-hand side of || will never be executed:",
+      "locations": [
+        {"path": "lib/mix/tasks/openapi.spec.yaml.ex", "line": 56, "subject": "Mix.Tasks.Openapi.Spec.Yaml.encoder/0"}
+      ]
+    },
+    {
+      "package": "open_api_spex",
+      "message": "this clause of defp term_type/1 is never used (or it will always fail/warn when invoked)",
+      "locations": [
+        {"path": "lib/open_api_spex/deprecated_cast.ex", "line": 325, "column": 8, "subject": "OpenApiSpex.DeprecatedCast.term_type/1"}
+      ]
+    },
+    {
+      "package": "open_api_spex",
+      "message": "this clause of defp validate_required_properties/3 is never used (or it will always fail/warn when invoked)",
+      "locations": [
+        {"path": "lib/open_api_spex/deprecated_cast.ex", "line": 466, "column": 8, "subject": "OpenApiSpex.DeprecatedCast.validate_required_properties/3"}
+      ]
+    },
+    {
+      "package": "phoenix_template",
+      "message": "the variable \"prefix_size\" is accessed inside size(...) of a bitstring but it was defined outside of the match. You must precede it with the pin operator",
+      "locations": [
+        {"path": "lib/phoenix/template.ex", "line": 505, "column": 29, "subject": "Phoenix.Template.unsuffix/2"}
+      ]
+    },
+    {
+      "package": "spark",
+      "message": "Kernel.ParallelCompiler.async/1 is deprecated. Use `pmap/2` instead",
+      "locations": [
+        {"path": "lib/spark/dsl/extension.ex", "line": 2081, "subject": "Spark.Dsl.Extension.do_async_compile/1"}
+      ]
+    },
+    {
+      "package": "yamerl",
+      "message": "'catch ...' is deprecated; please use 'try ... catch ... end' instead.",
+      "locations": [{"path": "src/yamerl_constr.erl", "line": 801, "column": 5}]
+    },
+    {
+      "package": "yamerl",
+      "message": "'catch ...' is deprecated; please use 'try ... catch ... end' instead.",
+      "locations": [{"path": "src/yamerl_node_binary.erl", "line": 65, "column": 9}]
+    },
+    {
+      "package": "yamerl",
+      "message": "'catch ...' is deprecated; please use 'try ... catch ... end' instead.",
+      "locations": [{"path": "src/yamerl_node_binary.erl", "line": 72, "column": 9}]
+    }
+  ]
+}

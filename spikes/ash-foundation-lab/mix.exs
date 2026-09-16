@@ -6,10 +6,11 @@ defmodule AshFoundationLab.MixProject do
       app: :ash_foundation_lab,
       version: "0.1.0",
       elixir: "~> 1.20",
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       aliases: aliases(),
-      dialyzer: [plt_add_apps: [:ecto_sql]]
+      dialyzer: [plt_add_apps: [:ecto_sql, :mix]]
     ]
   end
 
@@ -33,6 +34,9 @@ defmodule AshFoundationLab.MixProject do
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false}
     ]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_environment), do: ["lib"]
 
   defp aliases do
     [

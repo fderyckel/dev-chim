@@ -49,6 +49,8 @@ Replica unavailability or excessive lag follows the owning capability's declared
 
 Synchronized writes use named, idempotent domain actions with bounded batches. The future attendance unit is a tenant-qualified attendance session or classroom submission, not one transaction per learner and not one school-wide transaction. The action validates the complete tenant, actor, roster/version, permission, and state-transition scope before commit. Its transaction writes authoritative state, immutable change/audit facts, and the minimal outbox fact together. Notifications, summaries, integrations, exports, and analytical publication run after commit through separately governed Oban queues.
 
+The implementation must measure the supported bulk strategies in the pinned Ash release rather than assuming a bulk call produces one SQL statement or one transaction. The selected action records its actual query and lock shape. If a measured requirement needs bounded Ecto or SQL, that implementation remains internal to the same named action and preserves authorization, tenant context, atomicity, idempotency, audit, outbox, database constraints, and negative tests.
+
 The platform owns a connection budget per database placement:
 
 ```text
@@ -59,7 +61,7 @@ total_connections =
   + migration_administration_monitoring_and_replication_reserve
 ```
 
-Application autoscaling, Ecto repositories, Oban instances, and tenant placements cannot be configured independently of this budget. Pool checkout wait, saturation, rejected work, and per-tenant fairness are first-class signals. Backpressure rejects retryable work before opening a transaction when safe capacity is unavailable; a retry reuses the same idempotency key.
+Application autoscaling, Ecto repositories, Oban instances, and tenant placements cannot be configured independently of this budget. Pool checkout wait, saturation, rejected work, and per-tenant fairness are first-class signals. Backpressure rejects retryable work before opening a transaction when safe capacity is unavailable; a retry reuses the same idempotency key. Deliberate caller or tenant throttling is a rate-limited condition and may map to HTTP 429. Pool, database, or required-dependency saturation is a retryable-dependency condition and normally maps to HTTP 503; it is not disguised as caller rate limiting. A `Retry-After` value is emitted only when a bounded interval is known.
 
 PgBouncer or a managed transaction pooler remains evidence-triggered. Adopt it only when direct Ecto/Oban pools cannot stay within the accepted connection budget. Transaction pooling requires a compatibility test for prepared statements, migrations, advisory locks, listener behaviour, and any tenant or RLS context. Tenant and authorization safety must never depend on persistent session state crossing transaction-pooled connections.
 

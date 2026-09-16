@@ -8,13 +8,14 @@
 
 ## Context
 
-Web, integrations, and tools need a typed interface that preserves named actions, actor/tenant policy, errors, pagination, idempotency, and compatibility.
+Browser, native-mobile, integration, and tool clients need a typed interface that preserves named actions, actor/tenant policy, errors, pagination, idempotency, and compatibility. The public action contract must support excellent device-specific experiences without turning a generated transport or a TypeScript client into an independent policy engine.
 
 ## Decision drivers
 
 - One authoritative action contract.
 - Generated TypeScript types and client behaviour.
 - Predictable evolution without a second policy engine.
+- A client boundary that serves tailored browser and phone experiences without leaking Ash internals.
 
 ## Considered options
 
@@ -26,17 +27,21 @@ Web, integrations, and tools need a typed interface that preserves named actions
 
 Propose testing Ash JSON:API first because it can derive from the candidate domain model. Accept it only if named actions, policy, errors, pagination, versioning, idempotency, and client generation meet the scorecard. Use a thin REST/OpenAPI adapter if it does not. Defer GraphQL until a concrete use case cannot be served safely and efficiently otherwise.
 
+ADR 0020 owns the proposed client-experience direction. Its browser and native clients consume the same versioned public contract, but their layouts, navigation, components, and device interactions remain product decisions. Generated declarations and request helpers may remove duplicated wire-format knowledge; they do not generate a generic school interface or make authorization decisions.
+
 ## Consequences
 
 ### Positive
 
 - Generated contracts reduce duplicated schema logic.
 - The interface cannot become an independent authorization layer.
+- Browser and native clients can share action, error, and compatibility semantics without being forced into the same user interface.
 
 ### Negative
 
 - Generated semantics may require careful compatibility rules or adapters.
 - A client-generation pipeline must be owned and tested.
+- Supporting multiple client surfaces requires explicit version, accessibility, degraded-network, and release ownership.
 
 ## Security, privacy, operability, and migration effects
 
@@ -65,3 +70,4 @@ Use thin REST/OpenAPI adapters over explicit domain actions. Preserve action sem
 
 - [ADR 0002](0002-ash-adoption-criteria-and-fallback.md)
 - [ADR 0005](0005-domain-action-and-state-transition-convention.md)
+- [ADR 0020](0020-human-interface-experience-and-client-platform-boundary.md)

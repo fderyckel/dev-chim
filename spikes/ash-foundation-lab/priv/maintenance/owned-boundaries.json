@@ -1,0 +1,127 @@
+{
+  "schema_version": 1,
+  "status": "phase0_evidence",
+  "owner": "Platform engineering",
+  "reviewed_on": "2026-09-15",
+  "boundaries": [
+    {
+      "id": "transaction_backed_non_atomic_action",
+      "classification": "framework limitation",
+      "owner": "Platform engineering",
+      "cost": "The named transition cannot use Ash's single-statement atomic path because the locked framework pair cannot translate the custom validation error.",
+      "bounded_remedy": "Keep the explicit non-atomic declaration, PostgreSQL transaction, optimistic lock, and rollback tests together until the framework supports the validation expression or the action is replaced.",
+      "closure_gate": "Before a production state transition depends on this pattern.",
+      "recheck_trigger": "Any Ash or AshPostgres upgrade, or a change to the transition validation.",
+      "sources": [
+        "lib/ash_foundation_lab/foundation_record.ex"
+      ],
+      "evidence": "../../docs/phase-0/evidence/ash-pressure-test.md#named-action-and-tenant-role-slice"
+    },
+    {
+      "id": "dynamic_repository_sql",
+      "classification": "platform-owned transactional adapter",
+      "owner": "Platform engineering",
+      "cost": "Role graph locking, lifecycle coordination, idempotency, outbox insertion, access resolution, and bounded migration work use explicit SQL that must respect the selected dynamic repository and transaction.",
+      "bounded_remedy": "Keep raw SQL tenant-qualified, route it through AshFoundationLab.Repo, and cover each path with negative tenant, rollback, or concurrency evidence.",
+      "closure_gate": "Before any listed SQL adapter is promoted or reimplemented in the production core.",
+      "recheck_trigger": "A new raw SQL source file, a placement-routing change, or replacement with a reviewed Ash-native expression.",
+      "sources": [
+        "lib/ash_foundation_lab/access_control.ex",
+        "lib/ash_foundation_lab/change/idempotent_submission.ex",
+        "lib/ash_foundation_lab/change/record_outbox.ex",
+        "lib/ash_foundation_lab/retained_data_migration.ex",
+        "lib/ash_foundation_lab/role_administration.ex",
+        "lib/ash_foundation_lab/synthetic_module_lifecycle.ex",
+        "lib/ash_foundation_lab/trusted_routing.ex"
+      ],
+      "evidence": "../../docs/phase-0/evidence/ash-pressure-test.md"
+    },
+    {
+      "id": "page_limit_edge_adapter",
+      "classification": "generated-interface escape hatch",
+      "owner": "Platform and web engineering",
+      "cost": "AshJsonApi 1.7.1 does not enforce the configured maximum page size at the tested generated endpoint.",
+      "bounded_remedy": "Reject an excessive page limit in the thin edge before generated dispatch and drift-check the documented OpenAPI maximum.",
+      "closure_gate": "Before the production platform exposes a generated public list route.",
+      "recheck_trigger": "Any AshJsonApi upgrade or generated pagination behaviour change.",
+      "sources": [
+        "lib/ash_foundation_lab/api_router.ex",
+        "lib/ash_foundation_lab/json_api_page_limit.ex"
+      ],
+      "evidence": "../../docs/phase-0/evidence/ash-pressure-test.md#generated-jsonapi-policy-slice"
+    },
+    {
+      "id": "failure_header_edge_adapter",
+      "classification": "generated-interface adapter",
+      "owner": "Platform and web engineering",
+      "cost": "The proposed public transient-error contract needs cache and retry headers outside the generated error body.",
+      "bounded_remedy": "Keep the header adapter allowlisted to the tested status codes and verify the complete response at the transport boundary.",
+      "closure_gate": "Before the production platform exposes the proposed public error contract.",
+      "recheck_trigger": "Any generated error-handler, public taxonomy, or retry-policy change.",
+      "sources": [
+        "lib/ash_foundation_lab/api_router.ex",
+        "lib/ash_foundation_lab/json_api_failure_headers.ex"
+      ],
+      "evidence": "../../docs/phase-0/evidence/ash-pressure-test.md#stable-public-error-taxonomy-slice"
+    },
+    {
+      "id": "openapi_contract_modifier",
+      "classification": "generated-contract adapter",
+      "owner": "Platform and web engineering",
+      "cost": "The checked-in public schema needs a bounded modifier for page limits and transient responses that are not emitted completely by the evaluated generator.",
+      "bounded_remedy": "Keep one explicit modifier, regenerate from the Ash router, and fail the OpenAPI and TypeScript drift checks when output changes.",
+      "closure_gate": "Before a production client is generated from the public API contract.",
+      "recheck_trigger": "Any AshJsonApi, OpenApiSpex, route, page-limit, or public-error change.",
+      "sources": [
+        "lib/ash_foundation_lab/json_api_contract.ex",
+        "lib/ash_foundation_lab/json_api_router.ex"
+      ],
+      "evidence": "../../docs/phase-0/evidence/ash-pressure-test.md#idempotency-and-generated-typescript-client-slice"
+    },
+    {
+      "id": "retained_data_migration_choreography",
+      "classification": "platform-owned operational choreography",
+      "owner": "Platform engineering and operations",
+      "cost": "Generated schema intent does not own mixed-version reads and writes, bounded tenant backfills, lock budgets, constraint validation order, or the irreversible contract gate.",
+      "bounded_remedy": "Keep expand, compatibility, backfill, validation, and contract steps separate and review the four operational artifacts with retained-data tests.",
+      "closure_gate": "Before the first production migration contracts retained tenant data.",
+      "recheck_trigger": "Any retained-data schema evolution, migration generator change, or production deployment strategy decision.",
+      "sources": [
+        "lib/ash_foundation_lab/retained_data_migration.ex",
+        "priv/retained_data_migration_rehearsal/migrations/20260915010000_expand_foundation_record_name.exs",
+        "priv/retained_data_migration_rehearsal/migrations/20260915020000_enforce_foundation_record_dual_write.exs",
+        "priv/retained_data_migration_rehearsal/migrations/20260915030000_validate_foundation_record_name.exs",
+        "priv/retained_data_migration_rehearsal/migrations/20260915040000_contract_foundation_record_name.exs"
+      ],
+      "evidence": "../../docs/phase-0/evidence/retained-data-migration-rehearsal.md"
+    },
+    {
+      "id": "resource_descriptor_and_metadata_validator",
+      "classification": "governed metadata adapter",
+      "owner": "Platform engineering and security architecture",
+      "cost": "The one-way authoring boundary needs a stable-reference allowlist, deterministic descriptor schema, metadata validator, execution registry, and compatibility rules in addition to the Ash model.",
+      "bounded_remedy": "Keep the adapter derived, versioned, code-owned, and limited to approved presentation references; reject model, policy, tenancy, repository, SQL, code, and unknown references before executing the existing authorized Ash action.",
+      "closure_gate": "Before a production descriptor, form/view consumer, report-definition store, or metadata renderer is implemented.",
+      "recheck_trigger": "Any Ash information-API upgrade, descriptor schema change, new metadata kind, new consumer, or stable-reference removal.",
+      "sources": [
+        "lib/ash_foundation_lab/governed_metadata.ex",
+        "lib/ash_foundation_lab/resource_descriptor.ex",
+        "lib/mix/tasks/phase0.descriptor.check.ex"
+      ],
+      "evidence": "../../docs/phase-0/evidence/resource-authoring-and-governed-metadata.md"
+    },
+    {
+      "id": "tenant_movement_and_non_http_routing",
+      "classification": "platform-owned control-plane adapter",
+      "owner": "Platform engineering and security architecture",
+      "cost": "The disposable proof owns versioned placement transitions, tenant-qualified reconciliation SQL, and trusted target derivation for interface classes that Ash does not route by itself.",
+      "bounded_remedy": "Keep movement transitions named and capability-gated, keep the source authoritative until quiesced reconciliation succeeds, increment the placement version at cutover, reject stale envelopes, and derive every non-HTTP target from the trusted registry before re-entering Ash authorization.",
+      "closure_gate": "Before a production placement registry, tenant-movement control plane, or non-HTTP tenant adapter is implemented.",
+      "recheck_trigger": "Any placement model, movement choreography, routing envelope, non-HTTP adapter, tenant-owned table, or Ash authorization-boundary change.",
+      "sources": [
+        "lib/ash_foundation_lab/trusted_routing.ex"
+      ],
+      "evidence": "../../docs/phase-0/evidence/trusted-routing.md#tenant-movement-and-non-http-interface-slice"
+    }
+  ]
+}

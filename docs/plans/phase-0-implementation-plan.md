@@ -29,9 +29,9 @@ Before this plan was added, the target directory existed but was not a Git repos
 
 Implementation checkpoint on 2026-09-14:
 
-- P0.0 is implemented locally except for remote hosting and branch protection.
+- P0.0 repository and remote hosting setup are present; GitHub reported that `main` had no branch protection when checked on 2026-09-15.
 - P0.1 ADR governance and the initial Proposed record set are implemented.
-- P0.5 scenarios 1-14 have direct Ash/PostgreSQL evidence, including generated migration, patch-upgrade, trusted pooled/dedicated routing, module-lifecycle concurrency/drain review, action idempotency, and generated-client contract review; the wider adoption scorecard remains incomplete.
+- P0.5 scenarios 1-15 and the mandatory tenant-movement/non-HTTP follow-up have direct Ash/PostgreSQL evidence, including generated migration, retained-data rehearsal, patch-upgrade, trusted pooled/dedicated routing, module-lifecycle concurrency/drain review, action idempotency, generated-client contract review, test/maintenance ergonomics, and the governed descriptor/metadata slice. The complete locked dependency-warning surface also has a machine-normalized zero-delta gate. Mandatory scorecard criteria have evidence, but the non-patch upgrade, production-shaped migration measurement, bounded-condition disposition, and accountable adoption outcome remain incomplete.
 - P0.6 local toolchain, Ruff, ShellCheck, documentation validation, Credo, TypeScript contract checks, dependency audits, Dialyzer, database migrations, and test entrypoints are implemented and passing.
 - P0.3, P0.4, and P0.7 still require accountable human review and approved decisions before Phase 0 can close.
 
@@ -215,6 +215,9 @@ All records begin as Proposed. Only the architecture review may mark them Accept
 | 0015 | AI gateway tool exposure and evaluation policy | No implicit database authority; actor/tenant propagation; read allowlist and confirmed-write boundary |
 | 0016 | Scheduling service contract and publication boundary | Versioned input/output ownership; cancellation, reproducibility, and core-only publication rule |
 | 0017 | PostgreSQL availability, recovery, and consistency-aware read routing | Writer/HA/read/recovery separation; consistency classes; burst batching; connection budget; lag, failover, and restore evidence |
+| 0019 | Domain model authoring and governed metadata | Code-defined Ash authority; derived descriptor; view/report metadata validation; forbidden-reference and evolution evidence |
+
+Number 0018 remains reserved for the separate temporal records, correction, audit, and evidence-semantics decision; ADR 0019 does not pre-empt or silently combine that boundary.
 
 Required decision discipline:
 
@@ -225,6 +228,7 @@ Required decision discipline:
 - ADR 0014 should test the preferred generated REST or JSON:API path first. GraphQL remains deferred unless a concrete use case fails without it.
 - ADRs 0010, 0012, 0015, and 0016 define contracts and boundaries only; their production services are not Phase 0 deliverables.
 - ADR 0017 defines a production-topology hypothesis and evidence gates only; Phase 0 does not provision production database infrastructure or assume a read replica is required.
+- ADR 0019 keeps the domain, policy, and migration model in code; it does not authorize runtime-defined schemas, a custom compiler, a visual model builder, or a general custom-field store.
 
 Acceptance criteria:
 
@@ -362,8 +366,9 @@ Use a named action such as `submit_for_review` or `approve_record`. Do not expos
 12. A time-boxed dependency upgrade exercise records changed code, migration output, warnings, and test results.
 13. A neutral trusted-routing slice selects pooled and dedicated test databases from authenticated tenant context, ignores request-selected placement, propagates through spawned tasks and jobs, and fails closed on missing or stale routing.
 14. A neutral synthetic module proves that release availability, entitlement, activation, and actor authorization are independent, and that concurrent deactivation drains safely without losing required audit or outbox work.
+15. A neutral resource-authoring slice derives a versioned descriptor from an allowlisted Ash model, drives one view and one report definition without duplicating policy, rejects private, stale, cross-tenant, arbitrary-SQL, and unapproved-action references, and records rename and upgrade ergonomics.
 
-Scenarios 1-14 now have focused evidence. Scenario 14 is recorded in [module-lifecycle evidence](../phase-0/evidence/module-lifecycle.md); this does not by itself complete the Ash scorecard or approve ADR 0001.
+Scenarios 1-15 now have focused evidence. Scenario 11 includes a [retained-data expand-and-contract rehearsal](../phase-0/evidence/retained-data-migration-rehearsal.md), scenario 14 is recorded in [module-lifecycle evidence](../phase-0/evidence/module-lifecycle.md), and scenario 15 is recorded in [resource-authoring and governed-metadata evidence](../phase-0/evidence/resource-authoring-and-governed-metadata.md). Scenario 15 remains disposable evidence and must not be represented as production tooling. These results do not by themselves complete the Ash scorecard or approve ADR 0001, ADR 0002, or ADR 0019.
 
 #### Ash evaluation scorecard
 
@@ -380,6 +385,7 @@ Each category is Mandatory Pass, Pass with bounded remediation, or Fail:
 - generated API contract quality and policy preservation;
 - telemetry, redaction, and correlation support;
 - test ergonomics, compile feedback, and maintainability;
+- resource authoring, descriptor evolution, and governed view/report metadata ergonomics;
 - upgrade effort and dependency health; and
 - ability to keep public domain contracts explicit rather than leaking framework internals everywhere.
 
@@ -536,6 +542,7 @@ Slices 0C, 0D, and the non-Ash portion of 0F can proceed in parallel after 0A. S
 | Migration safety | Generated migration review and apply/rollback test | Missing tenant constraint, unsafe data rewrite, or unreadable migration |
 | API policy preservation | Generated-interface negative tests | Direct endpoint bypasses action policy |
 | Telemetry safety | Captured telemetry assertions | Restricted content or secret logged |
+| Resource authoring and governed metadata | Descriptor drift, tenant view/report, policy re-entry, forbidden-reference, and evolution tests | Metadata duplicates or broadens authority, crosses tenants, executes code/SQL, or silently accepts incompatible references |
 | Threat traceability | Threat-control-test matrix | High/critical threat lacks owner or verification |
 | Quality targets | Schema check and approval record | Blank, subjective, unowned, or environment-free target |
 | Peak capacity | Synchronized mixed-load benchmark | Annual average hides burst, amplification, pool starvation, or report overlap |

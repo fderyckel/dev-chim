@@ -18,6 +18,14 @@ One common product release may run in multiple deployment cells. A cell is an op
 
 Activating a module does not create a service, schema, database, or cell. Moving a tenant does not change its enabled modules, roles, or application model.
 
+## Internal application boundary
+
+Each module exposes Chimwemwe-owned, named domain actions and read interfaces. These may be Ash code interfaces or small context functions, but callers outside the owning module do not construct or pass `Ash.Query` or `Ash.Changeset` values, choose an Ecto repository, or reach around a policy with a generic CRUD call. Phoenix controllers, web components, generated APIs, jobs, integrations, reports, and AI tools enter through the same actor- and tenant-aware boundary.
+
+This boundary does not require redundant maps around every Ash value. Resource structs may remain useful inside the owning core, while public, cross-module, asynchronous, and wire contracts use deliberate Chimwemwe-owned types and versioning where compatibility matters. The purpose is to protect domain intent and replacement boundaries, not to hide every framework type mechanically.
+
+An owner may use Ecto or SQL internally for a measured bulk, projection, or reporting need that Ash cannot meet adequately, but the escape path remains behind the named domain or dataset interface. It preserves trusted actor and tenant context, authorization, transaction semantics, audit and outbox obligations, error taxonomy, and negative tests. A user interface, report definition, or integration never receives raw-table authority.
+
 ## Permitted supporting planes
 
 - Next.js web delivery has an independent static and edge lifecycle but no independent policy engine.

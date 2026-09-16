@@ -99,6 +99,8 @@ The routing contract must:
 
 Dynamic repositories establish technical feasibility, not routing safety. The Foundation Lab must test task and job boundaries, stale routing versions, placement changes, pool exhaustion, and deliberate attempts to choose another tenant's placement.
 
+The [Phase 0 trusted-routing evidence](../phase-0/evidence/trusted-routing.md) now exercises the routing, non-HTTP scoping, and abstract movement parts of this contract against two disposable PostgreSQL placements. That closes the Ash pressure-test gap only. A durable registry, authenticated production envelopes, real external adapters, copy/outbox/object choreography, connection pressure, backup, and restore remain acceptance evidence below.
+
 ## Future attendance design constraints
 
 Attendance is a later business module; Phase 0 creates no attendance schema or API. Its workload nevertheless supplies a useful foundation stress profile. The later module contract must evaluate:
@@ -121,8 +123,8 @@ Range partitioning by date or academic period remains evidence-driven. PostgreSQ
 - Synthetic synchronized-burst tests with named hardware, PostgreSQL settings, data shape, and pass thresholds.
 - Mixed workload tests covering attendance writes, corrections, operational summaries, reports, outbox dispatch, and permission revocation.
 - Pool saturation, lock, WAL, autovacuum, index-growth, backup, restore, and projection-lag measurements.
-- Cross-placement negative tests for HTTP, tasks, jobs, events, files, caches, search, exports, telemetry, support, and AI tools.
-- A placement-movement rehearsal with version conflict, rollback, and reconciliation evidence.
+- Production-integration cross-placement negative tests for HTTP, tasks, jobs, events, files, caches, search, exports, telemetry, support, and AI tools; the disposable Phase 0 lab covers all except support at its routing abstraction.
+- An operational placement-movement drill with durable version conflict, copy/outbox/object reconciliation, rollback, backup, and restore evidence; the disposable Phase 0 lab covers the abstract versioned transition and database-row reconciliation only.
 - A five-school decision signed by architecture, security/privacy, and operations owners; the arithmetic alone is insufficient.
 - Availability evidence that distinguishes writer failover, replica lag, point-in-time restore, and regional recovery, with an explicit connection budget and read-consistency classification.
 

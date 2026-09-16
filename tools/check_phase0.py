@@ -40,6 +40,7 @@ REQUIRED_PATHS = (
     "docs/security/threat-model.md",
     "docs/phase-0/README.md",
     "docs/phase-0/decision-register.md",
+    "docs/phase-0/evidence/ash-dependency-warning-baseline.md",
     "docs/phase-0/evidence/ash-upgrade-exercise.md",
     "docs/phase-0/evidence/module-lifecycle.md",
     "docs/phase-0/evidence/postgresql-availability-and-burst.md",
@@ -47,14 +48,24 @@ REQUIRED_PATHS = (
     "docs/phase-0/evidence/trusted-routing.md",
     "docs/phase-0/review-record.md",
     "docs/phase-1/README.md",
+    "docs/phase-1/evidence/action-invocation.md",
+    "docs/phase-1/evidence/core-foundation.md",
+    "docs/phase-1/evidence/resource-descriptor.md",
     "docs/plans/phase-1-core-foundation-plan.md",
+    "tools/check_ash_dependency_warnings.py",
     "apps/chimwemwe_core/mix.exs",
     "apps/chimwemwe_core/lib/chimwemwe/platform.ex",
+    "apps/chimwemwe_core/lib/chimwemwe/platform/action_invocation.ex",
     "apps/chimwemwe_core/lib/chimwemwe/platform/execution_context.ex",
+    "apps/chimwemwe_core/lib/chimwemwe/platform/invocation_error.ex",
+    "apps/chimwemwe_core/lib/chimwemwe/platform/resource.ex",
+    "apps/chimwemwe_core/lib/chimwemwe/platform/resource_contract.ex",
+    "apps/chimwemwe_core/lib/chimwemwe/platform/resource_descriptor.ex",
     "config/config.exs",
     "mix.exs",
     "spikes/ash-foundation-lab/mix.exs",
     "spikes/ash-foundation-lab/mix.lock",
+    "spikes/ash-foundation-lab/priv/maintenance/ash-dependency-warnings.json",
     "spikes/ash-foundation-lab/typescript-client-review/package.json",
     "spikes/ash-foundation-lab/typescript-client-review/package-lock.json",
 )
@@ -72,6 +83,7 @@ REQUIRED_ADR_NUMBERS = {
     "0015",
     "0016",
     "0017",
+    "0019",
 }
 
 REQUIRED_ADR_HEADINGS = (
@@ -203,7 +215,7 @@ def threat_model_errors(root: Path) -> list[str]:
     body = path.read_text(encoding="utf-8")
     errors: list[str] = []
 
-    for threat_number in range(1, 16):
+    for threat_number in range(1, 17):
         threat_id = f"TM-{threat_number:02d}"
         matching_lines = [line for line in body.splitlines() if line.startswith(f"| {threat_id} |")]
         if len(matching_lines) != 1:
@@ -270,7 +282,7 @@ def phase_boundary_errors(root: Path) -> list[str]:
             unexpected_apps = sorted(app_names - PHASE1_ALLOWED_APPS)
             if unexpected_apps:
                 errors.append(
-                    "Phase 1 slice 1A permits only apps/chimwemwe_core; "
+                    "Phase 1 slices 1A through 1C permit only apps/chimwemwe_core; "
                     f"unexpected apps: {', '.join(unexpected_apps)}"
                 )
             continue

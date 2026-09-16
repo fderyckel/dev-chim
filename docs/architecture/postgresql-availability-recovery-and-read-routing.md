@@ -95,6 +95,12 @@ The later attendance capability must follow these constraints:
 
 The benchmark compares this path with an intentionally unbatched shape to quantify the avoided request, commit, and connection amplification. The comparison is evidence only and does not make unsafe unbatched behaviour a supported API.
 
+### Bulk implementation evidence
+
+Batching is a domain contract, not a promise that a framework call becomes one SQL statement. For an Ash implementation, benchmark the supported `Ash.bulk_create/4` or `Ash.bulk_update/4` path in the pinned release and record the selected strategy, transaction shape, generated SQL, query count, lock behaviour, memory use, error semantics, and repeated-run variance. Error-collection options do not permit unauthorized or unexpectedly partial writes.
+
+Choose the smallest implementation that meets the accepted target while preserving whole-session validation and commit semantics. If the supported Ash path cannot meet a measured requirement, a bounded Ecto or SQL implementation may sit behind the same named action. It must keep trusted actor and tenant context, authorization, idempotency, audit, outbox, constraints, and the registered maintenance and negative-test obligations; it does not become a caller-visible persistence API.
+
 ## Backpressure and asynchronous work
 
 The system preserves the primary rather than allowing an unbounded queue of open transactions:
@@ -108,6 +114,8 @@ The system preserves the primary rather than allowing an unbounded queue of open
 - never acknowledge an attendance write merely because an in-memory or non-authoritative queue accepted it.
 
 Queue names and exact concurrency are later implementation choices, but the service classes and starvation rules are platform contracts. The transactional outbox remains the bridge between committed state and at-least-once consumers.
+
+Overload is classified before an interface maps it to a transport response. A deliberate caller- or tenant-fairness limit is `rate_limited` and may map to HTTP 429. Database, pool, or required-dependency saturation is `retryable_dependency` and normally maps to HTTP 503. `Retry-After` is supplied only when the owning control can state a bounded retry interval, and write retries reuse the same idempotency key. A generic database checkout failure is not relabelled as caller rate limiting.
 
 ## Connection budget
 

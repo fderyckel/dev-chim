@@ -11,6 +11,7 @@ defmodule ChimwemweCore.MixProject do
       lockfile: "../../mix.lock",
       elixir: "~> 1.20",
       start_permanent: Mix.env() == :prod,
+      elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps(),
       dialyzer: [plt_add_apps: [:mix]]
     ]
@@ -18,7 +19,7 @@ defmodule ChimwemweCore.MixProject do
 
   def application do
     [
-      extra_applications: [:logger],
+      extra_applications: [:crypto, :logger],
       mod: {Chimwemwe.Application, []}
     ]
   end
@@ -26,8 +27,13 @@ defmodule ChimwemweCore.MixProject do
   defp deps do
     [
       {:ash, "== 3.33.3"},
+      {:jason, "~> 1.4"},
+      {:picosat_elixir, "~> 0.2.3"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false}
     ]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_environment), do: ["lib"]
 end

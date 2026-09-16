@@ -20,5 +20,6 @@
 | AC-13 | A tenant or client treats module activation as permission, bypasses entitlement, or deactivates while work is in flight | Enforce all gates server-side; drain or park work deterministically; preserve audit, outbox, retained data, and compliance access |
 | AC-14 | A lagging replica still shows a revoked permission, old tenant placement, inactive module, or omits a just-committed attendance change | Keep security decisions and bounded read-your-write interactions on the writer; lag-gate approved stale reads and fail closed or delay them |
 | AC-15 | A caller reuses an idempotency key with another actor, tenant, aggregate, or request envelope to duplicate or suppress a transition | Bind the claim to tenant, action, actor, aggregate, and canonical request; replay only an exact completed result and reject changed reuse without another state or outbox write |
+| AC-16 | A tenant definition references a private field, forbidden action, another tenant's definition, arbitrary SQL or code, or an incompatible resource descriptor | Reject the definition or execution; disclose no protected schema or cross-tenant existence; re-authorize every allowed operation through the domain boundary |
 
 Each implemented capability must convert relevant abuse cases into automated negative tests and link them from the threat model.

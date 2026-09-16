@@ -79,7 +79,7 @@ Range partitioning for append-heavy resources is decided per resource after benc
 
 See the [tenant placement and workload capacity model](../architecture/tenant-placement-and-capacity.md), [tenant-placement capacity evidence](../phase-0/evidence/tenant-placement-capacity.md), [trusted pooled/dedicated routing evidence](../phase-0/evidence/trusted-routing.md), [threat model](../security/threat-model.md), and Ash tenancy tests.
 
-The focused routing slice passes pooled and dedicated selection, cross-placement denial, explicit spawned-task and job propagation, stale and missing routing, untrusted request input, repository-type validation, and process cleanup. Acceptance still requires synchronized workload bursts, concurrent permission revocation, pool exhaustion, tenant movement, backup, and restore. Attendance calculations alone are not acceptance evidence.
+The focused routing slice passes pooled and dedicated selection, cross-placement denial, explicit spawned-task and job propagation, stale and missing routing, untrusted request input, repository-type validation, and process cleanup. Its follow-up passes capability-gated movement between two real disposable databases with source authority during copy, quiescence, code-owned tenant-snapshot reconciliation, versioned cutover, rollback, and stale-envelope rejection across event, file, cache, search, realtime, export, analytics, telemetry, AI-tool, and integration classes. Acceptance still requires synchronized workload bursts, concurrent permission revocation, pool exhaustion, production control-plane and real-adapter integration, backup, restore, and accountable review. Attendance calculations alone are not acceptance evidence.
 
 ## Fallback and exit cost
 

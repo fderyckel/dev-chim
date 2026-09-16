@@ -68,5 +68,5 @@ def test_phase_one_core_requires_a_start_record_and_rejects_other_apps(
     (apps / "attendance").mkdir()
 
     assert CHECKER.phase_boundary_errors(tmp_path) == [
-        "Phase 1 slice 1A permits only apps/chimwemwe_core; unexpected apps: attendance"
+        "Phase 1 slices 1A through 1C permit only apps/chimwemwe_core; unexpected apps: attendance"
     ]

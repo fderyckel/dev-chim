@@ -26,6 +26,10 @@ Schools can generate large, sensitive report campaigns. Synchronous rendering or
 
 Propose versioned report definitions and templates, asynchronous bounded campaigns, immutable manifests, idempotent items, cancellation, retry, checksums, and output validation. Per-tenant quotas and fair scheduling prevent report workloads from consuming the database and connection budget reserved for synchronized operational writes. Gotenberg/Chromium is the preferred renderer subject to an accepted capacity target and mixed-workload benchmark.
 
+Every report definition selects a versioned, policy-protected dataset or read action; it never receives arbitrary table access or user-supplied SQL authority. Operational reports may use an authorized Ash read. Heavy historical reporting may use a disposable, rebuildable projection or governed publication produced after commit. The projection implementation may use bounded Ecto or SQL internally, but tenant filtering alone is not authorization: dataset selection and execution still bind the real actor, tenant, placement, module gates, classification, purpose, and audit requirements.
+
+This is a reporting implementation seam, not a second domain model or a general CQRS subsystem. PostgreSQL state and the transactional outbox remain authoritative, projections never authorize state changes, and a report template cannot choose its repository or bypass the named dataset contract.
+
 ## Consequences
 
 ### Positive

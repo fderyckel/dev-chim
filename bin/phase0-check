@@ -12,22 +12,22 @@ if ! pg_isready >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "[1/11] Python formatting"
+echo "[1/12] Python formatting"
 mise exec -- uv run ruff format --check tools tests/tools
 
-echo "[2/11] Python lint"
+echo "[2/12] Python lint"
 mise exec -- uv run ruff check tools tests/tools
 
-echo "[3/11] Shell lint"
+echo "[3/12] Shell lint"
 shellcheck .githooks/pre-push bin/bootstrap bin/phase0-check
 
-echo "[4/11] Repository and documentation conventions"
+echo "[4/12] Repository and documentation conventions"
 mise exec -- uv run python tools/check_phase0.py
 
-echo "[5/11] Python tests"
+echo "[5/12] Python tests"
 mise exec -- uv run pytest
 
-echo "[6/11] Elixir formatting, generated migration drift, and lint"
+echo "[6/12] Elixir formatting, generated migration drift, and lint"
 (
   cd "$spike_dir"
   mise exec -- mix format --check-formatted
@@ -39,16 +39,20 @@ echo "[6/11] Elixir formatting, generated migration drift, and lint"
     --check \
     --pretty=true \
     --filename priv/openapi/phase0-v1.json
+  mise exec -- env MIX_ENV=test mix phase0.descriptor.check
   mise exec -- mix credo --strict
 )
 
-echo "[7/11] Generated TypeScript client contract"
+echo "[7/12] Generated TypeScript client contract"
 (
   cd "$typescript_client_dir"
   mise exec -- npm run check
 )
 
-echo "[8/11] Dependency audits"
+echo "[8/12] Ash dependency warning drift"
+mise exec -- uv run python tools/check_ash_dependency_warnings.py
+
+echo "[9/12] Dependency audits"
 (
   cd "$spike_dir"
   mise exec -- mix hex.audit
@@ -59,19 +63,19 @@ echo "[8/11] Dependency audits"
   mise exec -- npm audit
 )
 
-echo "[9/11] Elixir type analysis"
+echo "[10/12] Elixir type analysis"
 (
   cd "$spike_dir"
   mise exec -- mix dialyzer
 )
 
-echo "[10/11] Elixir and PostgreSQL tests"
+echo "[11/12] Elixir and PostgreSQL tests"
 (
   cd "$spike_dir"
   mise exec -- env MIX_ENV=test mix test
 )
 
-echo "[11/11] Git whitespace check"
+echo "[12/12] Git whitespace check"
 git diff --check
 
 echo "Phase 0 local verification passed."
