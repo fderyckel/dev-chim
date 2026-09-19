@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "status": "selected_technical_baseline_live_measurement_blocked",
+  "selected_on": "2026-09-16",
+  "provider": "Amazon Web Services",
+  "service": "Amazon RDS for PostgreSQL",
+  "region": {
+    "technical_default": "eu-central-1",
+    "reason": "Same-continent low-latency default for the Luxembourg development context.",
+    "condition": "Confirm contractual residency, school jurisdiction, service availability, and total cost before provisioning."
+  },
+  "database": {
+    "engine_major": 18,
+    "engine_version_candidate": "18.6",
+    "deployment": "Multi-AZ DB instance with one synchronous non-readable standby",
+    "instance_class_candidate": "db.m7i.large",
+    "instance_shape": {
+      "vcpu": 2,
+      "memory_gib": 8
+    },
+    "storage": {
+      "type": "gp3",
+      "allocated_gib": 100,
+      "maximum_autoscaled_gib": 500,
+      "baseline_iops": 3000,
+      "baseline_throughput_mib_per_second": 125,
+      "encrypted": true
+    },
+    "postgresql_max_connections": 100,
+    "backup_retention_days": 35,
+    "deletion_protection": true,
+    "publicly_accessible": false,
+    "reader_instances": 0,
+    "connection_pooler": "none_at_baseline"
+  },
+  "application_budget": {
+    "application_nodes": 2,
+    "writer_pool_per_node": 10,
+    "job_and_outbox_connections": 5,
+    "reserved_connections": 25,
+    "total_budgeted_connections": 50,
+    "precheckout_per_tenant_limit": 2,
+    "precheckout_per_placement_limit_per_node": 10
+  },
+  "recovery": {
+    "committed_write_rpo_bytes_max": 0,
+    "failover_rto_seconds_max": 120,
+    "application_reconnect_seconds_max": 60,
+    "pitr_rpo_seconds_max": 300,
+    "pitr_rto_seconds_max": 14400,
+    "restore_target": "new isolated instance with explicit network, parameter, monitoring, backup, and Multi-AZ configuration"
+  },
+  "preflight": [
+    "Use describe-orderable-db-instance-options to confirm PostgreSQL 18.6, db.m7i.large, gp3, and Multi-AZ orderability in eu-central-1 on the execution date.",
+    "Record the exact parameter group, subnet group, KMS key, maintenance window, backup window, enhanced monitoring, Performance Insights, and cost estimate.",
+    "If db.m7i.large is not orderable, select the nearest current-generation general-purpose 2-vCPU/8-GiB class and retain that variance in the measurement artifact.",
+    "Do not add a reader or pooler unless direct-pool managed evidence misses an accepted target and the compatibility gates pass."
+  ],
+  "execution": {
+    "managed_capacity_fairness_failover_run": "blocked_no_aws_account_endpoint_or_credentials_in_workspace",
+    "local_equivalent_evidence": "spikes/ash-foundation-lab/priv/maintenance/precheckout-admission-measurement.json",
+    "secrets_recorded": false
+  },
+  "sources": [
+    "https://docs.aws.amazon.com/AmazonRDS/latest/PostgreSQLReleaseNotes/postgresql-versions.html",
+    "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZSingleStandby.html",
+    "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZ.Failover.html",
+    "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.DBInstanceClass.Summary.html",
+    "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.DBInstanceClass.RegionSupport.html",
+    "https://docs.aws.amazon.com/us_en/AmazonRDS/latest/UserGuide/CHAP_Storage.html",
+    "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PIT.html",
+    "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_WorkingWithAutomatedBackups.BackupRetention.html"
+  ]
+}

@@ -1,7 +1,8 @@
 # Phase 0 threat model
 
-- Status: Proposed
-- Owner: Security architecture
+- Status: Accepted Phase 0 engineering baseline
+- Owner: François — interim Security/Privacy Owner
+- Decision date: 2026-09-16
 - Review trigger: architecture review or any new trust boundary/data class
 
 ## Assets
@@ -46,24 +47,24 @@ Every boundary authenticates the caller or service, propagates tenant and correl
 | TM-09 | Sensitive logs, traces, events, or evidence | High | Minimal payloads, classification, source redaction, safe identifiers | [Captured correlated telemetry allowlist and redaction assertions](../phase-0/evidence/ash-pressure-test.md#telemetry-and-redaction-slice); third-party logger review remains | Platform engineering |
 | TM-10 | State commits without durable side-effect fact, or event without state | High | Transactional outbox and rollback | [Injected Ash transaction-failure test](../phase-0/evidence/ash-pressure-test.md#transactional-outbox-slice) | Platform engineering |
 | TM-11 | Forged, stale, or conflicting placement routes a tenant to another database, queue, or storage namespace | Critical | Authenticated versioned registry, placement membership constraint, least-privilege credentials, no default fallback | [Pooled/dedicated, non-HTTP, movement, reconciliation, version-conflict, rollback, and stale-route tests](../phase-0/evidence/trusted-routing.md); durable control-plane and real-adapter drills remain | Security architecture |
-| TM-12 | A synchronized write burst or noisy pooled tenant denies service or delays authorization, outbox, and recovery work | High | Per-tenant fairness, bounded bulk actions, pool budgets, backpressure, mixed-load targets, dedicated-placement escape path | Period-start burst, report-overlap, pool-exhaustion, backup, and restore tests | Platform engineering and operations |
-| TM-13 | Module activation bypasses authorization, or deactivation loses data, audit, jobs, events, or compliance access | Critical | Independent server-side gates, explicit dependencies, controlled drain, retained-data ownership, replay/reconciliation | [Gate matrix, concurrent deactivation, drain, retained-data, and reactivation tests](../phase-0/evidence/module-lifecycle.md); accountable review remains | Platform engineering and security architecture |
+| TM-12 | A synchronized write burst or noisy pooled tenant denies service or delays authorization, outbox, and recovery work | High | Per-tenant fairness, bounded bulk actions, pool budgets, pre-checkout backpressure, mixed-load targets, dedicated-placement escape path | [Raw burst/failure](../phase-0/evidence/capacity-and-recovery-measurement.md), [pre-checkout local proof](../phase-0/evidence/precheckout-admission-measurement.md), and [full-horizon local restore](../phase-0/evidence/full-horizon-restore-measurement.md); multi-node, report-overlap, and selected-deployment tests remain production-readiness gates | Platform engineering and operations |
+| TM-13 | Module activation bypasses authorization, or deactivation loses data, audit, jobs, events, or compliance access | Critical | Independent server-side gates, explicit dependencies, controlled drain, retained-data ownership, replay/reconciliation | [Accepted gate matrix, concurrent deactivation, drain, retained-data, and reactivation contract](../phase-0/evidence/module-lifecycle.md); real queue/outbox/drain/replay integrations remain production gates | Platform engineering and security architecture |
 | TM-14 | A stale or misrouted replica supplies revoked authorization, old placement/module state, or a contradictory read-after-write result | Critical | Central consistency classes, writer-only security decisions, lag gates, read-only credentials, and no request-selected repository | Replica-lag/outage, revocation, immediate-confirmation, and cross-placement negative tests | Platform engineering and security architecture |
 | TM-15 | A replayed or mutated idempotency key duplicates a transition, suppresses another actor's action, crosses tenant boundaries, or separates state from its durable event | High | Tenant-and-action uniqueness, actor/aggregate/canonical-request binding, writer transaction, exact-result replay, stable conflict, and bounded retention policy | [Exact, conflicting, cross-tenant, concurrent, rollback, and alternate-write tests](../phase-0/evidence/ash-pressure-test.md#idempotency-and-generated-typescript-client-slice); retention and abuse limits remain | Platform engineering and security architecture |
-| TM-16 | Malicious, cross-tenant, stale, or incompatible experience metadata exposes a forbidden field or action, broadens a report, or bypasses a domain rule | Critical | Code-defined authority, allowlisted versioned descriptors, tenant-qualified definitions, no arbitrary SQL or code, fail-closed validation, and re-authorization at execution | [Scenario 15 private-field, unapproved-action, arbitrary-SQL/code, authority, stale-version, missing-context, cross-tenant, filtered-execution, and denied-actor tests](../phase-0/evidence/resource-authoring-and-governed-metadata.md); accountable security review remains pending | Platform engineering and security architecture |
+| TM-16 | Malicious, cross-tenant, stale, or incompatible experience metadata exposes a forbidden field or action, broadens a report, or bypasses a domain rule | Critical | Code-defined authority, allowlisted versioned descriptors, tenant-qualified definitions, no arbitrary SQL or code, fail-closed validation, and re-authorization at execution | [Scenario 15 private-field, unapproved-action, arbitrary-SQL/code, authority, stale-version, missing-context, cross-tenant, filtered-execution, and denied-actor tests](../phase-0/evidence/resource-authoring-and-governed-metadata.md); independent security review is required before a real metadata consumer | Platform engineering and security architecture |
 
 ## Assumptions and scope limits
 
 - Phase 0 contains synthetic data and a local spike only.
 - Identity-provider, file, report, analytics, AI, and scheduler implementations are not present yet; their controls are architectural requirements, not completed evidence.
-- Application policy is the proposed authorization layer. RLS remains an evidence-driven backstop decision.
+- Application policy is the accepted authorization layer. RLS remains an evidence-driven backstop decision.
 - The five-school topology and attendance calculations are planning hypotheses, not accepted production sizing or placement evidence.
 - The placement registry and module lifecycle are Phase 0 contracts only; production implementations are outside this phase.
 - The local developer account and device security remain outside repository enforcement, but secrets and production data are prohibited.
 
 ## Residual-risk process
 
-High or critical residual risk needs a named accountable acceptor, expiry, mitigation owner, and review date in the Phase 0 review record. A planned later-phase test does not mean the threat is already mitigated.
+François accepts the bounded Phase 0 residual risk as interim Security/Privacy Owner through 2026-12-15 or the relevant production gate, whichever is earlier. Before real restricted child data is used, an independent security/privacy reviewer must review high and critical residual risks, name mitigation owners, and record expiry/review dates. A planned later-phase test does not mean the threat is already mitigated.
 
 ## Related records
 

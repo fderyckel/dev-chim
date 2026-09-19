@@ -1,9 +1,9 @@
 # Core foundation boundary
 
-- Status: Provisional; slices 1A through 1C verified
+- Status: Slices 1A through 1D implemented and test-verified under completed Phase 0 decisions
 - Owner: Platform engineering
 - Governing records: [ADR 0001](../adr/0001-modular-monolith-and-service-boundaries.md), [ADR 0002](../adr/0002-ash-adoption-criteria-and-fallback.md), [ADR 0003](../adr/0003-tenant-model-and-optional-postgresql-rls.md), and [ADR 0019](../adr/0019-domain-model-authoring-and-governed-metadata.md)
-- Review trigger: Phase 0 architecture outcome, identity or placement integration, or the first persistent resource
+- Review trigger: identity or placement integration, the first persistent resource, or a retained Ash production gate
 
 ## Purpose
 
@@ -16,7 +16,7 @@ Request metadata adds a correlation identifier, purpose, and locale only after t
 
 ## Ash boundary
 
-`Chimwemwe.Platform` is the production Ash domain. It always runs authorization, requires an actor, and remains resource-empty through slice 1C. The empty list is deliberate: each later resource must arrive with a named capability, owner, tenant contract, policies, persistence constraints, migration choreography, module lifecycle, and negative tests.
+`Chimwemwe.Platform` is the production Ash domain. It always runs authorization, requires an actor, and remains resource-empty through slice 1D. The empty list is deliberate: each later resource must arrive with a named capability, owner, tenant contract, policies, persistence constraints, migration choreography, module lifecycle, and negative tests.
 
 `Chimwemwe.Platform.Resource` is the code-owned base for future platform resources. It requires an explicit `:tenant_owned` or `:global_reference` ownership declaration and owns the Ash policy-authorizer configuration. `Chimwemwe.Platform.ResourceContract` audits every registered resource and the domain itself in the required test suite. A tenant-owned resource must use private, non-null `tenant_id` attribute multitenancy with no global fallback; a global-reference resource cannot silently carry tenant state; and create, update, and destroy actions cannot use their generic type name.
 
@@ -30,7 +30,13 @@ Slice 1C adds a read-only invocation boundary. It revalidates `ExecutionContext`
 
 Write invocation is intentionally deferred. A state-changing path must arrive with the first persistent resource's named action, policy, tenant constraints, migration, concurrency, idempotency, transactional outbox, recovery, and negative tests.
 
-The production dependencies are pinned to the exact Ash and PicoSAT releases exercised by the Phase 0 pressure-test. This is a reversible working assumption, not an acceptance of ADR 0002 or ADR 0019. The disposable `AshFoundationLab` remains evidence and is not imported, copied, or exposed as a production API.
+## Pre-checkout admission boundary
+
+Slice 1D adds a node-local concurrency boundary before any callback that may reach a database pool. It revalidates `ExecutionContext`, derives tenant and placement capacity keys from the trusted actor and placement, and atomically enforces explicit per-tenant and per-placement limits. Tenant saturation is a rate-limited result; placement saturation is a retryable-dependency result. Neither result contains tenant or placement identifiers, and retry guidance exists only when configured with a bounded interval.
+
+Admission protects scarce database connections; it does not grant authority. An admitted callback must still enter an authorized named action with the same execution context. The boundary is deliberately not supervised or connected to Ecto in this slice because production placement resolution, pool ownership, settings, failover, and multi-node calibration remain unresolved. It is not a distributed quota, and stronger physical placement remains the fallback if selected-deployment evidence misses its target.
+
+The production dependencies are pinned to the exact Ash and PicoSAT releases exercised by the Phase 0 pressure-test. ADR 0002 conditionally accepts Ash and ADR 0019 accepts the code-defined authority boundary; their production gates remain binding. The disposable `AshFoundationLab` remains evidence and is not imported, copied, or exposed as a production API.
 
 ## Fail-closed contract
 
@@ -47,6 +53,6 @@ This first slice validates context shape and source separation. It does not auth
 - no production module, entitlement, or activation registry;
 - no Oban worker or outbox dispatcher;
 - no external service, web workspace, or production infrastructure; and
-- no claim that Phase 0 has exited or its Proposed ADRs are accepted.
+- no claim that Phase 0 completion authorizes any capability outside the explicitly approved slice.
 
-See the [Phase 1 core-foundation plan](../plans/phase-1-core-foundation-plan.md), [slice 1C invocation evidence](../phase-1/evidence/action-invocation.md), [domain-model authoring boundary](domain-model-authoring-and-metadata.md), [trusted-routing evidence](../phase-0/evidence/trusted-routing.md), and [threat model](../security/threat-model.md).
+See the [Phase 1 core-foundation plan](../plans/phase-1-core-foundation-plan.md), [slice 1C invocation evidence](../phase-1/evidence/action-invocation.md), [slice 1D admission evidence](../phase-1/evidence/database-admission.md), [domain-model authoring boundary](domain-model-authoring-and-metadata.md), [trusted-routing evidence](../phase-0/evidence/trusted-routing.md), and [threat model](../security/threat-model.md).

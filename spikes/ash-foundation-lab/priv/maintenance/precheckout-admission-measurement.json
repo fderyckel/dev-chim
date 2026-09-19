@@ -1,0 +1,480 @@
+{
+  "bindings": {
+    "database_proxy_fairness_sha256": "f973385ac7f7d3fabbff49f83e331d6272f8df9b4f802ee0e0b4c6145f0af1af",
+    "failed_capacity_recovery_sha256": "3da6658a44626297095ca06394f801b5c47cfb4a92b76d3ed96b174bfa8525e5",
+    "target_recommendation_sha256": "7bffc0fac30297c153a5b41717566228f6d2ac7e782220b34eaac3828d0eca2b"
+  },
+  "command": "mise exec -- uv run python tools/measure_phase0_precheckout_admission.py --repetitions 3 --output spikes/ash-foundation-lab/priv/maintenance/precheckout-admission-measurement.json",
+  "environment": {
+    "application_nodes": 1,
+    "architecture": "arm64",
+    "ecto_pool_size": 10,
+    "managed_service": false,
+    "operating_system": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "postgresql_version": "18.6 (Homebrew)",
+    "topology": "fresh local PostgreSQL primary with a ten-connection Ecto sandbox pool"
+  },
+  "evaluation": {
+    "checks": {
+      "admission_precedes_repository_callback": true,
+      "atomicity_audit_and_outbox_preserved": true,
+      "database_proxy_followup_preserved": true,
+      "noisy_tenant_backpressured": true,
+      "other_tenant_degradation": true,
+      "other_tenants_not_rejected": true,
+      "placement_budget_preserved": true,
+      "raw_failed_baseline_preserved": true
+    },
+    "disposition": "local_precheckout_candidate_passed_managed_confirmation_required",
+    "passed": true
+  },
+  "limits": [
+    "This is disposable Phase 0 evidence, not a production admission API.",
+    "The callback boundary proves rejected work cannot call Ecto or request a Postgrex connection; it does not replace Ash policy or action authorization.",
+    "The local single-node pool does not reproduce managed-service network latency, provider maintenance, DNS failover, or multi-node distributed admission.",
+    "The two-per-tenant and ten-per-placement limits are the accepted planning baseline and must be recalibrated from managed measurements before production."
+  ],
+  "measured_on": "2026-09-16",
+  "measurement": {
+    "candidate": {
+      "admission_layer": "before_ecto_repository_callback_and_pool_checkout",
+      "per_tenant_limit": 2,
+      "placement_limit": 10,
+      "retry_after_ms": 20
+    },
+    "runs": [
+      {
+        "baseline": {
+          "database_counts": {
+            "2": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "3": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "4": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "5": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            }
+          },
+          "other_tenant_p95_ms": 22.538,
+          "outcomes": {
+            "2": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "3": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "4": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "5": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            }
+          }
+        },
+        "candidate": {
+          "database_callbacks_invoked": 597,
+          "database_counts": {
+            "1": {
+              "audit_events": 197,
+              "batches": 197,
+              "facts": 4925,
+              "outbox_events": 197
+            },
+            "2": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "3": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "4": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "5": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            }
+          },
+          "other_tenant_p95_degradation_percent": 0.058,
+          "other_tenant_p95_ms": 22.551,
+          "outcomes": {
+            "1": {
+              "admitted": 197,
+              "attempts": 800,
+              "rate_limited": 603,
+              "retryable_dependency": 0
+            },
+            "2": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "3": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "4": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "5": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            }
+          },
+          "rejected_callbacks_invoked": 0
+        },
+        "repetition": 1,
+        "safety": {
+          "all_admitted_batches_atomic": true,
+          "noisy_tenant_backpressured": true,
+          "other_tenants_not_rejected": true,
+          "placement_not_exhausted": true,
+          "rejected_before_database_callback": true
+        }
+      },
+      {
+        "baseline": {
+          "database_counts": {
+            "2": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "3": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "4": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "5": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            }
+          },
+          "other_tenant_p95_ms": 22.518,
+          "outcomes": {
+            "2": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "3": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "4": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "5": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            }
+          }
+        },
+        "candidate": {
+          "database_callbacks_invoked": 598,
+          "database_counts": {
+            "1": {
+              "audit_events": 198,
+              "batches": 198,
+              "facts": 4950,
+              "outbox_events": 198
+            },
+            "2": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "3": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "4": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "5": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            }
+          },
+          "other_tenant_p95_degradation_percent": -0.151,
+          "other_tenant_p95_ms": 22.484,
+          "outcomes": {
+            "1": {
+              "admitted": 198,
+              "attempts": 800,
+              "rate_limited": 602,
+              "retryable_dependency": 0
+            },
+            "2": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "3": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "4": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "5": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            }
+          },
+          "rejected_callbacks_invoked": 0
+        },
+        "repetition": 2,
+        "safety": {
+          "all_admitted_batches_atomic": true,
+          "noisy_tenant_backpressured": true,
+          "other_tenants_not_rejected": true,
+          "placement_not_exhausted": true,
+          "rejected_before_database_callback": true
+        }
+      },
+      {
+        "baseline": {
+          "database_counts": {
+            "2": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "3": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "4": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "5": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            }
+          },
+          "other_tenant_p95_ms": 22.54,
+          "outcomes": {
+            "2": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "3": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "4": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "5": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            }
+          }
+        },
+        "candidate": {
+          "database_callbacks_invoked": 598,
+          "database_counts": {
+            "1": {
+              "audit_events": 198,
+              "batches": 198,
+              "facts": 4950,
+              "outbox_events": 198
+            },
+            "2": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "3": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "4": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "5": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            }
+          },
+          "other_tenant_p95_degradation_percent": 0.257,
+          "other_tenant_p95_ms": 22.598,
+          "outcomes": {
+            "1": {
+              "admitted": 198,
+              "attempts": 800,
+              "rate_limited": 602,
+              "retryable_dependency": 0
+            },
+            "2": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "3": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "4": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            },
+            "5": {
+              "admitted": 100,
+              "attempts": 100,
+              "rate_limited": 0,
+              "retryable_dependency": 0
+            }
+          },
+          "rejected_callbacks_invoked": 0
+        },
+        "repetition": 3,
+        "safety": {
+          "all_admitted_batches_atomic": true,
+          "noisy_tenant_backpressured": true,
+          "other_tenants_not_rejected": true,
+          "placement_not_exhausted": true,
+          "rejected_before_database_callback": true
+        }
+      }
+    ],
+    "summary": {
+      "all_safety_assertions_passed": true,
+      "noisy_tenant_rejected_attempts": {
+        "max": 603,
+        "median": 602,
+        "min": 602
+      },
+      "other_tenant_p95_degradation_percent": {
+        "max": 0.257,
+        "median": 0.058,
+        "min": -0.151
+      }
+    }
+  },
+  "schema_version": 1,
+  "source": {
+    "artifacts_sha256": {
+      "spikes/ash-foundation-lab/lib/ash_foundation_lab/tenant_admission.ex": "258ed86bc18c0cc104fd6a19e70f6b482ec2abda49ba74d01e39c95238474ea6",
+      "spikes/ash-foundation-lab/lib/mix/tasks/phase0.tenant_admission.measure.ex": "c81d64c2dae321ebd5ff189bf0c07fef31153295c1f7a2f4c980ccdb5ed99673",
+      "spikes/ash-foundation-lab/priv/maintenance/capacity-recovery-measurement.json": "3da6658a44626297095ca06394f801b5c47cfb4a92b76d3ed96b174bfa8525e5",
+      "spikes/ash-foundation-lab/priv/maintenance/quality-target-recommendation.json": "7bffc0fac30297c153a5b41717566228f6d2ac7e782220b34eaac3828d0eca2b",
+      "spikes/ash-foundation-lab/priv/maintenance/tenant-fairness-measurement.json": "f973385ac7f7d3fabbff49f83e331d6272f8df9b4f802ee0e0b4c6145f0af1af",
+      "tools/measure_phase0_precheckout_admission.py": "e6467d74ebf5f3119a05c71bc32ea09f7830b18403c8316ab3fd303f88e6db6b"
+    },
+    "git_revision": "50defa1a2190f25414aced0bc6887d8f3e7c1524",
+    "working_tree": "dirty"
+  },
+  "status": "phase0_local_precheckout_admission_evidence"
+}

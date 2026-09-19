@@ -123,6 +123,7 @@ Range partitioning by date or academic period remains evidence-driven. PostgreSQ
 - Synthetic synchronized-burst tests with named hardware, PostgreSQL settings, data shape, and pass thresholds.
 - Mixed workload tests covering attendance writes, corrections, operational summaries, reports, outbox dispatch, and permission revocation.
 - Pool saturation, lock, WAL, autovacuum, index-growth, backup, restore, and projection-lag measurements.
+- Multi-node calibration and a managed rerun of the noisy-tenant comparison; the [pre-checkout candidate](../phase-0/evidence/precheckout-admission-measurement.md) now proves node-local admission before its repository callback, while the earlier database proxy remains historical algorithm evidence only.
 - Production-integration cross-placement negative tests for HTTP, tasks, jobs, events, files, caches, search, exports, telemetry, support, and AI tools; the disposable Phase 0 lab covers all except support at its routing abstraction.
 - An operational placement-movement drill with durable version conflict, copy/outbox/object reconciliation, rollback, backup, and restore evidence; the disposable Phase 0 lab covers the abstract versioned transition and database-row reconciliation only.
 - A five-school decision signed by architecture, security/privacy, and operations owners; the arithmetic alone is insufficient.

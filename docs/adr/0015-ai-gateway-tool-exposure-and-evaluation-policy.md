@@ -1,7 +1,8 @@
 # ADR 0015: AI gateway tool exposure and evaluation policy
 
-- Status: Proposed
+- Status: Deferred
 - Date: 2026-09-13
+- Decision date: 2026-09-16
 - Accountable owner: Security architecture
 - Deciders: Architecture review group, privacy owner, and product owner
 - Supersedes: None
@@ -24,7 +25,7 @@ AI can assist users and development, but models must not gain implicit database 
 
 ## Decision
 
-Propose a gateway outside domain authority. It may expose curated Ash actions through typed tools using the real actor, tenant, classification, purpose, confirmation state, module gates, and trusted placement resolved by the platform. Models cannot select a database or cell, activate a module, verify evidence, bypass policy, access raw SQL, or write without an explicitly approved action.
+Defer AI gateway implementation and provider selection until an approved capability, data-class inventory, and adversarial evaluation exist. Retain the proposed boundary as a later-phase requirement: any gateway stays outside domain authority and may expose only curated typed actions using the real actor, tenant, classification, purpose, confirmation state, module gates, and trusted placement resolved by the platform. Models cannot select a database or cell, activate a module, verify evidence, bypass policy, access raw SQL, or write without an explicitly approved action.
 
 ## Consequences
 

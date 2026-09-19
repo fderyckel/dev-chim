@@ -1,7 +1,8 @@
 # ADR 0007: Transactional outbox and event envelope
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-13
+- Decision date: 2026-09-16
 - Accountable owner: Platform engineering
 - Deciders: Architecture review group and operations owner
 - Supersedes: None
@@ -24,7 +25,7 @@ Post-commit jobs, projections, cache invalidation, search, webhooks, and notific
 
 ## Decision
 
-Propose a transactional outbox written with domain state. A versioned envelope includes event ID, type, schema version, tenant, actor/service context, correlation, causation, occurrence time, classification, and a minimal payload. Consumers are registered, idempotent, replayable, and observable.
+Adopt a transactional outbox written with domain state. A versioned envelope includes event ID, type, schema version, tenant, actor/service context, correlation, causation, occurrence time, classification, and a minimal payload. Consumers are registered, idempotent, replayable, and observable.
 
 Each outbox belongs to a trusted database placement. Dispatchers validate the tenant and current routing version rather than treating an event-supplied destination as authority. Tenant movement must quiesce, drain, or reconcile outbox cursors explicitly so events are neither lost nor processed in two placements.
 

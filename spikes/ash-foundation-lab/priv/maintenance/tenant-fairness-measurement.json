@@ -1,0 +1,515 @@
+{
+  "bindings": {
+    "failed_capacity_recovery_sha256": "3da6658a44626297095ca06394f801b5c47cfb4a92b76d3ed96b174bfa8525e5",
+    "raw_failure_disposition": "local_measurement_has_failed_target",
+    "raw_noisy_tenant_p95_degradation_percent": {
+      "max": 218.519,
+      "median": 171.429,
+      "min": 119.298
+    },
+    "target_recommendation_sha256": "7bffc0fac30297c153a5b41717566228f6d2ac7e782220b34eaac3828d0eca2b"
+  },
+  "candidate": {
+    "admission_layer": "database_transaction_proxy_only",
+    "bounded_retry_delay_ms": 20,
+    "name": "two_slots_per_tenant_database_advisory_lock_proxy",
+    "rejection_result": -1,
+    "runs": [
+      {
+        "baseline_other_tenants": {
+          "clients": 4,
+          "counts_by_tenant": {
+            "1": {
+              "audit_events": 0,
+              "batches": 0,
+              "facts": 0,
+              "outbox_events": 0
+            },
+            "2": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "3": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "4": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "5": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            }
+          },
+          "elapsed_ms": 2203.665,
+          "latency_ms": {
+            "max": 23.436,
+            "p50": 21.952,
+            "p95": 22.311,
+            "p99": 23.399
+          },
+          "stderr": "pgbench: setting random seed to 246813579",
+          "transactions": 400,
+          "transactions_per_second": 181.516
+        },
+        "candidate_under_noise": {
+          "admitted_batches_by_tenant": {
+            "1": 197,
+            "2": 100,
+            "3": 100,
+            "4": 100,
+            "5": 100
+          },
+          "assertions": {
+            "all_admitted_batches_atomic": true,
+            "cross_tenant_probe_rejected_without_partial_commit": true,
+            "idempotent_retry_preserved": true,
+            "no_cross_tenant_rows": true,
+            "one_audit_and_outbox_per_admitted_batch": true,
+            "rejected_attempts_create_no_partial_batches": true,
+            "safety_probes_leave_counts_unchanged": true
+          },
+          "attempts_by_tenant": {
+            "1": 800,
+            "2": 100,
+            "3": 100,
+            "4": 100,
+            "5": 100
+          },
+          "counts_by_tenant": {
+            "1": {
+              "audit_events": 197,
+              "batches": 197,
+              "facts": 4925,
+              "outbox_events": 197
+            },
+            "2": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "3": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "4": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "5": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            }
+          },
+          "noisy_tenant": {
+            "elapsed_ms": 2264.34,
+            "exit_code": 0,
+            "latency_ms": {
+              "max": 24.935,
+              "p50": 21.139,
+              "p95": 22.079,
+              "p99": 22.391
+            },
+            "stderr": "pgbench: setting random seed to 246813579",
+            "stdout": "pgbench (18.6 (Homebrew))\ntransaction type: /tmp/chim-phase0-tenant-fairness-n_ssv73s/fairness-workloads/tenant_one.sql\nscaling factor: 1\nquery mode: simple\nnumber of clients: 8\nnumber of threads: 8\nmaximum number of tries: 1\nnumber of transactions per client: 100\nnumber of transactions actually processed: 800/800\nnumber of failed transactions: 0 (0.000%)\nlatency average = 21.693 ms\ninitial connection time = 3.142 ms\ntps = 368.774737 (without initial connection time)",
+            "transactions": 800,
+            "transactions_per_second": 353.304
+          },
+          "other_tenants": {
+            "clients": 4,
+            "elapsed_ms": 2208.827,
+            "latency_ms": {
+              "max": 28.526,
+              "p50": 21.926,
+              "p95": 22.219,
+              "p99": 28.183
+            },
+            "stderr": "pgbench: setting random seed to 246813579",
+            "transactions": 400,
+            "transactions_per_second": 181.092
+          },
+          "rejected_attempts_by_tenant": {
+            "1": 603,
+            "2": 0,
+            "3": 0,
+            "4": 0,
+            "5": 0
+          }
+        },
+        "other_tenant_p95_degradation_percent": -0.412,
+        "repetition": 1
+      },
+      {
+        "baseline_other_tenants": {
+          "clients": 4,
+          "counts_by_tenant": {
+            "1": {
+              "audit_events": 0,
+              "batches": 0,
+              "facts": 0,
+              "outbox_events": 0
+            },
+            "2": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "3": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "4": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "5": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            }
+          },
+          "elapsed_ms": 2200.36,
+          "latency_ms": {
+            "max": 23.378,
+            "p50": 21.931,
+            "p95": 22.245,
+            "p99": 23.323
+          },
+          "stderr": "pgbench: setting random seed to 246813579",
+          "transactions": 400,
+          "transactions_per_second": 181.788
+        },
+        "candidate_under_noise": {
+          "admitted_batches_by_tenant": {
+            "1": 199,
+            "2": 100,
+            "3": 100,
+            "4": 100,
+            "5": 100
+          },
+          "assertions": {
+            "all_admitted_batches_atomic": true,
+            "cross_tenant_probe_rejected_without_partial_commit": true,
+            "idempotent_retry_preserved": true,
+            "no_cross_tenant_rows": true,
+            "one_audit_and_outbox_per_admitted_batch": true,
+            "rejected_attempts_create_no_partial_batches": true,
+            "safety_probes_leave_counts_unchanged": true
+          },
+          "attempts_by_tenant": {
+            "1": 800,
+            "2": 100,
+            "3": 100,
+            "4": 100,
+            "5": 100
+          },
+          "counts_by_tenant": {
+            "1": {
+              "audit_events": 199,
+              "batches": 199,
+              "facts": 4975,
+              "outbox_events": 199
+            },
+            "2": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "3": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "4": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "5": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            }
+          },
+          "noisy_tenant": {
+            "elapsed_ms": 2263.336,
+            "exit_code": 0,
+            "latency_ms": {
+              "max": 24.408,
+              "p50": 21.133,
+              "p95": 22.074,
+              "p99": 22.456
+            },
+            "stderr": "pgbench: setting random seed to 246813579",
+            "stdout": "pgbench (18.6 (Homebrew))\ntransaction type: /tmp/chim-phase0-tenant-fairness-n_ssv73s/fairness-workloads/tenant_one.sql\nscaling factor: 1\nquery mode: simple\nnumber of clients: 8\nnumber of threads: 8\nmaximum number of tries: 1\nnumber of transactions per client: 100\nnumber of transactions actually processed: 800/800\nnumber of failed transactions: 0 (0.000%)\nlatency average = 21.831 ms\ninitial connection time = 3.098 ms\ntps = 366.455405 (without initial connection time)",
+            "transactions": 800,
+            "transactions_per_second": 353.461
+          },
+          "other_tenants": {
+            "clients": 4,
+            "elapsed_ms": 2205.801,
+            "latency_ms": {
+              "max": 23.628,
+              "p50": 21.965,
+              "p95": 22.295,
+              "p99": 23.153
+            },
+            "stderr": "pgbench: setting random seed to 246813579",
+            "transactions": 400,
+            "transactions_per_second": 181.34
+          },
+          "rejected_attempts_by_tenant": {
+            "1": 601,
+            "2": 0,
+            "3": 0,
+            "4": 0,
+            "5": 0
+          }
+        },
+        "other_tenant_p95_degradation_percent": 0.225,
+        "repetition": 2
+      },
+      {
+        "baseline_other_tenants": {
+          "clients": 4,
+          "counts_by_tenant": {
+            "1": {
+              "audit_events": 0,
+              "batches": 0,
+              "facts": 0,
+              "outbox_events": 0
+            },
+            "2": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "3": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "4": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "5": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            }
+          },
+          "elapsed_ms": 2206.343,
+          "latency_ms": {
+            "max": 28.58,
+            "p50": 21.932,
+            "p95": 22.297,
+            "p99": 23.34
+          },
+          "stderr": "pgbench: setting random seed to 246813579",
+          "transactions": 400,
+          "transactions_per_second": 181.295
+        },
+        "candidate_under_noise": {
+          "admitted_batches_by_tenant": {
+            "1": 198,
+            "2": 100,
+            "3": 100,
+            "4": 100,
+            "5": 100
+          },
+          "assertions": {
+            "all_admitted_batches_atomic": true,
+            "cross_tenant_probe_rejected_without_partial_commit": true,
+            "idempotent_retry_preserved": true,
+            "no_cross_tenant_rows": true,
+            "one_audit_and_outbox_per_admitted_batch": true,
+            "rejected_attempts_create_no_partial_batches": true,
+            "safety_probes_leave_counts_unchanged": true
+          },
+          "attempts_by_tenant": {
+            "1": 800,
+            "2": 100,
+            "3": 100,
+            "4": 100,
+            "5": 100
+          },
+          "counts_by_tenant": {
+            "1": {
+              "audit_events": 198,
+              "batches": 198,
+              "facts": 4950,
+              "outbox_events": 198
+            },
+            "2": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "3": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "4": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            },
+            "5": {
+              "audit_events": 100,
+              "batches": 100,
+              "facts": 2500,
+              "outbox_events": 100
+            }
+          },
+          "noisy_tenant": {
+            "elapsed_ms": 2260.454,
+            "exit_code": 0,
+            "latency_ms": {
+              "max": 26.226,
+              "p50": 21.136,
+              "p95": 22.174,
+              "p99": 22.467
+            },
+            "stderr": "pgbench: setting random seed to 246813579",
+            "stdout": "pgbench (18.6 (Homebrew))\ntransaction type: /tmp/chim-phase0-tenant-fairness-n_ssv73s/fairness-workloads/tenant_one.sql\nscaling factor: 1\nquery mode: simple\nnumber of clients: 8\nnumber of threads: 8\nmaximum number of tries: 1\nnumber of transactions per client: 100\nnumber of transactions actually processed: 800/800\nnumber of failed transactions: 0 (0.000%)\nlatency average = 21.922 ms\ninitial connection time = 3.152 ms\ntps = 364.931206 (without initial connection time)",
+            "transactions": 800,
+            "transactions_per_second": 353.911
+          },
+          "other_tenants": {
+            "clients": 4,
+            "elapsed_ms": 2204.007,
+            "latency_ms": {
+              "max": 23.722,
+              "p50": 21.949,
+              "p95": 22.341,
+              "p99": 23.332
+            },
+            "stderr": "pgbench: setting random seed to 246813579",
+            "transactions": 400,
+            "transactions_per_second": 181.488
+          },
+          "rejected_attempts_by_tenant": {
+            "1": 602,
+            "2": 0,
+            "3": 0,
+            "4": 0,
+            "5": 0
+          }
+        },
+        "other_tenant_p95_degradation_percent": 0.197,
+        "repetition": 3
+      }
+    ],
+    "slots_per_tenant": 2,
+    "summary": {
+      "all_safety_assertions_passed": true,
+      "noisy_tenant_rejected_attempts": {
+        "max": 603,
+        "median": 602,
+        "min": 601
+      },
+      "other_tenant_p95_degradation_percent": {
+        "max": 0.225,
+        "median": 0.197,
+        "min": -0.412
+      },
+      "other_tenant_p95_ms_under_noise": {
+        "max": 22.341,
+        "median": 22.295,
+        "min": 22.219
+      },
+      "other_tenant_rejected_attempts": {
+        "max": 0,
+        "median": 0,
+        "min": 0
+      }
+    }
+  },
+  "command": "mise exec -- uv run python tools/measure_phase0_tenant_fairness.py --repetitions 3 --output spikes/ash-foundation-lab/priv/maintenance/tenant-fairness-measurement.json",
+  "environment": {
+    "architecture": "arm64",
+    "cpu_count": 10,
+    "machine_model": "Mac17,3",
+    "memory_bytes": 25769803776,
+    "operating_system": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "postgresql_settings": {
+      "archive_mode": "on",
+      "fsync": "on",
+      "full_page_writes": "on",
+      "max_connections": "40",
+      "shared_buffers": "16384",
+      "synchronous_commit": "on",
+      "wal_level": "replica"
+    },
+    "postgresql_version": "18.6 (Homebrew)",
+    "topology": "local disposable pooled primary; database-transaction admission proxy"
+  },
+  "evaluation": {
+    "checks": {
+      "candidate_batch_latency": true,
+      "candidate_noisy_tenant_backpressured": true,
+      "candidate_other_tenant_degradation": true,
+      "candidate_other_tenants_not_rejected": true,
+      "candidate_safety_contract": true,
+      "raw_failed_baseline_preserved": true
+    },
+    "disposition": "local_fairness_candidate_passed_managed_confirmation_required",
+    "passed": true
+  },
+  "limits": [
+    "This is a disposable database-transaction proxy for algorithm feasibility, not a production admission API.",
+    "Production fairness and backpressure must run before database pool checkout; this proxy still consumes a connection and starts a transaction before rejecting work.",
+    "The local primary does not reproduce an application pool, managed service tier, network, multi-node scheduler, report system, or provider failover.",
+    "The two-slot value and bounded retry delay are experiment parameters, not accepted production configuration.",
+    "The candidate preserves the raw failed measurement as a separately hashed artifact; it does not replace or rewrite that evidence."
+  ],
+  "measured_on": "2026-09-16",
+  "schema_version": 1,
+  "source": {
+    "artifacts_sha256": {
+      "spikes/ash-foundation-lab/priv/maintenance/capacity-recovery-measurement.json": "3da6658a44626297095ca06394f801b5c47cfb4a92b76d3ed96b174bfa8525e5",
+      "spikes/ash-foundation-lab/priv/maintenance/quality-target-recommendation.json": "7bffc0fac30297c153a5b41717566228f6d2ac7e782220b34eaac3828d0eca2b",
+      "tools/measure_phase0_capacity_recovery.py": "a5f6ed0b07b66c555535eddf82090b98f3519bfdd10597e30e5e607e7c939afc",
+      "tools/measure_phase0_tenant_fairness.py": "6646bedc258f896b2eb9dbfddb715feac1ba939730468969eb09a4e4a8fbf54d"
+    },
+    "git_revision": "50defa1a2190f25414aced0bc6887d8f3e7c1524",
+    "working_tree": "dirty"
+  },
+  "status": "phase0_local_fairness_candidate_evidence"
+}

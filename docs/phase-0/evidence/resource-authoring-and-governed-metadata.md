@@ -67,7 +67,7 @@ The tests prove:
 
 The complete spike was copied to an isolated temporary directory with build artifacts and dependencies excluded. The scenario was compiled and its descriptor drift task run first with Ash `3.33.2`, AshJsonApi `1.7.0`, and AshPostgres `2.13.0`, then with the current Ash `3.33.3`, AshJsonApi `1.7.1`, and AshPostgres `2.13.1`.
 
-Both patch sets compiled with application warnings treated as errors, produced the same checked descriptor, passed all 10 scenario tests, and passed `mix hex.audit` with no retired or advisory-listed package. The temporary copy was moved to the macOS Trash after the comparison. This is representative patch evidence only; ADR 0002 still records a non-patch framework upgrade as a bounded condition.
+Both patch sets compiled with application warnings treated as errors, produced the same checked descriptor, passed all 10 scenario tests, and passed `mix hex.audit` with no retired or advisory-listed package. The temporary copy was moved to the macOS Trash after the comparison. This remains representative patch evidence; the later [AshJsonApi non-patch exercise](ash-nonpatch-upgrade-exercise.md) separately preserved the same descriptor byte for byte.
 
 The first repository-wide gate exposed that the new Mix task's callbacks were absent from the existing Dialyzer PLT. The spike now includes the built-in `:mix` application in its Dialyzer analysis set. A focused rerun reported zero Dialyzer errors, and the subsequent complete `make check` passed: 5 repository-tool tests, 88 Phase 0 lab tests, 6 TypeScript client tests, and 14 provisional Phase 1 core tests, plus all formatting, lint, drift, audit, compilation, migration, type-analysis, and whitespace gates.
 
@@ -86,5 +86,5 @@ The result is **Pass with bounded remediation** for the resource-authoring, desc
 - The scenario validates and executes a report dataset; it does not authorize a reporting plane, export path, background job, or public API.
 - It does not implement custom fields, tenant schema mutation, a visual model builder, a workflow language, or a schema compiler.
 - Classification is derived for the dataset, but production definition-record classification, retention, recovery, and audit actions remain to be designed and tested.
-- The compatible-upgrade proof covers the adjacent locked patch sets only. A non-patch Ash upgrade remains untested.
+- This scenario's compatible-upgrade proof covers adjacent locked patch sets; the separate non-patch exercise covers one AshJsonApi minor, not an Ash core or AshPostgres minor.
 - ADR 0019 remains Proposed until accountable review; this evidence does not promote spike APIs into the production core.

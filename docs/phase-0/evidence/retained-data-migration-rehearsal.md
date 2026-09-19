@@ -1,6 +1,6 @@
 # Retained-data expand-and-contract migration rehearsal
 
-- Status: Focused disposable-database evidence passes; production-scale acceptance remains open
+- Status: Focused compatibility evidence passes; annual-envelope measurement completed separately with bounded remediation
 - Date: 2026-09-15
 - Owner: Platform engineering
 - Decision: [ADR 0002](../../adr/0002-ash-adoption-criteria-and-fallback.md)
@@ -20,6 +20,8 @@ Can the current Ash/PostgreSQL foundation preserve tenant-owned retained data ac
 - Focused tests: [`retained_data_migration_test.exs`](../../../spikes/ash-foundation-lab/test/ash_foundation_lab/retained_data_migration_test.exs).
 
 The sequence is deliberately separate from the executable application chain. It runs only against uniquely named disposable databases and proves migration choreography rather than changing the lab's current resource contract.
+
+The follow-up [annual-envelope measurement](retained-data-migration-measurement.md) exercises the same contract at 1,312,000 rows per repetition and records time, batch latency, WAL, storage, support-index, lock-retry, tenant-isolation, and retained-fingerprint evidence.
 
 ## Rehearsed sequence
 
@@ -52,11 +54,11 @@ The mixed-version path proved the old reader, old writer, fallback reader, and d
 
 The migration-readability and safety category advances from Partial pass to **Pass with bounded remediation**. The Ash generator remains useful for schema-drift and declared-constraint review, but it does not own deployment choreography, mixed-version application behaviour, tenant-by-tenant backfill, lock budgets, or destructive-contract authorization. Those remain platform-owned migrations, runbooks, and tests.
 
-This result does not accept Ash or ADR 0002. It demonstrates that the required escape hatch can remain bounded and reviewable for one neutral retained-data change.
+This result alone did not accept Ash or ADR 0002. It demonstrates that the required escape hatch can remain bounded and reviewable for one neutral retained-data change; the later accountable review accepted it as one of Ash's bounded production gates.
 
 ## Limits and falsifiers
 
-- Seven local rows are compatibility evidence, not a production lock-duration, throughput, WAL, storage, or maintenance-window benchmark.
+- Seven local rows are compatibility evidence. The separate annual-envelope measurement adds local lock-duration, throughput, WAL, storage, and maintenance behaviour, but is not a managed-production benchmark or approved target.
 - The legacy and candidate versions are simulated with explicit SQL, not two independently deployed application releases.
 - Trusted database placement is a caller precondition; this slice does not integrate the backfill runner with a production registry, tenant movement, or per-placement credentials.
 - No heavy index, type rewrite, partitioned table, replica, HA failover, restore, or mixed-release node fleet is exercised.

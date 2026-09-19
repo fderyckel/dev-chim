@@ -6,7 +6,7 @@
 - Time box: 30 minutes; the exercise completed within the budget
 - Source: revision `5c4569024d00` plus the current uncommitted Phase 0 spike changes
 - Environment: Apple silicon macOS 26.6.2, Erlang/OTP 29.0.5, Elixir 1.20.3, PostgreSQL 18.6
-- Decision: The tested patch update is compatible without application changes; compiler-warning drift is now machine-bounded, while a non-patch exercise remains required
+- Decision: The tested patch update is compatible without application changes; compiler-warning drift is machine-bounded, and the subsequent non-patch exercise also passes
 
 ## Scope and method
 
@@ -51,6 +51,8 @@ The candidate still emits the runtime warning that `Ash.Error.Invalid.TenantRequ
 
 Follow-up on 2026-09-15: the [machine-normalized warning baseline](ash-dependency-warning-baseline.md) now forces the complete locked dependency compile, records 39 warning groups with their owning packages and locations, fixes the lock digest and Elixir/OTP pair, and rejects both additions and removals. The missing-tenant JSON:API implementation was separately added and its prior runtime warning is no longer part of current evidence. These changes close items 1-3 below for the current pinned graph without rewriting the historical patch comparison.
 
+Follow-up on 2026-09-16: the [AshJsonApi non-patch exercise](ash-nonpatch-upgrade-exercise.md) upgrades 1.6.6 to 1.7.1 on the same schema with no application, generated migration, OpenAPI, descriptor, test, or advisory regression. It closes the historical item 3 below. Preceding Ash and AshPostgres minors were rejected as baselines because they are advisory-affected.
+
 ## Assessment and bounded remediation
 
 This patch-level exercise passes: the update is three lock-entry changes, requires no application edits, preserves migration output, keeps the existing database compatible, passes the full spike test set, and introduces no reported dependency advisory.
@@ -59,12 +61,12 @@ Upgrade and dependency health is recorded as **Pass with bounded remediation**, 
 
 1. preserve the checked classification and zero-delta warning baseline for the pinned Elixir/OTP pair and review any dependency change explicitly;
 2. preserve the stable JSON:API mapping for missing tenant context; and
-3. repeat this exercise for the first available non-patch Ash/AshPostgres/AshJsonApi update.
+3. preserve the non-patch review method for future framework minors and majors; the first recorded AshJsonApi minor exercise now passes.
 
 ## Limits
 
-- This is a patch-level upgrade, not evidence for a minor or major framework transition.
+- This document remains patch-level evidence; the linked follow-up separately covers one AshJsonApi minor transition, not an Ash core, AshPostgres, or major transition.
 - The exercise used a disposable local copy and synthetic database, not a clean CI host.
 - It proved compatibility with the existing schema but did not rehearse a retained-data migration, rolling deployment, or mixed-version cluster.
-- Warning categories are normalized for the current complete lock, but the first non-patch update has not yet tested how much baseline churn and remediation it produces.
+- Warning categories are normalized for the current complete lock; the non-patch follow-up separately records three reviewed source-location moves and no message or net-group change.
 - Package freshness and advisory results are a dated snapshot and must be rechecked at the adoption review.

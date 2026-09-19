@@ -1,7 +1,8 @@
 # ADR 0012: Report templates, Gotenberg, and campaign model
 
-- Status: Proposed
+- Status: Deferred
 - Date: 2026-09-13
+- Decision date: 2026-09-16
 - Accountable owner: Platform engineering and operations
 - Deciders: Architecture review group and product owner
 - Supersedes: None
@@ -24,7 +25,7 @@ Schools can generate large, sensitive report campaigns. Synchronous rendering or
 
 ## Decision
 
-Propose versioned report definitions and templates, asynchronous bounded campaigns, immutable manifests, idempotent items, cancellation, retry, checksums, and output validation. Per-tenant quotas and fair scheduling prevent report workloads from consuming the database and connection budget reserved for synchronized operational writes. Gotenberg/Chromium is the preferred renderer subject to an accepted capacity target and mixed-workload benchmark.
+Defer renderer selection and report implementation until the report phase has a representative template and mixed-workload benchmark. Retain versioned report definitions and templates, asynchronous bounded campaigns, immutable manifests, idempotent items, cancellation, retry, checksums, output validation, per-tenant quotas, and fair scheduling as the requirements for that later decision. Gotenberg/Chromium is a candidate, not a selected dependency.
 
 Every report definition selects a versioned, policy-protected dataset or read action; it never receives arbitrary table access or user-supplied SQL authority. Operational reports may use an authorized Ash read. Heavy historical reporting may use a disposable, rebuildable projection or governed publication produced after commit. The projection implementation may use bounded Ecto or SQL internally, but tenant filtering alone is not authorization: dataset selection and execution still bind the real actor, tenant, placement, module gates, classification, purpose, and audit requirements.
 

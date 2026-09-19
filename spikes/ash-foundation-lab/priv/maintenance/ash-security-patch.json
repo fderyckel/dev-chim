@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "status": "phase0_security_patch_verified",
+  "owner": "Platform engineering",
+  "reviewed_on": "2026-09-16",
+  "advisory": {
+    "id": "EEF-CVE-2026-86338",
+    "alias": "CVE-2026-86338",
+    "affected": "Ash >= 2.11.0-rc.0 and < 3.33.4",
+    "fixed_version": "3.33.4",
+    "surface": "forbidden calculation or aggregate referenced through an exposed filter",
+    "osv_url": "https://osv.dev/vulnerability/EEF-CVE-2026-86338",
+    "fix_commit": "https://github.com/ash-project/ash/commit/b3d4503241f3deacb5ceb955e10a4fa927da0f67"
+  },
+  "upgrade": {
+    "ash": {
+      "baseline": "3.33.3",
+      "candidate": "3.33.4"
+    },
+    "transitive": {
+      "reactor": {
+        "baseline": "1.0.6",
+        "candidate": "1.0.7"
+      },
+      "spark": {
+        "baseline": "2.7.2",
+        "candidate": "2.7.3"
+      }
+    },
+    "foundation_lab_lock_sha256": "fa0bcda4d29c3bf01a063e4ec49da854c59fa3814e7fabaca34de73eabcf2e64",
+    "production_core_lock_sha256": "1fcabf3ee441ea82787dfbcb6cd95ef71f4896959e80d7b393e2a4883eda10f1",
+    "locks_aligned": true
+  },
+  "regression": {
+    "test": "spikes/ash-foundation-lab/test/ash_foundation_lab/field_policy_calculation_regression_test.exs",
+    "support_resource": "spikes/ash-foundation-lab/test/support/field_policy_calculation_regression_resource.ex",
+    "forbidden_filter_returns_records": 0,
+    "authorized_filter_returns_records": 1,
+    "result": "pass"
+  },
+  "warning_review": {
+    "baseline_groups": 39,
+    "candidate_groups": 38,
+    "added_groups": 0,
+    "removed_groups": 1,
+    "removed": "Spark Kernel.ParallelCompiler.async/1 deprecation",
+    "baseline_sha256": "547a902d5649bc5692de2e7433407478c99467448d12fcd472e274f114abd0d3",
+    "zero_unreviewed_delta": true
+  },
+  "verification": {
+    "make_check": "pass",
+    "repository_tool_tests": 22,
+    "phase0_elixir_postgresql_tests": 103,
+    "typescript_client_tests": 6,
+    "production_core_tests": 43,
+    "phase0_hex_audit": "pass",
+    "production_core_hex_audit": "pass",
+    "phase0_dialyzer": "pass_zero_skipped",
+    "production_core_dialyzer": "pass_zero_skipped",
+    "generated_migration_drift": "pass",
+    "openapi_drift": "pass",
+    "resource_descriptor_drift": "pass"
+  },
+  "limits": [
+    "The focused regression covers the advisory's forbidden-calculation filter oracle; the upstream patch also covers aggregates.",
+    "The Foundation Lab and provisional core remain subject to the broader Ash adoption decision and bounded conditions.",
+    "Advisory freshness is time-dependent and remains enforced by both Hex audit gates."
+  ]
+}

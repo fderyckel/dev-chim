@@ -1,0 +1,240 @@
+{
+  "schema_version": 1,
+  "status": "conditionally_accepted",
+  "prepared_on": "2026-09-16",
+  "scope": "ADR 0002 Ash adoption bounded conditions",
+  "source_manifest": "spikes/ash-foundation-lab/priv/maintenance/owned-boundaries.json",
+  "source_manifest_sha256": "93d3f351f09d98249817db201083f6ae1667ad53cd0c109b680e8283ad96440e",
+  "recommendation": {
+    "outcome": "conditionally_accepted",
+    "binding": true,
+    "rationale": "All mandatory Phase 0 scorecard criteria have direct evidence, while the eight remaining limitations are bounded to named platform, interface, migration, metadata, or routing seams with pre-production gates and explicit fallbacks.",
+    "required_reviewers": [
+      "Architecture review group",
+      "Platform engineering",
+      "Web engineering",
+      "Security/privacy",
+      "Product/operations"
+    ],
+    "final_decision": "conditionally_accepted",
+    "accepted_by": "François — Project Owner",
+    "decided_on": "2026-09-16"
+  },
+  "conditions": [
+    {
+      "id": "transaction_backed_non_atomic_action",
+      "classification": "framework limitation",
+      "owner_role": "Platform engineering",
+      "proposed_disposition": "retain_as_bounded_prerequisite",
+      "rationale": "The limitation is confined to a named transition whose PostgreSQL transaction, optimistic lock, and rollback behaviour have direct tests; it does not weaken the action or authorization boundary.",
+      "production_gate": "Before a production state transition depends on this pattern.",
+      "verification_method": [
+        "Run the positive, stale-write, invalid-transition, and injected-rollback cases on the pinned production candidate versions.",
+        "Review the first production candidate action for an explicit non-atomic declaration and one enclosing PostgreSQL transaction."
+      ],
+      "fallback_trigger": "Replace the action with an explicit Phoenix/Ecto domain service if the transaction cannot preserve authorization, optimistic concurrency, rollback, and stable errors, or if this escape hatch becomes the default mutation path.",
+      "recheck_trigger": "Any Ash or AshPostgres upgrade, or a change to the transition validation.",
+      "evidence": [
+        "docs/phase-0/evidence/ash-pressure-test.md#named-action-and-tenant-role-slice"
+      ],
+      "required_reviewers": [
+        "Architecture review group",
+        "Platform engineering"
+      ],
+      "final_decision": "accepted_as_bounded_production_gate",
+      "accountable_person": "François — Platform Owner",
+      "decision_due_on": "2026-09-16",
+      "expires_on": "2026-12-15"
+    },
+    {
+      "id": "dynamic_repository_sql",
+      "classification": "platform-owned transactional adapter",
+      "owner_role": "Platform engineering",
+      "proposed_disposition": "retain_as_bounded_prerequisite",
+      "rationale": "The SQL is limited to code-owned transactional adapters, remains tenant-qualified, follows the selected dynamic repository, and is covered by tenant, rollback, and concurrency negatives.",
+      "production_gate": "Before any listed SQL adapter is promoted or reimplemented in the production core.",
+      "verification_method": [
+        "Run the tenant-isolation, routed-repository, rollback, and concurrency suites for every promoted adapter.",
+        "Keep the source scan and owned-boundary manifest gate green so new raw SQL cannot appear without disposition."
+      ],
+      "fallback_trigger": "Stop Ash promotion for the affected capability and use an explicit Phoenix/Ecto domain service if raw SQL becomes caller-visible, bypasses the selected repository or authorization boundary, or spreads beyond the owned adapter inventory.",
+      "recheck_trigger": "A new raw SQL source file, a placement-routing change, or replacement with a reviewed Ash-native expression.",
+      "evidence": [
+        "docs/phase-0/evidence/ash-test-and-maintenance-ergonomics.md",
+        "docs/phase-0/evidence/ash-pressure-test.md",
+        "docs/phase-0/evidence/trusted-routing.md"
+      ],
+      "required_reviewers": [
+        "Architecture review group",
+        "Platform engineering",
+        "Security/privacy"
+      ],
+      "final_decision": "accepted_as_bounded_production_gate",
+      "accountable_person": "François — Platform Owner",
+      "decision_due_on": "2026-09-16",
+      "expires_on": "2026-12-15"
+    },
+    {
+      "id": "page_limit_edge_adapter",
+      "classification": "generated-interface escape hatch",
+      "owner_role": "Platform and web engineering",
+      "proposed_disposition": "retain_as_bounded_prerequisite",
+      "rationale": "A small transport-edge guard restores the declared bounded page contract before generated dispatch without changing domain authorization or query ownership.",
+      "production_gate": "Before the production platform exposes a generated public list route.",
+      "verification_method": [
+        "Run below-minimum, non-integer, maximum, and above-maximum public request tests before generated dispatch.",
+        "Regenerate OpenAPI and verify the documented maximum and generated TypeScript contract remain drift-free."
+      ],
+      "fallback_trigger": "Own the public list route in a thin Phoenix adapter if the edge guard cannot be applied consistently or generator changes make the documented and enforced limits diverge.",
+      "recheck_trigger": "Any AshJsonApi upgrade or generated pagination behaviour change.",
+      "evidence": [
+        "docs/phase-0/evidence/ash-pressure-test.md#generated-jsonapi-policy-slice",
+        "docs/phase-0/evidence/ash-nonpatch-upgrade-exercise.md"
+      ],
+      "required_reviewers": [
+        "Architecture review group",
+        "Platform engineering",
+        "Web engineering"
+      ],
+      "final_decision": "accepted_as_bounded_production_gate",
+      "accountable_person": "François — Platform Owner",
+      "decision_due_on": "2026-09-16",
+      "expires_on": "2026-12-15"
+    },
+    {
+      "id": "failure_header_edge_adapter",
+      "classification": "generated-interface adapter",
+      "owner_role": "Platform and web engineering",
+      "proposed_disposition": "retain_as_bounded_prerequisite",
+      "rationale": "The adapter is constrained to allowlisted transient failures and completes the public retry and cache contract without exposing framework or internal failure details.",
+      "production_gate": "Before the production platform exposes the proposed public error contract.",
+      "verification_method": [
+        "Verify complete status, body, cache header, retry header, correlation identifier, and non-disclosure responses at the HTTP boundary.",
+        "Run the generated-interface negative suite after any public taxonomy or error-handler change."
+      ],
+      "fallback_trigger": "Own transient-error translation in a thin Phoenix transport layer if the generated handler cannot apply the complete contract consistently or begins leaking internal details.",
+      "recheck_trigger": "Any generated error-handler, public taxonomy, or retry-policy change.",
+      "evidence": [
+        "docs/phase-0/evidence/ash-pressure-test.md#stable-public-error-taxonomy-slice"
+      ],
+      "required_reviewers": [
+        "Architecture review group",
+        "Platform engineering",
+        "Web engineering",
+        "Security/privacy"
+      ],
+      "final_decision": "accepted_as_bounded_production_gate",
+      "accountable_person": "François — Platform Owner",
+      "decision_due_on": "2026-09-16",
+      "expires_on": "2026-12-15"
+    },
+    {
+      "id": "openapi_contract_modifier",
+      "classification": "generated-contract adapter",
+      "owner_role": "Platform and web engineering",
+      "proposed_disposition": "retain_as_bounded_prerequisite",
+      "rationale": "One explicit modifier fills two measured generator gaps while keeping the checked-in schema reproducible and its generated client byte-stable under review.",
+      "production_gate": "Before a production client is generated from the public API contract.",
+      "verification_method": [
+        "Regenerate the schema from the router and require a reviewed, byte-stable OpenAPI diff.",
+        "Regenerate and type-check the client, including page-limit and transient-error contract calls."
+      ],
+      "fallback_trigger": "Move contract ownership to a thin explicit interface layer if the modifier grows beyond the bounded page/error amendments, becomes order-sensitive, or cannot remain reproducible across supported upgrades.",
+      "recheck_trigger": "Any AshJsonApi, OpenApiSpex, route, page-limit, or public-error change.",
+      "evidence": [
+        "docs/phase-0/evidence/ash-pressure-test.md#idempotency-and-generated-typescript-client-slice",
+        "docs/phase-0/evidence/ash-nonpatch-upgrade-exercise.md"
+      ],
+      "required_reviewers": [
+        "Architecture review group",
+        "Platform engineering",
+        "Web engineering"
+      ],
+      "final_decision": "accepted_as_bounded_production_gate",
+      "accountable_person": "François — Platform Owner",
+      "decision_due_on": "2026-09-16",
+      "expires_on": "2026-12-15"
+    },
+    {
+      "id": "retained_data_migration_choreography",
+      "classification": "platform-owned operational choreography",
+      "owner_role": "Platform engineering and operations",
+      "proposed_disposition": "retain_as_bounded_prerequisite",
+      "rationale": "The generator remains useful for schema intent, while mixed-version compatibility, tenant backfill, support indexes, lock retries, observability, restore readiness, and destructive approval correctly remain explicit operator-owned work.",
+      "production_gate": "Before the first production migration contracts retained tenant data.",
+      "verification_method": [
+        "Repeat the annual-envelope rehearsal in the selected deployment environment under representative concurrent workload and approved lock, WAL, storage, and maintenance budgets.",
+        "Approve and rehearse support-index lifecycle, bounded lock retries, old-version drain, monitoring, backup or point-in-time recovery, and restore or forward-repair before contract."
+      ],
+      "fallback_trigger": "Defer the destructive contract and use an explicit Ecto or operator migration runner if the selected topology misses an approved target, restore cannot be demonstrated, or lock retries cannot remain bounded; reject Ash only if schema ownership itself becomes unsafe or pervasive.",
+      "recheck_trigger": "Any retained-data schema evolution, migration generator change, or production deployment strategy decision.",
+      "evidence": [
+        "docs/phase-0/evidence/retained-data-migration-rehearsal.md",
+        "docs/phase-0/evidence/retained-data-migration-measurement.md"
+      ],
+      "required_reviewers": [
+        "Architecture review group",
+        "Platform engineering",
+        "Product/operations"
+      ],
+      "final_decision": "accepted_as_bounded_production_gate",
+      "accountable_person": "François — Platform Owner",
+      "decision_due_on": "2026-09-16",
+      "expires_on": "2026-12-15"
+    },
+    {
+      "id": "resource_descriptor_and_metadata_validator",
+      "classification": "governed metadata adapter",
+      "owner_role": "Platform engineering and security architecture",
+      "proposed_disposition": "retain_as_bounded_prerequisite",
+      "rationale": "The adapter is one-way, code-owned, derived from allowlisted resource surfaces, and rejects policy, tenancy, repository, SQL, code, unknown, stale, and cross-tenant references before authorized execution.",
+      "production_gate": "Before a production descriptor, form/view consumer, report-definition store, or metadata renderer is implemented.",
+      "verification_method": [
+        "Run descriptor stability, rename, unknown-reference, forbidden-reference, cross-tenant, and authorized-execution tests for each schema version and consumer.",
+        "Complete security review before adding a metadata kind, durable definition store, renderer, or descriptor consumer."
+      ],
+      "fallback_trigger": "Stop the metadata path and retain explicit code-owned presentation contracts if definitions duplicate domain policy, allow authority-bearing references, cannot migrate stable references safely, or require a second runtime schema engine.",
+      "recheck_trigger": "Any Ash information-API upgrade, descriptor schema change, new metadata kind, new consumer, or stable-reference removal.",
+      "evidence": [
+        "docs/phase-0/evidence/resource-authoring-and-governed-metadata.md",
+        "docs/phase-1/evidence/resource-descriptor.md"
+      ],
+      "required_reviewers": [
+        "Architecture review group",
+        "Platform engineering",
+        "Security/privacy"
+      ],
+      "final_decision": "accepted_as_bounded_production_gate",
+      "accountable_person": "François — Platform Owner",
+      "decision_due_on": "2026-09-16",
+      "expires_on": "2026-12-15"
+    },
+    {
+      "id": "tenant_movement_and_non_http_routing",
+      "classification": "platform-owned control-plane adapter",
+      "owner_role": "Platform engineering and security architecture",
+      "proposed_disposition": "retain_as_bounded_prerequisite",
+      "rationale": "Placement selection is correctly outside Ash and remains safe when trusted context, versioned movement, source authority, reconciliation, stale-envelope rejection, and domain-boundary authorization are preserved together.",
+      "production_gate": "Before a production placement registry, tenant-movement control plane, or non-HTTP tenant adapter is implemented.",
+      "verification_method": [
+        "Run movement concurrency, quiescence, reconciliation, rollback, stale-envelope, missing-context, forged-target, and cross-placement tenant negatives against the durable registry candidate.",
+        "Exercise every non-HTTP adapter class through trusted target derivation and re-entry into Ash authorization, then rehearse registry backup and restore."
+      ],
+      "fallback_trigger": "Keep placement static and block tenant movement or the affected adapter if the durable registry, reconciliation, stale-context handling, or recovery proof cannot fail closed; never accept request-selected placement as a fallback.",
+      "recheck_trigger": "Any placement model, movement choreography, routing envelope, non-HTTP adapter, tenant-owned table, or Ash authorization-boundary change.",
+      "evidence": [
+        "docs/phase-0/evidence/trusted-routing.md#tenant-movement-and-non-http-interface-slice"
+      ],
+      "required_reviewers": [
+        "Architecture review group",
+        "Platform engineering",
+        "Security/privacy",
+        "Product/operations"
+      ],
+      "final_decision": "accepted_as_bounded_production_gate",
+      "accountable_person": "François — Platform Owner",
+      "decision_due_on": "2026-09-16",
+      "expires_on": "2026-12-15"
+    }
+  ]
+}

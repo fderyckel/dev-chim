@@ -1,15 +1,15 @@
-# Phase 1: provisional core foundation
+# Phase 1: core foundation
 
-- Status: Slices 1A through 1C verified provisionally; Phase 0 remains incomplete
+- Status: Slices 1A through 1D implemented and test-verified; Phase 0 entry decisions completed
 - Owner: Platform engineering
-- Start basis: explicit user direction on 2026-09-14 to focus on the core foundation and assume Ash for now
-- Entry exception: implementation may proceed only within the bounded scope below; this is not Phase 0 exit approval
+- Start basis: explicit user direction on 2026-09-14, followed by the completed Phase 0 review on 2026-09-16
+- Entry basis: Ash is conditionally accepted; implementation proceeds only in explicitly authorized bounded slices and must satisfy the retained production gates
 
 ## Why this can start narrowly
 
-Phase 0 has direct evidence for named actions, tenant and capability denial, tenant-defined role composition, global authorization requirements, optimistic concurrency, transactional rollback and idempotency, generated-interface policy preservation, trusted placement input, module-gate separation, telemetry redaction, migration generation, and a patch upgrade. The current working verification contract passes.
+Phase 0 has direct evidence for named actions, tenant and capability denial, tenant-defined role composition, global authorization requirements, optimistic concurrency, transactional rollback and idempotency, generated-interface policy preservation, trusted placement input, module-gate separation, telemetry redaction, migration generation, and patch plus non-patch interface-framework upgrades. Ash 3.33.4 now closes the field-policy advisory with a focused forbidden-calculation filter regression, and the current complete verification contract passes.
 
-Phase 0 still lacks accountable architecture acceptance, numeric quality targets, production identity and durable routing/movement integration, production-shaped retained-data migration measurements, measured capacity/recovery evidence, bounded-condition disposition, and the accountable Ash adoption outcome. Those gaps prevent broad production scaffolding and any school business module.
+Phase 0 now has a three-run annual-envelope retained-data migration measurement, an accepted disposition for all eight Ash bounded conditions, architect-approved numeric technical targets, a provider-neutral PostgreSQL contract, a combined local capacity/recovery run, exact full-horizon local restore, and clean-checkout rehearsal. The raw local run preserves the pooled noisy-tenant failure; the pre-checkout application-boundary candidate passes three local reruns. The accountable review accepts Ash conditionally and carries deployment, production identity, durable routing/movement, real adapter, and independent security verification into the phases where those capabilities become real. Those gates still prevent broad production scaffolding or a school business module without explicit authorization.
 
 ## Slice 1A boundary
 
@@ -50,12 +50,26 @@ Slice 1C adds one trusted invocation path from `Chimwemwe.Platform.ExecutionCont
 
 Neutral in-memory tenant-owned and global-reference resources exercise real Ash policy and tenancy behavior in tests. Mutation invocation is deliberately absent: production writes still require the first resource's persistence, migration, idempotency, outbox, concurrency, and recovery contract.
 
-## Guardrails while Phase 0 remains open
+## Slice 1D boundary
 
-- Every Phase 0 ADR remains Proposed unless its named deciders accept it.
-- `make check` proves repository consistency only; it does not close Phase 0.
-- Only `apps/chimwemwe_core` is allowed during slices 1A through 1C. A second production app or service needs explicit later-slice authorization.
+Slice 1D promotes only the contract proven by the new Phase 0 pre-checkout admission evidence. A node-local `Chimwemwe.Platform.DatabaseAdmission` boundary:
+
+- validates `ExecutionContext` before inspecting tenant or placement capacity;
+- derives tenant and placement capacity keys from trusted context rather than caller input;
+- requires explicit positive per-tenant and per-placement limits instead of embedding the current candidate values as production defaults;
+- acquires both permits before invoking the callback that may reach Ecto or Postgrex;
+- classifies tenant saturation as rate limited and placement saturation as a retryable dependency without disclosing identifiers;
+- supplies retry guidance only when an explicit bounded interval is configured; and
+- releases permits after normal return, exception, throw, exit, or caller termination.
+
+The boundary is not yet attached to a repository or application supervisor because no production placement registry, repository, or accepted capacity settings exist. It is node-local rather than a distributed quota and it does not replace Ash authorization, idempotency, database constraints, or stronger tenant placement.
+
+## Continuing guardrails
+
+- Phase 0 ADR outcomes and conditional gates are binding; an Accepted ADR is changed only by supersession.
+- `make check` proves repository consistency; it does not by itself approve a new production capability.
+- Only `apps/chimwemwe_core` is allowed during slices 1A through 1D. A second production app or service needs explicit later-slice authorization.
 - The core contains no production data or secrets and introduces no persistence, experience-metadata engine, or public interface.
-- If ADR 0002 rejects Ash, the core Ash domain and dependency are replaced before business modules depend on them; the execution-context contract remains framework-neutral.
+- If a retained Ash gate fails and its explicit adapter fallback cannot preserve the platform invariants, ADR 0002 must be superseded before the affected business capability depends on it; the execution-context contract remains framework-neutral.
 
-See the [implementation plan](../plans/phase-1-core-foundation-plan.md), [core boundary](../architecture/core-foundation-boundary.md), [domain-model authoring boundary](../architecture/domain-model-authoring-and-metadata.md), [slice 1A evidence](evidence/core-foundation.md), [slice 1B evidence](evidence/resource-descriptor.md), [slice 1C evidence](evidence/action-invocation.md), [Phase 0 status](../phase-0/README.md), and [review record](../phase-0/review-record.md).
+See the [implementation plan](../plans/phase-1-core-foundation-plan.md), [core boundary](../architecture/core-foundation-boundary.md), [domain-model authoring boundary](../architecture/domain-model-authoring-and-metadata.md), [slice 1A evidence](evidence/core-foundation.md), [slice 1B evidence](evidence/resource-descriptor.md), [slice 1C evidence](evidence/action-invocation.md), [slice 1D evidence](evidence/database-admission.md), [Phase 0 status](../phase-0/README.md), and [review record](../phase-0/review-record.md).

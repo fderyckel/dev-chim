@@ -1,0 +1,132 @@
+{
+  "schema_version": 1,
+  "status": "phase0_evidence",
+  "owner": "Platform engineering",
+  "reviewed_on": "2026-09-16",
+  "source_revision": "50defa1a2190f25414aced0bc6887d8f3e7c1524",
+  "environment": {
+    "os": "Apple silicon macOS 26.6.2",
+    "elixir": "1.20.3",
+    "otp": "29.0.5",
+    "postgresql": "18.6"
+  },
+  "upgrade": {
+    "package": "ash_json_api",
+    "baseline": "1.6.6",
+    "candidate": "1.7.1",
+    "fixed_packages": {
+      "ash": "3.33.3",
+      "ash_postgres": "2.13.1"
+    },
+    "baseline_lock_sha256": "e45e619b4c360dd32999d5ef16788d6ab4ddd5e24dc72115e2d51f544d8e48b1",
+    "candidate_lock_sha256": "bc7a379bca1f9c19417e67ee21716b983a5d00fb8112257f0b8b6534be94e451",
+    "lock_delta_entries": [
+      "ash_json_api"
+    ]
+  },
+  "excluded_baselines": [
+    {
+      "package": "ash",
+      "version": "3.32.3",
+      "severity": "MEDIUM",
+      "advisory": "EEF-CVE-2026-82752",
+      "reason": "The immediately preceding Ash minor is advisory-affected and is not an acceptable compatibility baseline."
+    },
+    {
+      "package": "ash_postgres",
+      "version": "2.12.0",
+      "severity": "HIGH",
+      "advisory": "EEF-CVE-2026-78699",
+      "reason": "The immediately preceding AshPostgres minor is advisory-affected and is not an acceptable compatibility baseline."
+    }
+  ],
+  "release_review": [
+    "Field visibility DSL and validation were added in 1.7.0.",
+    "Hidden fields were removed from schemas, routes, sorting, includes, writes, and serialized results in 1.7.0.",
+    "OpenAPI field-name mapping and non-resource-struct serialization were corrected in 1.7.0.",
+    "Type-less resources were excluded from filter schemas in 1.7.1."
+  ],
+  "checks": [
+    {
+      "id": "compile_warnings_as_errors",
+      "baseline": "pass",
+      "candidate": "pass"
+    },
+    {
+      "id": "hex_security_audit",
+      "baseline": "pass",
+      "candidate": "pass"
+    },
+    {
+      "id": "unused_dependency_check",
+      "baseline": "pass",
+      "candidate": "pass"
+    },
+    {
+      "id": "generated_migration_drift",
+      "baseline": "pass",
+      "candidate": "pass"
+    },
+    {
+      "id": "openapi_drift",
+      "baseline": "pass",
+      "candidate": "pass"
+    },
+    {
+      "id": "resource_descriptor_drift",
+      "baseline": "pass",
+      "candidate": "pass"
+    },
+    {
+      "id": "same_schema_full_test_suite",
+      "baseline": "94_passed",
+      "candidate": "94_passed"
+    }
+  ],
+  "artifacts": {
+    "generated_migration_bundle_sha256": {
+      "baseline": "e36e7e8c910bb5b514a3a8ad6bb3165d7ab82d5dfa5a0abf6bed52940631c5f1",
+      "candidate": "e36e7e8c910bb5b514a3a8ad6bb3165d7ab82d5dfa5a0abf6bed52940631c5f1"
+    },
+    "openapi_sha256": {
+      "baseline": "c3282aac350b39f81642167fecdb8fe97cc497d954e67271b5b463893b413138",
+      "candidate": "c3282aac350b39f81642167fecdb8fe97cc497d954e67271b5b463893b413138"
+    },
+    "resource_descriptor_sha256": {
+      "baseline": "88890d1fa5ae6a48b0176132f6542486ec9e92505bc338a6f55f7358741a236f",
+      "candidate": "88890d1fa5ae6a48b0176132f6542486ec9e92505bc338a6f55f7358741a236f"
+    }
+  },
+  "warnings": {
+    "baseline_groups": 38,
+    "candidate_groups": 38,
+    "added": 3,
+    "removed": 3,
+    "disposition": "source_location_only",
+    "moved_locations": [
+      {
+        "path": "lib/ash_json_api/json_schema/json_schema.ex",
+        "baseline_line": 343,
+        "candidate_line": 347
+      },
+      {
+        "path": "lib/ash_json_api/request.ex",
+        "baseline_line": 1223,
+        "candidate_line": 1246
+      },
+      {
+        "path": "lib/ash_json_api/json_schema/open_api.ex",
+        "baseline_line": 1354,
+        "candidate_line": 1387
+      }
+    ]
+  },
+  "result": "pass_with_bounded_remediation",
+  "limits": [
+    "The exercise covers an AshJsonApi minor, not an Ash core or AshPostgres minor.",
+    "The previous Ash and AshPostgres minors were excluded because their current Hex advisories make them unsafe baselines.",
+    "The exercise used a disposable local copy and synthetic PostgreSQL database rather than a clean CI host.",
+    "The lab does not adopt the new field-visibility DSL as an authorization mechanism; domain policies remain authoritative.",
+    "Package freshness and advisory results are dated evidence and must be rechecked at the adoption review."
+  ]
+}

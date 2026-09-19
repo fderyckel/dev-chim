@@ -10,13 +10,13 @@
 - Host: Apple silicon macOS 26.6.2
 - Project runtimes: Erlang/OTP 29.0.5, Elixir 1.20.3, Python 3.14.5, uv 0.12.13, Node.js 24.15.0
 - Services: PostgreSQL 18.6 over the local Unix socket
-- Framework packages: Ash 3.33.3, AshPostgres 2.13.1, AshJsonApi 1.7.1, OpenApiSpex 3.22.4, Phoenix 1.8.13, openapi-typescript 7.13.0, openapi-fetch 0.17.0, TypeScript 5.9.3, Vitest 5.0.0
+- Framework packages: Ash 3.33.4, AshPostgres 2.13.1, AshJsonApi 1.7.1, OpenApiSpex 3.22.4, Phoenix 1.8.13, openapi-typescript 7.13.0, openapi-fetch 0.17.0, TypeScript 5.9.3, Vitest 5.0.0
 - Commands: `make bootstrap`, `make format`, `make check`, and `mix dialyzer`
-- Results: 12 repository-tool tests passed; 94 Ash/PostgreSQL/JSON:API/migration-review/routing/lifecycle/role-graph/idempotency/error-contract/retained-data/maintenance/authoring tests passed; 6 TypeScript client behaviour tests passed; 25 provisional production-core tests passed; Ruff, ShellCheck, documentation validation, generated-migration, descriptor, OpenAPI, TypeScript-declaration, and dependency-warning drift detection, TypeScript compilation, Credo, dependency audits, Dialyzer, formatting, migrations, and Git whitespace checks passed.
+- Results: 22 repository-tool tests passed; 96 Ash/PostgreSQL/JSON:API/migration-review/routing/lifecycle/role-graph/idempotency/error-contract/retained-data/measurement/maintenance/authoring tests passed; 6 TypeScript client behaviour tests passed; 34 provisional production-core tests passed; Ruff, ShellCheck, documentation, target/disposition, capacity/recovery/fairness, and upgrade-evidence validation, generated-migration, descriptor, OpenAPI, TypeScript-declaration, source-bound measurement, and dependency-warning drift detection, TypeScript compilation, Credo, dependency audits, Dialyzer, formatting, migrations, and Git whitespace checks passed.
 
 The tests currently prove attribute-based tenant filtering, cross-tenant denial without an existence signal, actor and tenant fail-closed behaviour, capability denial, field and relationship policies, tenant-defined role composition and rename independence, direct/indirect/concurrent cycle rejection, governed role administration, named transitions, optimistic-lock conflicts, transactional exact-retry idempotency and changed-reuse conflict, compound tenant foreign keys, atomic state/audit/outbox/idempotency rollback, minimal event payloads, database constraints against alternate unsafe writes, generated JSON:API preservation of the action and policy boundary, versioned routes, bounded tenant-safe keyset pagination, the complete proposed public error taxonomy with transient retry guidance and internal non-disclosure, checked-in OpenAPI and generated-TypeScript drift detection, typed client calls without implicit write retries, tenant-safe telemetry, trusted pooled/dedicated routing, independent module gates with serialized deactivation, drain, retained data, mandatory work, and compatible reactivation, plus a disposable retained-data expand/backfill/validate/contract rehearsal.
 
-Dependency compilation emits 39 normalized warning groups across the current locked third-party graph under Elixir 1.20/OTP 29. None originates in the spike modules. The checked [warning baseline](ash-dependency-warning-baseline.md) records ownership and locations and fails on any added or removed group; maintained application code still compiles with warnings as errors.
+Dependency compilation emits 38 normalized warning groups across the current locked third-party graph under Elixir 1.20/OTP 29. None originates in the spike modules. The checked [warning baseline](ash-dependency-warning-baseline.md) records ownership and locations and fails on any added or removed group; maintained application code still compiles with warnings as errors. The [Ash 3.33.4 security-patch review](ash-security-patch.md) records the reviewed reduction from 39 groups and the focused field-policy regression.
 
 ## Named-action and tenant-role slice
 
@@ -31,7 +31,7 @@ Dependency compilation emits 39 normalized warning groups across the current loc
 
 The access model stores tenant-owned actors, roles, capabilities, actor-role assignments, role-capability assignments, and recursive role inclusions. Role names are data: a test renames a composed role and retains the same capability without a code change. Compound foreign keys reject cross-tenant assignments.
 
-The named update uses Ash validation plus optimistic locking inside the data-layer transaction. Ash 3.33.3/AshPostgres 2.13.1 could not compile the custom validation error into a fully atomic SQL expression, so the spike explicitly uses `require_atomic? false`. Concurrency still fails closed through the lock-version predicate, but the atomic-expression limitation remains framework-fit evidence for the final scorecard.
+The named update uses Ash validation plus optimistic locking inside the data-layer transaction. Ash 3.33.4/AshPostgres 2.13.1 cannot compile the custom validation error into a fully atomic SQL expression, so the spike explicitly uses `require_atomic? false`. Concurrency still fails closed through the lock-version predicate, but the atomic-expression limitation remains framework-fit evidence for the final scorecard.
 
 ## Authorization graph integrity and policy-matrix slice
 
@@ -159,7 +159,7 @@ The generated `up` path is additive: it creates tables, indexes, foreign keys, a
 
 The later generated idempotency artifact is also additive in `up` and explicit in `down`. Static inspection requires its tenant/action/key uniqueness, lookup indexes, tenant-qualified actor and aggregate foreign keys, request-hash width, status/completion consistency, and positive result-version checks. The matching executable migration rolled back and reapplied against the synthetic test database; the generated incremental artifact remains review evidence rather than the executable chain.
 
-This artifact is isolated from the executable handwritten migration chain. It is evidence for generator readability and baseline reversibility, not a replacement migration. It also exposes a type difference: Ash emits PostgreSQL `bigint` for the integer resource attributes that the handwritten spike migration currently defines as `integer`. The separate rehearsal below tests retained-data evolution and makes the required platform-owned choreography explicit; production-shaped scale and the observed type difference still require their own migration plan.
+This artifact is isolated from the executable handwritten migration chain. It is evidence for generator readability and baseline reversibility, not a replacement migration. It also exposes a type difference: Ash emits PostgreSQL `bigint` for the integer resource attributes that the handwritten spike migration currently defines as `integer`. The separate rehearsal and annual-envelope measurement below test retained-data evolution and make the required platform-owned choreography explicit; the observed type difference still requires its own migration plan.
 
 ## Retained-data expand-and-contract migration rehearsal
 
@@ -177,15 +177,29 @@ The compatibility test runs old-only writes, fallback reads, and dual writes tog
 
 The final cleanup drops the legacy column and intentionally refuses automatic rollback. This proves where the reversible window ends; it does not authorize such a step without old-version drain, backup/PITR proof, a maintenance owner, and a reviewed restore or forward-repair plan. The Ash generator remains responsible only for declared schema artifact generation and drift review. Mixed-version behaviour, backfill, lock budgets, constraint validation order, and contract authorization are a bounded platform-owned remedy.
 
-## Dependency upgrade slice
+### Annual-envelope measurement
+
+- Date: 2026-09-16
+- Runner: [`retained_data_migration_measurement.ex`](../../../spikes/ash-foundation-lab/lib/ash_foundation_lab/retained_data_migration_measurement.ex)
+- Checked artifact: [`retained-data-migration-measurement.json`](../../../spikes/ash-foundation-lab/priv/maintenance/retained-data-migration-measurement.json)
+- Detailed report: [Retained-data migration annual-envelope measurement](retained-data-migration-measurement.md)
+- Result: three complete disposable-database repetitions passed at 1,312,000 rows each.
+
+Each repetition backfilled 1,280,000 primary-tenant rows in 12,800 transactions capped at 100 rows, while proving that a 32,000-row control tenant remained untouched until its own backfill. Median primary throughput was 9,883.9 rows/second and median elapsed time was 129.50 seconds. Complete WAL was 2.370-2.535GB, final relation size was 418.7-428.8MB, and the temporary concurrent partial support index built in 3.38-5.52 seconds.
+
+The tail and lock evidence prevents an unqualified pass. Primary batch p99 was 356.84-456.03ms despite a 3.07-4.09ms p50. The enforcement gate preserved the per-attempt `250ms` lock budget but needed 43-108 attempts and 24.16-64.36 seconds after the update-heavy backfill. Production contraction therefore needs an operator-owned support-index lifecycle, bounded enforcement retry window, workload observability, old-version drain, and backup/repair gate. All three repetitions preserved tenant counts and the retained fingerprint across contract.
+
+## Dependency upgrade slices
 
 - Date: 2026-09-13
 - Detailed report: [Ash dependency upgrade exercise](ash-upgrade-exercise.md)
 - Previous patch set: Ash 3.33.2, AshPostgres 2.13.0, AshJsonApi 1.7.0
-- Candidate/current set: Ash 3.33.3, AshPostgres 2.13.1, AshJsonApi 1.7.1
+- Candidate/current set: Ash 3.33.4, AshPostgres 2.13.1, AshJsonApi 1.7.1
 - Result: both sets compiled and passed 21 tests; the candidate required no application changes, changed only three direct lock entries, passed the dependency audit, and produced a byte-for-byte identical generated baseline migration.
 
-The exercise used a disposable copy because the repository was already at every latest compatible release. It upgraded the preceding patch set onto the same synthetic database schema, then removed the database and temporary copy. Third-party compile warnings and the missing-tenant AshJsonApi warning remained, so upgrade ergonomics pass only with the warning and error-mapping remediation bounded in the detailed report.
+On 2026-09-13, the exercise used a disposable copy because the repository was then at every latest compatible release. It upgraded the preceding patch set onto the same synthetic database schema, then removed the database and temporary copy. Third-party compile warnings and the missing-tenant AshJsonApi warning remained at that point; both received the later bounded controls recorded in the detailed report.
+
+The 2026-09-16 [non-patch follow-up](ash-nonpatch-upgrade-exercise.md) upgraded AshJsonApi 1.6.6 to 1.7.1 while keeping Ash 3.33.3 and AshPostgres 2.13.1 fixed. Both sides passed the security audit, warnings-as-errors application compile, generated migration/OpenAPI/descriptor checks, and all 94 tests against the same schema. The lock delta contained only AshJsonApi, and the only normalized warning delta was three source-line moves with identical messages. Preceding Ash and AshPostgres minors were rejected as test baselines because Hex reports medium and high security advisories respectively.
 
 ## Trusted tenant-placement routing slice
 
@@ -230,7 +244,7 @@ An optimistic lifecycle version and `FOR UPDATE` lock serialize an ordinary muta
 
 Forced application compilation passed with warnings as errors. Two complete 94-test runs passed with seeds 0 and 1, and every one of the nine test files passed independently. The contract rejects unowned non-atomic or raw-SQL sources, authorization bypasses, silent test skips, detached edge/OpenAPI/descriptor adapters, and unregistered retained-data migration artifacts. A deliberate invalid Ash attribute type failed at compile time with the invalid type and valid alternatives in the error.
 
-This result makes eight current maintenance surfaces explicit: the transaction-backed non-atomic action, dynamic-repository SQL, page-limit and failure-header edge adapters, OpenAPI modification, retained-data operational choreography, the one-way descriptor/metadata adapter, and the tenant-movement/non-HTTP routing adapter. Each has an owner, bounded remedy, closure gate, and recheck trigger. The follow-up warning gate normalizes the complete locked dependency compile separately. This evidence does not remove the adapters, prove a non-patch upgrade, or make the disposable spike production code.
+This result makes eight current maintenance surfaces explicit: the transaction-backed non-atomic action, dynamic-repository SQL, page-limit and failure-header edge adapters, OpenAPI modification, retained-data operational choreography, the one-way descriptor/metadata adapter, and the tenant-movement/non-HTTP routing adapter. Each has an owner, bounded remedy, closure gate, and recheck trigger. The follow-up warning gate normalizes the complete locked dependency compile separately, and the separate non-patch exercise tests a real minor interface-framework transition. This evidence does not remove the adapters or make the disposable spike production code.
 
 ## Resource authoring and governed metadata slice
 
@@ -261,15 +275,15 @@ The authoring category passes with bounded remediation. The proof adds a descrip
 | Independent module gates and safe drain | Mandatory pass | Mandatory pass | [Release/entitlement/activation/authorization matrix, dependency denial, both concurrency lock orders, drain, retained data, mandatory work, and reactivation](#module-lifecycle-slice) |
 | State transitions, concurrency, and errors | Mandatory pass | Mandatory pass | [Named transition, optimistic request version, transactional exact-retry idempotency, and the complete proposed stable public taxonomy](#stable-public-error-taxonomy-slice), including trusted synthetic rate-limit, dependency, and internal failure paths with rollback and non-disclosure proof |
 | Transaction and rollback ergonomics | Mandatory pass | Mandatory pass | [Successful atomic state/audit/event write and injected rollback](#transactional-outbox-slice) |
-| Migration readability and safety | Mandatory pass | Pass with bounded remediation | [Generated baseline inspection and drift detection](#generated-migration-review-slice) plus the [retained-data expand/backfill/validate/contract rehearsal](#retained-data-expand-and-contract-migration-rehearsal); platform-owned choreography remains required and production-shaped scale is pending |
+| Migration readability and safety | Mandatory pass | Pass with bounded remediation | [Generated baseline inspection and drift detection](#generated-migration-review-slice), the [retained-data expand/backfill/validate/contract rehearsal](#retained-data-expand-and-contract-migration-rehearsal), and the [three-run annual-envelope measurement](retained-data-migration-measurement.md); the measured support-index, tail-latency, and enforcement-lock conditions require platform-owned production choreography |
 | Generated API policy preservation | Mandatory pass | Mandatory pass | [Versioned named routes, complete proposed stable errors, tenant-safe keyset pagination, checked-in OpenAPI and generated-type drift checks, cross-tenant existence-shape, transactional idempotency, compile-time invalid-call assertions, exact request serialization, no implicit write retry, and generic-update-bypass tests](#stable-public-error-taxonomy-slice) |
 | Telemetry and redaction | Mandatory pass | Mandatory pass | [Captured allowlist assertions on allowed and denied generated-interface requests](#telemetry-and-redaction-slice) |
 | Test and maintenance ergonomics | Pass or bounded remediation | Pass with bounded remediation | [Forced warning-as-error compile, seeded and isolated test runs, actionable DSL failure, and checked ownership of eight custom boundaries](ash-test-and-maintenance-ergonomics.md) |
 | Resource authoring and governed metadata | Pass or bounded remediation | Pass with bounded remediation | [Derived stable descriptor, tenant view/report definitions, authorized filtered report execution, forbidden-reference negatives, rename path, and patch compatibility](resource-authoring-and-governed-metadata.md) |
-| Upgrade effort and dependency health | Pass or bounded remediation | Pass with bounded remediation | [Three-package patch update with zero application or migration diff and 21 passing tests](ash-upgrade-exercise.md), plus the [complete locked dependency-warning baseline with a zero delta](ash-dependency-warning-baseline.md); a non-patch exercise remains |
+| Upgrade effort and dependency health | Pass or bounded remediation | Pass with bounded remediation | [Three-package patch update with zero application or migration diff and 21 passing tests](ash-upgrade-exercise.md), [AshJsonApi 1.6.6 to 1.7.1 minor update with 94 passing tests and byte-stable generated artifacts](ash-nonpatch-upgrade-exercise.md), plus the [complete locked dependency-warning baseline with a zero delta](ash-dependency-warning-baseline.md) |
 | Explicit public domain contracts | Pass or bounded remediation | Pass with bounded remediation | [Stable JSON:API error/action contract](#stable-public-error-taxonomy-slice) and [framework-independent descriptor references](resource-authoring-and-governed-metadata.md); bounded edge and descriptor adapters remain owned |
 
-The mandatory categories now have direct Phase 0 evidence. That evidence does not itself accept Ash: bounded conditions and the accountable ADR 0002 review outcome remain required.
+The mandatory categories now have direct Phase 0 evidence. On 2026-09-16, François accepted the eight [bounded-condition dispositions](ash-bounded-condition-disposition.md) and ADR 0002 conditionally accepted Ash as the default production-core framework. The evidence does not waive the named production gates, verification methods, fallbacks, or 2026-12-15 review date.
 
 ## Limits
 
@@ -283,9 +297,9 @@ The mandatory categories now have direct Phase 0 evidence. That evidence does no
 - AshJsonApi does not enforce or document the declared maximum page size at this generated interface in the tested version. The Phase 0 edge gate and OpenAPI modifier close the public contract locally but add adapter ownership and upgrade-drift risk.
 - The TypeScript directory is an isolated contract harness, not the Phase 1 web workspace; production package ownership, publishing, authentication/session integration, compatibility release policy, and broader query serialization remain undecided.
 - Response outcome/duration telemetry and third-party logger-redaction assertions remain outside this pre-dispatch telemetry proof.
-- The retained-data rehearsal uses seven local synthetic rows and SQL-simulated application versions. It does not measure production-shaped lock duration, backfill throughput, WAL, replica lag, storage, HA/failover, or mixed-release deployment behaviour; the destructive contract remains disposable-only.
+- The retained-data compatibility rehearsal uses seven rows, while the separate annual-envelope run measures local lock duration, backfill throughput, WAL, and storage across three 1,312,000-row repetitions. Neither exercises replica lag, HA/failover, backup/restore, managed storage, concurrent application work, or independently deployed mixed releases; the destructive contract remains disposable-only.
 - The JSON:API request validator requires the optional OpenApiSpex dependency; the prior missing-tenant mapping warning is closed by an explicit protocol implementation.
 - The named action is not fully atomic because the locked framework pair cannot translate the custom validation error; the current fallback path is transaction-backed with optimistic locking.
-- A patch upgrade and the machine-normalized warning-delta gate pass, but a non-patch framework upgrade remains untested.
+- Patch and non-patch interface-framework upgrades plus the machine-normalized warning-delta gate pass; future Ash core, AshPostgres, and major transitions still require their own evidence when a safe baseline and candidate exist.
 - The descriptor and experience definitions are disposable evidence for one neutral resource, not production framework APIs, durable metadata records, or a general renderer.
-- No clean-machine or CI-host rehearsal has been completed.
+- The later [clean-checkout rehearsal](clean-checkout-rehearsal.md) passed locally; remote CI and a second host remain outside this evidence.

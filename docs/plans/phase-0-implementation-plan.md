@@ -1,6 +1,6 @@
 # Phase 0 implementation plan
 
-- Status: In progress
+- Status: Complete; accountable decisions recorded 2026-09-16
 - Scope: Architecture decisions and risk spikes
 - Repository: `/Users/francois/dev-chim`
 - Source: *School ERP Platform Architecture - Foundation Roadmap*
@@ -27,13 +27,14 @@ Phase 0 does not build a school business module. It also does not build the prod
 
 Before this plan was added, the target directory existed but was not a Git repository and contained no project files. That makes it safe to establish conventions, but repository initialization and remote hosting still need an explicit implementation action.
 
-Implementation checkpoint on 2026-09-14:
+Completion checkpoint on 2026-09-16:
 
 - P0.0 repository and remote hosting setup are present; GitHub reported that `main` had no branch protection when checked on 2026-09-15.
-- P0.1 ADR governance and the initial Proposed record set are implemented.
-- P0.5 scenarios 1-15 and the mandatory tenant-movement/non-HTTP follow-up have direct Ash/PostgreSQL evidence, including generated migration, retained-data rehearsal, patch-upgrade, trusted pooled/dedicated routing, module-lifecycle concurrency/drain review, action idempotency, generated-client contract review, test/maintenance ergonomics, and the governed descriptor/metadata slice. The complete locked dependency-warning surface also has a machine-normalized zero-delta gate. Mandatory scorecard criteria have evidence, but the non-patch upgrade, production-shaped migration measurement, bounded-condition disposition, and accountable adoption outcome remain incomplete.
-- P0.6 local toolchain, Ruff, ShellCheck, documentation validation, Credo, TypeScript contract checks, dependency audits, Dialyzer, database migrations, and test entrypoints are implemented and passing.
-- P0.3, P0.4, and P0.7 still require accountable human review and approved decisions before Phase 0 can close.
+- P0.1 ADR governance and the accountable Accepted, Conditionally Accepted, or Deferred outcomes are recorded.
+- P0.5 scenarios 1-15 and the mandatory tenant-movement/non-HTTP follow-up have direct Ash/PostgreSQL evidence, including generated migration, retained-data rehearsal, a three-run annual-envelope migration measurement, patch and non-patch upgrade exercises, trusted pooled/dedicated routing, module-lifecycle concurrency/drain review, action idempotency, generated-client contract review, test/maintenance ergonomics, and the governed descriptor/metadata slice. The complete locked dependency-warning surface has a machine-normalized zero-delta gate. Ash is conditionally accepted with eight machine-checked, owned production gates and a 2026-12-15 review date.
+- P0.4 has architect-approved numeric targets, a provider-neutral PostgreSQL contract, a combined local capacity/recovery run, three passing pre-checkout admission repetitions, and an exact 131.2-million-row local restore. The preserved raw pooled shape fails all three noisy-tenant repetitions; the node-local pre-checkout shape passes all three. Multi-node selected-deployment repetition and final production placement remain later production-readiness gates. The earlier AWS estimate is withdrawn.
+- P0.6 local toolchain, Ruff, ShellCheck, documentation validation, Credo, TypeScript contract checks, dependency audits, Dialyzer, database migrations, test entrypoints, and a clean-checkout bootstrap/check rehearsal are implemented and passing.
+- P0.3, P0.4, and P0.7 have accountable review outcomes in the Phase 0 review record. Independent security review before real restricted data and school-side records ownership before a pilot remain later gates.
 
 The roadmap separates two concerns:
 
@@ -47,7 +48,7 @@ Ruff is included only for Python support scripts and tests. Elixir code in the A
 ## 3. Governing constraints
 
 - Phoenix, PostgreSQL, and the modular-monolith shape are the firm starting point.
-- Ash remains provisional until the pressure-test passes.
+- Ash is conditionally accepted; its eight production gates remain binding.
 - All mutations are named actions; generic CRUD is not the domain contract.
 - Tenant context is mandatory and non-null at every tested boundary.
 - Logical tenant controls remain mandatory across pooled databases, dedicated databases, and dedicated cells. Trusted authenticated context selects placement and missing or stale routing fails closed.
@@ -58,7 +59,7 @@ Ruff is included only for Python support scripts and tests. Elixir code in the A
 - Domain state and durable post-commit facts use an atomic transaction and an outbox model.
 - Sensitive or restricted data must not enter shared caches, broad search projections, logs, or AI tools by default.
 - The Phase 0 spike uses synthetic data only.
-- No production abstraction may depend on Ash until ADR 0002 is accepted.
+- Production abstractions may use Ash only within ADR 0002 and its bounded-condition gates.
 - Deferred technology choices remain deferred unless a measured requirement justifies them.
 
 ## 4. Planned repository shape
@@ -368,7 +369,7 @@ Use a named action such as `submit_for_review` or `approve_record`. Do not expos
 14. A neutral synthetic module proves that release availability, entitlement, activation, and actor authorization are independent, and that concurrent deactivation drains safely without losing required audit or outbox work.
 15. A neutral resource-authoring slice derives a versioned descriptor from an allowlisted Ash model, drives one view and one report definition without duplicating policy, rejects private, stale, cross-tenant, arbitrary-SQL, and unapproved-action references, and records rename and upgrade ergonomics.
 
-Scenarios 1-15 now have focused evidence. Scenario 11 includes a [retained-data expand-and-contract rehearsal](../phase-0/evidence/retained-data-migration-rehearsal.md), scenario 14 is recorded in [module-lifecycle evidence](../phase-0/evidence/module-lifecycle.md), and scenario 15 is recorded in [resource-authoring and governed-metadata evidence](../phase-0/evidence/resource-authoring-and-governed-metadata.md). Scenario 15 remains disposable evidence and must not be represented as production tooling. These results do not by themselves complete the Ash scorecard or approve ADR 0001, ADR 0002, or ADR 0019.
+Scenarios 1-15 now have focused evidence. Scenario 11 includes a [retained-data expand-and-contract rehearsal](../phase-0/evidence/retained-data-migration-rehearsal.md) and [three-run annual-envelope measurement](../phase-0/evidence/retained-data-migration-measurement.md), scenario 14 is recorded in [module-lifecycle evidence](../phase-0/evidence/module-lifecycle.md), and scenario 15 is recorded in [resource-authoring and governed-metadata evidence](../phase-0/evidence/resource-authoring-and-governed-metadata.md). The eight owned conditions have a [review-ready disposition recommendation](../phase-0/evidence/ash-bounded-condition-disposition.md). Scenario 15 remains disposable evidence and must not be represented as production tooling. These results and the non-binding recommendation do not approve ADR 0001, ADR 0002, or ADR 0019; accountable reviewers must still record the condition decisions.
 
 #### Ash evaluation scorecard
 
@@ -546,6 +547,7 @@ Slices 0C, 0D, and the non-Ash portion of 0F can proceed in parallel after 0A. S
 | Threat traceability | Threat-control-test matrix | High/critical threat lacks owner or verification |
 | Quality targets | Schema check and approval record | Blank, subjective, unowned, or environment-free target |
 | Peak capacity | Synchronized mixed-load benchmark | Annual average hides burst, amplification, pool starvation, or report overlap |
+| Tenant fairness | Source-bound raw failure plus bounded local reruns and selected-deployment production qualification | A fast absolute latency hides relative tenant harm, or a database-local proxy is mistaken for pre-checkout backpressure |
 | Database consistency | Replica-lag/outage and read-after-write tests | Stale authorization, placement/module state, or contradictory confirmation is served |
 | Database availability | Failover-during-burst and application-reconnection drill | Committed work is lost beyond RPO, retry duplicates state, placement opens, or outbox continuity breaks |
 | Database recovery | Isolated point-in-time restore and integrity/reconciliation drill | HA is mistaken for backup or the retained data cannot meet RPO/RTO |
@@ -576,26 +578,26 @@ Slices 0C, 0D, and the non-Ash portion of 0F can proceed in parallel after 0A. S
 
 ## 9. Phase 0 exit checklist
 
-- [ ] Repository root and hosting approach are confirmed.
-- [ ] Documentation and ADR indexes are complete and navigable.
-- [ ] All Phase 0 ADRs have accountable owners, evidence, and exit statuses.
-- [ ] Ash pressure-test scenarios and scorecard are complete.
-- [ ] Ash is accepted, conditionally accepted with bounded prerequisites, or replaced.
-- [ ] Threat boundaries, classifications, abuse cases, mitigations, and residual risks are reviewed.
-- [ ] Interactive latency, scale, report, file, recovery, and availability targets are numeric and approved.
-- [ ] Peak domain-write, retained-footprint, tenant-placement, and movement targets are numeric and approved.
-- [ ] PostgreSQL connection, consistency, failover, restore, replica-lag, backpressure, and asynchronous-continuity targets are numeric and approved.
-- [ ] Read-replica, pooler, partitioning, dedicated-placement, and cross-region-DR decisions record measured triggers rather than assumptions.
-- [ ] The five-school database/cell decision has workload, recovery, residency, cost, isolation, and rollback evidence.
-- [ ] Module release, entitlement, activation, authorization, dependency, drain, retained-data, and reactivation semantics are approved.
-- [ ] `make check` passes from a clean checkout and disposable database.
-- [ ] Ruff passes for repository Python tooling.
-- [ ] Elixir formatter, Credo, Dialyzer, migrations, and tests pass for the spike.
-- [ ] No production data, business module, or premature production service scaffold exists.
-- [ ] The architecture review record is approved and the Phase 1 input list is prepared.
+- [x] Repository root and provider-neutral hosting posture are confirmed; provider selection is deferred.
+- [x] Documentation and ADR indexes are complete and navigable.
+- [x] All Phase 0 ADRs have accountable owners, evidence, and exit statuses.
+- [x] Ash pressure-test scenarios and scorecard are complete.
+- [x] Ash is conditionally accepted with bounded prerequisites.
+- [x] Threat boundaries, classifications, abuse cases, mitigations, and residual risks are reviewed for the synthetic foundation scope.
+- [x] Interactive latency, scale, report, file, recovery, and availability targets are numeric and approved as planning baselines.
+- [x] Peak domain-write, retained-footprint, tenant-placement, and movement targets are numeric and approved as planning baselines.
+- [x] PostgreSQL connection, consistency, failover, restore, replica-lag, backpressure, and asynchronous-continuity targets are numeric and approved.
+- [x] Read-replica, pooler, partitioning, dedicated-placement, and cross-region-DR decisions record measured triggers rather than assumptions.
+- [x] The five-school planning profile records workload, recovery, residency, cost, isolation, and rollback inputs; final production placement is a later gate.
+- [x] Module release, entitlement, activation, authorization, dependency, drain, retained-data, and reactivation semantics are approved.
+- [x] `make check` passes from a clean checkout and disposable database.
+- [x] Ruff passes for repository Python tooling.
+- [x] Elixir formatter, Credo, Dialyzer, migrations, and tests pass for the spike.
+- [x] No production data, business module, or premature production service scaffold exists.
+- [x] The architecture review record is approved and the Phase 1 input list is prepared.
 
 ## 10. Definition of ready for Phase 1
 
-Phase 1 may start only when the Phase 0 exit checklist is complete. Its first implementation plan must consume the accepted ADRs and quality targets. It may then create the production Elixir modular core, Next.js workspace, shared contracts, infrastructure folders, complete CI baseline, developer bootstrap, and the broader template set described by the roadmap.
+Phase 1 foundation work consumes the accepted ADRs and quality targets in explicitly authorized bounded slices. Phase 0 completion does not by itself authorize a Next.js workspace, business module, production infrastructure, or another production app.
 
-If Phase 0 rejects Ash, Phase 1 must use the approved replacement from ADR 0002. It must not run a second open-ended framework selection exercise or preserve an unapproved Ash path in parallel.
+If a retained Ash gate fails and its explicit fallback cannot preserve the platform invariants, ADR 0002 must be superseded before the affected capability proceeds. The project does not maintain a second open-ended framework path in parallel.

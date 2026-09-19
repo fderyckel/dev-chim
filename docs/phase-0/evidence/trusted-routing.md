@@ -69,4 +69,4 @@ The tests prove:
 - Pool sizing, exhaustion, noisy-neighbour behaviour, burst performance, dedicated cells, read replicas, and regional topology remain separate evidence.
 - Logical Ash policy and compound foreign-key protection remain mandatory inside every selected database; physical routing does not replace tenant authorization.
 
-This evidence closes the mandatory Ash tenant-scoping gap at the Phase 0 pressure-test abstraction. It does not accept Ash, approve a final placement profile or RLS decision, satisfy the capacity and recovery campaign, or close ADR 0003.
+This evidence closes the mandatory Ash tenant-scoping gap at the Phase 0 pressure-test abstraction. It supported conditional acceptance of Ash and ADR 0003 on 2026-09-16; it does not approve a final production placement or RLS activation, and it does not replace selected-deployment capacity, recovery, or real-adapter gates.

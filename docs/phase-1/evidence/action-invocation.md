@@ -1,6 +1,6 @@
 # Core-foundation slice 1C action-invocation evidence
 
-- Status: Focused and full working-tree checks passed; architecture acceptance remains pending
+- Status: Focused and full working-tree checks passed; governing ADRs subsequently accepted
 - Owner: Platform engineering
 - Date: 2026-09-15
 - Source: revision `61469c9` plus the current uncommitted Phase 0 and Phase 1 work
@@ -51,9 +51,11 @@ Full command: `make check`
 
 Full working-tree result: 12 repository-tool tests, 94 Phase 0 Ash/PostgreSQL tests, 6 Phase 0 TypeScript client tests, and 34 Phase 1 core tests passed. Ruff, ShellCheck, documentation and phase-boundary validation, generated migration, resource-descriptor, OpenAPI, TypeScript, and dependency-warning drift checks, type checking, Credo, Hex and npm audits, unused-dependency checks, Dialyzer, formatting, and Git whitespace checks also passed. The Ash dependency-warning baseline remained at 39 normalized groups with zero delta.
 
-## Phase 0 remains open
+## Historical Phase 0 state at slice completion
 
 The separate exit command `mise exec -- uv run python tools/check_phase0.py --exit-review` failed as expected. It still reports unresolved owners, dates, numeric targets, evidence, decisions, and not-run recovery/capacity work, plus every required ADR that remains Proposed. The failure is retained as evidence that slice 1C did not turn working checks into Ash adoption or Phase 0 approval.
+
+Follow-up on 2026-09-16: the accountable review completed Phase 0, accepted ADR 0005, and conditionally accepted Ash. The exit check now passes. This later decision does not rewrite the historical slice result or authorize write invocation.
 
 ## Limits and next gate
 
@@ -61,4 +63,4 @@ The separate exit command `mise exec -- uv run python tools/check_phase0.py --ex
 - The production Ash domain remains resource-empty; all invocation fixtures are test-only and in memory.
 - This slice does not authenticate actors, resolve a live placement registry, verify routing-version currentness, select a PostgreSQL repository, expose an HTTP interface, generate a client, or execute descriptor or experience metadata.
 - The resource and action arguments are code-known modules and names, not public discovery or arbitrary module-loading surfaces.
-- ADR 0005 and every other required Phase 0 decision remain Proposed. Passing these tests does not accept Ash or close Phase 0.
+- ADR 0005 is now Accepted and Ash is Conditionally Accepted. This read-only proof still does not authorize the first write path or waive its production gates.

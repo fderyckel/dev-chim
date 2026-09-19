@@ -1,7 +1,8 @@
 # ADR 0014: Primary API and generated TypeScript client
 
-- Status: Proposed
+- Status: Conditionally Accepted
 - Date: 2026-09-13
+- Decision date: 2026-09-16
 - Accountable owner: Platform and web engineering
 - Deciders: Architecture review group
 - Supersedes: None
@@ -25,7 +26,7 @@ Browser, native-mobile, integration, and tool clients need a typed interface tha
 
 ## Decision
 
-Propose testing Ash JSON:API first because it can derive from the candidate domain model. Accept it only if named actions, policy, errors, pagination, versioning, idempotency, and client generation meet the scorecard. Use a thin REST/OpenAPI adapter if it does not. Defer GraphQL until a concrete use case cannot be served safely and efficiently otherwise.
+Conditionally adopt Ash JSON:API with a checked OpenAPI contract and generated TypeScript client because named actions, policy, errors, pagination, versioning, idempotency, and client generation meet the Phase 0 scorecard. Retain the bounded page-limit, failure-header, and OpenAPI modifiers as explicit owned edge adapters. Use a thin REST/OpenAPI adapter if a generated boundary cannot preserve the contract. Defer GraphQL until a concrete use case cannot be served safely and efficiently otherwise.
 
 ADR 0020 owns the proposed client-experience direction. Its browser and native clients consume the same versioned public contract, but their layouts, navigation, components, and device interactions remain product decisions. Generated declarations and request helpers may remove duplicated wire-format knowledge; they do not generate a generic school interface or make authorization decisions.
 
@@ -55,7 +56,7 @@ The [idempotency and generated-client slice](../phase-0/evidence/ash-pressure-te
 
 The [stable public error taxonomy slice](../phase-0/evidence/ash-pressure-test.md#stable-public-error-taxonomy-slice) adds explicit `429`, `503`, and `500` contracts. Synthetic transient failures receive bounded `Retry-After` guidance, every server failure is non-cacheable, private reasons are removed from the response, and the client surfaces each response without an implicit write retry. The failure selector exists only in trusted server context and cannot be supplied in the JSON:API document.
 
-Accountable acceptance of the bounded page-limit, error/header, idempotency, and client adapters still prevents this ADR from leaving Proposed.
+The accountable review accepts the bounded page-limit, error/header, idempotency, and client adapters as production conditions. A failed adapter gate blocks the affected public route and triggers the thin explicit-interface fallback.
 
 ## Fallback and exit cost
 

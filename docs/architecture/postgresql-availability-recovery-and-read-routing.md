@@ -117,6 +117,8 @@ Queue names and exact concurrency are later implementation choices, but the serv
 
 Overload is classified before an interface maps it to a transport response. A deliberate caller- or tenant-fairness limit is `rate_limited` and may map to HTTP 429. Database, pool, or required-dependency saturation is `retryable_dependency` and normally maps to HTTP 503. `Retry-After` is supplied only when the owning control can state a bounded retry interval, and write retries reuse the same idempotency key. A generic database checkout failure is not relabelled as caller rate limiting.
 
+The [Phase 0 fairness follow-up](../phase-0/evidence/tenant-fairness-backpressure-measurement.md) demonstrates that a two-slot-per-tenant candidate can protect the other tenants in the local synthetic workload while preserving atomicity and outbox facts. Its advisory-lock proxy rejects only after database checkout and transaction start, so it is not the production control described above. The [pre-checkout follow-up](../phase-0/evidence/precheckout-admission-measurement.md) closes that local seam. Production readiness still requires the same comparison through the actual pool, multiple application nodes, and selected deployment environment.
+
 ## Connection budget
 
 Every candidate placement records:
@@ -217,5 +219,4 @@ Tests use synthetic data and record exact hardware or service tier, PostgreSQL/p
 - [Ash policy behaviour for bulk creates](https://ash.hexdocs.pm/policies.html#bulk-creates) documents transaction requirements for filter-mode authorization.
 - [Oban queues](https://oban.hexdocs.pm/Oban.Queues.html) documents independently controlled queue concurrency.
 - [PgBouncer configuration](https://www.pgbouncer.org/config.html) documents pool modes, connection limits, session-state constraints, and prepared-statement handling.
-- [AWS Multi-AZ PostgreSQL](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Concepts.MultiAZSingleStandby.html) is one managed-service example that separates an HA standby from read scaling.
 - [Google Cloud SQL disaster recovery](https://docs.cloud.google.com/sql/docs/postgres/intro-to-cloud-sql-disaster-recovery) is one managed-service example that distinguishes regional HA from cross-region DR and its non-zero RPO risk.

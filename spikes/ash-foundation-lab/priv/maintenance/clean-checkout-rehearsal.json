@@ -1,0 +1,45 @@
+{
+  "bootstrap": {
+    "clean_after": true,
+    "command": "./bin/bootstrap",
+    "elapsed_ms": 47325.192,
+    "exit_code": 0
+  },
+  "candidate": {
+    "base_revision": "50defa1a2190f25414aced0bc6887d8f3e7c1524",
+    "candidate_commit": "9754f5dfc714a362ae2cff0987ce059cd6e2b33c",
+    "candidate_tree": "aacceab779f28f55cc20a5486bf61df4738e5302",
+    "clean_before_bootstrap": true,
+    "tracked_patch_applied": true,
+    "untracked_paths_copied": 40
+  },
+  "command": "mise exec -- uv run python tools/rehearse_phase0_clean_checkout.py --output spikes/ash-foundation-lab/priv/maintenance/clean-checkout-rehearsal.json",
+  "elapsed_ms": 369242.485,
+  "limits": [
+    "The candidate commit exists only inside the deleted temporary clone; the source working tree and history were not changed.",
+    "Ignored dependency and build directories may be created by bootstrap and checks; Git source status remained clean.",
+    "This local rehearsal does not establish remote CI, branch protection, or managed-service availability.",
+    "The result artifact itself is written only after the isolated run and is therefore validated by the subsequent source-tree make check, not by its own candidate commit."
+  ],
+  "rehearsed_on": "2026-09-16",
+  "schema_version": 1,
+  "source_sha256": {
+    "Makefile": "ba82ffc490cdbc8d4bf2570341cac35c9e47ebe63d95695481ea5c0059e7e0ec",
+    "bin/bootstrap": "a3f6c94233b97fbe336b637fd3332d09c8fa43a605fd926642b656db82ce4281",
+    "bin/core-check": "98661a8decfc7340854dc5529dcfd3907827b768378a82261f922da26dc6a37c",
+    "bin/phase0-check": "81e19436529d1f7c188380bec13debea5fd0a95802306c69f49f42d75f0e6b6e",
+    "tools/rehearse_phase0_clean_checkout.py": "928e2834f2d32857589ffb1df238d1ded161a7299db4d62dc51ab8f6afb1acaf"
+  },
+  "status": "phase0_clean_checkout_rehearsal_passed",
+  "verification": {
+    "clean_after": true,
+    "command": "make check",
+    "elapsed_ms": 321633.521,
+    "exit_code": 0,
+    "extracted_test_counts": {
+      "elixir_test_results": 146,
+      "repository_tool_tests": 23,
+      "typescript_tests": 6
+    }
+  }
+}

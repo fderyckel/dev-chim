@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "status": "review_ready_pending_accountable_decision",
+  "prepared_on": "2026-09-16",
+  "scope": "Phase 0 quality-attribute target recommendation",
+  "profile": {
+    "name": "five_school_planning_envelope",
+    "tenants": 5,
+    "learners": 8200,
+    "attendance_facts_per_period": 8200,
+    "attendance_facts_per_year": 13120000,
+    "planning_horizon_years": 10,
+    "planning_horizon_attendance_facts": 131200000,
+    "peak_window_seconds": 30,
+    "session_batch_size": 25,
+    "session_batches_per_period": 328,
+    "approved_business_forecast": false
+  },
+  "targets": [
+    {
+      "id": "interactive_api_reads",
+      "owner_role": "Product and platform engineering",
+      "metrics": {
+        "p95_server_duration_ms_max": 300,
+        "p99_server_duration_ms_max": 750,
+        "server_error_rate_percent_max": 0.1
+      },
+      "measurement": "Representative authorized reads against the planning dataset in the target region."
+    },
+    {
+      "id": "interactive_mutations",
+      "owner_role": "Product and platform engineering",
+      "metrics": {
+        "p95_server_duration_ms_max": 750,
+        "p99_server_duration_ms_max": 2000,
+        "server_error_rate_percent_max": 0.1
+      },
+      "measurement": "Named action including policy, transaction, immutable change evidence, and outbox commit."
+    },
+    {
+      "id": "peak_domain_writes",
+      "owner_role": "Platform engineering and operations",
+      "metrics": {
+        "committed_facts_per_second_min": 550,
+        "p95_session_batch_duration_ms_max": 1000,
+        "p99_session_batch_duration_ms_max": 2000,
+        "error_rate_percent_max": 0.1,
+        "unauthorized_partial_commits_max": 0
+      },
+      "measurement": "Three 8200-fact synchronized bursts in 25-fact tenant-qualified session batches, with audit and outbox amplification, mixed reads, retries, and authorization negatives."
+    },
+    {
+      "id": "user_visible_web",
+      "owner_role": "Product and web engineering",
+      "metrics": {
+        "p75_lcp_ms_max": 2500,
+        "p75_inp_ms_max": 200,
+        "p75_cls_max": 0.1
+      },
+      "measurement": "Representative high-frequency journeys on an agreed mid-tier phone and mobile network profile."
+    },
+    {
+      "id": "scale",
+      "owner_role": "Product and operations",
+      "metrics": {
+        "tenant_count": 5,
+        "learner_count": 8200,
+        "simultaneously_signed_in_users": 2000,
+        "concurrent_interactive_requests": 100
+      },
+      "measurement": "Synthetic planning envelope; the user and concurrency values require accountable forecast approval."
+    },
+    {
+      "id": "tenant_placement",
+      "owner_role": "Platform engineering, security, and operations",
+      "metrics": {
+        "p95_pool_wait_ms_max": 25,
+        "p99_pool_wait_ms_max": 100,
+        "other_tenant_p95_degradation_percent_max": 20,
+        "movement_writer_interruption_seconds_max": 60,
+        "reconciliation_mismatches_max": 0,
+        "accepted_stale_routes_max": 0
+      },
+      "measurement": "Pooled and dedicated candidates under synchronized burst, noisy-neighbour load, movement, stale routing, and reconciliation."
+    },
+    {
+      "id": "database_connections",
+      "owner_role": "Platform engineering and operations",
+      "metrics": {
+        "application_nodes": 2,
+        "writer_pool_per_node": 10,
+        "reader_pool_per_node": 0,
+        "job_and_outbox_connections": 5,
+        "reserved_connections": 25,
+        "total_budgeted_connections": 50,
+        "postgresql_max_connections": 100,
+        "p95_checkout_wait_ms_max": 25,
+        "timeout_or_rejection_rate_percent_max": 0.1,
+        "failover_and_maintenance_reserve_percent_min": 25
+      },
+      "measurement": "Direct-pool baseline without a reader or pooler; measure checkout wait, early rejection, recovery, and reserve."
+    },
+    {
+      "id": "oltp_footprint",
+      "owner_role": "Platform engineering, records governance, and operations",
+      "metrics": {
+        "active_attendance_years": 2,
+        "active_attendance_facts": 26240000,
+        "planning_horizon_attendance_facts": 131200000,
+        "index_to_table_bytes_ratio_max": 1.5,
+        "wal_to_logical_payload_ratio_max": 4.0,
+        "autovacuum_oldest_dead_tuple_age_seconds_max": 300
+      },
+      "measurement": "Infrastructure sizing envelope only; it does not authorize legal retention, archival, or deletion."
+    },
+    {
+      "id": "read_consistency",
+      "owner_role": "Platform engineering and security",
+      "metrics": {
+        "unsafe_security_or_read_your_write_routes_max": 0,
+        "bounded_staleness_seconds_max": 30,
+        "missing_read_your_write_results_max": 0,
+        "writer_fallback_connection_budget_percent_max": 20
+      },
+      "measurement": "Separate writer and replica connections under paused replay, lag, outage, permission change, and immediate confirmation."
+    },
+    {
+      "id": "asynchronous_continuity",
+      "owner_role": "Platform engineering and operations",
+      "metrics": {
+        "p95_oldest_outbox_age_seconds_max": 60,
+        "p99_oldest_outbox_age_seconds_max": 300,
+        "missed_committed_events_max": 0,
+        "unhandled_duplicate_events_max": 0,
+        "dead_letters_during_planning_burst_max": 0
+      },
+      "measurement": "Peak writes, failover, idempotent replay, tenant fairness, and lower-priority consumer throttling."
+    },
+    {
+      "id": "report_campaigns",
+      "owner_role": "Product and operations",
+      "metrics": {
+        "reports": 100,
+        "pages_per_report": 10,
+        "completion_deadline_minutes_max": 15,
+        "retries_per_report_max": 3
+      },
+      "measurement": "Defined reference template and renderer on the selected production candidate."
+    },
+    {
+      "id": "files",
+      "owner_role": "Product, security, and operations",
+      "metrics": {
+        "upload_mebibytes_max": 25,
+        "derivative_expansion_ratio_max": 5.0,
+        "p95_scan_deadline_seconds_max": 60
+      },
+      "measurement": "Allowlisted formats, malformed and malicious samples, derivatives, quarantine, and scan failure."
+    },
+    {
+      "id": "database_ha",
+      "owner_role": "Platform engineering and operations",
+      "metrics": {
+        "committed_write_rpo_bytes_max": 0,
+        "failover_rto_seconds_max": 120,
+        "application_reconnect_seconds_max": 60,
+        "missing_outbox_events_max": 0
+      },
+      "measurement": "Synchronous same-region standby candidate, writer loss during burst, promotion, endpoint switch, idempotent retry, and outbox reconciliation."
+    },
+    {
+      "id": "database_recovery",
+      "owner_role": "Platform engineering and operations",
+      "metrics": {
+        "pitr_rpo_seconds_max": 300,
+        "pitr_rto_seconds_max": 14400,
+        "integrity_mismatches_max": 0,
+        "drill_interval_days_max": 90
+      },
+      "measurement": "Isolated point-in-time restore at the planning-horizon retained footprint with tenant and outbox reconciliation."
+    },
+    {
+      "id": "object_recovery",
+      "owner_role": "Platform engineering, records governance, and operations",
+      "metrics": {
+        "rpo_seconds_max": 900,
+        "rto_seconds_max": 14400,
+        "metadata_object_mismatches_max": 0
+      },
+      "measurement": "Versioned object store restore and authoritative metadata reconciliation."
+    },
+    {
+      "id": "availability",
+      "owner_role": "Product and operations",
+      "metrics": {
+        "monthly_slo_percent_min": 99.9,
+        "scheduled_maintenance_hours_per_quarter_max": 4
+      },
+      "measurement": "Core action and critical dependencies; scheduled maintenance is reported separately and cannot hide unplanned failure."
+    }
+  ],
+  "approval": {
+    "final_decision": "pending_accountable_review",
+    "accountable_people": null,
+    "decided_on": null,
+    "review_due_on": null
+  },
+  "limits": [
+    "These values are a review recommendation, not approved service commitments.",
+    "The five-school population and concurrency inputs are synthetic planning assumptions, not a business forecast.",
+    "The OLTP horizon is an infrastructure sizing envelope and does not decide records-retention law or policy.",
+    "Report, file, object-store, web, and managed-provider targets require their later implementation evidence before acceptance."
+  ]
+}

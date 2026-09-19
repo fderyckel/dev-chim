@@ -25,12 +25,14 @@ cd ../.. && make check
 Results:
 
 - Forced test-environment compilation rebuilt 32 maintained and test-support modules and passed with warnings treated as errors.
-- The complete forced dependency compile matched its 39-group normalized warning baseline with zero additions and zero removals.
+- The complete forced dependency compile matched its 38-group normalized warning baseline with zero additions and zero removals.
 - The focused maintenance contract passed 5 tests.
 - Both complete seeded runs passed all 94 tests. ExUnit reported 3.6 seconds for seed 0 and 3.5 seconds for seed 1.
 - All nine test files have focused passing evidence: 2 idempotency, 33 resource/API, 3 generated-migration, 5 maintenance, 10 resource-authoring, 3 retained-data migration, 10 role-administration, 15 module-lifecycle, and 13 trusted-routing tests. The original file-isolation campaign covered the same files before the six-test routing expansion; the expanded routing file and maintenance contract were then rerun directly.
 - No maintained library source contains `authorize?: false`; no test file or test helper silently excludes a test.
-- The required repository-wide `make check` passed after the warning-gate integration: 12 repository-tool tests, 94 Phase 0 lab tests, 6 TypeScript client tests, and 25 provisional Phase 1 core tests, plus formatting, generated-artifact drift checks, the 39-group dependency-warning zero-delta check, lint, dependency audits, Dialyzer, compilation with warnings as errors, migrations, and whitespace checks.
+- The required repository-wide `make check` passed after the non-patch evidence integration: 14 repository-tool tests, 94 Phase 0 lab tests, 6 TypeScript client tests, and 34 provisional Phase 1 core tests, plus formatting, generated-artifact and upgrade-evidence checks, the 39-group dependency-warning zero-delta check, lint, dependency audits, Dialyzer, compilation with warnings as errors, migrations, and whitespace checks.
+
+The 2026-09-16 retained-data measurement follow-up adds a tenth independently runnable test file with two tests, registers its raw SQL and operational choreography in the same eight-boundary manifest, and adds a source-bound machine-readable evidence validator. The bounded-condition follow-up adds a machine-checked one-to-one disposition proposal and two repository tests that prevent it from claiming unrecorded acceptance. The quality-target and capacity/recovery follow-up adds two more repository tests that bind the proposed targets to the measured sources and preserve the failed noisy-tenant gate. The fairness follow-up adds two repository tests that bind the passing candidate to that failed baseline, recompute its three-run results, and prevent it from claiming production admission readiness. The required current `make check` passed with 22 repository-tool tests, 96 Phase 0 lab tests, 6 TypeScript client tests, and 34 provisional Phase 1 core tests. The 94-test results above remain the dated pre-measurement ergonomics campaign.
 
 ## Checked maintenance contract
 
@@ -54,7 +56,7 @@ The lab has 4,085 maintained library lines across 31 files and 5,442 test lines 
 
 The maintenance cost is real rather than hidden. The evidence still owns a transaction-backed non-atomic action, dynamic-repository SQL, two HTTP edge adapters, an OpenAPI modifier, and platform-managed retained-data choreography. Two scenario-heavy test files are large because the disposable lab keeps end-to-end setup next to its proof. The spike must not be promoted or copied into production; production boundaries need smaller fixtures and contract-specific helpers.
 
-Third-party dependency compilation still emits 39 reviewed warning groups under the pinned runtime even though a forced compile of the maintained application succeeds with warnings as errors. The [machine-normalized dependency-warning baseline](ash-dependency-warning-baseline.md) now blocks any added or removed group, package/lock change, toolchain change, or unrecognized warning form. A non-patch framework upgrade remains a separate ADR 0002 remediation item.
+Third-party dependency compilation still emits 38 reviewed warning groups under the pinned runtime even though a forced compile of the maintained application succeeds with warnings as errors. The [machine-normalized dependency-warning baseline](ash-dependency-warning-baseline.md) blocks any added or removed group, package/lock change, toolchain change, or unrecognized warning form. The [Ash 3.33.4 patch review](ash-security-patch.md) dispositions the one removed Spark warning; the separate [non-patch exercise](ash-nonpatch-upgrade-exercise.md) retains the AshJsonApi minor comparison.
 
 ## Scorecard result
 

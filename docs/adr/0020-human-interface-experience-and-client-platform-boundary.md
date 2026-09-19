@@ -1,7 +1,8 @@
 # ADR 0020: Human-interface experience and client-platform boundary
 
-- Status: Proposed
+- Status: Conditionally Accepted
 - Date: 2026-09-15
+- Decision date: 2026-09-16
 - Accountable owner: Product experience and platform engineering
 - Deciders: Architecture review group, product owner, security architecture, and web/mobile engineering
 - Supersedes: None
@@ -12,7 +13,7 @@ People judge Chimwemwe by whether everyday school work is clear, fast, forgiving
 
 Ash resources are declarative and introspectable, but they are not a school-ERP user interface. Treating them as a generic CRUD screen generator would make critical workflows feel generic and could confuse presentation with authorization. Conversely, independently reimplementing types, permitted actions, error handling, and policy assumptions in each client would create drift.
 
-The system context already treats the Next.js experience as a client of the Phoenix/Ash/PostgreSQL core. Phase 0 and the provisional Phase 1 core explicitly exclude a production web or mobile application. This ADR therefore records a proposed product and client boundary; it does not authorize implementation.
+The system context already treats the Next.js experience as a client of the Phoenix/Ash/PostgreSQL core. Phase 0 and the bounded Phase 1 core explicitly exclude a production web or mobile application. This ADR records the accepted browser-first product/client boundary and its native-client conditions; it does not authorize implementation.
 
 ## Decision drivers
 
@@ -32,7 +33,7 @@ The system context already treats the Next.js experience as a client of the Phoe
 
 ## Decision
 
-Propose TypeScript and React as the client family: Next.js/React is the primary browser experience, and Expo/React Native is the proposed companion for iOS and Android. The browser experience must be responsive and usable on a phone from the first browser release. A native application is justified for workflows whose user benefit depends on native capabilities or mobile resilience, such as push notifications, camera or scanner input, secure device integration, or explicitly designed offline capture; it is not required merely because the product has a phone layout.
+Conditionally adopt TypeScript and React as the client family. Next.js/React is the primary responsive browser experience. Expo/React Native remains deferred until a measured workflow depends on native capabilities or mobile resilience, such as push notifications, camera or scanner input, secure device integration, or explicitly designed offline capture; it is not required merely because the product has a phone layout.
 
 The product shares a design language, not a forced common screen tree.
 
@@ -78,7 +79,7 @@ The generated TypeScript client is a build artifact from the checked OpenAPI con
 
 Current evidence is limited to the contract boundary, not user-experience proof. The generated JSON:API and TypeScript-client pressure-test in ADR 0014 establishes a candidate for named actions, policy preservation, stable errors, idempotency, tenant-safe pagination, OpenAPI drift detection, and a typed request envelope. The resource-authoring scenario and ADR 0019 establish candidate descriptor/experience-metadata boundaries. [AshJsonApi's OpenAPI support](https://ash-json-api.hexdocs.pm/open-api.html) and [Expo's web support](https://docs.expo.dev/workflow/web/) demonstrate technical feasibility only.
 
-Before acceptance, accountable reviewers must require:
+Before a production client or workflow ships, accountable reviewers must require:
 
 1. Journey research and high-fidelity prototypes for at least one time-critical phone workflow, one browser-dense operational workflow, and one shared correction or handoff workflow. Attendance capture through desktop review and correction is a representative candidate, not an authorized business module.
 2. Usability sessions with representative school users, declared success measures for completion, errors, recovery, confidence, and time, and recorded changes to the design.

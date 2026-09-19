@@ -1,7 +1,8 @@
 # ADR 0010: File ownership, storage pipeline, and external drives
 
-- Status: Proposed
+- Status: Conditionally Accepted
 - Date: 2026-09-13
+- Decision date: 2026-09-16
 - Accountable owner: Platform engineering and security architecture
 - Deciders: Architecture review group and privacy owner
 - Supersedes: None
@@ -24,7 +25,7 @@ School files contain sensitive data, while parsers and renderers create a large 
 
 ## Decision
 
-Propose PostgreSQL/Ash ownership, relationships, classification, version, retention, checksum, and lifecycle metadata with S3-compatible binary storage. New uploads remain quarantined through type validation, scanning, extraction, and safe derivative generation. External drives are connectors, not the platform policy engine. Storage namespaces come from trusted tenant placement and routing version, never a request path or module-supplied bucket.
+Conditionally adopt PostgreSQL/Ash ownership, relationships, classification, version, retention, checksum, and lifecycle metadata with a provider-neutral object-storage adapter. New uploads remain quarantined through type validation, scanning, extraction, and safe derivative generation. External drives are connectors, not the platform policy engine. Storage namespaces come from trusted tenant placement and routing version, never a request path or module-supplied bucket. The storage provider and external connectors remain later implementation choices.
 
 ## Consequences
 

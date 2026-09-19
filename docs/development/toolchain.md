@@ -1,6 +1,6 @@
 # Toolchain contract
 
-- Status: Active for Phase 0 and provisional Phase 1 core slices 1A through 1C
+- Status: Active for Phase 0 and provisional Phase 1 core slices 1A through 1D
 - Owner: Platform engineering
 - Review trigger: runtime security advisory, package incompatibility, or Phase 1 workspace start
 

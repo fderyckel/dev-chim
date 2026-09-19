@@ -1,7 +1,8 @@
 # ADR 0019: Domain model authoring and governed metadata
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-15
+- Decision date: 2026-09-16
 - Accountable owner: Platform engineering
 - Deciders: Architecture review group, product owner, and security architecture
 - Supersedes: None
@@ -30,7 +31,7 @@ Ash already provides a declarative source model for resources, fields, relations
 
 ## Decision
 
-Propose the governed hybrid.
+Adopt the governed hybrid.
 
 Source-controlled Ash resources and named actions are the authoritative application model. They own persistent fields and types, relationships, identities, invariants, calculations with business meaning, tenancy, authorization policies, public actions, and migration intent. PostgreSQL remains authoritative for persisted state and critical database constraints.
 

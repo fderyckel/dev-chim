@@ -1,6 +1,6 @@
 # Module-lifecycle evidence
 
-- Status: Focused lifecycle slice passed; accountable approval required
+- Status: Accepted architecture contract; production integration gates remain
 - Owner: Platform engineering with product and security architecture
 - Date: 2026-09-14
 - Source: revision `f1b846fad10b` plus the current uncommitted Phase 0 spike changes
@@ -63,12 +63,13 @@ The migration gives every tenant-owned lifecycle table a non-null tenant key. Co
 - Lifecycle idempotency-key retry semantics are not exercised yet; this remains an ADR 0001 acceptance question even though optimistic conflicts have stable outcomes.
 - Audit and outbox facts are retained atomically, but dispatch, retries, deduplication, retention, legal hold, and placement movement remain separate work.
 - The lifecycle boundary uses explicit application-service and PostgreSQL transactions around the existing Ash-backed capability model. It is evidence for the architecture seam, not a reusable production API or a generated-interface result.
-- The focused proof does not approve ADR 0001, accept Ash, or replace the accountable architecture and security review.
+- The focused proof does not turn the synthetic boundary into a production API or approve an untested queue, projection, or external-consumer implementation.
 
 ## Review outcome
 
-- Accountable decider: OWNER_REQUIRED
-- Decision: DECISION_REQUIRED
-- Conditions, owner, and expiry: DECISION_REQUIRED
+- Accountable decider: François — Project Owner
+- Decision date: 2026-09-16
+- Decision: Accepted as the ADR 0001 architecture contract. Release availability, entitlement, module activation, and actor authorization remain separate server-side gates; deactivation retains data and does not cascade by default.
+- Conditions: before the first production module activation, François as interim Platform Owner must verify idempotent lifecycle requests, the real queue/outbox adapters, drain/replay/reconciliation, and a named operational owner. Review by 2026-12-15 or earlier at that production gate.
 
 See [module activation and lifecycle](../../architecture/module-activation-and-lifecycle.md) and [ADR 0001](../../adr/0001-modular-monolith-and-service-boundaries.md).

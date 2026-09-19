@@ -1,7 +1,8 @@
 # ADR 0009: Cache taxonomy, invalidation, and Valkey trigger
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-13
+- Decision date: 2026-09-16
 - Accountable owner: Platform engineering
 - Deciders: Architecture review group and security architecture
 - Supersedes: None
@@ -24,7 +25,7 @@ Caching can improve latency but can also leak restricted data or preserve revoke
 
 ## Decision
 
-Propose explicit cache classes, ownership, tenant-aware/versioned keys, TTL, invalidation event, bypass, and observability. Placement and module-lifecycle versions participate in keys or namespaces where movement or deactivation could otherwise serve stale data. Begin with public/browser caching where safe and ETS behind an adapter. Do not deploy Valkey until cross-node reuse or coordination has a measured requirement.
+Adopt explicit cache classes, ownership, tenant-aware/versioned keys, TTL, invalidation event, bypass, and observability. Placement and module-lifecycle versions participate in keys or namespaces where movement or deactivation could otherwise serve stale data. Begin with public/browser caching where safe and ETS behind an adapter. Do not deploy Valkey until cross-node reuse or coordination has a measured requirement.
 
 ## Consequences
 

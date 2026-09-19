@@ -3,7 +3,7 @@
 ## Test layers
 
 - Repository tests validate documentation, ADR structure, links, and phase boundaries.
-- Production core tests validate trusted actor/placement source separation, fail-closed execution context, tenant agreement, global Ash authorization and actor requirements, the resource-authoring contract, deterministic allowlisted descriptor derivation, and trusted invocation of public named reads.
+- Production core tests validate trusted actor/placement source separation, fail-closed execution context, tenant agreement, global Ash authorization and actor requirements, the resource-authoring contract, deterministic allowlisted descriptor derivation, trusted invocation of public named reads, and pre-checkout tenant/placement admission.
 - Unit tests cover deterministic logic without services.
 - Integration tests use the local synthetic PostgreSQL database and exercise Ash/PostgreSQL behaviour.
 - Security tests include negative authorization and cross-tenant cases alongside positive cases.
@@ -29,7 +29,7 @@ make check
 
 ### Fast development loop
 
-`make test-fast` runs only the provisional production-core test suite. It is the default short loop for core resource, action, policy, execution-context, descriptor, and trusted read-invocation work. It does not run the disposable Ash lab, Python repository checks, generated-artifact drift checks, TypeScript contracts, lint, dependency audit, or static analysis.
+`make test-fast` runs only the bounded production-core test suite. It is the default short loop for core resource, action, policy, execution-context, descriptor, trusted read-invocation, and admission work. It does not run the disposable Ash lab, Python repository checks, generated-artifact drift checks, TypeScript contracts, lint, dependency audit, or static analysis.
 
 Use a focused `mix test path/to/test.exs` command when one file is sufficient during diagnosis. Before sharing any change, run the relevant focused checks and the complete `make check` contract; a passing fast loop is never Phase 0 or architecture evidence by itself.
 
@@ -68,6 +68,7 @@ mise exec -- env MIX_ENV=test mix test
 - Every base-resource or domain-contract change needs valid tenant-owned and global-reference cases plus missing-contract, missing-policy, wrong-domain, unsafe-tenant, and generic-mutation denials where applicable.
 - Every production descriptor change needs tenant-owned and global-reference cases plus invalid-resource, private or missing field/action, unsupported type/classification, malformed or duplicate reference, generic mutation, canonical ordering, and stable-evolution tests where applicable.
 - Every trusted invocation change needs public named-read, actor denial, cross-tenant, global-reference, missing or invalid context, unregistered resource, private or wrong-type action, reserved-input, and no-write-surface cases where applicable.
+- Every pre-checkout admission change needs trusted-context, raw/missing/mismatched context, tenant saturation, placement saturation, independent-placement, callback-not-run, release-on-failure, caller-death reclamation, explicit-limit, retry-guidance, identifier-free-statistics, and no-live-wiring cases where applicable.
 - Every placement-routing change needs pooled and dedicated positive cases plus wrong-tenant, request-selected, stale-version, missing-placement, spawned-task, job-context, and relevant non-HTTP negative cases. Every movement change also needs authorization, current-version, destination-membership, quiescence, reconciliation-failure, cutover, stale-envelope, and rollback evidence.
 - Every module gate change needs independent entitlement, activation, and authorization cases; no test may infer one from another.
 - Every read-routing change needs writer-required, read-your-write, bounded-staleness, lagging-reader, unavailable-reader, and prohibited request-selected-repository cases where applicable.

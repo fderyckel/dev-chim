@@ -1,7 +1,8 @@
 # ADR 0001: Modular monolith and permitted service boundaries
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-13
+- Decision date: 2026-09-16
 - Accountable owner: Architecture review group
 - Deciders: Architecture review group and product owner
 - Supersedes: None
@@ -27,7 +28,7 @@ The platform needs strong transactional coherence and a foundation that a small 
 
 ## Decision
 
-Propose a Phoenix/Ash/PostgreSQL modular monolith as the authoritative core. Its small mandatory kernel owns tenant and actor context, authorization, audit, typed configuration, module lifecycle, events, jobs, files, API conventions, localization, and shared experience contracts. Bounded business modules own their domain state and behaviour. Permit separate web delivery, scheduling, AI, analytics, and hardened utility runtimes only behind versioned contracts and without independent domain authority.
+Adopt a Phoenix/Ash/PostgreSQL modular monolith as the authoritative core. Its small mandatory kernel owns tenant and actor context, authorization, audit, typed configuration, module lifecycle, events, jobs, files, API conventions, localization, and shared experience contracts. Bounded business modules own their domain state and behaviour. Permit separate web delivery, scheduling, AI, analytics, and hardened utility runtimes only behind versioned contracts and without independent domain authority.
 
 All approved module code ships in one immutable product release. Each tenant may activate an entitled subset, but release availability, entitlement, activation, and actor authorization are independent server-side gates. Activation never grants actor capabilities.
 
@@ -59,7 +60,7 @@ Module boundaries, deployment cells, and tenant database placements are orthogon
 
 ## Validation evidence
 
-See [service boundaries](../architecture/service-boundaries.md), [module activation and lifecycle](../architecture/module-activation-and-lifecycle.md), [module-lifecycle evidence](../phase-0/evidence/module-lifecycle.md), and the Phase 0 architecture review record. The neutral synthetic lifecycle test now proves independent gates, dependency handling, both concurrent deactivation lock orders, safe modeled job/event drain, retained-data access, and compatible reactivation. Accountable review of the evidence and its documented limits remains required.
+See [service boundaries](../architecture/service-boundaries.md), [module activation and lifecycle](../architecture/module-activation-and-lifecycle.md), [module-lifecycle evidence](../phase-0/evidence/module-lifecycle.md), and the [Phase 0 architecture review record](../phase-0/review-record.md). The neutral synthetic lifecycle test proves independent gates, dependency handling, both concurrent deactivation lock orders, safe modeled job/event drain, retained-data access, and compatible reactivation. The 2026-09-16 review accepts the architecture contract while carrying real queue/outbox, idempotency, drain/replay, reconciliation, and operational ownership into the first production-module gate.
 
 ## Fallback and exit cost
 

@@ -1,0 +1,102 @@
+{
+  "command": "mise exec -- uv run python tools/measure_phase0_full_horizon_restore.py --retained-rows 131200000 --output spikes/ash-foundation-lab/priv/maintenance/full-horizon-restore-measurement.json",
+  "environment": {
+    "architecture": "arm64",
+    "cpu_count": 10,
+    "machine_model": "Mac17,3",
+    "memory_bytes": 25769803776,
+    "operating_system": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "postgresql_settings": {
+      "archive_mode": "on",
+      "fsync": "on",
+      "full_page_writes": "on",
+      "hot_standby": "on",
+      "max_connections": "40",
+      "max_wal_senders": "10",
+      "shared_buffers": "16384",
+      "synchronous_commit": "on",
+      "wal_level": "replica"
+    },
+    "postgresql_version": "18.6 (Homebrew)",
+    "topology": "local disposable primary, physical standby, WAL archive, and isolated PITR restore"
+  },
+  "evaluation": {
+    "disposition": "local_full_horizon_restore_passed_managed_restore_required",
+    "passed": true
+  },
+  "limits": [
+    "This is a full-row-count local rehearsal on Apple Silicon, not a managed RDS restore measurement.",
+    "Synthetic row width and index shape cover the accepted attendance-fact count but do not predict every future domain, audit, correction, or attachment byte.",
+    "The WAL archive, base backup, and restore share one physical host; they validate PostgreSQL choreography and integrity, not zone or regional independence.",
+    "The local restore RTO excludes provider control-plane queueing, network transfer, lazy block initialization, DNS, and service reconfiguration."
+  ],
+  "measured_on": "2026-09-16",
+  "recovery": {
+    "assertions": {
+      "after_target_marker_absent": true,
+      "complete_fingerprint_matches": true,
+      "full_planning_horizon_loaded": true,
+      "heap_and_index_sizes_match": true,
+      "integrity_mismatches_within_target": true,
+      "isolated_port": true,
+      "restore_rto_within_target": true,
+      "target_marker_present": true
+    },
+    "base_backup_bytes": 14431718782,
+    "base_backup_ms": 12937.61,
+    "integrity_mismatches": 0,
+    "load": {
+      "load_ms": 453991.331,
+      "rows": 131200000,
+      "rows_per_second": 288992.302
+    },
+    "planning_horizon_fraction": 1.0,
+    "planning_horizon_rows": 131200000,
+    "restore_materialization_ms": 8351.342,
+    "restore_rto_ms": 9835.776,
+    "restore_startup_and_replay_ms": 1483.821,
+    "restored_fingerprint": {
+      "id_sum": 8606720065600000,
+      "maximum_id": 131200000,
+      "minimum_id": 1,
+      "payload_hash_sum": -42773832704663904657626,
+      "row_count": 131200000,
+      "tenant_sum": 393600000
+    },
+    "restored_relation": {
+      "heap_bytes": 11080318976,
+      "index_bytes": 2946940928,
+      "total_bytes": 14030217216
+    },
+    "retained_rows": 131200000,
+    "source_fingerprint": {
+      "id_sum": 8606720065600000,
+      "maximum_id": 131200000,
+      "minimum_id": 1,
+      "payload_hash_sum": -42773832704663904657626,
+      "row_count": 131200000,
+      "tenant_sum": 393600000
+    },
+    "source_relation": {
+      "heap_bytes": 11080318976,
+      "index_bytes": 2946940928,
+      "total_bytes": 14030209024
+    },
+    "target_lsn": "8/BA39A618",
+    "target_recorded_at": "2026-09-16T09:05:25.661863+00:00",
+    "wal_archive_availability_ms": 102.846
+  },
+  "schema_version": 1,
+  "source": {
+    "artifacts_sha256": {
+      "spikes/ash-foundation-lab/priv/maintenance/managed-postgresql-topology.json": "7b4504a4a778ef3529884f1b1bcb688cdae4771dc30b827d4187581ea15665ca",
+      "spikes/ash-foundation-lab/priv/maintenance/quality-target-recommendation.json": "7bffc0fac30297c153a5b41717566228f6d2ac7e782220b34eaac3828d0eca2b",
+      "spikes/ash-foundation-lab/priv/maintenance/quality-target-technical-approval.json": "273788f23238fb708a909f1a35ef0fb08c4044f34731c4288e50ea1b4b8a28da",
+      "tools/measure_phase0_capacity_recovery.py": "a5f6ed0b07b66c555535eddf82090b98f3519bfdd10597e30e5e607e7c939afc",
+      "tools/measure_phase0_full_horizon_restore.py": "0fc32a53d0bf5ccc50dcbdbb74a71be1e225a689aacd9afb323c4b0c1ade944f"
+    },
+    "git_revision": "50defa1a2190f25414aced0bc6887d8f3e7c1524",
+    "working_tree": "dirty"
+  },
+  "status": "phase0_local_full_horizon_restore_evidence"
+}

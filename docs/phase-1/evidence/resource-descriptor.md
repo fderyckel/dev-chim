@@ -1,6 +1,6 @@
 # Core-foundation slice 1B resource-descriptor evidence
 
-- Status: Focused and full working-tree checks passed; ADR 0019 acceptance remains pending
+- Status: Focused and full working-tree checks passed; ADR 0019 subsequently accepted
 - Owner: Platform engineering
 - Date: 2026-09-15
 - Source: revision `61469c9` plus the current uncommitted Phase 0 and Phase 1 work
@@ -55,4 +55,4 @@ One strict-lint finding in the concurrently advanced Phase 0 tenant-movement tes
 - The builder supports only the four portable Ash field types proven by the Phase 0 scenario: UUID, string, enum, and integer. A new type requires an explicit mapping and compatibility tests.
 - Relationships, calculations, aggregates, accepted-attribute mapping, datasets, metadata compatibility persistence, and removal choreography remain later evidence-driven extensions.
 - Descriptor classification is code-declared and exposed; this slice does not yet validate classification against a durable registry or enforce downstream propagation.
-- ADR 0019 and all other required Phase 0 decisions remain Proposed. Passing tests does not accept the governed-hybrid architecture.
+- ADR 0019 is now Accepted. This slice still does not authorize a descriptor consumer, durable metadata, renderer, report executor, or public interface; each must pass its production security gate.

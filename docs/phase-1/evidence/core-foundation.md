@@ -1,15 +1,15 @@
 # Core-foundation slice 1A evidence
 
-- Status: Focused implementation and working-tree checks passed; architecture acceptance remains pending
+- Status: Focused implementation and working-tree checks passed; governing ADRs subsequently accepted
 - Owner: Platform engineering
 - Date: 2026-09-15
 - Source: revision `61469c9` plus the current uncommitted Phase 0 and Phase 1 work
-- Environment: Apple silicon macOS 26.6.2, Erlang/OTP 29.0.5, Elixir 1.20.3, Ash 3.33.3, PicoSAT 0.2.3, Python 3.14.5, PostgreSQL 18.6, and Node.js 24.15.0
+- Environment: Apple silicon macOS 26.6.2, Erlang/OTP 29.0.5, Elixir 1.20.3, Ash 3.33.4, PicoSAT 0.2.3, Python 3.14.5, PostgreSQL 18.6, and Node.js 24.15.0
 - Boundary: [core foundation](../../architecture/core-foundation-boundary.md)
 
 ## Implemented proof
 
-The root is now an Elixir umbrella with one production app, `chimwemwe_core`. It pins Ash 3.33.3 and PicoSAT 0.2.3 and resolves every shared dependency to the same version already present in the Phase 0 Foundation Lab lock. The production app imports no spike module.
+The root is now an Elixir umbrella with one production app, `chimwemwe_core`. It pins Ash 3.33.4 and PicoSAT 0.2.3 and resolves every shared dependency to the same version already present in the Phase 0 Foundation Lab lock. The coordinated [security-patch review](../../phase-0/evidence/ash-security-patch.md) supersedes the original 3.33.3 pin without importing any spike module into production.
 
 The core defines:
 
@@ -49,18 +49,20 @@ Full command: `make check`
 
 Full working-tree result: 5 repository-tool tests, 88 Phase 0 Ash/PostgreSQL tests, 6 Phase 0 TypeScript client tests, and 14 Phase 1 core tests passed. Ruff, ShellCheck, documentation and phase-boundary validation, generated migration, resource-descriptor, OpenAPI, and TypeScript drift checks, type checking, Credo, Hex and npm audits, unused-dependency checks, Dialyzer, formatting, and Git whitespace checks also passed.
 
-## Phase 0 remains open
+## Historical Phase 0 state at slice completion
 
 The explicit exit command `mise exec -- uv run python tools/check_phase0.py --exit-review` failed as expected. It continues to report unresolved accountable owners, dates, numeric targets, evidence, decisions, `NOT_RUN` recovery/capacity cases, and every required ADR that remains Proposed.
 
 This expected failure proves that the early core start did not mark Phase 0 complete or convert passing local checks into architecture approval.
+
+Follow-up on 2026-09-16: the accountable review completed Phase 0 and the exit check now passes. Ash is conditionally accepted and ADR 0019 is accepted; all retained production gates and slice boundaries still apply.
 
 ## Limits
 
 - The trusted inputs are types and validation contracts, not live authentication or placement-registry integrations.
 - The routing version is validated structurally; currentness against an authoritative registry is not yet resolved.
 - The production Ash domain intentionally contains no resource, action, capability lookup, policy, or data layer.
-- Phase 0 scenario 15 now contains a disposable descriptor, drift check, and experience-metadata validator. None is a production API or part of this Phase 1 core slice; production consumers, persistence, and adoption still require ADR 0019 acceptance and a separately authorized slice.
+- Phase 0 scenario 15 contains a disposable descriptor, drift check, and experience-metadata validator. None is a production API or part of this Phase 1 core slice; production consumers and persistence still require a separately authorized slice and their ADR 0019 security gates.
 - There is no PostgreSQL repository, migration, transaction, outbox, API, worker, module registry, or school business module.
-- The Phase 0 third-party warning baseline and broader Ash adoption scorecard remain acceptance inputs.
-- Accountable architecture, platform, security/privacy, product, and operations review remains required.
+- The Phase 0 third-party warning baseline and broader Ash adoption scorecard remain upgrade and production-gate inputs.
+- Independent security/privacy review remains required before real restricted data.

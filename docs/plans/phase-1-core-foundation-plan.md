@@ -1,29 +1,30 @@
 # Phase 1 core-foundation implementation plan
 
-- Status: Slices 1A through 1C verified provisionally; accountable review remains
+- Status: Slices 1A through 1D implemented and test-verified; Phase 0 decisions completed
 - Owner: Platform engineering
-- Decision posture: provisional Ash assumption; Phase 0 and all required ADRs remain unaccepted
-- Review trigger: completion of slice 1C or any proposal to add persistence, write invocation, a metadata consumer, a public interface, another app, or a school domain
+- Decision posture: Ash conditionally accepted; applicable ADR outcomes and production gates are binding
+- Review trigger: completion of slice 1D or any proposal to add persistence, write invocation, a metadata consumer, a public interface, another app, or a school domain
 
 ## Inputs consumed
 
 | Input | What the core slices carry forward | What remains unresolved |
 | --- | --- | --- |
-| [ADR 0001](../adr/0001-modular-monolith-and-service-boundaries.md) | One production core with a small mandatory platform boundary | Accountable acceptance and production module lifecycle |
-| [ADR 0002](../adr/0002-ash-adoption-criteria-and-fallback.md) | Exact pressure-tested Ash and policy-solver releases plus global authorization | Full scorecard, acceptance, and fallback trigger |
+| [ADR 0001](../adr/0001-modular-monolith-and-service-boundaries.md) | One production core with a small mandatory platform boundary | Real module-lifecycle integration before the first production module |
+| [ADR 0002](../adr/0002-ash-adoption-criteria-and-fallback.md) | Exact pressure-tested Ash and policy-solver releases plus global authorization | Eight accepted production gates and their explicit fallbacks |
 | [ADR 0003](../adr/0003-tenant-model-and-optional-postgresql-rls.md) | Mandatory tenant identity separated from trusted placement and routing version | Production registry, database routing, movement, recovery, and RLS |
-| [ADR 0005](../adr/0005-domain-action-and-state-transition-convention.md) | No generic business mutation or CRUD surface | First production named action and accountable acceptance of the action/error convention |
-| [ADR 0019](../adr/0019-domain-model-authoring-and-governed-metadata.md) | Code-owned base-resource convention, structural audit, and a small derived descriptor contract proven by disposable Phase 0 evidence | Descriptor consumers, governed metadata, persistence, closure-gate decisions, and accountable acceptance |
+| [ADR 0005](../adr/0005-domain-action-and-state-transition-convention.md) | No generic business mutation or CRUD surface | First production named action and its action/error verification |
+| [ADR 0019](../adr/0019-domain-model-authoring-and-governed-metadata.md) | Code-owned base-resource convention, structural audit, and a small derived descriptor contract proven by disposable Phase 0 evidence | Descriptor consumers, governed metadata, persistence, and their closure gates |
 | [Retained-data migration evidence](../phase-0/evidence/retained-data-migration-rehearsal.md) | Keep migration choreography explicit and resource-specific | Production-shaped measurements, mixed-release deployment, recovery proof, and an authorized persistent resource |
 | [Trusted-routing evidence](../phase-0/evidence/trusted-routing.md) | Raw request placement is not accepted; missing or stale routing fails closed | Live registry and repository selection |
-| [Threat model](../security/threat-model.md) | TM-01, TM-02, TM-09, and TM-11 shape context, authorization, and non-disclosure tests | Accountable review and later interface-specific suites |
+| [Pre-checkout admission evidence](../phase-0/evidence/precheckout-admission-measurement.md) | Acquire node-local tenant and placement capacity before any repository callback | Multi-node coordination, selected-deployment calibration, and live pool integration |
+| [Threat model](../security/threat-model.md) | TM-01, TM-02, TM-09, and TM-11 shape context, authorization, and non-disclosure tests | Independent review before real restricted data and later interface-specific suites |
 
-These are working inputs, not accepted decisions. The explicit start direction permits only the reversible work below.
+These are decided Phase 0 inputs. Conditional and production-readiness gates remain binding, and explicit slice authorization still limits the work below.
 
 ## Slice 1A implementation
 
 1. Establish the root Elixir umbrella and one `chimwemwe_core` OTP app.
-2. Pin the production core to Ash 3.33.3 and PicoSAT 0.2.3, the exact Phase 0 pressure-tested releases.
+2. Pin the production core to Ash 3.33.4 and PicoSAT 0.2.3, including the coordinated Phase 0 security-patch review.
 3. Define the empty production Ash domain with authorization forced to `:always` and actor presence required.
 4. Define trusted actor, trusted placement, and execution-context types without role constants or request-selected infrastructure.
 5. Validate the complete context before invoking core work and return typed errors without echoing identifiers.
@@ -59,6 +60,19 @@ Slice 1B deliberately does not promote the Phase 0 report-dataset registry or go
 8. Exercise real policy denial, tenant filtering, global-reference behavior, invalid context, private or wrong-type actions, invalid resources, and reserved-input denial with neutral in-memory resources.
 9. Add no mutation API, production resource, persistence, migration, interface, worker, or external service.
 
+## Slice 1D implementation
+
+1. Add a node-local pre-checkout admission boundary that accepts only a validated production execution context and a zero-argument callback.
+2. Derive tenant and placement capacity keys from trusted actor and placement objects; accept no caller-supplied tenant, placement, repository, or database coordinate.
+3. Require explicit positive per-tenant and per-placement limits. Keep the Phase 0 two-and-ten values as measured candidates, not code defaults.
+4. Acquire both limits atomically in one admission process before invoking the callback that may check out a database connection.
+5. Reject tenant saturation as `:rate_limited` and placement saturation as `:retryable_dependency`; return no tenant or placement identifier.
+6. Emit retry guidance only when an explicit bounded interval is configured.
+7. Release every permit after normal completion or failure and reclaim permits when an admitted caller dies.
+8. Expose only aggregate, identifier-free operational counters for this provisional boundary.
+9. Do not register the process in the application supervisor or connect it to Ecto until live placement resolution, pool ownership, settings, and failover behaviour have their own slice.
+10. Add no persistence, production resource, write action, public interface, distributed quota, or production infrastructure.
+
 ## Acceptance checks
 
 - `Ash.Domain.Info.authorize(Chimwemwe.Platform)` returns `:always`.
@@ -83,10 +97,18 @@ Slice 1B deliberately does not promote the Phase 0 report-dataset registry or go
 - Unregistered or structurally invalid resources and private, missing, or non-read actions fail with one non-disclosing invocation error.
 - Reserved authority or context keys and non-map input fail before the Ash action runs.
 - No write invocation function is exported.
-- `make check` passes, while the Phase 0 exit review continues to fail for the recorded unresolved placeholders and Proposed ADRs.
+- Missing, raw, malformed, invalid-routing, or tenant-mismatched context is rejected before admission state or the supplied callback is reached.
+- Tenant and placement limits are enforced independently, and another tenant or placement can proceed when its own capacity remains.
+- Tenant and placement saturation have distinct stable classifications and do not disclose identifiers.
+- Admitted callbacks release capacity after return, exception, throw, exit, or caller death.
+- Retry guidance is absent by default and present only when configured explicitly.
+- An unavailable admission process fails closed as a retryable dependency before the callback runs.
+- Operational statistics contain counts only, not tenant or placement identifiers.
+- No production repository callback is wired into the application supervision tree.
+- `make check` and the Phase 0 exit review pass.
 
 ## Rollback and next gate
 
 Slice 1A can be removed by deleting the root umbrella files, `apps/chimwemwe_core`, and its Phase 1 documentation and validator allowance while retaining all Phase 0 evidence. The execution-context, explicit-ownership, and named-action concepts survive an Ash fallback because they depend on platform trust semantics rather than an Ash resource.
 
-Do not add PostgreSQL persistence, write invocation, or the first platform resource until its tenant keys, compound constraints, authorization policy, migration path, idempotency, outbox, concurrency, ownership, and negative tests are proposed as the next bounded slice. The descriptor builder and trusted read invoker are production foundation; the Phase 0 descriptor artifact, report registry, and governed experience-metadata implementation remain disposable evidence and are not production APIs. Do not add a school business module until Phase 0 acceptance and an explicit module authorization are recorded.
+Do not add PostgreSQL persistence, write invocation, or the first platform resource until its tenant keys, compound constraints, authorization policy, migration path, idempotency, outbox, concurrency, ownership, and negative tests are proposed as the next bounded slice. The descriptor builder and trusted read invoker are production foundation; the Phase 0 descriptor artifact, report registry, and governed experience-metadata implementation remain disposable evidence and are not production APIs. Do not add a school business module until an explicit module slice is authorized.

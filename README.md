@@ -1,11 +1,11 @@
 # Chimwemwe school platform
 
-This repository is establishing the governed foundation for a modular school platform. Phase 0 architecture and acceptance work remains incomplete. Three provisional Phase 1 core-foundation slices have started under the user's working assumption that Ash will be selected; this does not accept Ash or any Proposed ADR. No school business module belongs here yet.
+This repository is establishing the governed foundation for a modular school platform. Phase 0 completed its architecture, security-baseline, pressure-test, and accountable decision package on 2026-09-16. Ash is conditionally accepted as the default production-core framework, with eight binding production gates. Four bounded Phase 1 core-foundation slices are implemented. No school business module belongs here yet.
 
 ## Start here
 
-1. Read [the Phase 0 scope](docs/phase-0/README.md) and its unresolved exit gates.
-2. Read [the provisional Phase 1 core scope](docs/phase-1/README.md).
+1. Read [the Phase 0 outcome](docs/phase-0/README.md) and its binding later gates.
+2. Read [the Phase 1 core scope](docs/phase-1/README.md).
 3. Read [the architecture index](docs/architecture/README.md) and [ADR index](docs/adr/README.md).
 4. Follow [local setup](docs/development/getting-started.md).
 5. Run `make check` before sharing changes.
@@ -30,11 +30,11 @@ These commands are the project contract. Editor tasks and future CI jobs must ca
 ## Current boundaries
 
 - Phoenix/PostgreSQL and the modular-monolith shape are the firm base.
-- Ash is a candidate under pressure-test, not yet an accepted production dependency.
-- The production core uses the exact pressure-tested Ash version provisionally; replacement remains required if ADR 0002 later rejects Ash.
-- The proposed authoring model keeps Ash resources, actions, policies, and migrations authoritative while derived metadata may configure views and reports; it does not add a second runtime ORM.
+- Ash is conditionally accepted as the default production-core framework; every retained exception has a production gate, verification method, and fallback.
+- The production core and Foundation Lab use the reviewed Ash 3.33.4 security-patch baseline.
+- The accepted authoring model keeps Ash resources, actions, policies, and migrations authoritative while derived metadata may configure views and reports; it does not add a second runtime ORM.
 - Roles and access scopes are tenant-defined data, never a fixed list of school job titles.
 - Logical tenant controls remain mandatory in pooled databases, dedicated databases, and dedicated cells; physical placement is evidence-driven.
 - Module release availability, entitlement, tenant activation, and actor authorization are separate server-side gates.
 - All examples and tests use synthetic data.
-- Slice 1A contains trusted context, the empty globally-authorized Ash platform domain, and a code-owned resource-authoring guard. Slice 1B adds the deterministic, allowlisted resource-descriptor builder. Slice 1C adds only trusted invocation of public named read actions. Production resources, write invocation, persistence, descriptor consumers, experience metadata, business modules, web applications, scheduler services, runtime AI, and analytics remain outside their scope.
+- Slice 1A contains trusted context, the empty globally-authorized Ash platform domain, and a code-owned resource-authoring guard. Slice 1B adds the deterministic, allowlisted resource-descriptor builder. Slice 1C adds only trusted invocation of public named read actions. Slice 1D adds only trusted pre-checkout tenant and placement admission. Production resources, write invocation, persistence, descriptor consumers, experience metadata, business modules, web applications, scheduler services, runtime AI, and analytics remain outside their scope.

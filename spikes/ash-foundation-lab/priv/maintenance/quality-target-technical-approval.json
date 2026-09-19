@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "status": "accepted_technical_planning_baseline",
+  "scope": "Phase 0 five-school quality-attribute targets",
+  "decision_basis": "Project owner directed the software architect to provide and adopt the best engineering estimate in place of a separate accountable target-approval gate.",
+  "decided_on": "2026-09-16",
+  "review_due_on": "2026-12-15",
+  "recommendation_sha256": "7bffc0fac30297c153a5b41717566228f6d2ac7e782220b34eaac3828d0eca2b",
+  "accepted_without_amendment": true,
+  "accepted_target_ids": [
+    "interactive_api_reads",
+    "interactive_mutations",
+    "peak_domain_writes",
+    "user_visible_web",
+    "scale",
+    "tenant_placement",
+    "database_connections",
+    "oltp_footprint",
+    "read_consistency",
+    "asynchronous_continuity",
+    "report_campaigns",
+    "files",
+    "database_ha",
+    "database_recovery",
+    "object_recovery",
+    "availability"
+  ],
+  "authority": {
+    "decision_authority": "project_owner_instruction",
+    "estimate_prepared_by": "software_architecture_agent",
+    "execution_owners": "the owner roles recorded on each accepted target"
+  },
+  "conditions": [
+    "These are engineering planning targets, not customer-facing service commitments or an approved business forecast.",
+    "Managed PostgreSQL, browser, report, file, and object-store measurements may tighten or relax a target only through a dated amendment retaining this baseline.",
+    "Legal retention, residency, privacy, and budget decisions remain with their actual accountable authorities.",
+    "Review occurs by 2026-12-15 or earlier on a material workload, provider, region, topology, or product-scope change."
+  ]
+}

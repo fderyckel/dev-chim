@@ -30,6 +30,7 @@
         "lib/ash_foundation_lab/change/idempotent_submission.ex",
         "lib/ash_foundation_lab/change/record_outbox.ex",
         "lib/ash_foundation_lab/retained_data_migration.ex",
+        "lib/ash_foundation_lab/retained_data_migration_measurement.ex",
         "lib/ash_foundation_lab/role_administration.ex",
         "lib/ash_foundation_lab/synthetic_module_lifecycle.ex",
         "lib/ash_foundation_lab/trusted_routing.ex"
@@ -83,11 +84,13 @@
       "classification": "platform-owned operational choreography",
       "owner": "Platform engineering and operations",
       "cost": "Generated schema intent does not own mixed-version reads and writes, bounded tenant backfills, lock budgets, constraint validation order, or the irreversible contract gate.",
-      "bounded_remedy": "Keep expand, compatibility, backfill, validation, and contract steps separate and review the four operational artifacts with retained-data tests.",
+      "bounded_remedy": "Keep expand, compatibility, indexed tenant backfill, validation, and contract steps separate; retain the annual-envelope measurement and require an operator-owned index and lock-retry plan before production use.",
       "closure_gate": "Before the first production migration contracts retained tenant data.",
       "recheck_trigger": "Any retained-data schema evolution, migration generator change, or production deployment strategy decision.",
       "sources": [
         "lib/ash_foundation_lab/retained_data_migration.ex",
+        "lib/ash_foundation_lab/retained_data_migration_measurement.ex",
+        "lib/mix/tasks/phase0.retained_data.measure.ex",
         "priv/retained_data_migration_rehearsal/migrations/20260915010000_expand_foundation_record_name.exs",
         "priv/retained_data_migration_rehearsal/migrations/20260915020000_enforce_foundation_record_dual_write.exs",
         "priv/retained_data_migration_rehearsal/migrations/20260915030000_validate_foundation_record_name.exs",

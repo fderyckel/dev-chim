@@ -1,0 +1,450 @@
+{
+  "command": "MIX_ENV=test mix phase0.retained_data.measure --primary-rows 1280000 --control-rows 32000 --repetitions 3",
+  "envelope": {
+    "approved_production_target": false,
+    "basis": "one synthetic 800-learner school-year at 200 days and eight attendance opportunities, plus a separate control tenant",
+    "control_tenant_rows": 32000,
+    "primary_tenant_rows": 1280000,
+    "repetitions": 3,
+    "total_rows_per_run": 1312000
+  },
+  "environment": {
+    "architecture": "aarch64-apple-darwin",
+    "cpu": "Apple M5",
+    "elixir": "1.20.3",
+    "erlang_otp": "29",
+    "memory_bytes": "25769803776",
+    "operating_system": "26.6.2",
+    "scheduler_count": "10"
+  },
+  "limits": [
+    "Local single-node PostgreSQL is not the proposed managed production writer, HA standby, or replica topology.",
+    "The planning envelope is synthetic and not an owner-approved production scale or service-level target.",
+    "The measurement does not exercise mixed application releases, concurrent user writes, replica lag, failover, backup, or restore.",
+    "The temporary support index is benchmark choreography; its production creation, cleanup, lock budget, and operator ownership require a reviewed migration plan.",
+    "WAL and relation bytes describe this schema, generated text shape, PostgreSQL settings, and local hardware only."
+  ],
+  "measured_on": "2026-09-16",
+  "methodology": {
+    "backfill_batch_size": 100,
+    "batch_latency_percentile_method": "nearest-rank over successful data batches",
+    "database_lifecycle": "new local disposable PostgreSQL database per repetition",
+    "lock_timeout": "250ms",
+    "migration_lock_retry": {
+      "delay_ms": 250,
+      "maximum_attempts": 120,
+      "rule": "retry only PostgreSQL lock_not_available after the failed transaction rolls back"
+    },
+    "support_index": "temporary concurrent partial index on tenant_id, inserted_at, and id where canonical_name is null",
+    "tenant_safety": "backfill primary tenant first; assert every control row remains null before separately backfilling control tenant"
+  },
+  "owner": "Platform engineering",
+  "result": "measured_with_bounded_remediation",
+  "runs": [
+    {
+      "assertions": {
+        "canonical_column_not_null": true,
+        "control_tenant_untouched_during_primary_backfill": true,
+        "legacy_column_removed": true,
+        "non_empty_constraint_validated": true,
+        "presence_constraint_validated": true,
+        "retained_fingerprint_unchanged": true,
+        "support_index_removed": true,
+        "tenant_counts_preserved": true,
+        "values_match": true
+      },
+      "backfill": {
+        "batch_size": 100,
+        "control": {
+          "batch_latency_ms": {
+            "max": 2.741,
+            "p50": 1.645,
+            "p95": 2.259,
+            "p99": 2.52
+          },
+          "batches": 320,
+          "elapsed_ms": 541.732,
+          "rows": 32000,
+          "rows_per_second": 59069.798
+        },
+        "primary": {
+          "batch_latency_ms": {
+            "max": 398.27,
+            "p50": 3.065,
+            "p95": 4.627,
+            "p99": 356.838
+          },
+          "batches": 12800,
+          "elapsed_ms": 124878.703,
+          "rows": 1280000,
+          "rows_per_second": 10249.946
+        },
+        "support_index": {
+          "columns": [
+            "tenant_id",
+            "inserted_at",
+            "id"
+          ],
+          "creation": "concurrent",
+          "name": "foundation_records_canonical_name_backfill_index",
+          "predicate": "canonical_name IS NULL"
+        }
+      },
+      "environment": {
+        "postgresql_server_version": "18.6 (Homebrew)",
+        "settings": {
+          "fsync": "on",
+          "full_page_writes": "on",
+          "max_connections": "100",
+          "shared_buffers": "128MB",
+          "synchronous_commit": "on",
+          "wal_level": "replica"
+        }
+      },
+      "migration_lock_attempts": {
+        "contract": 1,
+        "enforce": 80,
+        "expand": 1,
+        "validate": 1
+      },
+      "relation_bytes": {
+        "after_backfill": {
+          "indexes": 278560768,
+          "table": 226115584,
+          "total": 504766464
+        },
+        "after_contract": {
+          "indexes": 201039872,
+          "table": 226115584,
+          "total": 427245568
+        },
+        "after_seed": {
+          "indexes": 146497536,
+          "table": 165355520,
+          "total": 311918592
+        },
+        "with_support_index": {
+          "indexes": 223993856,
+          "table": 165355520,
+          "total": 389414912
+        }
+      },
+      "repetition": 1,
+      "retained_fingerprint": {
+        "fingerprint": "-9154763574224053014",
+        "rows": 1312000
+      },
+      "rows": {
+        "control_tenant": 32000,
+        "primary_tenant": 1280000,
+        "total": 1312000
+      },
+      "timings_ms": {
+        "contract": 3.247,
+        "control_backfill": 541.732,
+        "enforce": 51507.362,
+        "expand": 8.482,
+        "primary_backfill": 124878.703,
+        "seed": 15222.793,
+        "support_index_build": 3397.584,
+        "support_index_drop": 5.443,
+        "validate": 116.569
+      },
+      "wal_bytes": {
+        "backfill": 1415781784,
+        "contract": 58448,
+        "enforce": 231652512,
+        "expand": 99216,
+        "seed": 661452368,
+        "support_index_build": 226227248,
+        "support_index_drop": 11160,
+        "total": 2535283152,
+        "validate": 416
+      }
+    },
+    {
+      "assertions": {
+        "canonical_column_not_null": true,
+        "control_tenant_untouched_during_primary_backfill": true,
+        "legacy_column_removed": true,
+        "non_empty_constraint_validated": true,
+        "presence_constraint_validated": true,
+        "retained_fingerprint_unchanged": true,
+        "support_index_removed": true,
+        "tenant_counts_preserved": true,
+        "values_match": true
+      },
+      "backfill": {
+        "batch_size": 100,
+        "control": {
+          "batch_latency_ms": {
+            "max": 3.613,
+            "p50": 2.085,
+            "p95": 2.69,
+            "p99": 3.194
+          },
+          "batches": 320,
+          "elapsed_ms": 682.034,
+          "rows": 32000,
+          "rows_per_second": 46918.482
+        },
+        "primary": {
+          "batch_latency_ms": {
+            "max": 699.413,
+            "p50": 4.091,
+            "p95": 5.347,
+            "p99": 456.03
+          },
+          "batches": 12800,
+          "elapsed_ms": 159009.066,
+          "rows": 1280000,
+          "rows_per_second": 8049.855
+        },
+        "support_index": {
+          "columns": [
+            "tenant_id",
+            "inserted_at",
+            "id"
+          ],
+          "creation": "concurrent",
+          "name": "foundation_records_canonical_name_backfill_index",
+          "predicate": "canonical_name IS NULL"
+        }
+      },
+      "environment": {
+        "postgresql_server_version": "18.6 (Homebrew)",
+        "settings": {
+          "fsync": "on",
+          "full_page_writes": "on",
+          "max_connections": "100",
+          "shared_buffers": "128MB",
+          "synchronous_commit": "on",
+          "wal_level": "replica"
+        }
+      },
+      "migration_lock_attempts": {
+        "contract": 1,
+        "enforce": 108,
+        "expand": 1,
+        "validate": 1
+      },
+      "relation_bytes": {
+        "after_backfill": {
+          "indexes": 280084480,
+          "table": 226115584,
+          "total": 506290176
+        },
+        "after_contract": {
+          "indexes": 202563584,
+          "table": 226115584,
+          "total": 428769280
+        },
+        "after_seed": {
+          "indexes": 145833984,
+          "table": 165355520,
+          "total": 311255040
+        },
+        "with_support_index": {
+          "indexes": 223330304,
+          "table": 165355520,
+          "total": 388751360
+        }
+      },
+      "repetition": 2,
+      "retained_fingerprint": {
+        "fingerprint": "-8681352837356866237",
+        "rows": 1312000
+      },
+      "rows": {
+        "control_tenant": 32000,
+        "primary_tenant": 1280000,
+        "total": 1312000
+      },
+      "timings_ms": {
+        "contract": 2.769,
+        "control_backfill": 682.034,
+        "enforce": 64364.877,
+        "expand": 3.729,
+        "primary_backfill": 159009.066,
+        "seed": 14973.287,
+        "support_index_build": 5518.682,
+        "support_index_drop": 3.386,
+        "validate": 111.634
+      },
+      "wal_bytes": {
+        "backfill": 1301006000,
+        "contract": 57032,
+        "enforce": 332610840,
+        "expand": 99240,
+        "seed": 662013824,
+        "support_index_build": 228599664,
+        "support_index_drop": 11160,
+        "total": 2524398176,
+        "validate": 416
+      }
+    },
+    {
+      "assertions": {
+        "canonical_column_not_null": true,
+        "control_tenant_untouched_during_primary_backfill": true,
+        "legacy_column_removed": true,
+        "non_empty_constraint_validated": true,
+        "presence_constraint_validated": true,
+        "retained_fingerprint_unchanged": true,
+        "support_index_removed": true,
+        "tenant_counts_preserved": true,
+        "values_match": true
+      },
+      "backfill": {
+        "batch_size": 100,
+        "control": {
+          "batch_latency_ms": {
+            "max": 3.018,
+            "p50": 1.768,
+            "p95": 2.143,
+            "p99": 2.734
+          },
+          "batches": 320,
+          "elapsed_ms": 578.011,
+          "rows": 32000,
+          "rows_per_second": 55362.268
+        },
+        "primary": {
+          "batch_latency_ms": {
+            "max": 548.981,
+            "p50": 3.653,
+            "p95": 4.726,
+            "p99": 416.491
+          },
+          "batches": 12800,
+          "elapsed_ms": 129503.997,
+          "rows": 1280000,
+          "rows_per_second": 9883.865
+        },
+        "support_index": {
+          "columns": [
+            "tenant_id",
+            "inserted_at",
+            "id"
+          ],
+          "creation": "concurrent",
+          "name": "foundation_records_canonical_name_backfill_index",
+          "predicate": "canonical_name IS NULL"
+        }
+      },
+      "environment": {
+        "postgresql_server_version": "18.6 (Homebrew)",
+        "settings": {
+          "fsync": "on",
+          "full_page_writes": "on",
+          "max_connections": "100",
+          "shared_buffers": "128MB",
+          "synchronous_commit": "on",
+          "wal_level": "replica"
+        }
+      },
+      "migration_lock_attempts": {
+        "contract": 1,
+        "enforce": 43,
+        "expand": 1,
+        "validate": 1
+      },
+      "relation_bytes": {
+        "after_backfill": {
+          "indexes": 270049280,
+          "table": 226115584,
+          "total": 496254976
+        },
+        "after_contract": {
+          "indexes": 192528384,
+          "table": 226115584,
+          "total": 418734080
+        },
+        "after_seed": {
+          "indexes": 146006016,
+          "table": 165355520,
+          "total": 311427072
+        },
+        "with_support_index": {
+          "indexes": 223502336,
+          "table": 165355520,
+          "total": 388923392
+        }
+      },
+      "repetition": 3,
+      "retained_fingerprint": {
+        "fingerprint": "5788434895410256193",
+        "rows": 1312000
+      },
+      "rows": {
+        "control_tenant": 32000,
+        "primary_tenant": 1280000,
+        "total": 1312000
+      },
+      "timings_ms": {
+        "contract": 2.761,
+        "control_backfill": 578.011,
+        "enforce": 24160.792,
+        "expand": 2.835,
+        "primary_backfill": 129503.997,
+        "seed": 13998.466,
+        "support_index_build": 3380.38,
+        "support_index_drop": 3.337,
+        "validate": 114.233
+      },
+      "wal_bytes": {
+        "backfill": 1305968648,
+        "contract": 50464,
+        "enforce": 179101432,
+        "expand": 99216,
+        "seed": 660294936,
+        "support_index_build": 224636080,
+        "support_index_drop": 11184,
+        "total": 2370162376,
+        "validate": 416
+      }
+    }
+  ],
+  "schema_version": 1,
+  "source": {
+    "artifacts_sha256": {
+      "lib/ash_foundation_lab/retained_data_migration.ex": "728d541eecb32be6ca1ad9858d4a65c94a8066b47ad70a53433695a1526b03b0",
+      "lib/ash_foundation_lab/retained_data_migration_measurement.ex": "dfa604b7a71a2c38048eed287ade3df1e83af19ba0063a43619857ca4c7ab049",
+      "lib/mix/tasks/phase0.retained_data.measure.ex": "3ef76157a4dfab8a8329877bac3ab312c06f75c7c26d883578585104eef9faa9",
+      "priv/retained_data_migration_rehearsal/migrations/20260915010000_expand_foundation_record_name.exs": "943b56abb6849802885477ac15f698a8ee89d09324ccd60236f46cb567f2fd8d",
+      "priv/retained_data_migration_rehearsal/migrations/20260915020000_enforce_foundation_record_dual_write.exs": "b7ba936a9b3099dcb94a73d92d992db047f91e834b4a5115c1c3928f7adb5a0d",
+      "priv/retained_data_migration_rehearsal/migrations/20260915030000_validate_foundation_record_name.exs": "076beefa245b3d2ae3bd7a998f10bdcce03a4cdb7dbf8f40021abe9d28424744",
+      "priv/retained_data_migration_rehearsal/migrations/20260915040000_contract_foundation_record_name.exs": "46c5a2e6f76efcbd6b2e39ffd0d741bd4883cc5a8bdba7a41611078fa228bda8"
+    },
+    "git_revision": "50defa1a2190f25414aced0bc6887d8f3e7c1524",
+    "working_tree": "dirty"
+  },
+  "status": "phase0_evidence",
+  "summary": {
+    "final_relation_bytes": {
+      "max": 428769280,
+      "median": 427245568,
+      "min": 418734080
+    },
+    "primary_backfill_elapsed_ms": {
+      "max": 159009.066,
+      "median": 129503.997,
+      "min": 124878.703
+    },
+    "primary_backfill_rows_per_second": {
+      "max": 10249.946,
+      "median": 9883.865,
+      "min": 8049.855
+    },
+    "support_index_build_ms": {
+      "max": 5518.682,
+      "median": 3397.584,
+      "min": 3380.38
+    },
+    "total_wal_bytes": {
+      "max": 2535283152,
+      "median": 2524398176,
+      "min": 2370162376
+    }
+  }
+}

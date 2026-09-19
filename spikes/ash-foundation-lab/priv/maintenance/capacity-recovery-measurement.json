@@ -1,0 +1,538 @@
+{
+  "capacity": {
+    "connection_exhaustion": {
+      "additional_attempts": 5,
+      "elapsed_ms": 3062.689,
+      "held_connections": 37,
+      "max_connections": 40,
+      "non_superuser_capacity": 37,
+      "recovery_ms": 16.001,
+      "rejected_attempts": 5,
+      "rejected_before_transaction": true
+    },
+    "noisy_tenant": {
+      "other_tenant_p95_degradation_percent": {
+        "max": 218.519,
+        "median": 171.429,
+        "min": 119.298
+      },
+      "runs": [
+        {
+          "baseline_other_tenants": {
+            "clients": 4,
+            "elapsed_ms": 27.588,
+            "latency_ms": {
+              "max": 2.066,
+              "p50": 0.17,
+              "p95": 0.245,
+              "p99": 2.005
+            },
+            "stderr": "pgbench: setting random seed to 246813579",
+            "transactions": 400,
+            "transactions_per_second": 14499.035
+          },
+          "noisy_tenant": {
+            "elapsed_ms": 236.335,
+            "exit_code": 0,
+            "latency_ms": {
+              "max": 4.728,
+              "p50": 0.525,
+              "p95": 0.899,
+              "p99": 1.469
+            },
+            "stderr": "pgbench: setting random seed to 246813579",
+            "stdout": "pgbench (18.6 (Homebrew))\ntransaction type: /tmp/chim-phase0-capacity-recovery-a22o7tz0/workloads/tenant_one.sql\nscaling factor: 1\nquery mode: simple\nnumber of clients: 8\nnumber of threads: 8\nmaximum number of tries: 1\nnumber of transactions per client: 400\nnumber of transactions actually processed: 3200/3200\nnumber of failed transactions: 0 (0.000%)\nlatency average = 0.571 ms\ninitial connection time = 2.637 ms\ntps = 14011.673475 (without initial connection time)",
+            "transactions": 3200,
+            "transactions_per_second": 13540.116
+          },
+          "other_tenant_p95_degradation_percent": 171.429,
+          "other_tenants_during_noise": {
+            "clients": 4,
+            "elapsed_ms": 53.45,
+            "latency_ms": {
+              "max": 3.683,
+              "p50": 0.379,
+              "p95": 0.665,
+              "p99": 2.624
+            },
+            "stderr": "pgbench: setting random seed to 246813579",
+            "transactions": 400,
+            "transactions_per_second": 7483.653
+          },
+          "repetition": 1
+        },
+        {
+          "baseline_other_tenants": {
+            "clients": 4,
+            "elapsed_ms": 27.615,
+            "latency_ms": {
+              "max": 2.03,
+              "p50": 0.171,
+              "p95": 0.243,
+              "p99": 1.952
+            },
+            "stderr": "pgbench: setting random seed to 246813579",
+            "transactions": 400,
+            "transactions_per_second": 14484.968
+          },
+          "noisy_tenant": {
+            "elapsed_ms": 240.353,
+            "exit_code": 0,
+            "latency_ms": {
+              "max": 4.315,
+              "p50": 0.518,
+              "p95": 0.985,
+              "p99": 2.284
+            },
+            "stderr": "pgbench: setting random seed to 246813579",
+            "stdout": "pgbench (18.6 (Homebrew))\ntransaction type: /tmp/chim-phase0-capacity-recovery-a22o7tz0/workloads/tenant_one.sql\nscaling factor: 1\nquery mode: simple\nnumber of clients: 8\nnumber of threads: 8\nmaximum number of tries: 1\nnumber of transactions per client: 400\nnumber of transactions actually processed: 3200/3200\nnumber of failed transactions: 0 (0.000%)\nlatency average = 0.581 ms\ninitial connection time = 2.813 ms\ntps = 13773.986105 (without initial connection time)",
+            "transactions": 3200,
+            "transactions_per_second": 13313.737
+          },
+          "other_tenant_p95_degradation_percent": 218.519,
+          "other_tenants_during_noise": {
+            "clients": 4,
+            "elapsed_ms": 55.663,
+            "latency_ms": {
+              "max": 3.022,
+              "p50": 0.37,
+              "p95": 0.774,
+              "p99": 2.605
+            },
+            "stderr": "pgbench: setting random seed to 246813579",
+            "transactions": 400,
+            "transactions_per_second": 7186.043
+          },
+          "repetition": 2
+        },
+        {
+          "baseline_other_tenants": {
+            "clients": 4,
+            "elapsed_ms": 31.614,
+            "latency_ms": {
+              "max": 2.475,
+              "p50": 0.174,
+              "p95": 0.285,
+              "p99": 2.384
+            },
+            "stderr": "pgbench: setting random seed to 246813579",
+            "transactions": 400,
+            "transactions_per_second": 12652.722
+          },
+          "noisy_tenant": {
+            "elapsed_ms": 240.147,
+            "exit_code": 0,
+            "latency_ms": {
+              "max": 3.461,
+              "p50": 0.529,
+              "p95": 1.028,
+              "p99": 1.633
+            },
+            "stderr": "pgbench: setting random seed to 246813579",
+            "stdout": "pgbench (18.6 (Homebrew))\ntransaction type: /tmp/chim-phase0-capacity-recovery-a22o7tz0/workloads/tenant_one.sql\nscaling factor: 1\nquery mode: simple\nnumber of clients: 8\nnumber of threads: 8\nmaximum number of tries: 1\nnumber of transactions per client: 400\nnumber of transactions actually processed: 3200/3200\nnumber of failed transactions: 0 (0.000%)\nlatency average = 0.580 ms\ninitial connection time = 2.785 ms\ntps = 13790.131437 (without initial connection time)",
+            "transactions": 3200,
+            "transactions_per_second": 13325.188
+          },
+          "other_tenant_p95_degradation_percent": 119.298,
+          "other_tenants_during_noise": {
+            "clients": 4,
+            "elapsed_ms": 51.341,
+            "latency_ms": {
+              "max": 3.533,
+              "p50": 0.359,
+              "p95": 0.625,
+              "p99": 1.512
+            },
+            "stderr": "pgbench: setting random seed to 246813579",
+            "transactions": 400,
+            "transactions_per_second": 7791.0
+          },
+          "repetition": 3
+        }
+      ]
+    },
+    "runs": [
+      {
+        "assertions": {
+          "cross_tenant_write_rejected": true,
+          "idempotent_retry_has_one_batch": true,
+          "idempotent_retry_returns_zero": true,
+          "unauthorized_partial_commit_absent": true
+        },
+        "bounded": {
+          "clients": 8,
+          "counts": {
+            "audit_events": 328,
+            "batches": 328,
+            "facts": 8200,
+            "outbox_events": 328
+          },
+          "elapsed_ms": 29.047,
+          "facts": 8200,
+          "facts_per_second": 282301.098,
+          "latency_ms": {
+            "max": 3.076,
+            "p50": 0.359,
+            "p95": 0.884,
+            "p99": 2.699
+          },
+          "stderr": "pgbench: setting random seed to 246813579",
+          "transactions": 328,
+          "transactions_per_second": 11292.093,
+          "wal_bytes": 2954264
+        },
+        "mixed_reads": {
+          "elapsed_ms": 618.97,
+          "exit_code": 0,
+          "latency_ms": {
+            "max": 6.737,
+            "p50": 6.04,
+            "p95": 6.453,
+            "p99": 6.55
+          },
+          "stderr": "pgbench: setting random seed to 246813579",
+          "stdout": "pgbench (18.6 (Homebrew))\ntransaction type: /tmp/chim-phase0-capacity-recovery-a22o7tz0/workloads/reads.sql\nscaling factor: 1\nquery mode: simple\nnumber of clients: 4\nnumber of threads: 4\nmaximum number of tries: 1\nnumber of transactions per client: 100\nnumber of transactions actually processed: 400/400\nnumber of failed transactions: 0 (0.000%)\nlatency average = 6.101 ms\ninitial connection time = 2.511 ms\ntps = 655.643120 (without initial connection time)",
+          "transactions": 400,
+          "transactions_per_second": 646.235
+        },
+        "relation_bytes": {
+          "indexes": 3710976,
+          "table": 2916352,
+          "total": 6766592
+        },
+        "repetition": 1,
+        "unbatched_comparison": {
+          "clients": 8,
+          "counts": {
+            "audit_events": 8200,
+            "batches": 8200,
+            "facts": 8200,
+            "outbox_events": 8200
+          },
+          "elapsed_ms": 158.531,
+          "facts": 8200,
+          "facts_per_second": 51724.899,
+          "latency_ms": {
+            "max": 2.516,
+            "p50": 0.132,
+            "p95": 0.212,
+            "p99": 0.272
+          },
+          "stderr": "pgbench: setting random seed to 246813579",
+          "transactions": 8200,
+          "transactions_per_second": 51725.022,
+          "wal_bytes": 12252368
+        }
+      },
+      {
+        "assertions": {
+          "cross_tenant_write_rejected": true,
+          "idempotent_retry_has_one_batch": true,
+          "idempotent_retry_returns_zero": true,
+          "unauthorized_partial_commit_absent": true
+        },
+        "bounded": {
+          "clients": 8,
+          "counts": {
+            "audit_events": 328,
+            "batches": 328,
+            "facts": 8200,
+            "outbox_events": 328
+          },
+          "elapsed_ms": 27.327,
+          "facts": 8200,
+          "facts_per_second": 300069.528,
+          "latency_ms": {
+            "max": 2.793,
+            "p50": 0.365,
+            "p95": 0.654,
+            "p99": 2.627
+          },
+          "stderr": "pgbench: setting random seed to 246813579",
+          "transactions": 328,
+          "transactions_per_second": 12002.58,
+          "wal_bytes": 2924416
+        },
+        "mixed_reads": {
+          "elapsed_ms": 620.496,
+          "exit_code": 0,
+          "latency_ms": {
+            "max": 6.627,
+            "p50": 6.256,
+            "p95": 6.445,
+            "p99": 6.509
+          },
+          "stderr": "pgbench: setting random seed to 246813579",
+          "stdout": "pgbench (18.6 (Homebrew))\ntransaction type: /tmp/chim-phase0-capacity-recovery-a22o7tz0/workloads/reads.sql\nscaling factor: 1\nquery mode: simple\nnumber of clients: 4\nnumber of threads: 4\nmaximum number of tries: 1\nnumber of transactions per client: 100\nnumber of transactions actually processed: 400/400\nnumber of failed transactions: 0 (0.000%)\nlatency average = 6.126 ms\ninitial connection time = 1.761 ms\ntps = 652.983400 (without initial connection time)",
+          "transactions": 400,
+          "transactions_per_second": 644.645
+        },
+        "relation_bytes": {
+          "indexes": 3719168,
+          "table": 2932736,
+          "total": 6791168
+        },
+        "repetition": 2,
+        "unbatched_comparison": {
+          "clients": 8,
+          "counts": {
+            "audit_events": 8200,
+            "batches": 8200,
+            "facts": 8200,
+            "outbox_events": 8200
+          },
+          "elapsed_ms": 159.255,
+          "facts": 8200,
+          "facts_per_second": 51489.749,
+          "latency_ms": {
+            "max": 2.615,
+            "p50": 0.131,
+            "p95": 0.212,
+            "p99": 0.265
+          },
+          "stderr": "pgbench: setting random seed to 246813579",
+          "transactions": 8200,
+          "transactions_per_second": 51489.857,
+          "wal_bytes": 12262768
+        }
+      },
+      {
+        "assertions": {
+          "cross_tenant_write_rejected": true,
+          "idempotent_retry_has_one_batch": true,
+          "idempotent_retry_returns_zero": true,
+          "unauthorized_partial_commit_absent": true
+        },
+        "bounded": {
+          "clients": 8,
+          "counts": {
+            "audit_events": 328,
+            "batches": 328,
+            "facts": 8200,
+            "outbox_events": 328
+          },
+          "elapsed_ms": 26.567,
+          "facts": 8200,
+          "facts_per_second": 308653.593,
+          "latency_ms": {
+            "max": 3.051,
+            "p50": 0.347,
+            "p95": 0.637,
+            "p99": 2.577
+          },
+          "stderr": "pgbench: setting random seed to 246813579",
+          "transactions": 328,
+          "transactions_per_second": 12346.086,
+          "wal_bytes": 2946688
+        },
+        "mixed_reads": {
+          "elapsed_ms": 618.676,
+          "exit_code": 0,
+          "latency_ms": {
+            "max": 6.708,
+            "p50": 6.138,
+            "p95": 6.454,
+            "p99": 6.578
+          },
+          "stderr": "pgbench: setting random seed to 246813579",
+          "stdout": "pgbench (18.6 (Homebrew))\ntransaction type: /tmp/chim-phase0-capacity-recovery-a22o7tz0/workloads/reads.sql\nscaling factor: 1\nquery mode: simple\nnumber of clients: 4\nnumber of threads: 4\nmaximum number of tries: 1\nnumber of transactions per client: 100\nnumber of transactions actually processed: 400/400\nnumber of failed transactions: 0 (0.000%)\nlatency average = 6.111 ms\ninitial connection time = 1.908 ms\ntps = 654.566996 (without initial connection time)",
+          "transactions": 400,
+          "transactions_per_second": 646.541
+        },
+        "relation_bytes": {
+          "indexes": 3842048,
+          "table": 2908160,
+          "total": 6889472
+        },
+        "repetition": 3,
+        "unbatched_comparison": {
+          "clients": 8,
+          "counts": {
+            "audit_events": 8200,
+            "batches": 8200,
+            "facts": 8200,
+            "outbox_events": 8200
+          },
+          "elapsed_ms": 160.621,
+          "facts": 8200,
+          "facts_per_second": 51051.855,
+          "latency_ms": {
+            "max": 2.579,
+            "p50": 0.132,
+            "p95": 0.214,
+            "p99": 0.276
+          },
+          "stderr": "pgbench: setting random seed to 246813579",
+          "transactions": 8200,
+          "transactions_per_second": 51051.709,
+          "wal_bytes": 12398392
+        }
+      }
+    ],
+    "summary": {
+      "all_atomicity_and_authorization_assertions_passed": true,
+      "facts_per_second": {
+        "max": 308653.593,
+        "median": 300069.528,
+        "min": 282301.098
+      },
+      "session_batch_p95_ms": {
+        "max": 0.884,
+        "median": 0.654,
+        "min": 0.637
+      }
+    }
+  },
+  "command": "mise exec -- uv run python tools/measure_phase0_capacity_recovery.py --repetitions 3 --retained-rows 1312000 --output spikes/ash-foundation-lab/priv/maintenance/capacity-recovery-measurement.json",
+  "envelope": {
+    "approved_business_forecast": false,
+    "attendance_facts_per_period": 8200,
+    "attendance_facts_per_year": 13120000,
+    "learners": 8200,
+    "name": "five_school_planning_envelope",
+    "peak_window_seconds": 30,
+    "planning_horizon_attendance_facts": 131200000,
+    "planning_horizon_years": 10,
+    "session_batch_size": 25,
+    "session_batches_per_period": 328,
+    "tenants": 5
+  },
+  "environment": {
+    "architecture": "arm64",
+    "cpu_count": 10,
+    "machine_model": "Mac17,3",
+    "memory_bytes": 25769803776,
+    "operating_system": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+    "postgresql_settings": {
+      "archive_mode": "on",
+      "fsync": "on",
+      "full_page_writes": "on",
+      "hot_standby": "on",
+      "max_connections": "40",
+      "max_wal_senders": "10",
+      "shared_buffers": "16384",
+      "synchronous_commit": "on",
+      "wal_level": "replica"
+    },
+    "postgresql_version": "18.6 (Homebrew)",
+    "topology": "local disposable primary, physical standby, WAL archive, and isolated PITR restore"
+  },
+  "evaluation": {
+    "checks": {
+      "application_reconnect": true,
+      "atomicity_and_authorization": true,
+      "bounded_batch_p95": true,
+      "bounded_fact_rate": true,
+      "committed_write_rpo": true,
+      "connection_exhaustion_rejects_before_transaction": true,
+      "failover_rto": true,
+      "failover_safety_assertions": true,
+      "noisy_tenant_degradation": false,
+      "outbox_continuity": true,
+      "pitr_integrity": true,
+      "pitr_rto": true,
+      "recovery_conflict_is_bounded": true,
+      "replica_outage_rejects_bounded_staleness": true,
+      "replica_security_route_never_stale": true
+    },
+    "disposition": "local_measurement_has_failed_target",
+    "passed": false
+  },
+  "limits": [
+    "Local Apple Silicon results do not size or accept a managed production service tier.",
+    "PITR uses 1,312,000 retained synthetic rows, one percent of the 131,200,000-row attendance planning horizon; full-horizon managed restore remains required.",
+    "The physical standby shares one host and filesystem, so it exercises PostgreSQL choreography rather than zone or regional failure independence.",
+    "The workload uses a neutral SQL contract that represents the future named batch action; it is not a production attendance module or Ash bulk-strategy benchmark.",
+    "Web, file, object-store, report-renderer, production identity, durable movement, and managed-provider evidence are outside this local run."
+  ],
+  "measured_on": "2026-09-16",
+  "recovery": {
+    "failover": {
+      "application_reconnect_ms": 12.893,
+      "assertions": {
+        "burst_was_interrupted": true,
+        "idempotent_retry_deduplicated": true,
+        "known_commit_present": true,
+        "no_committed_batch_missing_outbox": true,
+        "no_duplicate_outbox_fact": true,
+        "sampled_synchronous_lsn_present": true
+      },
+      "committed_write_rpo_bytes": 0,
+      "duplicate_outbox_events": 0,
+      "failover_rto_ms": 255.84,
+      "interrupted_burst": {
+        "elapsed_ms": 624.035,
+        "exit_code": 2,
+        "latency_ms": {
+          "max": 14.616,
+          "p50": 12.718,
+          "p95": 13.776,
+          "p99": 14.608
+        },
+        "stderr": "pgbench: setting random seed to 246813579\nWARNING:  terminating connection due to immediate shutdown command\nWARNING:  terminating connection due to immediate shutdown command\npgbench: error: client 3 aborted in command 2 (SQL) of script 0; perhaps the backend died while processing\npgbench: error: client 5 aborted in command 2 (SQL) of script 0; perhaps the backend died while processing\nWARNING:  terminating connection due to immediate shutdown command\npgbench: error: client 7 aborted in command 2 (SQL) of script 0; perhaps the backend died while processing\nWARNING:  terminating connection due to immediate shutdown command\npgbench: error: client 0 aborted in command 2 (SQL) of script 0; perhaps the backend died while processing\nWARNING:  terminating connection due to immediate shutdown command\nWARNING:  terminating connection due to immediate shutdown command\npgbench: error: client 6 aborted in command 2 (SQL) of script 0; perhaps the backend died while processing\nWARNING:  terminating connection due to immediate shutdown command\nWARNING:  terminating connection due to immediate shutdown command\npgbench: error: client 2 aborted in command 2 (SQL) of script 0; perhaps the backend died while processing\npgbench: error: client 4 aborted in command 2 (SQL) of script 0; perhaps the backend died while processing\npgbench: error: client 1 aborted in command 2 (SQL) of script 0; perhaps the backend died while processing\npgbench: error: Run was aborted; the above results are incomplete.",
+        "stdout": "pgbench (18.6 (Homebrew))\ntransaction type: /tmp/chim-phase0-capacity-recovery-a22o7tz0/workloads/failover.sql\nscaling factor: 1\nquery mode: simple\nnumber of clients: 8\nnumber of threads: 8\nmaximum number of tries: 1\nnumber of transactions per client: 100\nnumber of transactions actually processed: 314/800\nnumber of failed transactions: 0 (0.000%)\nlatency average = 13.034 ms\ninitial connection time = 2.941 ms\ntps = 613.759551 (without initial connection time)",
+        "transactions": 314,
+        "transactions_per_second": 503.177
+      },
+      "missing_outbox_events": 0,
+      "promoted_counts": {
+        "audit_events": 3923,
+        "batches": 3923,
+        "facts": 98075,
+        "outbox_events": 3923
+      },
+      "promoted_lsn": "0/1E330C10",
+      "sampled_primary_lsn": "0/1E03BE98"
+    },
+    "pitr": {
+      "assertions": {
+        "after_target_marker_absent": true,
+        "isolated_port": true,
+        "retained_fingerprint_matches": true,
+        "target_marker_present": true
+      },
+      "base_backup_bytes": 210782551,
+      "base_backup_ms": 285.017,
+      "planning_horizon_fraction": 0.01,
+      "planning_horizon_rows": 131200000,
+      "restore_rto_ms": 119.259,
+      "retained_rows": 1312000,
+      "target_lsn": "0/1B005688",
+      "target_recorded_at": "2026-09-16T07:51:00.743233+00:00",
+      "wal_archive_availability_ms": 0.313
+    },
+    "replica": {
+      "paused_replay": {
+        "catchup_ms": 7.504,
+        "lag_bytes": 536,
+        "primary_lsn": "0/1E000218",
+        "security_sensitive_route_used_stale_state": false,
+        "stale_marker_visible": false,
+        "standby_replay_lsn": "0/1E000000"
+      },
+      "recovery_conflict": {
+        "conflict_resolution_ms": 1032.496,
+        "long_query_cancelled": true,
+        "long_query_exit_code": 1,
+        "stderr": "ERROR:  canceling statement due to conflict with recovery\nDETAIL:  User was holding a relation lock for too long."
+      },
+      "standby_outage": {
+        "bounded_staleness_route_decision": "reject",
+        "primary_required_available": true,
+        "standby_available": false,
+        "uncontrolled_writer_fallback": false
+      }
+    }
+  },
+  "schema_version": 1,
+  "source": {
+    "artifacts_sha256": {
+      "spikes/ash-foundation-lab/priv/maintenance/quality-target-recommendation.json": "7bffc0fac30297c153a5b41717566228f6d2ac7e782220b34eaac3828d0eca2b",
+      "tools/measure_phase0_capacity_recovery.py": "a5f6ed0b07b66c555535eddf82090b98f3519bfdd10597e30e5e607e7c939afc"
+    },
+    "git_revision": "50defa1a2190f25414aced0bc6887d8f3e7c1524",
+    "working_tree": "dirty"
+  },
+  "status": "phase0_local_evidence",
+  "target_recommendation_sha256": "7bffc0fac30297c153a5b41717566228f6d2ac7e782220b34eaac3828d0eca2b"
+}

@@ -1,7 +1,8 @@
 # ADR 0003: Tenant model, placement profiles, and optional PostgreSQL RLS
 
-- Status: Proposed
+- Status: Conditionally Accepted
 - Date: 2026-09-13
+- Decision date: 2026-09-16
 - Accountable owner: Security architecture
 - Deciders: Architecture review group and privacy owner
 - Supersedes: None
@@ -30,7 +31,7 @@ Attendance illustrates why placement cannot be inferred from student count. Unde
 
 ## Decision
 
-Propose attribute-based logical tenancy in every placement. Every tenant-owned row has a non-null tenant key, compound constraints prevent cross-tenant relationships, and the selected database rejects tenants not assigned to that placement. Ash policies remain the business authorization layer.
+Conditionally adopt attribute-based logical tenancy in every placement. Every tenant-owned row has a non-null tenant key, compound constraints prevent cross-tenant relationships, and the selected database rejects tenants not assigned to that placement. Ash policies remain the business authorization layer. Physical placement, movement, and RLS activation remain evidence-triggered production decisions; no hosting provider is selected by this ADR.
 
 Support three physical placement profiles without changing the application model:
 
@@ -77,9 +78,9 @@ Range partitioning for append-heavy resources is decided per resource after benc
 
 ## Validation evidence
 
-See the [tenant placement and workload capacity model](../architecture/tenant-placement-and-capacity.md), [tenant-placement capacity evidence](../phase-0/evidence/tenant-placement-capacity.md), [trusted pooled/dedicated routing evidence](../phase-0/evidence/trusted-routing.md), [threat model](../security/threat-model.md), and Ash tenancy tests.
+See the [tenant placement and workload capacity model](../architecture/tenant-placement-and-capacity.md), [tenant-placement capacity evidence](../phase-0/evidence/tenant-placement-capacity.md), [combined local capacity/recovery measurement](../phase-0/evidence/capacity-and-recovery-measurement.md), [pre-checkout admission follow-up](../phase-0/evidence/precheckout-admission-measurement.md), [full-horizon restore](../phase-0/evidence/full-horizon-restore-measurement.md), [provider-neutral PostgreSQL decision](0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md), [trusted pooled/dedicated routing evidence](../phase-0/evidence/trusted-routing.md), [threat model](../security/threat-model.md), and Ash tenancy tests.
 
-The focused routing slice passes pooled and dedicated selection, cross-placement denial, explicit spawned-task and job propagation, stale and missing routing, untrusted request input, repository-type validation, and process cleanup. Its follow-up passes capability-gated movement between two real disposable databases with source authority during copy, quiescence, code-owned tenant-snapshot reconciliation, versioned cutover, rollback, and stale-envelope rejection across event, file, cache, search, realtime, export, analytics, telemetry, AI-tool, and integration classes. Acceptance still requires synchronized workload bursts, concurrent permission revocation, pool exhaustion, production control-plane and real-adapter integration, backup, restore, and accountable review. Attendance calculations alone are not acceptance evidence.
+The focused routing slice passes pooled and dedicated selection, cross-placement denial, explicit spawned-task and job propagation, stale and missing routing, untrusted request input, repository-type validation, and process cleanup. Its follow-up passes capability-gated movement between two real disposable databases with source authority during copy, quiescence, code-owned tenant-snapshot reconciliation, versioned cutover, rollback, and stale-envelope rejection across event, file, cache, search, realtime, export, analytics, telemetry, AI-tool, and integration classes. The local capacity/recovery run adds synchronized bursts, connection exhaustion, physical-standby failure, failover, outbox integrity, and one-percent PITR, but its raw pooled shape fails the accepted noisy-tenant isolation target. The final node-local pre-checkout candidate passes three real-PostgreSQL repetitions with -0.151%-0.257% other-tenant degradation, zero other-tenant rejections, active noisy-tenant backpressure before its repository callback, and intact atomicity/outbox assertions. The exact 131.2-million-row local restore also passes with zero logical mismatches. Phase 0 accepts the logical tenancy and routing contract. Multi-node admission calibration, deployment-environment capacity/recovery, concurrent production authorization behaviour, and durable control-plane and real-adapter integration remain fail-closed production gates; stronger placement remains the fallback.
 
 ## Fallback and exit cost
 

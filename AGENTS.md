@@ -6,9 +6,9 @@ Read `README.md`, `docs/phase-0/README.md`, `docs/phase-1/README.md`, `docs/arch
 
 ## Scope
 
-- Phase 0 may add architecture evidence, repository tooling, and the disposable Ash pressure-test.
-- Phase 1 slice 1A may add only the production core foundation under `apps/chimwemwe_core`, as bounded by `docs/plans/phase-1-core-foundation-plan.md`.
-- Phase 0 remains incomplete. The Phase 1 core is provisional under the user's working Ash assumption and does not accept any Proposed ADR.
+- Phase 0 is complete as of 2026-09-16. Its evidence and disposable Ash pressure-test remain non-production artifacts.
+- Implemented Phase 1 slices 1A through 1D are limited to the production core foundation under `apps/chimwemwe_core`, as bounded by `docs/plans/phase-1-core-foundation-plan.md`; later slices require explicit authorization.
+- Ash is conditionally accepted as the default production-core framework. The eight production gates in `docs/phase-0/evidence/ash-bounded-condition-disposition.md` remain binding.
 - Do not add a school business module, web shell, scheduler, AI gateway, analytics plane, production infrastructure, or other production app until its later slice is explicitly authorized.
 - Do not treat spike code as a production framework API.
 - Preserve unrelated user changes and never commit, push, clean, or rewrite history without an explicit request.
