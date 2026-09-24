@@ -2,7 +2,25 @@ defmodule Chimwemwe.Platform.ExecutionContextTest do
   use ExUnit.Case, async: true
 
   alias Ash.Domain.Info
-  alias Chimwemwe.Platform.{ContextError, ExecutionContext, TrustedActor, TrustedPlacement}
+
+  alias Chimwemwe.Platform.Authority.{
+    ActionIdempotency,
+    ActorRoleAssignment,
+    AuditEvent,
+    Capability,
+    Membership,
+    Role,
+    RoleCapabilityGrant,
+    RoleInclusion
+  }
+
+  alias Chimwemwe.Platform.{
+    ContextError,
+    ExecutionContext,
+    OutboxEvent,
+    TrustedActor,
+    TrustedPlacement
+  }
 
   @tenant_id "11111111-1111-4111-8111-111111111111"
   @other_tenant_id "22222222-2222-4222-8222-222222222222"
@@ -100,7 +118,19 @@ defmodule Chimwemwe.Platform.ExecutionContextTest do
 
     assert Info.authorize(Chimwemwe.Platform) == :always
     assert Info.require_actor?(Chimwemwe.Platform)
-    assert Info.resources(Chimwemwe.Platform) == []
+
+    assert MapSet.new(Info.resources(Chimwemwe.Platform)) ==
+             MapSet.new([
+               Membership,
+               Role,
+               Capability,
+               ActorRoleAssignment,
+               RoleCapabilityGrant,
+               RoleInclusion,
+               AuditEvent,
+               OutboxEvent,
+               ActionIdempotency
+             ])
   end
 
   defp trusted_actor(tenant_id) do

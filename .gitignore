@@ -32,7 +32,11 @@ erl_crash.dump
 # JavaScript and Java (later phases)
 node_modules/
 .next/
+clients/web/next-env.d.ts
+*.tsbuildinfo
 dist/
+playwright-report/
+test-results/
 .gradle/
 build/
 
@@ -43,4 +47,3 @@ build/
 tmp/
 log/
 docs/phase-0/evidence/generated/
-

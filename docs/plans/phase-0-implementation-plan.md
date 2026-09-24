@@ -218,7 +218,7 @@ All records begin as Proposed. Only the architecture review may mark them Accept
 | 0017 | PostgreSQL availability, recovery, and consistency-aware read routing | Writer/HA/read/recovery separation; consistency classes; burst batching; connection budget; lag, failover, and restore evidence |
 | 0019 | Domain model authoring and governed metadata | Code-defined Ash authority; derived descriptor; view/report metadata validation; forbidden-reference and evolution evidence |
 
-Number 0018 remains reserved for the separate temporal records, correction, audit, and evidence-semantics decision; ADR 0019 does not pre-empt or silently combine that boundary.
+Number 0018 was reserved for the separate temporal records, correction, audit, and evidence-semantics decision and now contains the Conditionally Accepted [ADR 0018](../adr/0018-temporal-records-correction-audit-and-evidence-semantics.md); ADR 0019 did not pre-empt or silently combine that boundary.
 
 Required decision discipline:
 

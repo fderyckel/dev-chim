@@ -6,36 +6,43 @@ core_dir="$repo_root/apps/chimwemwe_core"
 
 cd "$repo_root"
 
-echo "[1/7] Phase 1 core shell and formatting"
+echo "[1/8] Phase 1 core shell and formatting"
 shellcheck bin/core-check
 mise exec -- mix format --check-formatted
 
-echo "[2/7] Phase 1 core compilation"
+echo "[2/8] Phase 1 core compilation"
 mise exec -- env MIX_ENV=test mix compile --warnings-as-errors
 
-echo "[3/7] Phase 1 core lint"
+echo "[3/8] Phase 1 core migration drift"
+(
+  cd "$core_dir"
+  mise exec -- mix ash_postgres.generate_migrations --check \
+    --migration-path priv/repo/migrations \
+    --snapshot-path priv/resource_snapshots
+)
+
+echo "[4/8] Phase 1 core lint"
 (
   cd "$core_dir"
   mise exec -- mix credo --strict
 )
 
-echo "[4/7] Phase 1 core dependency audit"
+echo "[5/8] Phase 1 core dependency audit"
 (
   cd "$core_dir"
   mise exec -- mix hex.audit
   mise exec -- mix deps.unlock --check-unused
 )
 
-echo "[5/7] Phase 1 core type analysis"
-(
-  cd "$core_dir"
-  mise exec -- mix dialyzer
-)
+echo "[6/8] Phase 1 core type analysis"
+mise exec -- mix dialyzer
 
-echo "[6/7] Phase 1 core tests"
+echo "[7/8] Phase 1 core tests"
+mise exec -- env MIX_ENV=test mix ecto.create --quiet
+mise exec -- env MIX_ENV=test mix ecto.migrate --quiet
 mise exec -- env MIX_ENV=test mix test
 
-echo "[7/7] Git whitespace check"
+echo "[8/8] Git whitespace check"
 git diff --check
 
 echo "Phase 1 core local verification passed."

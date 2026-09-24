@@ -2,13 +2,13 @@
 
 - Status: Passed
 - Owner: Platform engineering
-- Rehearsed: 2026-09-16
+- Rehearsed: 2026-09-24
 - Machine record: [`clean-checkout-rehearsal.json`](../../../spikes/ash-foundation-lab/priv/maintenance/clean-checkout-rehearsal.json)
 - Harness: [`rehearse_phase0_clean_checkout.py`](../../../tools/rehearse_phase0_clean_checkout.py)
 
 ## Result
 
-The complete current candidate was materialized in a temporary clone as a local-only commit. The clone was clean before bootstrap, remained clean after `./bin/bootstrap`, and remained clean after `make check`. Bootstrap and the full Phase 0 plus provisional-core verification both exited successfully.
+The complete current candidate was materialized in a temporary clone as a local-only commit. The clone was clean before bootstrap, remained clean after `./bin/bootstrap`, and remained clean after `make check`. Bootstrap and the full Phase 0, production-core, and UI-0 verification all exited successfully.
 
 The rehearsal copies the current tracked patch and every non-ignored untracked source file, commits them only inside the disposable clone, and deletes that clone after the run. It does not commit, clean, or rewrite the source working tree.
 

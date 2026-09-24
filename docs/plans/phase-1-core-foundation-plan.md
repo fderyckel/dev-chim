@@ -1,9 +1,9 @@
 # Phase 1 core-foundation implementation plan
 
-- Status: Slices 1A through 1D implemented and test-verified; Phase 0 decisions completed
+- Status: Slices 1A through 1F and the first Slice 1G safe-write increment implemented and test-verified; Phase 0 decisions completed
 - Owner: Platform engineering
 - Decision posture: Ash conditionally accepted; applicable ADR outcomes and production gates are binding
-- Review trigger: completion of slice 1D or any proposal to add persistence, write invocation, a metadata consumer, a public interface, another app, or a school domain
+- Review trigger: another authority mutation, generic or public write invocation, a metadata consumer, a public interface, another app, or a school domain
 
 ## Inputs consumed
 
@@ -12,7 +12,9 @@
 | [ADR 0001](../adr/0001-modular-monolith-and-service-boundaries.md) | One production core with a small mandatory platform boundary | Real module-lifecycle integration before the first production module |
 | [ADR 0002](../adr/0002-ash-adoption-criteria-and-fallback.md) | Exact pressure-tested Ash and policy-solver releases plus global authorization | Eight accepted production gates and their explicit fallbacks |
 | [ADR 0003](../adr/0003-tenant-model-and-optional-postgresql-rls.md) | Mandatory tenant identity separated from trusted placement and routing version | Production registry, database routing, movement, recovery, and RLS |
-| [ADR 0005](../adr/0005-domain-action-and-state-transition-convention.md) | No generic business mutation or CRUD surface | First production named action and its action/error verification |
+| [ADR 0005](../adr/0005-domain-action-and-state-transition-convention.md) | No generic business mutation or CRUD surface; first private production named action | Additional resource actions and any public action/error contract |
+| [ADR 0007](../adr/0007-transactional-outbox-and-event-envelope.md) | The first write commits one minimal durable event fact with its state | Dispatcher, retry, operational replay, retention, and movement reconciliation |
+| [ADR 0017](../adr/0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md) | One authoritative writer boundary, explicit pool budgets, admission before checkout, and no request-selected repository | Selected-deployment topology, failover, recovery, multi-node calibration, and production credentials |
 | [ADR 0019](../adr/0019-domain-model-authoring-and-governed-metadata.md) | Code-owned base-resource convention, structural audit, and a small derived descriptor contract proven by disposable Phase 0 evidence | Descriptor consumers, governed metadata, persistence, and their closure gates |
 | [Retained-data migration evidence](../phase-0/evidence/retained-data-migration-rehearsal.md) | Keep migration choreography explicit and resource-specific | Production-shaped measurements, mixed-release deployment, recovery proof, and an authorized persistent resource |
 | [Trusted-routing evidence](../phase-0/evidence/trusted-routing.md) | Raw request placement is not accepted; missing or stale routing fails closed | Live registry and repository selection |
@@ -73,6 +75,68 @@ Slice 1B deliberately does not promote the Phase 0 report-dataset registry or go
 9. Do not register the process in the application supervisor or connect it to Ecto until live placement resolution, pool ownership, settings, and failover behaviour have their own slice.
 10. Add no persistence, production resource, write action, public interface, distributed quota, or production infrastructure.
 
+## Slice 1E implementation
+
+1. Add the Chimwemwe-owned AshPostgres repository using the exact Phase 0 dependency baseline, PostgreSQL 18 minimum, and no production default connection.
+2. Start repository processes only inside an explicitly configured persistence runtime; use no implicit or default pool.
+3. Load an immutable tenant-to-placement-to-repository mapping at runtime startup, reject incomplete, duplicate, or unknown repository references, and expose no mutation API.
+4. Revalidate `ExecutionContext` before runtime or route lookup, then compare the complete current placement including tenant, profile, opaque reference, and routing version.
+5. Return one non-disclosing route failure for unknown, stale, or forged placement state and a retryable dependency failure for an unavailable runtime component.
+6. Accept no repository, database, placement, routing, actor, tenant, or Ash options in the operation API.
+7. Acquire the existing explicit tenant and placement admission permit before installing the dynamic repository or invoking the callback that may check out a connection.
+8. Keep repository selection synchronous and process-local, restore the prior repository on every exit path, and prove spawned work has no inherited selection.
+9. Add an empty generated-migration and resource-snapshot drift check plus the review contract for expand/backfill/validate/contract choreography before the first retained resource.
+10. Exercise pooled and dedicated route selection against synthetic PostgreSQL, including positive query, raw/missing/mismatched context, unknown tenant, stale route, forged placement, admission rejection, unavailable runtime, and cleanup cases.
+11. Keep `Chimwemwe.Platform` resource-empty. Add no table, production migration, write action, durable movement registry, production route configuration, or capacity default.
+
+## Slice 1F implementation
+
+1. Add six persistent tenant-owned Ash resources for tenant membership, role, capability, actor-role assignment, role-capability grant, and role inclusion inside the existing platform domain.
+2. Keep every tenant key private and non-null, with no global fallback, and give every referenced resource a tenant-qualified unique `(id, tenant_id)` index.
+3. Enforce compound tenant-qualified foreign keys for membership assignments, role grants, and both sides of role inclusion so alternate write paths cannot create cross-tenant authority edges.
+4. Identify roles by immutable UUID rather than name. Keep role names renameable tenant data and reserve a positive lock version for the governed mutation slice.
+5. Constrain capability keys to stable dotted identifiers. A stored key grants no behavior unless platform code explicitly requires the same key at a named action boundary.
+6. Enforce direct and indirect role-cycle rejection in PostgreSQL with a tenant-qualified advisory lock and recursive trigger so the invariant covers every future adapter.
+7. Add `Authority.authorize/3`, accepting only a persistence runtime, validated context, and code-known capability key. Resolve direct and transitive grants on the authoritative writer with no caller-selected role, grant, tenant, placement, or repository.
+8. Add a fail-closed Ash policy check that can use the current writer selection; outside that boundary, database unavailability denies rather than granting authority.
+9. Expose no Ash actions and no graph mutation API. Keep assignment, grant, inclusion, rename, revoke, audit, outbox, and idempotency behavior in Slice 1G.
+10. Generate resource snapshots, review and correct migration dependency ordering, then prove migration apply, rollback, reapply, and drift against synthetic PostgreSQL.
+11. Test direct and composed grants, rename independence, missing membership/grant denial, invalid capability input, untrusted and stale context, unavailable runtime, compound cross-tenant rejection, cycle rejection, closed resources, and absence of mutation functions.
+
+## Slice 1G first safe-write vertical slice
+
+The first Slice 1G increment is deliberately one resource-specific action rather than a
+generic write invoker or a complete authority-administration API. It renames a tenant-defined
+role without changing that role's identity, assignments, grants, or inclusions.
+
+1. Add the private Ash action `Role.rename_role` and expose it only through the
+   Chimwemwe-owned `Authority.rename_role/3` boundary. The caller supplies ordinary action
+   input, while actor, tenant, placement, routing, correlation, and Ash options remain derived
+   from validated platform context.
+2. Require the code-owned `platform.authority.roles.rename` capability against current writer
+   state. A stored capability with the same key grants nothing unless this action requires it.
+3. Require a positive expected role version, a UUID idempotency key, and a UUID causation
+   identifier. Lock the tenant-qualified role and increment its positive version exactly once.
+4. Bind an idempotency key to tenant, action, actor, role, and a canonical request hash. An
+   exact retry returns the committed result; changed input or actor returns one stable
+   idempotency conflict. The same key remains independent in another tenant.
+5. Commit the role update, one immutable authority-audit fact, one minimal versioned outbox
+   fact, and the completed idempotency result in the same writer transaction. The outbox fact
+   carries no role label and is not placement authority.
+6. Keep audit, outbox, and idempotency resources closed to direct actions. Do not add a public
+   write invoker, dispatcher, worker, interface, role assignment, capability grant, role
+   inclusion, revoke path, provisioning resource, or school module in this increment.
+7. Prove success, exact replay, concurrent retry serialization, stale-version conflict,
+   changed-request conflict, missing-capability denial, cross-tenant non-disclosure, malformed
+   input/context rejection, tenant-isolated idempotency, and rollback after a post-outbox
+   database failure.
+8. Generate and review the migration and resource snapshots, including tenant keys, indexes,
+   completion constraints, rollback order, migration apply/rollback/reapply, and drift.
+
+This increment proves the write contract but does not complete Slice 1G. Assignment, grant,
+composition, rename reversal, revocation, retention, dispatch, and operational replay remain
+separately authorized follow-up work.
+
 ## Acceptance checks
 
 - `Ash.Domain.Info.authorize(Chimwemwe.Platform)` returns `:always`.
@@ -84,7 +148,7 @@ Slice 1B deliberately does not promote the Phase 0 report-dataset registry or go
 - A valid tenant-owned resource and a valid global-reference resource pass the structural audit.
 - Missing base ownership, policy authorizer, policies, tenant attribute, or correct domain registration fails the audit.
 - Nullable or public tenant keys, tenant resources with global fallback, and generic state-changing action names fail the audit.
-- No school role, business module, persistence layer, HTTP route, worker, or external service is added.
+- No school role, business module, HTTP route, worker, or external service is added.
 - The production core never imports `AshFoundationLab`.
 - Descriptor derivation rejects a resource that fails the production resource contract.
 - Tenant scope is derived from resource ownership and cannot be supplied in the descriptor allowlist.
@@ -96,7 +160,7 @@ Slice 1B deliberately does not promote the Phase 0 report-dataset registry or go
 - Raw, missing, malformed, mismatched, or non-positive-routing context fails before resource or action discovery.
 - Unregistered or structurally invalid resources and private, missing, or non-read actions fail with one non-disclosing invocation error.
 - Reserved authority or context keys and non-map input fail before the Ash action runs.
-- No write invocation function is exported.
+- The generic `ActionInvocation` boundary exports no write function; only the resource-specific `Authority.rename_role/3` boundary is added.
 - Missing, raw, malformed, invalid-routing, or tenant-mismatched context is rejected before admission state or the supplied callback is reached.
 - Tenant and placement limits are enforced independently, and another tenant or placement can proceed when its own capacity remains.
 - Tenant and placement saturation have distinct stable classifications and do not disclose identifiers.
@@ -105,10 +169,29 @@ Slice 1B deliberately does not promote the Phase 0 report-dataset registry or go
 - An unavailable admission process fails closed as a retryable dependency before the callback runs.
 - Operational statistics contain counts only, not tenant or placement identifiers.
 - No production repository callback is wired into the application supervision tree.
+- The configured persistence runtime owns all repository processes and exposes no caller-selected repository option.
+- A current pooled or dedicated route selects the expected repository and reaches PostgreSQL only after admission.
+- Raw, mismatched, unknown, stale, and forged context fails before the database callback runs.
+- The prior dynamic repository is restored after return or failure, and spawned work inherits no repository selection.
+- Missing runtime components fail closed with a non-disclosing retryable-dependency result.
+- Repository, placement, per-tenant, and per-placement configuration is explicit; there is no production database or capacity default.
+- All nine persistent platform resources are tenant-owned, contract-valid, and registered in the always-authorized actor-required domain. Only `Role.rename_role` exposes an action, and it is private.
+- Direct and transitive capability grants resolve on the current writer and remain valid after a role rename.
+- Missing membership, missing grant, malformed capability, raw or mismatched context, stale routing, and unavailable runtime fail closed without disclosing graph contents.
+- Compound tenant foreign keys reject cross-tenant assignment, grant, and inclusion through alternate SQL writes.
+- PostgreSQL rejects direct and indirect role cycles, and the surviving graph remains unchanged.
+- Role rename requires the code-known capability, validated tenant context, positive expected version, idempotency key, and causation identifier.
+- A successful rename increments the role version once and atomically records one audit fact, one minimal outbox fact, and one completed idempotency result.
+- Exact and concurrent retries return the same committed result without duplicate facts; changed input or actor returns an idempotency conflict, and the same key is isolated between tenants.
+- Unauthorized, stale-version, duplicate-name, cross-tenant, malformed-input, and raw-context requests fail with stable non-disclosing errors and leave no facts.
+- A database failure after outbox insertion rolls back role state, audit, outbox, and idempotency together, after which the same request can succeed.
+- The reviewed migration applies, rolls back, reapplies, and passes generated migration and snapshot drift checks.
 - `make check` and the Phase 0 exit review pass.
 
 ## Rollback and next gate
 
 Slice 1A can be removed by deleting the root umbrella files, `apps/chimwemwe_core`, and its Phase 1 documentation and validator allowance while retaining all Phase 0 evidence. The execution-context, explicit-ownership, and named-action concepts survive an Ash fallback because they depend on platform trust semantics rather than an Ash resource.
 
-Do not add PostgreSQL persistence, write invocation, or the first platform resource until its tenant keys, compound constraints, authorization policy, migration path, idempotency, outbox, concurrency, ownership, and negative tests are proposed as the next bounded slice. The descriptor builder and trusted read invoker are production foundation; the Phase 0 descriptor artifact, report registry, and governed experience-metadata implementation remain disposable evidence and are not production APIs. Do not add a school business module until an explicit module slice is authorized.
+Slice 1E can be rolled back by removing the repository runtime, AshPostgres dependency, migration baseline, and its tests while retaining the framework-neutral context and admission contracts from 1A-1D. Slice 1F can be rolled back before retained production data by removing its closed resources, resolver, migration/snapshots, and tests. The first Slice 1G increment can likewise be rolled back only while its role changes and evidence tables contain no retained data. Once authority rows or action facts exist outside synthetic development, rollback must use forward repair or an approved recovery point rather than dropping or rewinding authority state.
+
+The role-rename increment proves the first safe-write contract; it does not authorize assignment, grant, composition, revoke, public write invocation, outbox dispatch, retention deletion, provisioning, or another module. Those require the next explicitly bounded plan and corresponding recovery and negative evidence. The Phase 0 descriptor artifact, report registry, and governed experience-metadata implementation remain disposable evidence and are not production APIs. Do not add a school business module until an explicit module slice is authorized.

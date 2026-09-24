@@ -28,7 +28,7 @@
       }
     },
     "foundation_lab_lock_sha256": "fa0bcda4d29c3bf01a063e4ec49da854c59fa3814e7fabaca34de73eabcf2e64",
-    "production_core_lock_sha256": "1fcabf3ee441ea82787dfbcb6cd95ef71f4896959e80d7b393e2a4883eda10f1",
+    "production_core_lock_sha256": "f100c5b5349bd65aba5ac4b4762fe429e554bbdc77349bcfbb56a1c00ca6962c",
     "locks_aligned": true
   },
   "regression": {

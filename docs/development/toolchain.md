@@ -1,6 +1,6 @@
 # Toolchain contract
 
-- Status: Active for Phase 0 and provisional Phase 1 core slices 1A through 1D
+- Status: Active for Phase 0, Phase 1 core slices 1A through 1F, and UI-0
 - Owner: Platform engineering
 - Review trigger: runtime security advisory, package incompatibility, or Phase 1 workspace start
 
@@ -13,6 +13,7 @@
 | Python virtual environment and packages | uv | `pyproject.toml` and `uv.lock` |
 | Elixir dependencies | Mix/Hex | spike `mix.exs` and `mix.lock` |
 | Production core Elixir dependencies | Mix/Hex | root `mix.exs`, `mix.lock`, and `apps/chimwemwe_core/mix.exs` |
+| UI-0 browser dependencies | npm | `clients/web/package.json` and `clients/web/package-lock.json` |
 | project commands | Make and scripts | `Makefile` and `bin/` |
 
 ## Verified Phase 0 versions
@@ -30,7 +31,14 @@
 | Ruff | 0.16.7 | Yes |
 | pytest | 9.1.1 | Yes |
 | ShellCheck | 0.11.0 | Yes |
-| Node.js | 24.15.0 | Yes for the Phase 0 generated-client review |
+| Node.js | 24.15.0 | Yes for the generated-client review and UI-0 |
+| npm | 11.12.1 | Yes for the generated-client review and UI-0 |
+
+UI-0 pins Next.js, React, TypeScript, its test runners, and its style tools exactly
+in the browser workspace lock. `bin/bootstrap` installs the locked dependency tree
+and the pinned Playwright Chromium browser. The browser workspace is local-only:
+development, verification, and browser builds require
+`CHIMWEMWE_UI0_SYNTHETIC=true`, and an unflagged production build fails closed.
 
 Java and a container runtime are not Phase 0 dependencies. Select and pin a supported JDK before the scheduling-service spike, and select a supported container runtime before tests require Gotenberg, Tika, ClamAV, or S3-compatible services. Their absence must not be hidden by a passing Phase 0 check.
 
@@ -41,4 +49,5 @@ Java and a container runtime are not Phase 0 dependencies. Select and pin a supp
 - Read release and security notes, run `make check`, and record migration or compatibility effects.
 - For Ash or another architectural dependency, attach upgrade evidence to ADR 0002.
 - Keep the production core on the exact pressure-tested Ash release until an explicit dependency-review slice changes it.
+- Keep UI-0 dependencies exact and update `clients/web/package.json` and its lock together; do not allow ranges to turn a local prototype check into a floating contract.
 - Do not perform broad dependency upgrades inside an unrelated feature change.

@@ -67,6 +67,8 @@ REQUIRED_PATHS = (
     "docs/phase-1/evidence/core-foundation.md",
     "docs/phase-1/evidence/database-admission.md",
     "docs/phase-1/evidence/resource-descriptor.md",
+    "docs/phase-1/evidence/trusted-persistence.md",
+    "docs/development/migrations.md",
     "docs/plans/phase-1-core-foundation-plan.md",
     "tools/check_ash_dependency_warnings.py",
     "apps/chimwemwe_core/mix.exs",
@@ -76,9 +78,16 @@ REQUIRED_PATHS = (
     "apps/chimwemwe_core/lib/chimwemwe/platform/database_admission.ex",
     "apps/chimwemwe_core/lib/chimwemwe/platform/execution_context.ex",
     "apps/chimwemwe_core/lib/chimwemwe/platform/invocation_error.ex",
+    "apps/chimwemwe_core/lib/chimwemwe/platform/persistence.ex",
+    "apps/chimwemwe_core/lib/chimwemwe/platform/persistence_error.ex",
+    "apps/chimwemwe_core/lib/chimwemwe/platform/persistence_runtime.ex",
+    "apps/chimwemwe_core/lib/chimwemwe/platform/placement_registry.ex",
     "apps/chimwemwe_core/lib/chimwemwe/platform/resource.ex",
     "apps/chimwemwe_core/lib/chimwemwe/platform/resource_contract.ex",
     "apps/chimwemwe_core/lib/chimwemwe/platform/resource_descriptor.ex",
+    "apps/chimwemwe_core/lib/chimwemwe/repo.ex",
+    "apps/chimwemwe_core/priv/repo/migrations/README.md",
+    "apps/chimwemwe_core/priv/resource_snapshots/README.md",
     "config/config.exs",
     "mix.exs",
     "spikes/ash-foundation-lab/mix.exs",
@@ -153,6 +162,10 @@ STATUS_PATTERN = re.compile(r"^- Status: (.+)$", re.MULTILINE)
 ADR_FILENAME_PATTERN = re.compile(r"^(\d{4})-[a-z0-9-]+\.md$")
 ADR_INDEX_PATTERN = re.compile(
     r"^\| \[(\d{4})\]\(([^)]+)\) \| [^|]+ \| ([^|]+) \|",
+    re.MULTILINE,
+)
+PHASE0_DECISION_ADR_PATTERN = re.compile(
+    r"^\| \[(\d{4})\]\(\.\./adr/([^)]+)\) \|",
     re.MULTILINE,
 )
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
@@ -293,9 +306,9 @@ def exit_review_errors(root: Path) -> list[str]:
                 f"{path.relative_to(root)}: unresolved exit placeholders {', '.join(present)}"
             )
 
-    for path in (root / "docs/adr").glob("[0-9][0-9][0-9][0-9]-*.md"):
-        if path.name == "0000-template.md":
-            continue
+    decision_register = (root / "docs/phase-0/decision-register.md").read_text(encoding="utf-8")
+    for _number, target in PHASE0_DECISION_ADR_PATTERN.findall(decision_register):
+        path = root / "docs/adr" / target
         body = path.read_text(encoding="utf-8")
         status_match = STATUS_PATTERN.search(body)
         if status_match and status_match.group(1).strip() == "Proposed":
@@ -319,7 +332,7 @@ def phase_boundary_errors(root: Path) -> list[str]:
             unexpected_apps = sorted(app_names - PHASE1_ALLOWED_APPS)
             if unexpected_apps:
                 errors.append(
-                    "Phase 1 slices 1A through 1D permit only apps/chimwemwe_core; "
+                    "Phase 1 slices 1A through 1F permit only apps/chimwemwe_core; "
                     f"unexpected apps: {', '.join(unexpected_apps)}"
                 )
             continue

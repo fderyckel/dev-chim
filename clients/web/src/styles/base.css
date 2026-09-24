@@ -1,0 +1,45 @@
+@layer base {
+  html {
+    min-width: 20rem;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100vh;
+    background: var(--color-canvas);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--font-size-base);
+    line-height: var(--line-height-copy);
+    text-rendering: optimizelegibility;
+  }
+
+  a {
+    color: var(--color-action-strong);
+    text-underline-offset: 0.2em;
+  }
+
+  button,
+  a,
+  input,
+  textarea {
+    outline: none;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  [tabindex]:focus-visible {
+    box-shadow: var(--focus-ring);
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  ::selection {
+    background: var(--color-information-surface);
+    color: var(--color-text);
+  }
+}

@@ -42,6 +42,25 @@ def test_exit_review_and_repository_contract_pass_together() -> None:
     assert CHECKER.validate_repository(ROOT, exit_review=True) == []
 
 
+def test_phase_zero_exit_scope_comes_from_decision_register(tmp_path: Path) -> None:
+    decision_register = tmp_path / "docs/phase-0/decision-register.md"
+    decision_register.parent.mkdir(parents=True)
+    decision_register.write_text(
+        "| [0001](../adr/0001-in-scope.md) | Accepted |\n"
+        "| [0002](../adr/0002-also-in-scope.md) | Deferred |\n",
+        encoding="utf-8",
+    )
+
+    matches = CHECKER.PHASE0_DECISION_ADR_PATTERN.findall(
+        decision_register.read_text(encoding="utf-8")
+    )
+
+    assert matches == [
+        ("0001", "0001-in-scope.md"),
+        ("0002", "0002-also-in-scope.md"),
+    ]
+
+
 def test_nonpatch_upgrade_evidence_matches_current_checked_artifacts() -> None:
     assert CHECKER.ash_upgrade_evidence_errors(ROOT) == []
 
@@ -177,5 +196,5 @@ def test_phase_one_core_requires_a_start_record_and_rejects_other_apps(
     (apps / "attendance").mkdir()
 
     assert CHECKER.phase_boundary_errors(tmp_path) == [
-        "Phase 1 slices 1A through 1D permit only apps/chimwemwe_core; unexpected apps: attendance"
+        "Phase 1 slices 1A through 1F permit only apps/chimwemwe_core; unexpected apps: attendance"
     ]

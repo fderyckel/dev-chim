@@ -4,6 +4,7 @@ set -eu
 repo_root=$(cd "$(dirname "$0")/.." && pwd -P)
 spike_dir="$repo_root/spikes/ash-foundation-lab"
 typescript_client_dir="$spike_dir/typescript-client-review"
+web_client_dir="$repo_root/clients/web"
 
 require_command() {
   if ! command -v "$1" >/dev/null 2>&1; then
@@ -51,8 +52,16 @@ mise exec -- mix local.rebar --force
 )
 
 (
-  cd "$repo_root"
-  mise exec -- mix deps.get
+  cd "$web_client_dir"
+  mise exec -- npm ci
+  mise exec -- npm exec -- playwright install chromium
 )
 
-echo "Phase 0 and provisional Phase 1 core environments are ready. Run: make check"
+(
+  cd "$repo_root"
+  mise exec -- mix deps.get
+  mise exec -- env MIX_ENV=test mix ecto.create --quiet
+  mise exec -- env MIX_ENV=test mix ecto.migrate --quiet
+)
+
+echo "Phase 0, Phase 1 core, and UI-0 environments are ready. Run: make check"

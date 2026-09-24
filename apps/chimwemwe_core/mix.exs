@@ -13,7 +13,7 @@ defmodule ChimwemweCore.MixProject do
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
       deps: deps(),
-      dialyzer: [plt_add_apps: [:mix]]
+      dialyzer: [plt_add_apps: [:ecto_sql, :mix]]
     ]
   end
 
@@ -27,6 +27,7 @@ defmodule ChimwemweCore.MixProject do
   defp deps do
     [
       {:ash, "== 3.33.4"},
+      {:ash_postgres, "== 2.13.1"},
       {:jason, "~> 1.4"},
       {:picosat_elixir, "~> 0.2.3"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},

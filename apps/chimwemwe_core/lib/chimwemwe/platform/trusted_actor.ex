@@ -46,6 +46,18 @@ defmodule Chimwemwe.Platform.TrustedActor do
   def validate(_actor), do: error(:invalid_actor_context, nil)
 
   @doc false
+  @spec revalidate(term()) :: {:ok, t()} | {:error, ContextError.t()}
+  def revalidate(%__MODULE__{} = actor) do
+    with :ok <- validate(actor), do: {:ok, actor}
+  end
+
+  def revalidate(_actor), do: error(:invalid_actor_context, nil)
+
+  @doc false
+  @spec actor_id(t()) :: String.t()
+  def actor_id(%__MODULE__{actor_id: actor_id}), do: actor_id
+
+  @doc false
   @spec tenant_id(t()) :: String.t()
   def tenant_id(%__MODULE__{tenant_id: tenant_id}), do: tenant_id
 

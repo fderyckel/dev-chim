@@ -2,31 +2,31 @@
   "bootstrap": {
     "clean_after": true,
     "command": "./bin/bootstrap",
-    "elapsed_ms": 47325.192,
+    "elapsed_ms": 162068.812,
     "exit_code": 0
   },
   "candidate": {
-    "base_revision": "50defa1a2190f25414aced0bc6887d8f3e7c1524",
-    "candidate_commit": "9754f5dfc714a362ae2cff0987ce059cd6e2b33c",
-    "candidate_tree": "aacceab779f28f55cc20a5486bf61df4738e5302",
+    "base_revision": "a30107fee99ed660bbd20471fc574047d04bed12",
+    "candidate_commit": "cc3cfa4b7b53a91b2fb9308d9fcbb94e62fb7ea7",
+    "candidate_tree": "5f7c32fb7abf616443f427e785f45441bf8a9296",
     "clean_before_bootstrap": true,
     "tracked_patch_applied": true,
-    "untracked_paths_copied": 40
+    "untracked_paths_copied": 71
   },
   "command": "mise exec -- uv run python tools/rehearse_phase0_clean_checkout.py --output spikes/ash-foundation-lab/priv/maintenance/clean-checkout-rehearsal.json",
-  "elapsed_ms": 369242.485,
+  "elapsed_ms": 777673.258,
   "limits": [
     "The candidate commit exists only inside the deleted temporary clone; the source working tree and history were not changed.",
     "Ignored dependency and build directories may be created by bootstrap and checks; Git source status remained clean.",
     "This local rehearsal does not establish remote CI, branch protection, or managed-service availability.",
     "The result artifact itself is written only after the isolated run and is therefore validated by the subsequent source-tree make check, not by its own candidate commit."
   ],
-  "rehearsed_on": "2026-09-16",
+  "rehearsed_on": "2026-09-24",
   "schema_version": 1,
   "source_sha256": {
-    "Makefile": "ba82ffc490cdbc8d4bf2570341cac35c9e47ebe63d95695481ea5c0059e7e0ec",
-    "bin/bootstrap": "a3f6c94233b97fbe336b637fd3332d09c8fa43a605fd926642b656db82ce4281",
-    "bin/core-check": "98661a8decfc7340854dc5529dcfd3907827b768378a82261f922da26dc6a37c",
+    "Makefile": "e16ea9753f6f0ecf33217a76090c22099350ce9f8a81b3b8abcbd58ed6f08699",
+    "bin/bootstrap": "78c18c9fb3a8741a1fa5707b0ece98a742bf396de7a30ac22e7bcf36b0c8c425",
+    "bin/core-check": "f483a9d84c5d28f1b9ff1bb1a781fc1b61386c78830c1e01258f23a60ab51c64",
     "bin/phase0-check": "81e19436529d1f7c188380bec13debea5fd0a95802306c69f49f42d75f0e6b6e",
     "tools/rehearse_phase0_clean_checkout.py": "928e2834f2d32857589ffb1df238d1ded161a7299db4d62dc51ab8f6afb1acaf"
   },
@@ -34,11 +34,11 @@
   "verification": {
     "clean_after": true,
     "command": "make check",
-    "elapsed_ms": 321633.521,
+    "elapsed_ms": 615114.677,
     "exit_code": 0,
     "extracted_test_counts": {
-      "elixir_test_results": 146,
-      "repository_tool_tests": 23,
+      "elixir_test_results": 160,
+      "repository_tool_tests": 24,
       "typescript_tests": 6
     }
   }

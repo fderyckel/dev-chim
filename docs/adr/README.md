@@ -9,7 +9,7 @@ ADRs record decisions that shape stable platform boundaries. Every record starts
 
 1. Copy [ADR 0000](0000-template.md) and allocate the next reserved number from the source backlog.
 2. Fill every section, including alternatives, negative consequences, validation, fallback, and review triggers.
-3. Add the record to this index and the Phase 0 decision register.
+3. Add the record to this index. Add it to the Phase 0 decision register only when it is governed by the completed Phase 0 review.
 4. Gather evidence before acceptance.
 5. Supersede an Accepted decision with a new ADR; do not rewrite its outcome.
 
@@ -30,7 +30,9 @@ ADRs record decisions that shape stable platform boundaries. Every record starts
 | [0015](0015-ai-gateway-tool-exposure-and-evaluation-policy.md) | AI gateway tool exposure and evaluation policy | Deferred | Security architecture | AI threat model |
 | [0016](0016-scheduling-service-contract-and-publication-boundary.md) | Scheduling service contract and publication boundary | Deferred | Platform and scheduling engineering | Contract review |
 | [0017](0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md) | PostgreSQL availability, recovery, and consistency-aware read routing | Accepted | Platform engineering and operations | Availability, burst, lag, failover, connection, and restore evidence |
+| [0018](0018-temporal-records-correction-audit-and-evidence-semantics.md) | Temporal records, correction, audit, and evidence semantics | Conditionally Accepted | Platform engineering and domain records owners | [Decision review](../architecture/temporal-records-decision-review.md); TR-01 through TR-08 remain binding |
 | [0019](0019-domain-model-authoring-and-governed-metadata.md) | Domain model authoring and governed metadata | Accepted | Platform engineering | [Authoring and metadata scenario](../phase-0/evidence/resource-authoring-and-governed-metadata.md) |
 | [0020](0020-human-interface-experience-and-client-platform-boundary.md) | Human-interface experience and client-platform boundary | Conditionally Accepted | Product experience and platform engineering | Journey research, prototypes, accessibility checks, and public-client contract tests |
+| [0021](0021-academic-calendar-authority-and-template-adoption.md) | Academic calendar authority and template adoption | Proposed | Product and platform engineering | [Synthetic scenario review](../architecture/academic-calendar-synthetic-scenario-review.md); stakeholder, migration, security, and interaction evidence required |
 
 Allowed decision statuses are Proposed, Accepted, Conditionally Accepted, Rejected, Superseded, and Deferred. `Template` is reserved for ADR 0000.
