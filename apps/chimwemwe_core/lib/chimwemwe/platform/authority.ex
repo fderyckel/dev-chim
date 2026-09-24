@@ -1,11 +1,11 @@
 defmodule Chimwemwe.Platform.Authority do
   @moduledoc """
-  Resolves tenant-defined capability grants and owns the first governed write.
+  Resolves tenant-defined capability grants and owns governed authority writes.
 
   Callers provide a persistence runtime, validated execution context, and one
   code-known capability key. Role identifiers, assignments, repository selection,
-  and graph traversal remain internal. `rename_role/3` is resource-specific and
-  exposes no generic write, graph mutation, or caller-controlled Ash options.
+  and graph traversal remain internal. `rename_role/3` and `assign_role/3` are
+  resource-specific and expose no generic write or caller-controlled Ash options.
   """
 
   alias Chimwemwe.Platform.{
@@ -15,11 +15,18 @@ defmodule Chimwemwe.Platform.Authority do
     TrustedActor
   }
 
-  alias Chimwemwe.Platform.Authority.{RenameRoleResult, Role}
+  alias Chimwemwe.Platform.Authority.{
+    ActorRoleAssignment,
+    AssignRoleResult,
+    RenameRoleResult,
+    Role
+  }
+
   alias Chimwemwe.Repo
 
   @capability_pattern ~r/^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+$/
   @maximum_capability_length 120
+  @assign_input_keys [:causation_id, :idempotency_key, :membership_id, :role_id]
   @rename_input_keys [:causation_id, :expected_version, :idempotency_key, :name, :role_id]
 
   @doc "Authorizes one code-known capability against current tenant-owned authority data."
@@ -44,6 +51,18 @@ defmodule Chimwemwe.Platform.Authority do
     end)
   end
 
+  @doc "Assigns one tenant membership to one tenant-defined role through a private action."
+  @spec assign_role(Supervisor.supervisor(), term(), map()) ::
+          {:ok, AssignRoleResult.t()} | {:error, term()}
+  def assign_role(runtime, context, input) do
+    ExecutionContext.with_validated(context, fn validated_context ->
+      with {:ok, normalized_input} <- normalize_assign_input(input),
+           {:ok, action_input} <- assign_action_input(validated_context, normalized_input) do
+        run_assign(runtime, validated_context, action_input)
+      end
+    end)
+  end
+
   @doc false
   @spec actor_has_capability?(TrustedActor.t(), String.t()) :: boolean()
   def actor_has_capability?(%TrustedActor{} = actor, capability) do
@@ -57,6 +76,25 @@ defmodule Chimwemwe.Platform.Authority do
   end
 
   def actor_has_capability?(_actor, _capability), do: false
+
+  defp assign_action_input(context, input) do
+    action_input =
+      Ash.ActionInput.for_action(ActorRoleAssignment, :assign_role, input,
+        actor: context.actor,
+        authorize?: true,
+        context: action_context(context),
+        domain: Chimwemwe.Platform,
+        tenant: TrustedActor.tenant_id(context.actor)
+      )
+
+    if action_input.valid? do
+      {:ok, action_input}
+    else
+      authority_error(:invalid_input)
+    end
+  rescue
+    _error -> authority_error(:internal)
+  end
 
   defp rename_action_input(context, input) do
     action_input =
@@ -97,8 +135,39 @@ defmodule Chimwemwe.Platform.Authority do
     :exit, _reason -> authority_error(:retryable_dependency)
   end
 
+  defp run_assign(runtime, context, action_input) do
+    case Persistence.with_writer(runtime, context, fn ->
+           Ash.run_action(action_input,
+             actor: context.actor,
+             authorize?: true,
+             domain: Chimwemwe.Platform,
+             tenant: TrustedActor.tenant_id(context.actor)
+           )
+         end) do
+      {:ok, {:ok, %AssignRoleResult{} = result}} -> {:ok, result}
+      {:ok, {:error, error}} -> map_action_error(error)
+      {:ok, _unexpected} -> authority_error(:internal)
+      {:error, _reason} = error -> error
+    end
+  rescue
+    _error -> authority_error(:retryable_dependency)
+  catch
+    :exit, _reason -> authority_error(:retryable_dependency)
+  end
+
+  defp normalize_assign_input(input) when is_map(input) and not is_struct(input) do
+    with {:ok, normalized} <- normalize_input_keys(input, &assign_input_key/1),
+         true <- Enum.sort(Map.keys(normalized)) == Enum.sort(@assign_input_keys) do
+      {:ok, normalized}
+    else
+      _invalid -> authority_error(:invalid_input)
+    end
+  end
+
+  defp normalize_assign_input(_input), do: authority_error(:invalid_input)
+
   defp normalize_rename_input(input) when is_map(input) and not is_struct(input) do
-    with {:ok, normalized} <- normalize_input_keys(input),
+    with {:ok, normalized} <- normalize_input_keys(input, &rename_input_key/1),
          true <- Enum.sort(Map.keys(normalized)) == Enum.sort(@rename_input_keys) do
       {:ok, normalized}
     else
@@ -108,9 +177,9 @@ defmodule Chimwemwe.Platform.Authority do
 
   defp normalize_rename_input(_input), do: authority_error(:invalid_input)
 
-  defp normalize_input_keys(input) do
+  defp normalize_input_keys(input, key_normalizer) do
     Enum.reduce_while(input, {:ok, %{}}, fn {key, value}, {:ok, normalized} ->
-      with {:ok, normalized_key} <- rename_input_key(key),
+      with {:ok, normalized_key} <- key_normalizer.(key),
            false <- Map.has_key?(normalized, normalized_key) do
         {:cont, {:ok, Map.put(normalized, normalized_key, value)}}
       else
@@ -118,6 +187,13 @@ defmodule Chimwemwe.Platform.Authority do
       end
     end)
   end
+
+  defp assign_input_key(key) when key in @assign_input_keys, do: {:ok, key}
+  defp assign_input_key("causation_id"), do: {:ok, :causation_id}
+  defp assign_input_key("idempotency_key"), do: {:ok, :idempotency_key}
+  defp assign_input_key("membership_id"), do: {:ok, :membership_id}
+  defp assign_input_key("role_id"), do: {:ok, :role_id}
+  defp assign_input_key(_key), do: authority_error(:invalid_input)
 
   defp rename_input_key(key) when key in @rename_input_keys, do: {:ok, key}
   defp rename_input_key("causation_id"), do: {:ok, :causation_id}

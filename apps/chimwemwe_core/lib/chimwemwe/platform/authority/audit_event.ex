@@ -40,7 +40,7 @@ defmodule Chimwemwe.Platform.Authority.AuditEvent do
       check_constraint(
         [:before_version, :after_version],
         "platform_authority_audit_versions_must_be_consecutive",
-        check: "before_version >= 1 AND after_version = before_version + 1"
+        check: "before_version >= 0 AND after_version = before_version + 1"
       )
 
       check_constraint(:change_summary, "platform_authority_audit_change_must_be_an_object",
@@ -112,13 +112,13 @@ defmodule Chimwemwe.Platform.Authority.AuditEvent do
     attribute :before_version, :integer do
       allow_nil? false
       public? false
-      constraints min: 1
+      constraints min: 0
     end
 
     attribute :after_version, :integer do
       allow_nil? false
       public? false
-      constraints min: 2
+      constraints min: 1
     end
 
     attribute :change_summary, :map do

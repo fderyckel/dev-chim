@@ -79,6 +79,7 @@ defmodule Chimwemwe.Platform.Authority.ActionIdempotency do
           :status,
           :result_name,
           :result_lock_version,
+          :result_payload,
           :audit_reference,
           :event_id,
           :completed_at
@@ -86,9 +87,13 @@ defmodule Chimwemwe.Platform.Authority.ActionIdempotency do
         "platform_authority_idempotency_completion_must_be_consistent",
         check: """
         (status = 'started' AND result_name IS NULL AND result_lock_version IS NULL AND
+          result_payload IS NULL AND
           audit_reference IS NULL AND event_id IS NULL AND completed_at IS NULL) OR
-        (status = 'completed' AND result_name IS NOT NULL AND result_lock_version IS NOT NULL AND
-          audit_reference IS NOT NULL AND event_id IS NOT NULL AND completed_at IS NOT NULL)
+        (status = 'completed' AND audit_reference IS NOT NULL AND event_id IS NOT NULL AND
+          completed_at IS NOT NULL AND (
+            (result_payload IS NULL AND result_name IS NOT NULL AND result_lock_version IS NOT NULL) OR
+            (result_payload IS NOT NULL AND result_name IS NULL AND result_lock_version IS NULL)
+          ))
         """
       )
 
@@ -96,6 +101,12 @@ defmodule Chimwemwe.Platform.Authority.ActionIdempotency do
         :result_lock_version,
         "platform_authority_idempotency_result_version_must_be_positive",
         check: "result_lock_version IS NULL OR result_lock_version >= 1"
+      )
+
+      check_constraint(
+        :result_payload,
+        "platform_authority_idempotency_payload_must_be_an_object",
+        check: "result_payload IS NULL OR jsonb_typeof(result_payload) = 'object'"
       )
     end
   end
@@ -188,6 +199,11 @@ defmodule Chimwemwe.Platform.Authority.ActionIdempotency do
       allow_nil? true
       public? false
       constraints min: 1
+    end
+
+    attribute :result_payload, :map do
+      allow_nil? true
+      public? false
     end
 
     attribute :audit_reference, :uuid do

@@ -1,6 +1,10 @@
 defmodule Chimwemwe.Platform.Authority.ActorRoleAssignment do
   @moduledoc """
   Tenant-qualified assignment from one membership to one tenant-defined role.
+
+  `assign_role` is private. Callers enter through
+  `Chimwemwe.Platform.Authority.assign_role/3`, which owns trusted context,
+  persistence routing, stable results, and stable errors.
   """
 
   use Chimwemwe.Platform.Resource,
@@ -46,6 +50,12 @@ defmodule Chimwemwe.Platform.Authority.ActorRoleAssignment do
         match_type: :full
       )
     end
+
+    check_constraints do
+      check_constraint(:lock_version, "platform_actor_role_assignment_version_must_be_positive",
+        check: "lock_version >= 1"
+      )
+    end
   end
 
   multitenancy do
@@ -71,11 +81,37 @@ defmodule Chimwemwe.Platform.Authority.ActorRoleAssignment do
   end
 
   actions do
+    action :assign_role, :struct do
+      public? false
+      transaction? true
+      constraints instance_of: Chimwemwe.Platform.Authority.AssignRoleResult
+
+      argument :membership_id, :uuid do
+        allow_nil? false
+      end
+
+      argument :role_id, :uuid do
+        allow_nil? false
+      end
+
+      argument :idempotency_key, :uuid do
+        allow_nil? false
+      end
+
+      argument :causation_id, :uuid do
+        allow_nil? false
+      end
+
+      run Chimwemwe.Platform.Authority.AssignRole
+    end
   end
 
   policies do
-    policy always() do
-      forbid_if always()
+    policy action(:assign_role) do
+      forbid_unless actor_present()
+
+      authorize_if {Chimwemwe.Platform.Policy.HasCapability,
+                    capability: "platform.authority.assignments.create"}
     end
   end
 
@@ -95,6 +131,13 @@ defmodule Chimwemwe.Platform.Authority.ActorRoleAssignment do
     attribute :role_id, :uuid do
       allow_nil? false
       public? false
+    end
+
+    attribute :lock_version, :integer do
+      allow_nil? false
+      default 1
+      public? false
+      constraints min: 1
     end
 
     create_timestamp :inserted_at
