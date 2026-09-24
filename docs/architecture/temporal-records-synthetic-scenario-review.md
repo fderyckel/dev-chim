@@ -8,7 +8,7 @@
 
 ## Purpose
 
-This review pressure-tests the proposed temporal-record contract against the three walkthroughs required by ADR 0018: a correction to a published calendar after another record has relied on it, an append-only reversal and replacement, and a prospective configuration change followed by a retroactive correction.
+This review pressure-tested the then-proposed temporal-record contract against the three walkthroughs required by ADR 0018: a correction to a published calendar after another record has relied on it, an append-only reversal and replacement, and a prospective configuration change followed by a retroactive correction.
 
 The fixtures are deliberately synthetic. They test whether the contract separates domain history, effective time, security audit, outbox facts, projections, and retention without requiring a universal event store or bitemporal engine. They do not establish school, accounting, safeguarding, privacy, or retention policy.
 

@@ -23,6 +23,12 @@ The decision considers:
 
 This evidence establishes a coherent decision boundary and exposes the remaining runtime questions. It does not prove the temporal implementation, real retention policy, school records policy, or lawful-erasure behavior.
 
+## Review representation
+
+François authorizes this conditional platform decision as Project Owner and current interim Security/Privacy Owner. The record does not claim that an independent security/privacy reviewer, school records owner, finance owner, legal owner, or safeguarding owner participated. Those reviewers become mandatory before their data or domain enters scope, as recorded in the binding conditions and the existing Phase 0 residual-risk process.
+
+This separation is deliberate: ADR 0018 accepts a platform vocabulary and fail-closed proof contract, not a school's retention schedule, accounting treatment, safeguarding process, or lawful-erasure determination.
+
 ## Options considered
 
 ### Fully Accept now

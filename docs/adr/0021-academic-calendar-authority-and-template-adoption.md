@@ -126,7 +126,7 @@ Before production data exists, exit cost is limited to documentation and prototy
 ## Review triggers
 
 - Two representative schools require overlapping primary academic calendars within one school scope.
-- Published-calendar correction cannot fit Conditionally Accepted [ADR 0018](0018-temporal-records-correction-audit-and-evidence-semantics.md) or its accepted successor.
+- Published-calendar correction cannot fit [ADR 0018](0018-temporal-records-correction-audit-and-evidence-semantics.md) or its accepted successor.
 - A downstream module needs to reinterpret durable records after a calendar change.
 - Template adoption creates unacceptable duplication or cannot express legitimate school variation.
 - A proposal introduces implicit hierarchy fallback, generic CRUD, live template inheritance, runtime schema mutation, or a second calendar authority.
