@@ -1,6 +1,6 @@
 # Phase 1 core-foundation implementation plan
 
-- Status: Slices 1A through 1F and the first Slice 1G safe-write increment implemented and test-verified; Phase 0 decisions completed
+- Status: Slices 1A through 1F and Slice 1G-A implemented and test-verified; Slice 1G-B tenant-safe role assignment authorized and in progress; Phase 0 decisions completed
 - Owner: Platform engineering
 - Decision posture: Ash conditionally accepted; applicable ADR outcomes and production gates are binding
 - Review trigger: another authority mutation, generic or public write invocation, a metadata consumer, a public interface, another app, or a school domain
@@ -136,6 +136,44 @@ role without changing that role's identity, assignments, grants, or inclusions.
 This increment proves the write contract but does not complete Slice 1G. Assignment, grant,
 composition, rename reversal, revocation, retention, dispatch, and operational replay remain
 separately authorized follow-up work.
+
+## Slice 1G-B tenant-safe role assignment
+
+The next Slice 1G increment adds one authority-graph mutation: assigning an existing tenant
+membership to an existing tenant-defined role. It reuses the proven safe-write contract without
+opening a generic authority-administration surface.
+
+1. Add the private Ash action `ActorRoleAssignment.assign_role` and expose it only through the
+   Chimwemwe-owned `Authority.assign_role/3` boundary. Accept exactly `membership_id`, `role_id`,
+   `idempotency_key`, and `causation_id`; derive actor, tenant, placement, routing, correlation,
+   repository, and Ash options from validated context.
+2. Require the code-owned `platform.authority.assignments.create` capability and recheck it on
+   the selected authoritative writer while holding the tenant authority-write lock.
+3. Resolve and lock both referenced records by `(id, tenant_id)`. A missing or cross-tenant
+   membership or role returns the same non-disclosing not-found result, and compound database
+   constraints remain the final alternate-write defence.
+4. Create one immutable assignment UUID at lock version 1. A second action with a different
+   idempotency key for the same membership-role pair is a stable conflict; exact retries return
+   the original committed assignment result.
+5. Extend the existing action-idempotency manifest compatibly with an action-neutral JSON result
+   payload while retaining the role-rename result columns for mixed-version compatibility. Do
+   not drop or reinterpret existing role-rename claims in this increment.
+6. Commit the assignment, one immutable authority-audit fact using aggregate version `0 -> 1`,
+   one minimal versioned outbox fact, and the completed idempotency result in the same writer
+   transaction. Neither fact carries a role label or grants authority independently.
+7. Prove success and immediate writer-side authorization, exact and concurrent replay,
+   changed-request and changed-actor conflict, duplicate-assignment conflict, missing-capability
+   denial, cross-tenant non-disclosure, malformed input/context rejection, tenant-isolated
+   idempotency, alternate-write constraint protection, and rollback after a post-outbox failure.
+8. Generate and manually review the migration and resource snapshots for the assignment version,
+   action-neutral result payload, compatibility constraint, audit creation-version rule, tenant
+   keys, indexes, foreign keys, rollback order, apply/rollback/reapply, and drift.
+9. Add no membership, role, capability, grant, inclusion, revoke, dispatcher, worker, public
+   write invoker, browser connection, provisioning resource, or school module in this increment.
+
+Slice 1G-B does not complete the authority administration surface. Capability grants, role
+composition, revocation, membership lifecycle, retention, dispatch, and operational replay
+remain separately authorized follow-up work.
 
 ## Acceptance checks
 
