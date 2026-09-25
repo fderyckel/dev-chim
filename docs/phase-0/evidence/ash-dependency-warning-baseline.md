@@ -43,7 +43,7 @@ These are observed third-party facts, not claims that every warning is harmless.
 
 ## Limits
 
-- The baseline proves repeatability for the pinned lock and Elixir/OTP pair on the recorded local platform. The [Ash 3.33.4 security-patch review](ash-security-patch.md) records the reviewed 39-to-38 transition; the separate [non-patch exercise](ash-nonpatch-upgrade-exercise.md) retains its historical isolated AshJsonApi minor comparison.
+- The baseline proves repeatability for the pinned lock and Elixir/OTP pair on the recorded local platform. The [Ash security-patch reviews](ash-security-patch.md) record the earlier 39-to-38 transition and the Ash 3.33.11 zero-group delta; the separate [non-patch exercise](ash-nonpatch-upgrade-exercise.md) retains its historical isolated AshJsonApi minor comparison.
 - Dependency compilation is forced from the locally available locked source; this is not a package-freshness, advisory, runtime, or behavioural test. Those remain separate checks.
 - Compiler warnings can expose a future compatibility problem without being an immediate application defect. The baseline detects change but does not replace dependency release-note review or issue triage.
 - Runtime log warnings, generated-migration safety notices, and application warnings belong to their existing evidence and gates; they are intentionally not folded into this compile-warning artifact.

@@ -261,11 +261,6 @@ export interface components {
             readonly less_than_or_equal?: string;
             /** Format: uuid */
             readonly not_eq?: string;
-            /** Format: uuid */
-            readonly range_adjacent?: string;
-            readonly range_contains?: string;
-            /** Format: uuid */
-            readonly range_overlaps?: string;
         };
         readonly "foundation-record-filter-id": {
             /** Format: uuid */
@@ -286,11 +281,6 @@ export interface components {
             readonly less_than_or_equal?: string;
             /** Format: uuid */
             readonly not_eq?: string;
-            /** Format: uuid */
-            readonly range_adjacent?: string;
-            readonly range_contains?: string;
-            /** Format: uuid */
-            readonly range_overlaps?: string;
         };
         readonly "foundation-record-filter-lock_version": {
             readonly eq?: number;
@@ -303,9 +293,6 @@ export interface components {
             readonly less_than?: number;
             readonly less_than_or_equal?: number;
             readonly not_eq?: number;
-            readonly range_adjacent?: number;
-            readonly range_contains?: string;
-            readonly range_overlaps?: number;
         };
         readonly "foundation-record-filter-name": {
             readonly contains?: string;
@@ -321,9 +308,6 @@ export interface components {
             readonly less_than_or_equal?: string;
             readonly like?: string;
             readonly not_eq?: string;
-            readonly range_adjacent?: string;
-            readonly range_contains?: string;
-            readonly range_overlaps?: string;
             readonly string_ends_with?: string;
             readonly string_starts_with?: string;
         };
@@ -344,9 +328,6 @@ export interface components {
             readonly less_than_or_equal?: "draft" | "in_review";
             /** @enum {string} */
             readonly not_eq?: "draft" | "in_review";
-            readonly range_adjacent?: string;
-            readonly range_contains?: string;
-            readonly range_overlaps?: string;
         };
         /** @description A link MUST be represented as either: a string containing the link's URL or a link object. */
         readonly link: string;

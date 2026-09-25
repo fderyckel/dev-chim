@@ -1,6 +1,6 @@
 # Module activation and lifecycle
 
-- Status: Proposed during Phase 0
+- Status: Accepted architecture contract; Phase 1 Slice 1H-A initial activation implemented
 - Owner: Architecture review group with platform and product engineering
 - Governing record: [ADR 0001](../adr/0001-modular-monolith-and-service-boundaries.md)
 - Review trigger: module contract, entitlement, activation, dependency, or deactivation semantics change
@@ -68,9 +68,33 @@ Every later module contract declares:
 - telemetry and audit events for every lifecycle transition; and
 - positive, negative, concurrency, dependency, and recovery tests.
 
+## Phase 1 Slice 1H-A boundary
+
+Slice 1H-A implements the smallest persistent production-core proof of the four independent
+gates. A trusted, immutable release manifest declares stable module keys, versions, owners, and
+an acyclic dependency graph. Closed tenant-owned entitlement and activation resources persist
+tenant state. They do not provide an entitlement-management surface.
+
+`Chimwemwe.Platform.ModuleLifecycle.activate/4` is the only initial-activation boundary. It
+validates trusted context before action input, derives the released version and dependencies from
+the trusted manifest, requires `platform.modules.activate` on the authoritative writer, locks the
+tenant-and-module lifecycle scope, verifies entitlement and active dependencies independently,
+and invokes one private named Ash action. The transaction creates activation version 1 together
+with one minimized audit fact, one transactional outbox fact, and one exact idempotency result.
+
+`ModuleLifecycle.authorize/5` is the ordinary use gate. It independently requires that the module
+is released, entitled, active at the released version, dependency-compatible, and permitted by
+the requested code-owned actor capability. Activating a module therefore grants no actor
+capability. Neither the client nor action input can select tenant, repository, release state,
+entitlement, activation, dependencies, actor, or Ash authorization options.
+
+This slice adds no commercial entitlement workflow, deactivation, drain, reactivation, retained
+data action, public interface, provisioning flow, or business module. Those remain explicitly
+separate work, beginning with the bounded Slice 1H-B lifecycle proof.
+
 ## Phase 0 boundary and evidence
 
-Phase 0 records and pressure-tests the lifecycle contract only. It does not create a production module registry, entitlement service, UI, or school business module.
+Phase 0 recorded and pressure-tested the lifecycle contract only. It did not create a production module registry, entitlement service, UI, or school business module. Slice 1H-A now promotes only the trusted declaration, closed entitlement/activation state, initial activation, and ordinary gate described above.
 
 Before this decision is accepted, a neutral synthetic module must prove that:
 
@@ -82,4 +106,3 @@ Before this decision is accepted, a neutral synthetic module must prove that:
 - jobs and events do not continue with ordinary module authority after deactivation;
 - required audit, retention, and outbox work is not lost during drain; and
 - no lifecycle transition drops or implicitly erases retained tenant data.
-

@@ -50,6 +50,23 @@ make check
 
 See [testing.md](testing.md) for focused commands and [git-workflow.md](git-workflow.md) before pushing.
 
+## Local browser qualification
+
+Use `make web-dev` for the fixture-only UI-0 experience. To exercise the first read-only core
+connection, run:
+
+```sh
+make web-core-dev
+```
+
+Then open `http://127.0.0.1:3000/authority/assignments`. The command creates and migrates the
+dedicated `chimwemwe_ui1_local` database, generates a fresh local bridge token, and starts the
+loopback core and browser processes together. The page uses only synthetic records and cannot
+save an assignment. Stop both processes with Control-C.
+
+The token is process-local and must not be copied into browser code, screenshots, committed
+configuration, or logs. This command does not configure production identity, hosting, or data.
+
 ## Troubleshooting
 
 - Run `mise doctor` when a pinned runtime is not selected.

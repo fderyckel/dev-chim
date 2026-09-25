@@ -26,10 +26,12 @@ defmodule ChimwemweCore.MixProject do
 
   defp deps do
     [
-      {:ash, "== 3.33.4"},
+      {:ash, "== 3.33.11"},
       {:ash_postgres, "== 2.13.1"},
+      {:bandit, "== 1.12.5"},
       {:jason, "~> 1.4"},
       {:picosat_elixir, "~> 0.2.3"},
+      {:phoenix, "== 1.8.14"},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false}
     ]

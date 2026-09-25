@@ -21,12 +21,16 @@
     "typecheck": "tsc --noEmit",
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
+    "test:e2e:ui1": "playwright test --config playwright.ui1.config.ts",
+    "test:e2e:ui1-unavailable": "playwright test --config playwright.ui1-unavailable.config.ts",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm run test:unit && npm run build"
   },
   "dependencies": {
     "next": "16.3.6",
+    "openapi-fetch": "0.17.0",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "server-only": "0.0.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

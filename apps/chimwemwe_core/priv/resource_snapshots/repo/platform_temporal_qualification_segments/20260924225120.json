@@ -1,0 +1,252 @@
+{
+  "attributes": [
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"gen_random_uuid()\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": true,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "tenant_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "index_where": null,
+        "match_tenant?": true,
+        "match_type": "full",
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "platform_temporal_segment_aggregate_tenant_fkey",
+        "on_delete": "restrict",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "platform_temporal_qualification_aggregates"
+      },
+      "scale": null,
+      "size": null,
+      "source": "aggregate_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "index_where": null,
+        "match_tenant?": true,
+        "match_type": "full",
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "platform_temporal_segment_revision_tenant_fkey",
+        "on_delete": "restrict",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "platform_temporal_qualification_revisions"
+      },
+      "scale": null,
+      "size": null,
+      "source": "revision_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "effective_from",
+      "type": "date"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "effective_until",
+      "type": "date"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "value",
+      "type": "text"
+    }
+  ],
+  "base_filter": null,
+  "check_constraints": [
+    {
+      "attribute": [
+        "effective_from",
+        "effective_until"
+      ],
+      "base_filter": null,
+      "check": "effective_from < effective_until",
+      "name": "platform_temporal_segment_interval_valid"
+    },
+    {
+      "attribute": [
+        "value"
+      ],
+      "base_filter": null,
+      "check": "char_length(value) BETWEEN 1 AND 80",
+      "name": "platform_temporal_segment_value_not_empty"
+    }
+  ],
+  "create_table_options": null,
+  "custom_indexes": [
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "id",
+        "tenant_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_qualification_segments_id_tenant_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "tenant_id",
+        "revision_id",
+        "effective_from",
+        "id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "revision_id"
+        },
+        {
+          "type": "atom",
+          "value": "effective_from"
+        },
+        {
+          "type": "atom",
+          "value": "id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_qualification_segment_effective_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": false,
+      "using": null,
+      "where": null
+    }
+  ],
+  "custom_statements": [
+    {
+      "after_tables": [
+        "platform_temporal_qualification_segments"
+      ],
+      "code?": false,
+      "down": "DROP FUNCTION guard_platform_temporal_qualification_segment();",
+      "global?": true,
+      "name": "platform_temporal_qualification_segment_guard_function",
+      "up": "CREATE FUNCTION guard_platform_temporal_qualification_segment()\nRETURNS trigger\nLANGUAGE plpgsql\nAS $$\nBEGIN\n  IF TG_OP = 'DELETE' THEN\n    RAISE EXCEPTION USING\n      ERRCODE = '23514',\n      CONSTRAINT = 'platform_temporal_qualification_segment_delete_forbidden',\n      MESSAGE = 'temporal qualification segment deletion is forbidden';\n  END IF;\n\n  IF TG_OP = 'UPDATE' THEN\n    RAISE EXCEPTION USING\n      ERRCODE = '23514',\n      CONSTRAINT = 'platform_temporal_qualification_segment_immutable',\n      MESSAGE = 'temporal qualification segments are immutable';\n  END IF;\n\n  PERFORM pg_advisory_xact_lock(\n    hashtextextended(\n      'platform-temporal-qualification-segment:' ||\n        NEW.tenant_id::text || ':' || NEW.revision_id::text,\n      0\n    )\n  );\n\n  IF EXISTS (\n    SELECT 1\n    FROM platform_temporal_qualification_segments AS segment\n    WHERE segment.tenant_id = NEW.tenant_id\n      AND segment.revision_id = NEW.revision_id\n      AND NEW.effective_from < segment.effective_until\n      AND segment.effective_from < NEW.effective_until\n  ) THEN\n    RAISE EXCEPTION USING\n      ERRCODE = '23P01',\n      CONSTRAINT = 'platform_temporal_qualification_segment_no_overlap',\n      MESSAGE = 'temporal qualification segments overlap';\n  END IF;\n\n  RETURN NEW;\nEND;\n$$;\n"
+    },
+    {
+      "after_tables": [
+        "platform_temporal_qualification_segments"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER platform_temporal_qualification_segment_guard\n  ON platform_temporal_qualification_segments;\n",
+      "global?": true,
+      "name": "platform_temporal_qualification_segment_guard_trigger",
+      "up": "CREATE TRIGGER platform_temporal_qualification_segment_guard\nBEFORE INSERT OR UPDATE OR DELETE\nON platform_temporal_qualification_segments\nFOR EACH ROW\nEXECUTE FUNCTION guard_platform_temporal_qualification_segment();\n"
+    }
+  ],
+  "has_create_action": false,
+  "hash": "5A2AAD0517E15166C9BDA7B97DF1FCB7089DE364968B0D45FAA6F764B52EA2A9",
+  "identities": [],
+  "multitenancy": {
+    "attribute": "tenant_id",
+    "global": false,
+    "strategy": "attribute"
+  },
+  "repo": "Elixir.Chimwemwe.Repo",
+  "schema": null,
+  "table": "platform_temporal_qualification_segments"
+}

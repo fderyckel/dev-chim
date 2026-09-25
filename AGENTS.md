@@ -7,7 +7,7 @@ Read `README.md`, `docs/phase-0/README.md`, `docs/phase-1/README.md`, `docs/arch
 ## Scope
 
 - Phase 0 is complete as of 2026-09-16. Its evidence and disposable Ash pressure-test remain non-production artifacts.
-- Implemented Phase 1 slices 1A through 1F are limited to the production core foundation under `apps/chimwemwe_core`, as bounded by `docs/plans/phase-1-core-foundation-plan.md`; later core slices require explicit authorization.
+- Implemented Phase 1 slices 1A through 1F and the bounded Slice 1G-A/1G-B authority writes are limited to the production core foundation under `apps/chimwemwe_core`, as bounded by `docs/plans/phase-1-core-foundation-plan.md`; later core slices require explicit authorization.
 - UI-0 is authorized only as the local, synthetic browser experience under `clients/web`, bounded by `docs/plans/local-browser-experience-foundation-proposal.md`. It is not a production client, public interface, authentication path, or school module.
 - Ash is conditionally accepted as the default production-core framework. The eight production gates in `docs/phase-0/evidence/ash-bounded-condition-disposition.md` remain binding.
 - Do not connect UI-0 to the core, add real authentication or data, or add another school business module, production web surface, scheduler, AI gateway, analytics plane, production infrastructure, or production app until its later slice is explicitly authorized.

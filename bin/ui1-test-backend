@@ -1,0 +1,21 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(cd "$(dirname "$0")/.." && pwd -P)
+test_database=chimwemwe_ui1_e2e
+test_token=ui1-playwright-local-token-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+
+cd "$repo_root"
+
+CHIMWEMWE_UI1_SETUP=true CHIMWEMWE_UI1_DATABASE="$test_database" \
+  mise exec -- mix ecto.create --quiet
+CHIMWEMWE_UI1_SETUP=true CHIMWEMWE_UI1_DATABASE="$test_database" \
+  mise exec -- mix ecto.migrate --quiet
+
+exec env \
+  CHIMWEMWE_UI1_API_URL=http://127.0.0.1:4011 \
+  CHIMWEMWE_UI1_BRIDGE_TOKEN="$test_token" \
+  CHIMWEMWE_UI1_DATABASE="$test_database" \
+  CHIMWEMWE_UI1_LOCAL=true \
+  CHIMWEMWE_UI1_PORT=4011 \
+  mise exec -- mix run --no-halt

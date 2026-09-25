@@ -1,0 +1,77 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(cd "$(dirname "$0")/.." && pwd -P)
+web_dir="$repo_root/clients/web"
+bridge_port=${CHIMWEMWE_UI1_PORT:-4001}
+bridge_database=${CHIMWEMWE_UI1_DATABASE:-chimwemwe_ui1_local}
+
+require_command() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "Missing required command: $1" >&2
+    exit 1
+  fi
+}
+
+require_command curl
+require_command mise
+require_command openssl
+
+cd "$repo_root"
+
+CHIMWEMWE_UI1_SETUP=true CHIMWEMWE_UI1_DATABASE="$bridge_database" \
+  mise exec -- mix ecto.create --quiet
+CHIMWEMWE_UI1_SETUP=true CHIMWEMWE_UI1_DATABASE="$bridge_database" \
+  mise exec -- mix ecto.migrate --quiet
+
+bridge_token=$(openssl rand -hex 32)
+export CHIMWEMWE_UI0_SYNTHETIC=true
+export CHIMWEMWE_UI1_API_URL="http://127.0.0.1:$bridge_port"
+export CHIMWEMWE_UI1_BRIDGE_TOKEN="$bridge_token"
+export CHIMWEMWE_UI1_DATABASE="$bridge_database"
+export CHIMWEMWE_UI1_LOCAL=true
+export CHIMWEMWE_UI1_PORT="$bridge_port"
+
+(
+  trap '' INT
+  exec mise exec -- mix run --no-halt
+) &
+core_pid=$!
+
+cleanup() {
+  if kill -0 "$core_pid" 2>/dev/null; then
+    kill "$core_pid" 2>/dev/null || true
+    wait "$core_pid" 2>/dev/null || true
+  fi
+}
+
+trap cleanup EXIT HUP INT TERM
+
+attempt=0
+until [ "$attempt" -ge 50 ]; do
+  if ! kill -0 "$core_pid" 2>/dev/null; then
+    echo "The local core stopped before it became ready." >&2
+    wait "$core_pid"
+  fi
+
+  status=$(curl --silent --output /dev/null --write-out '%{http_code}' \
+    "$CHIMWEMWE_UI1_API_URL/api/v1/authority/assignment-options" || true)
+
+  if [ "$status" = "401" ]; then
+    break
+  fi
+
+  attempt=$((attempt + 1))
+  sleep 0.2
+done
+
+if [ "$status" != "401" ]; then
+  echo "The local core did not become ready on $CHIMWEMWE_UI1_API_URL." >&2
+  exit 1
+fi
+
+echo "Chimwemwe UI-1A is ready at http://127.0.0.1:3000/authority/assignments"
+echo "This local qualification uses synthetic data and cannot write assignments."
+
+cd "$web_dir"
+mise exec -- npm run dev

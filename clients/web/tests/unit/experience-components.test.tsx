@@ -13,6 +13,7 @@ import type {
 } from "../../src/ports/view-data";
 
 const context: PrototypeContext = {
+  experience: "ui0",
   tenantName: "Synthetic Learning Community",
   tenantKind: "synthetic",
   dateLabel: "Example day",

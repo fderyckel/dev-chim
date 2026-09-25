@@ -1,9 +1,9 @@
 # Phase 1 core-foundation implementation plan
 
-- Status: Slices 1A through 1F and Slice 1G-A implemented and test-verified; Slice 1G-B tenant-safe role assignment authorized and in progress; Phase 0 decisions completed
+- Status: Slices 1A through 1H-A and ADR 0018 T1-A/T1-B bounded increments implemented; Slice 1H-A focused tests, full production-core tests, compile, migration lifecycle, snapshot drift, dependency audit, and scoped static checks pass, while complete repository verification is blocked by concurrent UI-1A dependency-evidence, formatting, Credo, and Dialyzer changes; Phase 0 decisions completed
 - Owner: Platform engineering
 - Decision posture: Ash conditionally accepted; applicable ADR outcomes and production gates are binding
-- Review trigger: another authority mutation, generic or public write invocation, a metadata consumer, a public interface, another app, or a school domain
+- Review trigger: another authority mutation, a callable temporal action or read boundary, generic or public write invocation, a metadata consumer, a public interface, another app, or a school domain
 
 ## Inputs consumed
 
@@ -15,6 +15,7 @@
 | [ADR 0005](../adr/0005-domain-action-and-state-transition-convention.md) | No generic business mutation or CRUD surface; first private production named action | Additional resource actions and any public action/error contract |
 | [ADR 0007](../adr/0007-transactional-outbox-and-event-envelope.md) | The first write commits one minimal durable event fact with its state | Dispatcher, retry, operational replay, retention, and movement reconciliation |
 | [ADR 0017](../adr/0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md) | One authoritative writer boundary, explicit pool budgets, admission before checkout, and no request-selected repository | Selected-deployment topology, failover, recovery, multi-node calibration, and production credentials |
+| [ADR 0018](../adr/0018-temporal-records-correction-audit-and-evidence-semantics.md) | Separate publication and correction intent, immutable operation results, explicit temporal reads, and evidence-layer separation | Retention/hold/erasure, reversal action, consumer reconciliation, migration provenance, backup/restore, and accountable Full Acceptance |
 | [ADR 0019](../adr/0019-domain-model-authoring-and-governed-metadata.md) | Code-owned base-resource convention, structural audit, and a small derived descriptor contract proven by disposable Phase 0 evidence | Descriptor consumers, governed metadata, persistence, and their closure gates |
 | [Retained-data migration evidence](../phase-0/evidence/retained-data-migration-rehearsal.md) | Keep migration choreography explicit and resource-specific | Production-shaped measurements, mixed-release deployment, recovery proof, and an authorized persistent resource |
 | [Trusted-routing evidence](../phase-0/evidence/trusted-routing.md) | Raw request placement is not accepted; missing or stale routing fails closed | Live registry and repository selection |
@@ -26,7 +27,7 @@ These are decided Phase 0 inputs. Conditional and production-readiness gates rem
 ## Slice 1A implementation
 
 1. Establish the root Elixir umbrella and one `chimwemwe_core` OTP app.
-2. Pin the production core to Ash 3.33.4 and PicoSAT 0.2.3, including the coordinated Phase 0 security-patch review.
+2. Pin the production core to Ash 3.33.11 and PicoSAT 0.2.3, including the coordinated Phase 0 security-patch reviews.
 3. Define the empty production Ash domain with authorization forced to `:always` and actor presence required.
 4. Define trusted actor, trusted placement, and execution-context types without role constants or request-selected infrastructure.
 5. Validate the complete context before invoking core work and return typed errors without echoing identifiers.
@@ -175,6 +176,127 @@ Slice 1G-B does not complete the authority administration surface. Capability gr
 composition, revocation, membership lifecycle, retention, dispatch, and operational replay
 remain separately authorized follow-up work.
 
+## ADR 0018 T1-A temporal qualification physical model
+
+The authorized first increment of the neutral temporal proof is a closed physical-model
+qualification inside the production core. It deliberately precedes any callable temporal action
+or school domain.
+
+1. Add one synthetic stable aggregate, immutable revision chain, immutable effective-segment
+   set, and immutable append-only fact under a qualification-only namespace.
+2. Keep every resource tenant-owned, actor-required through the platform domain, and closed to
+   Ash actions. Add no generic temporal API, business vocabulary, public interface, descriptor,
+   worker, dispatcher, or education module.
+3. Let PostgreSQL assign `recorded_at`, preserve stable aggregate identity, prevent revision
+   branches and backward current-pointer movement, and reject update or delete of revisions,
+   effective segments, and facts through alternate write paths.
+4. Enforce tenant-qualified aggregate, predecessor, current-pointer, segment, and reversal
+   relationships. Include explicit synthetic scope identity where the later capability boundary
+   must distinguish records inside one tenant.
+5. Serialize segment insertion per tenant and revision and reject overlapping half-open Date
+   intervals inside one revision while permitting historical successor revisions to cover the
+   same effective dates.
+6. Prove the physical exact/current/effective query shapes and append-only reversal shape with
+   synthetic PostgreSQL tests, including cross-tenant, cross-scope, immutability, chain,
+   interval, and caller-backdated timestamp negatives.
+7. Generate and manually review the migration and resource snapshots, including circular
+   selector ordering, compound indexes and foreign keys, trigger teardown order, apply,
+   rollback, reapply, and drift.
+
+T1-A does not complete TR-01 or any other ADR 0018 condition. Named publication/correction and
+reversal actions, capability-protected history reads, operation/idempotency results, audit and
+outbox atomicity, downstream reconciliation, retention/legal hold/erasure, baseline import,
+backup/restore, and performance limits remain separately bounded T1 increments.
+
+## ADR 0018 T1-B governed revision actions and reads
+
+The authorized second increment keeps the T1-A qualification model neutral while adding only
+the callable revision behavior required to evaluate TR-01 through TR-05. It does not add the
+append-only reversal action, retention/erasure behavior, migration import, recovery rehearsal,
+consumer implementation, public interface, or school domain.
+
+1. Add separate private `Aggregate.publish_revision` and `Aggregate.correct_revision` actions.
+   Publication creates revision 1 for a new caller-named aggregate; correction requires the exact
+   current revision ID and creates one consecutive successor. There is no combined mode switch,
+   generic mutation, or "correct latest" request.
+2. Expose the actions only through a qualification-owned boundary that validates trusted context
+   before action input and derives actor, tenant, placement, routing, correlation, repository,
+   domain, authorization, and Ash options from that context.
+3. Require distinct code-owned publish and correct capabilities, then re-authorize on the
+   authoritative writer after taking a tenant-and-aggregate transaction lock.
+4. Accept one bounded non-empty set of normalized half-open Date segments, a stable reason code,
+   UUID idempotency and causation identifiers, and—only for correction—the expected current
+   revision. Generate revision, operation, and segment identities inside the writer transaction.
+5. Bind replay to tenant, action, actor, aggregate, and the canonical complete request. Exact and
+   concurrent retries return the complete committed revision-and-segment result; changed input or
+   actor conflicts; racing different corrections against one expected revision cannot branch.
+6. Atomically create the aggregate when publishing, immutable revision and segments, monotonic
+   current selector, minimized security audit evidence, one minimal outbox fact, and the completed
+   idempotency result. Reuse the existing closed safe-write evidence resources only as neutral
+   qualification scaffolding; do not promote a common temporal persistence abstraction.
+7. Add named writer-routed `get_current`, `get_effective`, `get_revision`, and bounded
+   `list_history` reads. Current/effective and exact/history use distinct code-owned capabilities;
+   an unsupported recorded-time read validates and authorizes before returning an explicit typed
+   failure rather than approximating from timestamps.
+8. Prove success, exact replay, changed-request/actor conflict, stale and concurrent correction,
+   missing capability/context, current-versus-history disclosure, cross-tenant non-disclosure,
+   invalid/overlapping segments, full transaction rollback after outbox insertion, and exact,
+   current, effective, history, and unsupported recorded-time behavior.
+9. Keep all actions private. Add no generic/public write or read invoker, dispatcher, worker,
+   browser connection, production runtime wiring, framework history dependency, reusable temporal
+   library, business vocabulary, school module, or claim that TR-01 through TR-05 are complete.
+
+T1-B may close executable portions of TR-01 through TR-05 only when its evidence is recorded.
+TR-05 still requires consumer pin/follow/reconcile proof, while TR-06, TR-07, the reversal half of
+TR-01, and accountable Full Acceptance remain later bounded work.
+
+## Slice 1H-A independent module gates and activation
+
+The authorized first module-lifecycle increment promotes only the release, entitlement,
+activation, dependency, and actor-authorization contract already accepted by ADR 0001. It uses
+one neutral declaration and synthetic tenant facts; it does not add a school module, commercial
+entitlement service, deactivation drain, reactivation, or production runtime wiring.
+
+1. Add an immutable Chimwemwe-owned release manifest whose declarations have stable module keys,
+   versions, owners, and an acyclic dependency graph. Callers cannot supply a manifest through
+   action input, and an invalid, duplicate, missing-dependency, or cyclic manifest fails closed.
+2. Add closed tenant-owned `ModuleEntitlement` and `ModuleActivation` resources with non-null
+   tenant keys, tenant-qualified uniqueness, and a compound entitlement relationship so an
+   alternate writer cannot activate a module for another tenant or without its entitlement fact.
+3. Add the private `ModuleActivation.activate_module` Ash action and expose it only through the
+   Chimwemwe-owned `ModuleLifecycle.activate/4` boundary. Accept exactly module key, expected
+   lifecycle version zero, idempotency key, and causation identifier; derive the released version,
+   dependencies, actor, tenant, placement, routing, correlation, repository, and Ash options from
+   trusted platform state.
+4. Require the code-owned `platform.modules.activate` capability and recheck it on the selected
+   authoritative writer while holding the tenant-and-module lifecycle lock. Verify release,
+   entitlement, and every declared dependency independently before creating activation version 1.
+5. Bind idempotency to tenant, action, actor, module key, released version, expected version, and
+   causation identifier. Exact and concurrent retries return the committed activation; changed
+   request or actor conflicts; a different key for an already active module is a stable conflict.
+6. Atomically create the activation, one minimized audit fact, one versioned outbox fact, and the
+   completed action-idempotency result. Activation grants no capability and neither evidence fact
+   is release, entitlement, activation, placement, or authorization authority.
+7. Add `ModuleLifecycle.authorize/5` as the ordinary server-side gate. It validates context before
+   module lookup, uses the authoritative writer, and independently requires release availability,
+   tenant entitlement, active compatible version, active dependencies, and the requested
+   code-owned actor capability. It accepts no caller-selected gate state or repository options.
+8. Prove each missing gate independently, successful activation followed by continued capability
+   denial, the complete four-gate positive, missing/raw context, cross-tenant non-disclosure,
+   dependency denial, alternate-write constraints, exact and changed replay, concurrent retry,
+   tenant-isolated keys, and rollback after a post-outbox failure.
+9. Generate and manually review the migration and resource snapshots, including tenant keys,
+   module-key constraints, compound foreign keys, compatible table ordering, rollback order,
+   apply/rollback/reapply, and drift.
+10. Add no module deactivation, drain, queue or consumer state, retained-data action, reactivation,
+    public or generic invocation, browser connection, provisioning resource, school vocabulary,
+    business module, dispatcher, worker, or external service in this increment.
+
+Slice 1H-A proves the independent gates and safe initial activation only. Slice 1H-B must still
+prove deterministic deactivation versus ordinary work, drain/park behavior, mandatory work,
+retained-data ownership, dependency-safe deactivation, compatible reactivation, replay, and
+reconciliation before the production module-lifecycle gate is complete.
+
 ## Acceptance checks
 
 - `Ash.Domain.Info.authorize(Chimwemwe.Platform)` returns `:always`.
@@ -198,7 +320,7 @@ remain separately authorized follow-up work.
 - Raw, missing, malformed, mismatched, or non-positive-routing context fails before resource or action discovery.
 - Unregistered or structurally invalid resources and private, missing, or non-read actions fail with one non-disclosing invocation error.
 - Reserved authority or context keys and non-map input fail before the Ash action runs.
-- The generic `ActionInvocation` boundary exports no write function; only the resource-specific `Authority.rename_role/3` boundary is added.
+- The generic `ActionInvocation` boundary exports no write function; only the resource-specific `Authority.rename_role/3` and `Authority.assign_role/3` boundaries are added.
 - Missing, raw, malformed, invalid-routing, or tenant-mismatched context is rejected before admission state or the supplied callback is reached.
 - Tenant and placement limits are enforced independently, and another tenant or placement can proceed when its own capacity remains.
 - Tenant and placement saturation have distinct stable classifications and do not disclose identifiers.
@@ -213,7 +335,7 @@ remain separately authorized follow-up work.
 - The prior dynamic repository is restored after return or failure, and spawned work inherits no repository selection.
 - Missing runtime components fail closed with a non-disclosing retryable-dependency result.
 - Repository, placement, per-tenant, and per-placement configuration is explicit; there is no production database or capacity default.
-- All nine persistent platform resources are tenant-owned, contract-valid, and registered in the always-authorized actor-required domain. Only `Role.rename_role` exposes an action, and it is private.
+- All fifteen persistent platform resources are tenant-owned, contract-valid, and registered in the always-authorized actor-required domain. Module entitlement is action-closed, and module activation exposes only its private governed initial-activation action.
 - Direct and transitive capability grants resolve on the current writer and remain valid after a role rename.
 - Missing membership, missing grant, malformed capability, raw or mismatched context, stale routing, and unavailable runtime fail closed without disclosing graph contents.
 - Compound tenant foreign keys reject cross-tenant assignment, grant, and inclusion through alternate SQL writes.
@@ -223,13 +345,35 @@ remain separately authorized follow-up work.
 - Exact and concurrent retries return the same committed result without duplicate facts; changed input or actor returns an idempotency conflict, and the same key is isolated between tenants.
 - Unauthorized, stale-version, duplicate-name, cross-tenant, malformed-input, and raw-context requests fail with stable non-disclosing errors and leave no facts.
 - A database failure after outbox insertion rolls back role state, audit, outbox, and idempotency together, after which the same request can succeed.
+- Role assignment requires the code-known capability, validated tenant context, existing tenant-qualified membership and role, an idempotency key, and a causation identifier.
+- A successful assignment creates one version-1 edge and atomically records one creation audit fact, one minimal outbox fact, and one action-neutral completed idempotency result.
+- Exact and concurrent assignment retries return the same result without duplicate edges or facts; changed input or actor conflicts, a different key for the same edge conflicts, and the same key remains tenant-isolated.
+- Unauthorized, cross-tenant, malformed-input, and raw-context assignment requests fail with stable non-disclosing errors and leave no action facts.
+- Alternate SQL cannot create a cross-tenant assignment or a non-positive assignment version.
+- A database failure after assignment outbox insertion rolls back the edge, audit, outbox, and idempotency together, after which the same request succeeds.
+- Temporal publication and correction require distinct code-known capabilities, validated tenant context, bounded normalized segments, stable reason, idempotency and causation identifiers, and the exact expected current revision for correction.
+- Publication and correction generate immutable operation, revision, and segment identities on the writer; writer time, the current selector, audit, outbox, and exact completed result commit or roll back together.
+- Exact and concurrent temporal retries return the same complete result without duplicate state or evidence; changed request or actor conflicts, tenant keys remain isolated, and racing different corrections against one expected revision cannot branch.
+- Missing capability/context, cross-tenant references, history-disclosure attempts, unknown input, invalid/overlapping intervals, and alternate physical writes fail closed without surviving action evidence.
+- Named current/effective reads require current-read capability, exact/history reads require history capability, history is bounded with explicit truncation, and recorded-time reads fail explicitly after authorization.
+- T1-B adds no reversal action, retention/hold/erasure action, consumer, import, recovery, public interface, UI connection, common temporal library, or school module, and does not mark TR-01 through TR-07 complete.
+- The trusted release manifest rejects duplicate, missing-dependency, cyclic, malformed-key, and malformed-version declarations and cannot arrive through action input.
+- Module release, tenant entitlement, compatible activation, active dependencies, and actor capability are required independently; activation grants no capability.
+- Initial activation requires trusted context, the code-owned management capability, entitlement, dependency compatibility, lifecycle version zero, idempotency, and causation, while accepting no caller-selected tenant, placement, repository, release, gate, actor, or Ash option.
+- Exact and concurrent activation retries return one committed result; changed input or actor conflicts, the same key is tenant-isolated, and a different key cannot duplicate an active module.
+- Activation, minimized audit, transactional outbox, and completed idempotency evidence commit or roll back together; post-outbox failure leaves no facts and the same request can retry safely.
+- Compound tenant foreign keys and database checks reject cross-tenant entitlements, malformed keys or versions, inactive state, and non-positive lifecycle versions through alternate writes.
+- Slice 1H-A adds no entitlement-management API, deactivation, drain, queue or consumer lifecycle, retained-data action, reactivation, public invocation, browser connection, provisioning resource, or school module.
 - The reviewed migration applies, rolls back, reapplies, and passes generated migration and snapshot drift checks.
-- `make check` and the Phase 0 exit review pass.
+- Complete repository acceptance still requires `make check` and the Phase 0 exit review to pass;
+  the current run stops on stale UI-1A dependency/security and clean-checkout evidence.
 
 ## Rollback and next gate
 
 Slice 1A can be removed by deleting the root umbrella files, `apps/chimwemwe_core`, and its Phase 1 documentation and validator allowance while retaining all Phase 0 evidence. The execution-context, explicit-ownership, and named-action concepts survive an Ash fallback because they depend on platform trust semantics rather than an Ash resource.
 
-Slice 1E can be rolled back by removing the repository runtime, AshPostgres dependency, migration baseline, and its tests while retaining the framework-neutral context and admission contracts from 1A-1D. Slice 1F can be rolled back before retained production data by removing its closed resources, resolver, migration/snapshots, and tests. The first Slice 1G increment can likewise be rolled back only while its role changes and evidence tables contain no retained data. Once authority rows or action facts exist outside synthetic development, rollback must use forward repair or an approved recovery point rather than dropping or rewinding authority state.
+Slice 1E can be rolled back by removing the repository runtime, AshPostgres dependency, migration baseline, and its tests while retaining the framework-neutral context and admission contracts from 1A-1D. Slice 1F can be rolled back before retained production data by removing its closed resources, resolver, migration/snapshots, and tests. Slice 1G-A and 1G-B can likewise be rolled back only while their role changes, assignments, and evidence tables contain no retained data. Once authority rows or action facts exist outside synthetic development, rollback must use forward repair or an approved recovery point rather than dropping or rewinding authority state.
 
-The role-rename increment proves the first safe-write contract; it does not authorize assignment, grant, composition, revoke, public write invocation, outbox dispatch, retention deletion, provisioning, or another module. Those require the next explicitly bounded plan and corresponding recovery and negative evidence. The Phase 0 descriptor artifact, report registry, and governed experience-metadata implementation remain disposable evidence and are not production APIs. Do not add a school business module until an explicit module slice is authorized.
+Slice 1H-A can roll back only while entitlement, activation, and associated audit, outbox, and idempotency facts are absent. The migration enforces that boundary. Once any such fact is retained, lifecycle removal requires forward repair or an approved recovery point; dropping the tables is prohibited.
+
+The role-rename, role-assignment, temporal-revision, and initial module-activation increments prove bounded resource-specific contracts. They do not authorize membership or role creation, capability grant, composition, revoke, public write invocation, outbox dispatch, retention deletion, provisioning, deactivation, reactivation, or a school module. Slice 1H-B is the next lifecycle gate and requires separate authorization plus drain, retained-data, concurrency, and recovery evidence. The Phase 0 descriptor artifact, report registry, and governed experience-metadata implementation remain disposable evidence and are not production APIs. Do not add a school business module until an explicit module slice is authorized.

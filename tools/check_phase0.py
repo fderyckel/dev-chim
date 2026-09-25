@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import re
 import sys
 from datetime import date
@@ -361,7 +362,7 @@ def file_sha256(path: Path) -> str:
 
 
 def ash_upgrade_document_errors(evidence: Any, root: Path) -> list[str]:
-    """Validate the governed non-patch upgrade evidence and current artifact links."""
+    """Validate the governed historical non-patch upgrade evidence."""
     prefix = "ash non-patch upgrade evidence"
     expected_top_level = {
         "schema_version",
@@ -499,7 +500,6 @@ def ash_upgrade_document_errors(evidence: Any, root: Path) -> list[str]:
     if not isinstance(artifacts, dict) or set(artifacts) != expected_artifacts:
         errors.append(f"{prefix}: artifact comparison is incomplete")
     else:
-        valid_artifacts: set[str] = set()
         for name, comparison in artifacts.items():
             if (
                 not isinstance(comparison, dict)
@@ -509,21 +509,6 @@ def ash_upgrade_document_errors(evidence: Any, root: Path) -> list[str]:
                 or not SHA256_PATTERN.fullmatch(comparison["candidate"])
             ):
                 errors.append(f"{prefix}: {name} did not remain byte-stable")
-            else:
-                valid_artifacts.add(name)
-
-        current_artifacts = {
-            "openapi_sha256": root / "spikes/ash-foundation-lab/priv/openapi/phase0-v1.json",
-            "resource_descriptor_sha256": root
-            / "spikes/ash-foundation-lab/priv/resource_descriptors/foundation-record.v1.json",
-        }
-        for name, path in current_artifacts.items():
-            if (
-                name in valid_artifacts
-                and path.exists()
-                and artifacts[name]["candidate"] != file_sha256(path)
-            ):
-                errors.append(f"{prefix}: {name} no longer matches the checked artifact")
 
     warnings = evidence["warnings"]
     if (
@@ -1771,8 +1756,13 @@ def tenant_fairness_measurement_errors(root: Path) -> list[str]:
     return tenant_fairness_measurement_document_errors(evidence, recommendation, baseline, root)
 
 
-def phase0_followup_evidence_errors(root: Path) -> list[str]:
+def phase0_followup_evidence_errors(
+    root: Path, *, skip_clean_checkout: bool | None = None
+) -> list[str]:
     """Validate accepted targets, follow-ups, and the withdrawn AWS estimate."""
+    if skip_clean_checkout is None:
+        skip_clean_checkout = os.environ.get("CHIMWEMWE_CLEAN_CHECKOUT_REHEARSAL") == "1"
+
     maintenance = root / "spikes/ash-foundation-lab/priv/maintenance"
     paths = {
         "recommendation": maintenance / "quality-target-recommendation.json",
@@ -1879,20 +1869,42 @@ def phase0_followup_evidence_errors(root: Path) -> list[str]:
     core_lock = root / "mix.lock"
     spike_versions = locked_hex_versions(root)
     core_versions = locked_hex_versions_from_path(core_lock)
+    generated_artifacts = security.get("generated_artifacts", {})
+    expected_generated_artifacts = {
+        "openapi_sha256": root / "spikes/ash-foundation-lab/priv/openapi/phase0-v1.json",
+        "typescript_schema_sha256": root
+        / "spikes/ash-foundation-lab/typescript-client-review/generated/schema.d.ts",
+        "resource_descriptor_sha256": root
+        / "spikes/ash-foundation-lab/priv/resource_descriptors/foundation-record.v1.json",
+    }
+    generated_artifacts_current = all(
+        path.is_file() and generated_artifacts.get(name) == file_sha256(path)
+        for name, path in expected_generated_artifacts.items()
+    )
     if (
         security.get("status") != "phase0_security_patch_verified"
-        or security.get("advisory", {}).get("fixed_version") != "3.33.4"
-        or spike_versions.get("ash") != "3.33.4"
-        or core_versions.get("ash") != "3.33.4"
+        or security.get("advisory", {}).get("id") != "EEF-CVE-2026-93477"
+        or security.get("advisory", {}).get("fixed_version") != "3.33.11"
+        or security.get("previous_advisory", {}).get("id") != "EEF-CVE-2026-86338"
+        or security.get("previous_advisory", {}).get("fixed_version") != "3.33.4"
+        or spike_versions.get("ash") != "3.33.11"
+        or core_versions.get("ash") != "3.33.11"
         or security.get("upgrade", {}).get("foundation_lab_lock_sha256") != file_sha256(spike_lock)
         or security.get("upgrade", {}).get("production_core_lock_sha256") != file_sha256(core_lock)
+        or security.get("regression", {}).get("test")
+        != "spikes/ash-foundation-lab/test/ash_foundation_lab/bulk_private_argument_regression_test.exs"
         or security.get("regression", {}).get("result") != "pass"
+        or not generated_artifacts_current
+        or generated_artifacts.get("openapi_removed_filter_properties")
+        != ["range_adjacent", "range_contains", "range_overlaps"]
+        or generated_artifacts.get("openapi_added_filter_properties") != []
+        or generated_artifacts.get("public_paths_changed") is not False
         or security.get("verification", {}).get("make_check") != "pass"
     ):
         errors.append("Ash security-patch evidence is stale or incomplete")
 
     clean_path = maintenance / "clean-checkout-rehearsal.json"
-    if clean_path.exists():
+    if clean_path.exists() and not skip_clean_checkout:
         try:
             clean = json.loads(clean_path.read_text(encoding="utf-8"))
         except json.JSONDecodeError as error:
@@ -1970,7 +1982,12 @@ def validate_repository(root: Path, *, exit_review: bool = False) -> list[str]:
     )
     if tenant_fairness_measurement.exists():
         errors.extend(tenant_fairness_measurement_errors(root))
-    errors.extend(phase0_followup_evidence_errors(root))
+    errors.extend(
+        phase0_followup_evidence_errors(
+            root,
+            skip_clean_checkout=os.environ.get("CHIMWEMWE_CLEAN_CHECKOUT_REHEARSAL") == "1",
+        )
+    )
     retained_data_measurement = (
         root / "spikes/ash-foundation-lab/priv/maintenance/retained-data-migration-measurement.json"
     )

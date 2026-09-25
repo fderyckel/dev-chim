@@ -46,12 +46,15 @@ def run(
     return completed
 
 
-def run_streamed(command: list[str], *, cwd: Path) -> tuple[int, str, float]:
+def run_streamed(
+    command: list[str], *, cwd: Path, env: dict[str, str] | None = None
+) -> tuple[int, str, float]:
     """Stream a long verification command while retaining a bounded summary source."""
     started = time.perf_counter()
     process = subprocess.Popen(
         command,
         cwd=cwd,
+        env=env,
         stderr=subprocess.STDOUT,
         stdout=subprocess.PIPE,
         text=True,
@@ -179,7 +182,11 @@ def rehearse() -> dict[str, Any]:
             raise RehearsalError("bootstrap modified tracked or untracked source files")
 
         print("clean-checkout: running complete make check", flush=True)
-        check_code, check_output, check_seconds = run_streamed(["make", "check"], cwd=checkout)
+        check_environment = os.environ.copy()
+        check_environment["CHIMWEMWE_CLEAN_CHECKOUT_REHEARSAL"] = "1"
+        check_code, check_output, check_seconds = run_streamed(
+            ["make", "check"], cwd=checkout, env=check_environment
+        )
         clean_after_check = not run(["git", "status", "--porcelain"], cwd=checkout).stdout
         if check_code != 0:
             raise RehearsalError(

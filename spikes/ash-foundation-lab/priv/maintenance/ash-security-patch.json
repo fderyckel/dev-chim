@@ -2,8 +2,18 @@
   "schema_version": 1,
   "status": "phase0_security_patch_verified",
   "owner": "Platform engineering",
-  "reviewed_on": "2026-09-16",
+  "reviewed_on": "2026-09-25",
   "advisory": {
+    "id": "EEF-CVE-2026-93477",
+    "alias": "CVE-2026-93477",
+    "github_alias": "GHSA-c2p4-p7q6-hr2j",
+    "affected": "Ash >= 2.17.15 and < 3.33.11",
+    "fixed_version": "3.33.11",
+    "surface": "private action arguments accepted from user parameters on bulk update and bulk destroy paths",
+    "osv_url": "https://osv.dev/vulnerability/EEF-CVE-2026-93477",
+    "fix_commit": "https://github.com/ash-project/ash/commit/6b7ac53a0a2532291eb940d7beaf0fbb2da6fc4f"
+  },
+  "previous_advisory": {
     "id": "EEF-CVE-2026-86338",
     "alias": "CVE-2026-86338",
     "affected": "Ash >= 2.11.0-rc.0 and < 3.33.4",
@@ -14,45 +24,59 @@
   },
   "upgrade": {
     "ash": {
-      "baseline": "3.33.3",
-      "candidate": "3.33.4"
+      "baseline": "3.33.4",
+      "candidate": "3.33.11"
     },
     "transitive": {
-      "reactor": {
-        "baseline": "1.0.6",
-        "candidate": "1.0.7"
-      },
-      "spark": {
-        "baseline": "2.7.2",
-        "candidate": "2.7.3"
+      "multigraph": {
+        "baseline": "0.16.1-mg.4",
+        "candidate": "0.16.1-mg.5"
       }
     },
-    "foundation_lab_lock_sha256": "fa0bcda4d29c3bf01a063e4ec49da854c59fa3814e7fabaca34de73eabcf2e64",
-    "production_core_lock_sha256": "f100c5b5349bd65aba5ac4b4762fe429e554bbdc77349bcfbb56a1c00ca6962c",
+    "foundation_lab_lock_sha256": "c3b62f00284f31948bf0717d2f8c083b0fa4e3b706ddfae4c233edb033b04eb7",
+    "production_core_lock_sha256": "f9f70395bd250c982e36c9899487fe437026cc5dc19dac50b99a8ad30672d3dc",
     "locks_aligned": true
   },
   "regression": {
-    "test": "spikes/ash-foundation-lab/test/ash_foundation_lab/field_policy_calculation_regression_test.exs",
-    "support_resource": "spikes/ash-foundation-lab/test/support/field_policy_calculation_regression_resource.ex",
-    "forbidden_filter_returns_records": 0,
-    "authorized_filter_returns_records": 1,
+    "test": "spikes/ash-foundation-lab/test/ash_foundation_lab/bulk_private_argument_regression_test.exs",
+    "support_resource": "spikes/ash-foundation-lab/test/support/bulk_private_argument_regression_resource.ex",
+    "vulnerable_baseline": "1/3 passed; both attacker-controlled bulk cases failed",
+    "candidate": "3/3 passed",
+    "bulk_update_user_private_argument_applied": false,
+    "bulk_destroy_user_private_argument_applied": false,
+    "trusted_private_argument_applied": true,
     "result": "pass"
   },
   "warning_review": {
-    "baseline_groups": 39,
+    "baseline_groups": 38,
     "candidate_groups": 38,
     "added_groups": 0,
-    "removed_groups": 1,
-    "removed": "Spark Kernel.ParallelCompiler.async/1 deprecation",
+    "removed_groups": 0,
+    "moved_locations": 4,
     "baseline_sha256": "547a902d5649bc5692de2e7433407478c99467448d12fcd472e274f114abd0d3",
+    "candidate_sha256": "e17cb4f3435ac29d4af5082fb54e3e341bce0da73fe6c6b0f84f3f9456fad99e",
     "zero_unreviewed_delta": true
+  },
+  "generated_artifacts": {
+    "openapi_sha256": "d208c24027c3bf0f14ad6f8b7da23d89ece4ba19e502b21ede1c2bbf2d2d5dd7",
+    "typescript_schema_sha256": "55f0b4c583998b098c6290a40568fd9f6a06c567cbf50206df690deeba3eab36",
+    "resource_descriptor_sha256": "88890d1fa5ae6a48b0176132f6542486ec9e92505bc338a6f55f7358741a236f",
+    "openapi_removed_filter_properties": [
+      "range_adjacent",
+      "range_contains",
+      "range_overlaps"
+    ],
+    "openapi_added_filter_properties": [],
+    "public_paths_changed": false
   },
   "verification": {
     "make_check": "pass",
-    "repository_tool_tests": 22,
-    "phase0_elixir_postgresql_tests": 103,
+    "focused_security_regression_tests": 3,
+    "repository_tool_tests": 24,
+    "phase0_elixir_postgresql_tests": 106,
     "typescript_client_tests": 6,
-    "production_core_tests": 43,
+    "production_core_tests": 97,
+    "web_unit_tests": 20,
     "phase0_hex_audit": "pass",
     "production_core_hex_audit": "pass",
     "phase0_dialyzer": "pass_zero_skipped",
@@ -62,8 +86,9 @@
     "resource_descriptor_drift": "pass"
   },
   "limits": [
-    "The focused regression covers the advisory's forbidden-calculation filter oracle; the upstream patch also covers aggregates.",
-    "The Foundation Lab and provisional core remain subject to the broader Ash adoption decision and bounded conditions.",
+    "The focused regression covers user-supplied private arguments on both affected bulk paths and trusted server-side private arguments on bulk update.",
+    "The prior field-policy advisory and its focused regression remain in repository history and the complete suite.",
+    "The Foundation Lab and production core remain subject to the broader Ash adoption decision and bounded conditions.",
     "Advisory freshness is time-dependent and remains enforced by both Hex audit gates."
   ]
 }

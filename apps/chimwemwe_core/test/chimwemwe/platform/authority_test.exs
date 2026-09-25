@@ -180,10 +180,10 @@ defmodule Chimwemwe.Platform.AuthorityTest do
              end)
   end
 
-  test "authority resources are tenant-owned and only role rename has an action" do
+  test "authority resources are tenant-owned and expose only governed private actions" do
     assert :ok = ResourceContract.validate_domain(Platform)
 
-    assert 9 == length(Ash.Domain.Info.resources(Platform))
+    assert 15 == length(Ash.Domain.Info.resources(Platform))
 
     for resource <- Ash.Domain.Info.resources(Platform) do
       assert :tenant_owned == resource.__chimwemwe_resource_ownership__()
@@ -193,13 +193,45 @@ defmodule Chimwemwe.Platform.AuthorityTest do
     assert role_action.type == :action
     refute role_action.public?
 
+    assignment_action =
+      ResourceInfo.action(
+        Chimwemwe.Platform.Authority.ActorRoleAssignment,
+        :assign_role
+      )
+
+    assert assignment_action.type == :action
+    refute assignment_action.public?
+
+    temporal_actions =
+      ResourceInfo.actions(Chimwemwe.Platform.TemporalQualification.Aggregate)
+
+    assert Enum.map(temporal_actions, & &1.name) == [:publish_revision, :correct_revision]
+    assert Enum.all?(temporal_actions, &(not &1.public?))
+
+    activation_action =
+      ResourceInfo.action(
+        Chimwemwe.Platform.ModuleLifecycle.ModuleActivation,
+        :activate_module
+      )
+
+    assert activation_action.type == :action
+    refute activation_action.public?
+
     for resource <-
-          Ash.Domain.Info.resources(Platform) -- [Chimwemwe.Platform.Authority.Role] do
+          Ash.Domain.Info.resources(Platform) --
+            [
+              Chimwemwe.Platform.Authority.Role,
+              Chimwemwe.Platform.Authority.ActorRoleAssignment,
+              Chimwemwe.Platform.Authority.Membership,
+              Chimwemwe.Platform.TemporalQualification.Aggregate,
+              Chimwemwe.Platform.ModuleLifecycle.ModuleActivation
+            ] do
       assert [] == ResourceInfo.actions(resource)
     end
 
     assert Code.ensure_loaded?(Authority)
     assert function_exported?(Authority, :rename_role, 3)
+    assert function_exported?(Authority, :assign_role, 3)
     refute function_exported?(Authority, :assign_role, 4)
     refute function_exported?(Authority, :grant_capability, 4)
     refute function_exported?(Authority, :include_role, 4)

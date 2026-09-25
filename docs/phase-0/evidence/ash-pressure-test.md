@@ -10,13 +10,13 @@
 - Host: Apple silicon macOS 26.6.2
 - Project runtimes: Erlang/OTP 29.0.5, Elixir 1.20.3, Python 3.14.5, uv 0.12.13, Node.js 24.15.0
 - Services: PostgreSQL 18.6 over the local Unix socket
-- Framework packages: Ash 3.33.4, AshPostgres 2.13.1, AshJsonApi 1.7.1, OpenApiSpex 3.22.4, Phoenix 1.8.13, openapi-typescript 7.13.0, openapi-fetch 0.17.0, TypeScript 5.9.3, Vitest 5.0.0
+- Framework packages: Ash 3.33.11, AshPostgres 2.13.1, AshJsonApi 1.7.1, OpenApiSpex 3.22.4, Phoenix 1.8.13, openapi-typescript 7.13.0, openapi-fetch 0.17.0, TypeScript 5.9.3, Vitest 5.0.0
 - Commands: `make bootstrap`, `make format`, `make check`, and `mix dialyzer`
 - Results: 22 repository-tool tests passed; 96 Ash/PostgreSQL/JSON:API/migration-review/routing/lifecycle/role-graph/idempotency/error-contract/retained-data/measurement/maintenance/authoring tests passed; 6 TypeScript client behaviour tests passed; 34 provisional production-core tests passed; Ruff, ShellCheck, documentation, target/disposition, capacity/recovery/fairness, and upgrade-evidence validation, generated-migration, descriptor, OpenAPI, TypeScript-declaration, source-bound measurement, and dependency-warning drift detection, TypeScript compilation, Credo, dependency audits, Dialyzer, formatting, migrations, and Git whitespace checks passed.
 
 The tests currently prove attribute-based tenant filtering, cross-tenant denial without an existence signal, actor and tenant fail-closed behaviour, capability denial, field and relationship policies, tenant-defined role composition and rename independence, direct/indirect/concurrent cycle rejection, governed role administration, named transitions, optimistic-lock conflicts, transactional exact-retry idempotency and changed-reuse conflict, compound tenant foreign keys, atomic state/audit/outbox/idempotency rollback, minimal event payloads, database constraints against alternate unsafe writes, generated JSON:API preservation of the action and policy boundary, versioned routes, bounded tenant-safe keyset pagination, the complete proposed public error taxonomy with transient retry guidance and internal non-disclosure, checked-in OpenAPI and generated-TypeScript drift detection, typed client calls without implicit write retries, tenant-safe telemetry, trusted pooled/dedicated routing, independent module gates with serialized deactivation, drain, retained data, mandatory work, and compatible reactivation, plus a disposable retained-data expand/backfill/validate/contract rehearsal.
 
-Dependency compilation emits 38 normalized warning groups across the current locked third-party graph under Elixir 1.20/OTP 29. None originates in the spike modules. The checked [warning baseline](ash-dependency-warning-baseline.md) records ownership and locations and fails on any added or removed group; maintained application code still compiles with warnings as errors. The [Ash 3.33.4 security-patch review](ash-security-patch.md) records the reviewed reduction from 39 groups and the focused field-policy regression.
+Dependency compilation emits 38 normalized warning groups across the current locked third-party graph under Elixir 1.20/OTP 29. None originates in the spike modules. The checked [warning baseline](ash-dependency-warning-baseline.md) records ownership and locations and fails on any added or removed group; maintained application code still compiles with warnings as errors. The [Ash security-patch reviews](ash-security-patch.md) record the earlier reduction from 39 groups, the current zero-group patch delta, and focused regressions for both recorded advisories.
 
 ## Named-action and tenant-role slice
 
@@ -31,7 +31,7 @@ Dependency compilation emits 38 normalized warning groups across the current loc
 
 The access model stores tenant-owned actors, roles, capabilities, actor-role assignments, role-capability assignments, and recursive role inclusions. Role names are data: a test renames a composed role and retains the same capability without a code change. Compound foreign keys reject cross-tenant assignments.
 
-The named update uses Ash validation plus optimistic locking inside the data-layer transaction. Ash 3.33.4/AshPostgres 2.13.1 cannot compile the custom validation error into a fully atomic SQL expression, so the spike explicitly uses `require_atomic? false`. Concurrency still fails closed through the lock-version predicate, but the atomic-expression limitation remains framework-fit evidence for the final scorecard.
+The named update uses Ash validation plus optimistic locking inside the data-layer transaction. Ash 3.33.11/AshPostgres 2.13.1 cannot compile the custom validation error into a fully atomic SQL expression, so the spike explicitly uses `require_atomic? false`. Concurrency still fails closed through the lock-version predicate, but the atomic-expression limitation remains framework-fit evidence for the final scorecard.
 
 ## Authorization graph integrity and policy-matrix slice
 
@@ -194,7 +194,7 @@ The tail and lock evidence prevents an unqualified pass. Primary batch p99 was 3
 - Date: 2026-09-13
 - Detailed report: [Ash dependency upgrade exercise](ash-upgrade-exercise.md)
 - Previous patch set: Ash 3.33.2, AshPostgres 2.13.0, AshJsonApi 1.7.0
-- Candidate/current set: Ash 3.33.4, AshPostgres 2.13.1, AshJsonApi 1.7.1
+- Candidate/current set: Ash 3.33.11, AshPostgres 2.13.1, AshJsonApi 1.7.1
 - Result: both sets compiled and passed 21 tests; the candidate required no application changes, changed only three direct lock entries, passed the dependency audit, and produced a byte-for-byte identical generated baseline migration.
 
 On 2026-09-13, the exercise used a disposable copy because the repository was then at every latest compatible release. It upgraded the preceding patch set onto the same synthetic database schema, then removed the database and temporary copy. Third-party compile warnings and the missing-tenant AshJsonApi warning remained at that point; both received the later bounded controls recorded in the detailed report.

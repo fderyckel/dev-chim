@@ -2,8 +2,8 @@ defmodule Chimwemwe.Platform.Authority.Membership do
   @moduledoc """
   Tenant-owned membership binding an authenticated actor identity to one tenant.
 
-  The resource is persistent but closed to Ash actions until Slice 1G supplies
-  named, audited, idempotent administration actions.
+  UI-1A exposes one public, capability-protected read for assignment preparation.
+  Membership mutation remains closed.
   """
 
   use Chimwemwe.Platform.Resource,
@@ -37,11 +37,21 @@ defmodule Chimwemwe.Platform.Authority.Membership do
   end
 
   actions do
+    read :assignment_candidates do
+      public? true
+      prepare build(sort: [inserted_at: :asc, id: :asc])
+    end
   end
 
   policies do
     policy always() do
-      forbid_if always()
+      forbid_unless actor_present()
+      authorize_if always()
+    end
+
+    policy action(:assignment_candidates) do
+      authorize_if {Chimwemwe.Platform.Policy.HasCapability,
+                    capability: "platform.authority.assignments.create"}
     end
   end
 

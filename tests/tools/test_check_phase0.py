@@ -61,7 +61,7 @@ def test_phase_zero_exit_scope_comes_from_decision_register(tmp_path: Path) -> N
     ]
 
 
-def test_nonpatch_upgrade_evidence_matches_current_checked_artifacts() -> None:
+def test_nonpatch_upgrade_evidence_preserves_the_historical_comparison() -> None:
     assert CHECKER.ash_upgrade_evidence_errors(ROOT) == []
 
 

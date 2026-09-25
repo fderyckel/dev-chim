@@ -54,6 +54,8 @@ See [Ash pressure-test evidence](../phase-0/evidence/ash-pressure-test.md), the 
 
 On 2026-09-16, refreshed Hex metadata reported [EEF-CVE-2026-86338](https://osv.dev/vulnerability/EEF-CVE-2026-86338) against Ash 3.33.3. The coordinated [Ash 3.33.4 security-patch review](../phase-0/evidence/ash-security-patch.md) updates the production and Foundation Lab locks, adds a focused forbidden-calculation filter regression, refreshes the warning baseline, preserves generated artifacts, and restores passing audit and complete verification gates. That patch closed the advisory blocker; the separate accountable review made the broader conditional-adoption decision.
 
+On 2026-09-25, refreshed Hex metadata reported [EEF-CVE-2026-93477](https://osv.dev/vulnerability/EEF-CVE-2026-93477) against Ash 3.33.4. The same coordinated [security-patch review](../phase-0/evidence/ash-security-patch.md) moves both locks to the first fixed release, Ash 3.33.11, and adds focused bulk update/destroy regressions proving untrusted parameters cannot set private action arguments while trusted server options still can. This patch preserves the conditional adoption boundary and does not authorize direct public exposure of generic bulk actions.
+
 ## Fallback and exit cost
 
 Fallback is Phoenix/Ecto with explicit action modules, policy services, schemas, and thin interface adapters. The code-owned ownership and named-action rules survive that replacement even though the Ash base resource and audit are removed. Select the fallback before school modules depend on Ash if any critical criterion fails or requires pervasive escape hatches.

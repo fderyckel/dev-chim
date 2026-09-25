@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help bootstrap format lint test-fast test docs-check web-dev web-check web-e2e check
+.PHONY: help bootstrap format lint test-fast test docs-check web-dev web-core-dev web-check web-e2e web-core-e2e check
 
 help:
 	@echo "bootstrap  Install and prepare local workspace dependencies"
@@ -10,8 +10,10 @@ help:
 	@echo "test       Run Python and Elixir tests"
 	@echo "docs-check Validate repository and ADR documentation"
 	@echo "web-dev    Start the local synthetic UI-0 browser workspace"
+	@echo "web-core-dev Start the local read-only UI-1A core connection"
 	@echo "web-check  Verify UI-0 formatting, styles, types, tests, and build"
 	@echo "web-e2e    Exercise the built UI-0 workspace in a real browser"
+	@echo "web-core-e2e Exercise the local UI-1A browser-to-core connection"
 	@echo "check      Run the complete local verification suite"
 
 bootstrap:
@@ -26,7 +28,7 @@ format:
 lint:
 	mise exec -- uv run ruff format --check tools tests/tools
 	mise exec -- uv run ruff check tools tests/tools
-	shellcheck .githooks/pre-push bin/bootstrap bin/phase0-check
+	shellcheck .githooks/pre-push bin/bootstrap bin/phase0-check bin/core-check bin/ui1-local bin/ui1-test-backend
 	cd spikes/ash-foundation-lab && mise exec -- mix format --check-formatted
 	cd spikes/ash-foundation-lab && mise exec -- mix ash_postgres.generate_migrations --check --migration-path priv/generated_migration_review/migrations --snapshot-path priv/generated_migration_review/resource_snapshots
 	cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix openapi.spec.json --spec AshFoundationLab.JsonApiRouter --check --pretty=true --filename priv/openapi/phase0-v1.json
@@ -40,6 +42,7 @@ lint:
 	cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm run typecheck
 	mise exec -- mix format --check-formatted
 	mise exec -- env MIX_ENV=test mix compile --warnings-as-errors
+	mise exec -- env MIX_ENV=test mix run tools/check_ui1_openapi.exs
 	cd apps/chimwemwe_core && mise exec -- mix ash_postgres.generate_migrations --check --migration-path priv/repo/migrations --snapshot-path priv/resource_snapshots
 	cd apps/chimwemwe_core && mise exec -- mix credo --strict
 	cd apps/chimwemwe_core && mise exec -- mix hex.audit
@@ -48,6 +51,7 @@ lint:
 	cd clients/web && mise exec -- npm run format:check
 	cd clients/web && mise exec -- npm run lint
 	cd clients/web && mise exec -- npm run typecheck
+	cd clients/web/openapi-client-generator && mise exec -- npm run generate:check
 
 test-fast:
 	mise exec -- env MIX_ENV=test mix ecto.create --quiet
@@ -69,13 +73,23 @@ docs-check:
 web-dev:
 	cd clients/web && CHIMWEMWE_UI0_SYNTHETIC=true mise exec -- npm run dev
 
+web-core-dev:
+	./bin/ui1-local
+
 web-check:
+	cd clients/web/openapi-client-generator && mise exec -- npm run generate:check
+	cd clients/web/openapi-client-generator && mise exec -- npm audit --audit-level=high
+	cd clients/web && mise exec -- npm audit --audit-level=high
 	cd clients/web && CHIMWEMWE_UI0_SYNTHETIC=true mise exec -- npm run check
 
 web-e2e: web-check
 	cd clients/web && CHIMWEMWE_UI0_SYNTHETIC=true mise exec -- npm run test:e2e
 
+web-core-e2e: web-check
+	cd clients/web && mise exec -- npm run test:e2e:ui1
+	cd clients/web && mise exec -- npm run test:e2e:ui1-unavailable
+
 check:
 	./bin/phase0-check
 	./bin/core-check
-	$(MAKE) web-e2e
+	$(MAKE) web-e2e web-core-e2e

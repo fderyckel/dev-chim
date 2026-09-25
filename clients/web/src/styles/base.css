@@ -22,6 +22,7 @@
   button,
   a,
   input,
+  select,
   textarea {
     outline: none;
   }
@@ -29,6 +30,7 @@
   button:focus-visible,
   a:focus-visible,
   input:focus-visible,
+  select:focus-visible,
   textarea:focus-visible,
   [tabindex]:focus-visible {
     box-shadow: var(--focus-ring);

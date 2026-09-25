@@ -9,6 +9,7 @@
 - Security tests include negative authorization and cross-tenant cases alongside positive cases.
 - Contract tests drift-check the OpenAPI-derived TypeScript declarations, compile invalid-call assertions, and exercise the thin client's request and retry behaviour without creating a production web workspace.
 - UI-0 unit and component tests exercise the synthetic view-data boundary and accessible semantics. Automated accessibility checks and real-browser tests cover landmarks, status language, keyboard navigation, and reflow at narrow, medium, and wide viewports. They are bounded engineering evidence, not WCAG certification or production-workflow validation.
+- UI-1A core, adapter, component, and real-browser tests exercise only the guarded assignment-options read. They cover local-session denial, capability denial, stale routing, cross-tenant non-disclosure, contract-shape rejection, unavailable recovery, no browser-to-core request, disabled writes, accessibility, and 320-, 768-, and 1440-pixel reflow.
 - Placement tests prove that authenticated tenant context, not request input, selects the database and every bounded non-HTTP target; stale or missing routing fails closed. Movement tests keep the source authoritative during copy, quiesce ordinary work, reconcile code-owned tenant snapshots, increment the route version only at cutover, reject every old interface envelope, and exercise rollback.
 - Module-lifecycle tests keep release availability, entitlement, activation, and actor authorization independent and cover concurrent deactivation, drain, retained data, and reactivation.
 - Migration-rehearsal tests use disposable databases to prove bounded lock failure, mixed-version compatibility, tenant-scoped batches, constraint validation, retained-data snapshots, and the explicit point after which rollback becomes destructive.
@@ -27,6 +28,7 @@ make lint
 make docs-check
 make web-check
 make web-e2e
+make web-core-e2e
 make check
 ```
 
@@ -41,6 +43,12 @@ uses Chromium at 320, 768, and 1440 CSS pixels. Tests locate controls and
 content through accessible roles, names, and visible status text rather than CSS
 selectors. `make web-dev` is the only supported local start command; it sets the
 explicit synthetic-prototype guard and serves on `http://127.0.0.1:3000`.
+
+`make web-core-e2e` verifies the generated UI-1A contract, then starts the dedicated synthetic
+core database, loopback bridge, and Next.js server. It exercises the authorized read at all
+three viewports and separately proves the browser's unavailable recovery state. Unit tests
+cover denied, retryable, and malformed-contract adapter responses. `make web-core-dev` is the
+supported human-test command for this bounded read-only connection.
 
 Use a focused `mix test path/to/test.exs` command when one file is sufficient during diagnosis. Before sharing any change, run the relevant focused checks and the complete `make check` contract; a passing fast loop is never Phase 0 or architecture evidence by itself.
 
@@ -70,6 +78,8 @@ mise exec -- env MIX_ENV=test mix test apps/chimwemwe_core/test/chimwemwe/platfo
 cd apps/chimwemwe_core && mise exec -- mix ash_postgres.generate_migrations --check --migration-path priv/repo/migrations --snapshot-path priv/resource_snapshots
 make web-check
 make web-e2e
+cd clients/web/openapi-client-generator && mise exec -- npm run generate:check
+make web-core-e2e
 ./bin/core-check
 ```
 
@@ -79,6 +89,9 @@ make web-e2e
 - Use synthetic tenant IDs and records; never copy production data.
 - UI-0 tests must use accessible roles, names, labels, and written status text; CSS classes are a styling contract, not test identifiers.
 - An unflagged UI-0 production build must fail closed. Browser tests may run only against the explicit synthetic adapter and must not imply authorization, persistence, or a working school module.
+- UI-1A tests must keep the bridge on loopback, use a server-owned synthetic session, assert
+  cross-tenant non-disclosure, and prove the generated client has no mutation method. A green
+  local bridge test is not production authentication or deployment evidence.
 - Database tests use SQL Sandbox transactions where possible.
 - Test names describe behaviour and expected denial, not implementation details.
 - Every policy change needs a permitted case, a denied case, a cross-tenant case, and a missing-context case where applicable.
@@ -91,7 +104,7 @@ make web-e2e
 - Every tenant-authority change needs direct and transitive grant positives, missing membership and grant denials, rename independence, malformed capability input, stale or mismatched context, compound cross-tenant foreign-key rejection, direct and indirect cycle rejection, unavailable writer behavior, and proof that no ungoverned mutation surface was added.
 - Every named authority write needs capability denial, malformed and missing context, cross-tenant non-disclosure, optimistic conflict, database-constraint conflict, exact and changed-request idempotency, changed-actor binding, concurrent retry, tenant-isolated keys, atomic audit/outbox/idempotency facts, injected post-fact rollback, safe retry, and proof that no generic or public write surface was added.
 - Every placement-routing change needs pooled and dedicated positive cases plus wrong-tenant, request-selected, stale-version, missing-placement, spawned-task, job-context, and relevant non-HTTP negative cases. Every movement change also needs authorization, current-version, destination-membership, quiescence, reconciliation-failure, cutover, stale-envelope, and rollback evidence.
-- Every module gate change needs independent entitlement, activation, and authorization cases; no test may infer one from another.
+- Every module gate change needs independent release, entitlement, compatible activation, dependency, and actor-authorization cases; activation must not grant capability. An initial lifecycle mutation also needs trusted-context and exact-input rejection, compound cross-tenant constraints, exact and changed replay, changed-actor binding, concurrent retry, tenant-isolated keys, atomic audit/outbox/idempotency evidence, injected rollback, and safe retry.
 - Every read-routing change needs writer-required, read-your-write, bounded-staleness, lagging-reader, unavailable-reader, and prohibited request-selected-repository cases where applicable.
 - Every generated-client change must start from the checked-in OpenAPI artifact, reject contract drift, keep tenant placement out of caller input, and prove whether write retries are explicit or automatic.
 - Every retained-data migration must separate expand, mixed-version operation, tenant-scoped bounded backfill, validation, contract, and rollback boundaries; destructive contract requires an explicit drain and recovery gate.

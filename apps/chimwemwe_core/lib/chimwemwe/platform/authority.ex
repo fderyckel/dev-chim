@@ -9,6 +9,7 @@ defmodule Chimwemwe.Platform.Authority do
   """
 
   alias Chimwemwe.Platform.{
+    ActionInvocation,
     AuthorityError,
     ExecutionContext,
     Persistence,
@@ -17,7 +18,10 @@ defmodule Chimwemwe.Platform.Authority do
 
   alias Chimwemwe.Platform.Authority.{
     ActorRoleAssignment,
+    AssignmentOption,
+    AssignmentOptions,
     AssignRoleResult,
+    Membership,
     RenameRoleResult,
     Role
   }
@@ -27,6 +31,7 @@ defmodule Chimwemwe.Platform.Authority do
   @capability_pattern ~r/^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+$/
   @maximum_capability_length 120
   @assign_input_keys [:causation_id, :idempotency_key, :membership_id, :role_id]
+  @assignment_options_contract_version 1
   @rename_input_keys [:causation_id, :expected_version, :idempotency_key, :name, :role_id]
 
   @doc "Authorizes one code-known capability against current tenant-owned authority data."
@@ -63,6 +68,15 @@ defmodule Chimwemwe.Platform.Authority do
     end)
   end
 
+  @doc "Returns capability-protected membership and role options for assignment preparation."
+  @spec assignment_options(Supervisor.supervisor(), term()) ::
+          {:ok, AssignmentOptions.t()} | {:error, term()}
+  def assignment_options(runtime, context) do
+    ExecutionContext.with_validated(context, fn validated_context ->
+      run_assignment_options(runtime, validated_context)
+    end)
+  end
+
   @doc false
   @spec actor_has_capability?(TrustedActor.t(), String.t()) :: boolean()
   def actor_has_capability?(%TrustedActor{} = actor, capability) do
@@ -76,6 +90,51 @@ defmodule Chimwemwe.Platform.Authority do
   end
 
   def actor_has_capability?(_actor, _capability), do: false
+
+  defp run_assignment_options(runtime, context) do
+    case Persistence.with_writer(runtime, context, fn -> read_assignment_options(context) end) do
+      {:ok, {:ok, %AssignmentOptions{} = options}} -> {:ok, options}
+      {:ok, {:error, error}} -> map_action_error(error)
+      {:ok, _unexpected} -> authority_error(:internal)
+      {:error, _reason} = error -> error
+    end
+  rescue
+    _error -> authority_error(:retryable_dependency)
+  catch
+    :exit, _reason -> authority_error(:retryable_dependency)
+  end
+
+  defp read_assignment_options(context) do
+    with {:ok, memberships} <-
+           ActionInvocation.read(context, Membership, :assignment_candidates),
+         {:ok, roles} <- ActionInvocation.read(context, Role, :assignment_candidates) do
+      {:ok, build_assignment_options(memberships, roles)}
+    end
+  end
+
+  defp build_assignment_options(memberships, roles) do
+    membership_options =
+      memberships
+      |> Enum.with_index(1)
+      |> Enum.map(fn {membership, index} ->
+        %AssignmentOption{
+          id: membership.id,
+          label:
+            "Synthetic membership #{index |> Integer.to_string() |> String.pad_leading(2, "0")}"
+        }
+      end)
+
+    role_options =
+      Enum.map(roles, fn role ->
+        %AssignmentOption{id: role.id, label: role.name}
+      end)
+
+    %AssignmentOptions{
+      contract_version: @assignment_options_contract_version,
+      memberships: membership_options,
+      roles: role_options
+    }
+  end
 
   defp assign_action_input(context, input) do
     action_input =

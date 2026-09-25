@@ -15,7 +15,7 @@ Each evidence note records:
 - [Ash pressure-test](ash-pressure-test.md)
 - [Ash dependency upgrade exercise](ash-upgrade-exercise.md)
 - [AshJsonApi non-patch upgrade exercise](ash-nonpatch-upgrade-exercise.md)
-- [Ash 3.33.4 security-patch review](ash-security-patch.md)
+- [Ash security-patch reviews](ash-security-patch.md)
 - [Ash dependency warning baseline](ash-dependency-warning-baseline.md)
 - [Ash test and maintenance ergonomics](ash-test-and-maintenance-ergonomics.md)
 - [Ash bounded-condition disposition](ash-bounded-condition-disposition.md)

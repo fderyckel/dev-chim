@@ -24,11 +24,11 @@
   "rehearsed_on": "2026-09-24",
   "schema_version": 1,
   "source_sha256": {
-    "Makefile": "e16ea9753f6f0ecf33217a76090c22099350ce9f8a81b3b8abcbd58ed6f08699",
-    "bin/bootstrap": "78c18c9fb3a8741a1fa5707b0ece98a742bf396de7a30ac22e7bcf36b0c8c425",
-    "bin/core-check": "f483a9d84c5d28f1b9ff1bb1a781fc1b61386c78830c1e01258f23a60ab51c64",
+    "Makefile": "81336a5c53c71c56e5abee9215788d9996e435a4b0f4f55467c3ee6708fd43a1",
+    "bin/bootstrap": "c0cdd41b0e3c08c033cd7aff92bdf63fdec29201021914abf3674cd0fa129bf3",
+    "bin/core-check": "96cdc9abd46a4899236a0232dc26186eec54cecdec693e50b6ebfcb64067572a",
     "bin/phase0-check": "81e19436529d1f7c188380bec13debea5fd0a95802306c69f49f42d75f0e6b6e",
-    "tools/rehearse_phase0_clean_checkout.py": "928e2834f2d32857589ffb1df238d1ded161a7299db4d62dc51ab8f6afb1acaf"
+    "tools/rehearse_phase0_clean_checkout.py": "7ee5f8afd710fafc5d0c67861eac4a33f507136173ab01b0dd29956a54d2afe2"
   },
   "status": "phase0_clean_checkout_rehearsal_passed",
   "verification": {

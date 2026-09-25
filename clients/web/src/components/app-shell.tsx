@@ -9,12 +9,26 @@ type AppShellProps = Readonly<{
   children: ReactNode;
 }>;
 
-const navigation = [
+const ui0Navigation = [
   { key: "home" as const, label: "Home", href: "/" },
   { key: "preview" as const, label: "UI preview", href: "/ui-preview" },
 ];
 
 export function AppShell({ activePage, context, children }: AppShellProps) {
+  const navigation =
+    context.experience === "ui1"
+      ? [
+          ui0Navigation[0],
+          {
+            key: "assignments" as const,
+            label: "Assignments",
+            href: "/authority/assignments",
+          },
+          ui0Navigation[1],
+        ]
+      : ui0Navigation;
+  const connected = context.experience === "ui1";
+
   return (
     <div className="l-app-shell">
       <a className="c-skip-link" href="#main-content">
@@ -32,7 +46,9 @@ export function AppShell({ activePage, context, children }: AppShellProps) {
 
           <div className="c-prototype-flag" role="status">
             <span className="c-prototype-flag__signal" aria-hidden="true" />
-            Local prototype · synthetic data
+            {connected
+              ? "Local core bridge · synthetic data"
+              : "Local prototype · synthetic data"}
           </div>
 
           <div className="c-account-control">
@@ -42,7 +58,9 @@ export function AppShell({ activePage, context, children }: AppShellProps) {
             <span className="c-account-control__copy">
               <span className="c-account-control__label">Example account</span>
               <span className="c-account-control__meta">
-                Controls unavailable in UI-0
+                {connected
+                  ? "Server-owned local session"
+                  : "Controls unavailable in UI-0"}
               </span>
             </span>
           </div>
@@ -80,7 +98,7 @@ export function AppShell({ activePage, context, children }: AppShellProps) {
                   aria-current={activePage === item.key ? "page" : undefined}
                 >
                   <span className="c-primary-nav__icon" aria-hidden="true">
-                    {item.key === "home" ? "⌂" : "◫"}
+                    {item.key === "home" ? "⌂" : item.key === "assignments" ? "◇" : "◫"}
                   </span>
                   {item.label}
                 </Link>
@@ -104,8 +122,9 @@ export function AppShell({ activePage, context, children }: AppShellProps) {
 
       <footer className="c-product-footer">
         <p className="c-product-footer__copy">
-          UI-0 local experience foundation · synthetic fixtures only · no writes,
-          authentication, storage, or server connection
+          {connected
+            ? "UI-1A local qualification · synthetic server-owned context · read-only core connection · no writes or production authentication"
+            : "UI-0 local experience foundation · synthetic fixtures only · no writes, authentication, storage, or server connection"}
         </p>
       </footer>
     </div>

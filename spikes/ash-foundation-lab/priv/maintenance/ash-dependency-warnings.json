@@ -2,7 +2,7 @@
   "schema_version": 1,
   "status": "phase0_evidence",
   "owner": "Platform engineering",
-  "reviewed_on": "2026-09-15",
+  "reviewed_on": "2026-09-25",
   "scope": {
     "command": [
       "mix",
@@ -10,7 +10,7 @@
       "--force"
     ],
     "packages": {
-      "ash": "3.33.4",
+      "ash": "3.33.11",
       "ash_json_api": "1.7.1",
       "ash_postgres": "2.13.1",
       "ash_sql": "0.7.3",
@@ -31,7 +31,7 @@
       "jason": "1.4.5",
       "json_xema": "0.6.5",
       "mime": "2.0.7",
-      "multigraph": "0.16.1-mg.4",
+      "multigraph": "0.16.1-mg.5",
       "open_api_spex": "3.22.4",
       "phoenix": "1.8.13",
       "phoenix_pubsub": "2.3.0",
@@ -52,7 +52,7 @@
       "yaml_elixir": "2.12.2",
       "ymlr": "5.1.6"
     },
-    "mix_lock_sha256": "fa0bcda4d29c3bf01a063e4ec49da854c59fa3814e7fabaca34de73eabcf2e64",
+    "mix_lock_sha256": "c3b62f00284f31948bf0717d2f8c083b0fa4e3b706ddfae4c233edb033b04eb7",
     "toolchain": {
       "elixir": "1.20.3",
       "otp": "29"
@@ -93,7 +93,7 @@
       "locations": [
         {
           "path": "lib/ash/actions/read/read.ex",
-          "line": 2832,
+          "line": 2838,
           "subject": "Ash.Actions.Read.for_read/5"
         }
       ]
@@ -104,7 +104,7 @@
       "locations": [
         {
           "path": "lib/ash/actions/read/read.ex",
-          "line": 2841,
+          "line": 2847,
           "subject": "Ash.Actions.Read.for_read/5"
         }
       ]
@@ -115,7 +115,7 @@
       "locations": [
         {
           "path": "lib/ash/filter/filter.ex",
-          "line": 3512,
+          "line": 3525,
           "column": 8,
           "subject": "Ash.Filter.add_expression_part/4"
         }
@@ -346,7 +346,7 @@
       "package": "multigraph",
       "message": "the following clause is redundant:",
       "locations": [
-        {"path": "lib/multigraph.ex", "line": 2935, "column": 8, "subject": "Multigraph.include_edge_for_filtered_partitions?/4"}
+        {"path": "lib/multigraph.ex", "line": 2902, "column": 8, "subject": "Multigraph.include_edge_for_filtered_partitions?/4"}
       ]
     },
     {

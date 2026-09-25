@@ -1,0 +1,19 @@
+{
+  "name": "@chimwemwe/ui1-openapi-client-generator",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.15.0",
+    "npm": "11.12.1"
+  },
+  "packageManager": "npm@11.12.1",
+  "scripts": {
+    "generate": "openapi-typescript ../../../apps/chimwemwe_core/priv/openapi/ui1-local-v1.json --output ../src/generated/ui1/schema.d.ts --alphabetize --immutable",
+    "generate:check": "openapi-typescript ../../../apps/chimwemwe_core/priv/openapi/ui1-local-v1.json --output ../src/generated/ui1/schema.d.ts --alphabetize --immutable --check"
+  },
+  "devDependencies": {
+    "openapi-typescript": "7.13.0",
+    "typescript": "5.9.3"
+  }
+}

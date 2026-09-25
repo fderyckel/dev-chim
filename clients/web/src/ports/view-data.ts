@@ -1,6 +1,7 @@
-export type NavigationKey = "home" | "preview";
+export type NavigationKey = "home" | "assignments" | "preview";
 
 export type PrototypeContext = Readonly<{
+  experience: "ui0" | "ui1";
   tenantName: string;
   tenantKind: "synthetic";
   dateLabel: string;

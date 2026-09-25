@@ -19,6 +19,10 @@
     transform: none;
   }
 
+  .c-button:disabled {
+    cursor: not-allowed;
+  }
+
   .c-input.has-error {
     border-color: var(--color-critical-text);
     background: var(--color-critical-surface);
@@ -102,6 +106,11 @@
     .c-prototype-flag,
     .c-state-notice__symbol,
     .c-empty-state__symbol {
+      border: var(--border-width) solid currentcolor;
+    }
+
+    .c-read-boundary__mark,
+    .c-bridge-state__symbol {
       border: var(--border-width) solid currentcolor;
     }
 

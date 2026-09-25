@@ -1,7 +1,8 @@
 # Core-foundation Slice 1G role-rename evidence
 
-- Status: Focused action, migration lifecycle, and production-core verification pass; required repository-wide check blocked by an occupied UI test port
+- Status: Focused action, migration lifecycle, production-core, and complete repository verification pass
 - Date: 2026-09-24
+- Last verified: 2026-09-25
 - Owner: Platform engineering
 - Governing records: [ADR 0002](../../adr/0002-ash-adoption-criteria-and-fallback.md), [ADR 0003](../../adr/0003-tenant-model-and-optional-postgresql-rls.md), [ADR 0005](../../adr/0005-domain-action-and-state-transition-convention.md), [ADR 0007](../../adr/0007-transactional-outbox-and-event-envelope.md), [ADR 0017](../../adr/0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md), [ADR 0019](../../adr/0019-domain-model-authoring-and-governed-metadata.md), and [threat model TM-01/TM-02/TM-09/TM-10/TM-14/TM-15](../../security/threat-model.md)
 - Source basis: completed Phase 0 named-action evidence, implemented Slices 1A through 1F, and the explicitly authorized first Slice 1G increment
@@ -43,8 +44,10 @@ One PostgreSQL transaction contains:
 4. one completed `Authority.ActionIdempotency` result with opaque audit and event references.
 
 Audit, outbox, and idempotency resources are private tenant-owned manifests with no actions.
-There is no dispatcher, consumer, HTTP route, generated client, application-supervisor runtime,
-assignment, capability grant, role inclusion, revoke, provisioning, or school module.
+This increment added no dispatcher, consumer, HTTP route, generated client,
+application-supervisor runtime, assignment, capability grant, role inclusion, revoke,
+provisioning, or school module. The separately authorized Slice 1G-B role-assignment increment
+was integrated later and does not change the role-rename boundary recorded here.
 
 ## Failure and recovery contract
 
@@ -98,28 +101,30 @@ post-outbox rollback, and safe retry.
 
 ## Complete verification
 
-`./bin/core-check` passed with strict formatting, warnings-as-errors compilation, migration and
-snapshot drift, Credo, Hex audit, unused-dependency check, Dialyzer, **63 production-core tests**,
-and Git whitespace validation.
+`./bin/core-check` first passed this increment with strict formatting, warnings-as-errors
+compilation, migration and snapshot drift, Credo, Hex audit, unused-dependency check, Dialyzer,
+**63 production-core tests**, and Git whitespace validation.
 
-The required `make check` was run. Phase 0 passed 24 Python tests, 103 Elixir/PostgreSQL tests,
-six generated TypeScript client tests, dependency and warning drift, audits, Dialyzer, generated
-artifacts, documentation, and whitespace checks. The production core passed again with 63 tests.
-UI-0 formatting, lint, types, seven unit tests, and production build also passed. The final
-Playwright launcher then refused to start because a separate existing `npm run dev` process was
-already listening on its fixed `127.0.0.1:3000` test address.
+The final required `make check` passed on 2026-09-25 after the existing local UI development
+process was temporarily restarted to release its fixed test port. The complete run passed 24
+repository Python tests, 103 Phase 0 Elixir/PostgreSQL tests, six generated TypeScript client tests, 75
+production-core tests after the separately authorized role-assignment and temporal-qualification increments were integrated,
+seven UI-0 unit tests, and 12 Playwright tests across wide, medium, and narrow viewports. It also
+passed dependency and warning drift, audits, both Dialyzer suites, generated artifacts,
+documentation conventions, formatting, lint, types, the production browser build, keyboard and
+reflow checks, automated accessibility checks, and Git whitespace validation.
 
-The unchanged 12-test Playwright suite passed on an isolated temporary port across wide, medium,
-and narrow viewports, including keyboard, reflow, and automated accessibility checks. The
-temporary configuration was removed. This distinguishes the port collision from a browser
-regression, but it does not make the required `make check` green; that command must be rerun after
-port 3000 is released.
+An earlier complete run reached the same final Playwright step but could not bind
+`127.0.0.1:3000` while the development server was active. No code or test-server workaround was
+retained; the required command itself passed with its fresh production test server, after which
+the development server was restored on the same address.
 
 ## Scope and limits
 
 - This increment proves one label change; it does not complete Slice 1G.
 - Role identity and effective authority do not change when the label changes.
-- Assignment, grant, inclusion, revoke, and authority-cache invalidation remain unimplemented.
+- Role assignment is implemented by the separately authorized Slice 1G-B increment. Capability
+  grants, role inclusion, revoke, and authority-cache invalidation remain unimplemented.
 - Outbox dispatch, consumer deduplication, retention deletion, operational replay, and
   placement-movement reconciliation remain later gates.
 - The persistence runtime remains test-started with synthetic configuration and is not installed

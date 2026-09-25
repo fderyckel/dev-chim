@@ -61,7 +61,7 @@ Those observations remain historical failure evidence. The later coordinated [As
 
 During final verification, refreshed Hex metadata began reporting [EEF-CVE-2026-86338](https://osv.dev/vulnerability/EEF-CVE-2026-86338) against Ash 3.33.3. The advisory describes a field-policy information-disclosure oracle for forbidden calculations and aggregates and identifies 3.33.4 as the fixed release.
 
-Both locks now pin Ash 3.33.4. The coordinated review refreshes the warning baseline, adds a focused forbidden-calculation filter regression, preserves generated artifacts, and passes both complete verification contracts. The production domain remains resource-empty; the regression lives only in test support.
+Both locks now resolve Ash 3.33.11. The coordinated reviews refresh the warning baseline, retain the focused forbidden-calculation filter regression, add bulk-private-argument update/destroy coverage, and preserve generated artifacts. The security regressions live only in test support.
 
 ## Limits and next gate
 

@@ -84,6 +84,29 @@ This decision closes the T0 paper-decision gate and makes a neutral T1 proof eli
 
 ADR 0021 remains Proposed. Before its calendar domain may be accepted or implemented, the relevant ADR 0018 conditions must pass, a school-side records owner must review the calendar correction and retention behavior, and that module needs separate authorization.
 
+## Implementation progress
+
+The 2026-09-25 [T1-A physical-model evidence](../phase-1/evidence/temporal-qualification-physical-model.md)
+adds a closed neutral aggregate/revision/segment/fact qualification model and proves a bounded set
+of PostgreSQL identity, tenant, immutability, interval, timestamp, concurrency, and physical query
+invariants. It introduces no callable temporal action, history interface, audit/outbox contract,
+retention action, recovery proof, shared temporal library, or school module.
+
+T1-A is therefore progress toward TR-01, TR-02, TR-03, TR-04, and TR-07, not completion of any
+TR-01 through TR-07 gate. The Full Acceptance gate below is unchanged.
+
+The 2026-09-25 [T1-B revision-boundary evidence](../phase-1/evidence/temporal-qualification-revision-boundary.md)
+adds separate capability-protected publication and exact-target correction actions, immutable
+operation results with exact and concurrent replay, stable stale/concurrent conflict, atomic
+state/audit/outbox/idempotency behavior, and writer-routed current, effective, exact, bounded
+history, and explicitly unsupported recorded-time reads.
+
+This closes the executable revision branches of TR-02 through TR-05, but not those conditions as
+whole T1 gates. The append-only fact still has no governed reversal/replacement action, TR-05 has
+no downstream pin/follow/reconcile consumer, TR-06 has no retention/hold/erasure proof, and TR-07
+has no baseline import, reconciliation, backup/restore, or projection-convergence proof. TR-01
+through TR-07 therefore remain open and ADR 0018 remains Conditionally Accepted.
+
 ## Full Acceptance gate
 
 ADR 0018 may move from Conditionally Accepted to Accepted only after:

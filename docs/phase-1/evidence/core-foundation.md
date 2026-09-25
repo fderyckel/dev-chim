@@ -4,12 +4,12 @@
 - Owner: Platform engineering
 - Date: 2026-09-15
 - Source: revision `61469c9` plus the current uncommitted Phase 0 and Phase 1 work
-- Environment: Apple silicon macOS 26.6.2, Erlang/OTP 29.0.5, Elixir 1.20.3, Ash 3.33.4, PicoSAT 0.2.3, Python 3.14.5, PostgreSQL 18.6, and Node.js 24.15.0
+- Environment: Apple silicon macOS 26.6.2, Erlang/OTP 29.0.5, Elixir 1.20.3, Ash 3.33.11, PicoSAT 0.2.3, Python 3.14.5, PostgreSQL 18.6, and Node.js 24.15.0
 - Boundary: [core foundation](../../architecture/core-foundation-boundary.md)
 
 ## Implemented proof
 
-The root is now an Elixir umbrella with one production app, `chimwemwe_core`. It pins Ash 3.33.4 and PicoSAT 0.2.3 and resolves every shared dependency to the same version already present in the Phase 0 Foundation Lab lock. The coordinated [security-patch review](../../phase-0/evidence/ash-security-patch.md) supersedes the original 3.33.3 pin without importing any spike module into production.
+The root is now an Elixir umbrella with one production app, `chimwemwe_core`. It pins Ash 3.33.11 and PicoSAT 0.2.3 and resolves every shared dependency to the same version already present in the Phase 0 Foundation Lab lock. The coordinated [security-patch reviews](../../phase-0/evidence/ash-security-patch.md) supersede the original 3.33.3 pin without importing any spike module into production.
 
 The core defines:
 

@@ -274,23 +274,6 @@
             "type": "string",
             "x-struct": null,
             "x-validate": null
-          },
-          "range_adjacent": {
-            "format": "uuid",
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "range_contains": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "range_overlaps": {
-            "format": "uuid",
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
           }
         },
         "type": "object",
@@ -363,23 +346,6 @@
             "type": "string",
             "x-struct": null,
             "x-validate": null
-          },
-          "range_adjacent": {
-            "format": "uuid",
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "range_contains": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "range_overlaps": {
-            "format": "uuid",
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
           }
         },
         "type": "object",
@@ -440,21 +406,6 @@
             "x-validate": null
           },
           "not_eq": {
-            "type": "integer",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "range_adjacent": {
-            "type": "integer",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "range_contains": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "range_overlaps": {
             "type": "integer",
             "x-struct": null,
             "x-validate": null
@@ -533,21 +484,6 @@
             "x-validate": null
           },
           "not_eq": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "range_adjacent": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "range_contains": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "range_overlaps": {
             "type": "string",
             "x-struct": null,
             "x-validate": null
@@ -645,21 +581,6 @@
               "draft",
               "in_review"
             ],
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "range_adjacent": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "range_contains": {
-            "type": "string",
-            "x-struct": null,
-            "x-validate": null
-          },
-          "range_overlaps": {
             "type": "string",
             "x-struct": null,
             "x-validate": null

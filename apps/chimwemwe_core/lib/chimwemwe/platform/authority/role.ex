@@ -48,6 +48,11 @@ defmodule Chimwemwe.Platform.Authority.Role do
   end
 
   actions do
+    read :assignment_candidates do
+      public? true
+      prepare build(sort: [name: :asc, id: :asc])
+    end
+
     action :rename_role, :struct do
       public? false
       transaction? true
@@ -80,6 +85,13 @@ defmodule Chimwemwe.Platform.Authority.Role do
   end
 
   policies do
+    policy action(:assignment_candidates) do
+      forbid_unless actor_present()
+
+      authorize_if {Chimwemwe.Platform.Policy.HasCapability,
+                    capability: "platform.authority.assignments.create"}
+    end
+
     policy action(:rename_role) do
       forbid_unless actor_present()
 

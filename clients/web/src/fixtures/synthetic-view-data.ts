@@ -14,6 +14,7 @@ function assertSyntheticExperienceIsExplicitlyEnabled(): void {
 }
 
 const context: PrototypeContext = {
+  experience: "ui0",
   tenantName: "Mphamvu Learning Community",
   tenantKind: "synthetic",
   dateLabel: "Example day · 21 September 2026",

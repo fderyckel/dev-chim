@@ -1,13 +1,13 @@
 # Phase 1: core foundation
 
-- Status: Slices 1A through 1F and the first Slice 1G safe-write increment implemented and test-verified; local synthetic UI-0 implemented; representative human review pending
+- Status: Slices 1A through 1H-A and ADR 0018 T1-A/T1-B bounded increments implemented with focused and production-core tests passing; complete repository verification is currently blocked by concurrent UI-1A dependency/evidence and static-check changes; local synthetic UI-0 implemented; representative human review pending
 - Owner: Platform engineering
 - Start basis: explicit user direction on 2026-09-14, followed by the completed Phase 0 review on 2026-09-16
 - Entry basis: Ash is conditionally accepted; implementation proceeds only in explicitly authorized bounded slices and must satisfy the retained production gates
 
 ## Why this can start narrowly
 
-Phase 0 has direct evidence for named actions, tenant and capability denial, tenant-defined role composition, global authorization requirements, optimistic concurrency, transactional rollback and idempotency, generated-interface policy preservation, trusted placement input, module-gate separation, telemetry redaction, migration generation, and patch plus non-patch interface-framework upgrades. Ash 3.33.4 now closes the field-policy advisory with a focused forbidden-calculation filter regression, and the current complete verification contract passes.
+Phase 0 has direct evidence for named actions, tenant and capability denial, tenant-defined role composition, global authorization requirements, optimistic concurrency, transactional rollback and idempotency, generated-interface policy preservation, trusted placement input, module-gate separation, telemetry redaction, migration generation, and patch plus non-patch interface-framework upgrades. Ash 3.33.11 closes the recorded field-policy and bulk-private-argument advisories with focused regressions, and complete verification is being refreshed for the current combined candidate.
 
 Phase 0 now has a three-run annual-envelope retained-data migration measurement, an accepted disposition for all eight Ash bounded conditions, architect-approved numeric technical targets, a provider-neutral PostgreSQL contract, a combined local capacity/recovery run, exact full-horizon local restore, and clean-checkout rehearsal. The raw local run preserves the pooled noisy-tenant failure; the pre-checkout application-boundary candidate passes three local reruns. The accountable review accepts Ash conditionally and carries deployment, production identity, durable routing/movement, real adapter, and independent security verification into the phases where those capabilities become real. Those gates still prevent broad production scaffolding or a school business module without explicit authorization.
 
@@ -91,7 +91,7 @@ Roles are identified by immutable UUIDs and may be renamed without changing gran
 
 At Slice 1F completion all six resources exposed no Ash actions. Test fixtures used direct SQL only to prove the data constraints and resolver; that was not a production administration path. The first Slice 1G increment below replaces only that role-rename deferral. Assignment, grant, inclusion, and revoke remain closed.
 
-## Slice 1G first safe-write boundary
+## Slice 1G-A first safe-write boundary
 
 The first bounded Slice 1G increment implements one private named action,
 `Role.rename_role`, behind `Authority.rename_role/3`. It deliberately changes only a
@@ -118,6 +118,99 @@ HTTP route, dispatcher, worker, production runtime wiring, assignment/grant/comp
 or provisioning resource. This increment proves the safe-write contract; it does not complete
 all of Slice 1G.
 
+## Slice 1G-B tenant-safe role assignment
+
+Slice 1G-B adds one more private named action,
+`ActorRoleAssignment.assign_role`, behind `Authority.assign_role/3`. The action connects one
+existing tenant membership to one existing tenant-defined role; it cannot create either record
+or accept an actor, tenant, placement, repository, or Ash option from request input.
+
+The boundary requires the code-owned `platform.authority.assignments.create` capability and
+rechecks it on the authoritative writer while holding the tenant authority-write lock. It locks
+the membership and role through tenant-qualified predicates, returns the same not-found result
+for absent and cross-tenant references, and relies on compound foreign keys as the final defence
+for alternate write paths.
+
+The assignment is an immutable UUID aggregate at version 1. Its transaction creates the
+assignment, an audit fact recording aggregate version `0 -> 1`, a minimal outbox fact without a
+role label, and a completed idempotency result. Exact and concurrent retries return the original
+assignment and evidence references. Changed input or actor conflicts, while the same key remains
+independent between tenants. A different idempotency key for an existing membership-role pair is
+a stable conflict rather than a silent no-op.
+
+The idempotency manifest adds a JSON result payload as a compatible expansion. Existing
+role-rename rows and code continue using the retained name/version result columns; the migration
+does not drop or reinterpret them. Capability grants, role composition, revocation, membership
+lifecycle, dispatch, retention, public APIs, and browser integration remain outside this slice.
+
+## ADR 0018 T1-A temporal qualification boundary
+
+T1-A adds four closed, tenant-owned resources for one neutral synthetic temporal proof: stable
+aggregate identity, immutable revisions, immutable effective segments, and immutable append-only
+facts. They remain inside the existing platform domain, expose no Ash actions, and are not a
+shared temporal library or a school-domain schema.
+
+PostgreSQL assigns recorded time, preserves tenant-and-aggregate revision chains, constrains the
+current selector to its own aggregate, rejects backward selector movement, serializes overlapping
+segment races, permits the same dates in historical successor revisions, and rejects direct
+revision, segment, fact, or aggregate-identity rewrites. Fact reversals remain append-only and
+tenant-and-scope qualified.
+
+Focused tests exercise the physical exact/current/effective query shapes and negative database
+paths only. Publication/correction and reversal actions, capability-protected history reads,
+idempotency, audit/outbox atomicity, retention/legal hold/erasure, import provenance,
+backup/restore, projection convergence, and performance limits remain open. Consequently T1-A
+does not complete TR-01 or any other ADR 0018 condition. See the
+[physical-model evidence](evidence/temporal-qualification-physical-model.md).
+
+## ADR 0018 T1-B governed revision boundary
+
+T1-B opens only the revisioned half of the neutral proof. `Aggregate.publish_revision` and
+`Aggregate.correct_revision` are separate private actions reached through
+`TemporalQualification.publish_revision/3` and `correct_revision/3`. Publication creates a new
+aggregate and revision 1; correction requires the exact selected revision and creates one
+consecutive immutable successor. Both actions require distinct tenant-defined capabilities,
+recheck authority on the writer under an aggregate lock, bind exact replay to actor and canonical
+request, and commit revision state, minimized audit evidence, a transactional outbox fact, and the
+completed result together.
+
+The same boundary provides writer-routed `get_current`, `get_effective`, `get_revision`, and
+bounded `list_history` reads. Current/effective access is separate from exact/history access.
+Recorded-time queries are explicitly unsupported and fail only after trusted context and history
+capability checks. Inputs are limited to 32 normalized half-open Date segments and history to 100
+revisions; those are qualification bounds, not production sizing claims.
+
+T1-B adds no append-only fact action, retention/legal-hold/erasure action, consumer, migration
+import, recovery rehearsal, dispatcher, public API, UI connection, common temporal library, or
+school module. TR-01 through TR-07 therefore remain open as whole gates even though the revision
+branches of their action, authorization, concurrency, read, and atomic-evidence checks now have
+executable proof. See the [T1-B evidence](evidence/temporal-qualification-revision-boundary.md).
+
+## Slice 1H-A independent module gates and initial activation
+
+Slice 1H-A promotes only the neutral lifecycle contract accepted in ADR 0001. A trusted immutable
+release manifest declares stable module keys, versions, owners, and an acyclic dependency graph.
+Two closed tenant-owned resources store entitlement and active version facts. Entitlement remains
+a fact with no mutation or commercial-contract API.
+
+`ModuleLifecycle.activate/4` validates trusted context before exact action input, derives release
+and dependency state from the manifest, requires `platform.modules.activate` on the authoritative
+writer, and invokes one private named initial-activation action. Tenant-and-module serialization,
+exact replay, and one writer transaction bind the activation to minimized audit evidence, a
+transactional outbox fact, and the completed idempotency result. A database failure after outbox
+insertion rolls back every fact and permits a safe retry.
+
+`ModuleLifecycle.authorize/5` independently requires release availability, tenant entitlement, an
+active compatible version, active compatible dependencies, and the requested code-owned actor
+capability. Activation therefore grants no actor authority. Cross-tenant edges, malformed module
+keys and versions, raw or missing context, caller-selected gate state, public mutation, and generic
+CRUD remain fail closed.
+
+This slice adds no deactivation, drain, queue or consumer lifecycle, retained-data action,
+reactivation, entitlement management, provisioning, browser connection, or school module. See the
+[Slice 1H-A evidence](evidence/module-lifecycle-initial-activation.md). Slice 1H-B remains the next
+separately authorized lifecycle increment.
+
 ## UI-0 local browser boundary
 
 UI-0 implements only the local experience-validation slice authorized on 2026-09-24. It adds a separate Next.js, React, and TypeScript workspace under `clients/web` with:
@@ -132,13 +225,35 @@ UI-0 implements only the local experience-validation slice authorized on 2026-09
 
 The workspace is local evidence for ADR 0020, not the public client described by ADR 0014. Navigation and hidden or disabled controls grant no authority. The synthetic adapter cannot become a production API shim, and the production core remains unchanged. Representative school-user testing and a real authorized workflow remain later gates.
 
+## UI-1A local read-only core bridge
+
+UI-1A implements the separately authorized local qualification governed by proposed ADR 0022.
+It adds one loopback Phoenix endpoint inside the existing core and one server-rendered Next.js
+route at `/authority/assignments`. A fresh local token resolves only on the server to fixed
+synthetic trusted actor and placement values. Browser input cannot select the actor, tenant,
+capability, repository, placement, routing version, or Ash options.
+
+The endpoint exposes only `GET /api/v1/authority/assignment-options`. Both underlying named Ash
+reads require `platform.authority.assignments.create` and execute through the authoritative
+writer boundary. The minimal DTO contains opaque membership and role option IDs and labels but
+no tenant, actor, capability, repository, placement, or routing identifiers. A second synthetic
+tenant is seeded so tests can prove non-disclosure.
+
+The Next.js adapter is server-only, rejects non-loopback configuration and unexpected contract
+versions, uses a checked OpenAPI artifact and generated TypeScript declarations, and does not
+cache. The screen provides accessible selectors and an explicitly disabled save control. There
+is no POST route, mutation client, server action, browser persistence, real identity, public
+deployment, or school module. Representative human testing remains necessary before terminology
+or workflow is considered validated.
+
 ## Continuing guardrails
 
 - Phase 0 ADR outcomes and conditional gates are binding; an Accepted ADR is changed only by supersession.
 - `make check` proves repository consistency; it does not by itself approve a new production capability.
-- Only `apps/chimwemwe_core` is allowed during slices 1A through the current Slice 1G increment. A second production app or service needs explicit later-slice authorization.
-- `clients/web` is allowed only for UI-0's guarded synthetic experience; it has no authority to become a production client or connect to the core.
+- Only `apps/chimwemwe_core` is allowed during slices 1A through the current Slice 1H-A increment. A second production app or service needs explicit later-slice authorization.
+- `clients/web` is allowed for UI-0 and only UI-1A's guarded, loopback, read-only core connection;
+  it has no authority to become a production client, expose a write, or add real identity.
 - The core contains no production data or secrets and introduces no generic or public write invocation, experience-metadata engine, or public interface.
 - If a retained Ash gate fails and its explicit adapter fallback cannot preserve the platform invariants, ADR 0002 must be superseded before the affected business capability depends on it; the execution-context contract remains framework-neutral.
 
-See the [implementation plan](../plans/phase-1-core-foundation-plan.md), [UI-0 proposal](../plans/local-browser-experience-foundation-proposal.md), [core boundary](../architecture/core-foundation-boundary.md), [domain-model authoring boundary](../architecture/domain-model-authoring-and-metadata.md), [slice 1A evidence](evidence/core-foundation.md), [slice 1B evidence](evidence/resource-descriptor.md), [slice 1C evidence](evidence/action-invocation.md), [slice 1D evidence](evidence/database-admission.md), [slice 1E evidence](evidence/trusted-persistence.md), [slice 1F evidence](evidence/tenant-authority.md), [Slice 1G role-rename evidence](evidence/authority-role-rename.md), [UI-0 evidence](evidence/local-browser-experience.md), [migration discipline](../development/migrations.md), [Phase 0 status](../phase-0/README.md), and [review record](../phase-0/review-record.md).
+See the [implementation plan](../plans/phase-1-core-foundation-plan.md), [UI-0 proposal](../plans/local-browser-experience-foundation-proposal.md), [UI-1A plan](../plans/local-browser-core-bridge-plan.md), [core boundary](../architecture/core-foundation-boundary.md), [domain-model authoring boundary](../architecture/domain-model-authoring-and-metadata.md), [slice 1A evidence](evidence/core-foundation.md), [slice 1B evidence](evidence/resource-descriptor.md), [slice 1C evidence](evidence/action-invocation.md), [slice 1D evidence](evidence/database-admission.md), [slice 1E evidence](evidence/trusted-persistence.md), [slice 1F evidence](evidence/tenant-authority.md), [Slice 1G-A role-rename evidence](evidence/authority-role-rename.md), [Slice 1G-B role-assignment evidence](evidence/authority-role-assignment.md), [ADR 0018 T1-A evidence](evidence/temporal-qualification-physical-model.md), [ADR 0018 T1-B evidence](evidence/temporal-qualification-revision-boundary.md), [Slice 1H-A evidence](evidence/module-lifecycle-initial-activation.md), [UI-0 evidence](evidence/local-browser-experience.md), [UI-1A evidence](evidence/local-browser-core-bridge.md), [migration discipline](../development/migrations.md), [Phase 0 status](../phase-0/README.md), and [review record](../phase-0/review-record.md).
