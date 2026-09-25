@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+mode="format"
+
+if [[ "${1:-}" == "--check" ]]; then
+  mode="check"
+  shift
+fi
+
+if (($#)); then
+  echo "Usage: $0 [--check]" >&2
+  exit 64
+fi
+
+paths=()
+
+while IFS= read -r path || [[ -n "$path" ]]; do
+  paths+=("$path")
+done < <(git diff --cached --name-only --diff-filter=ACMR -- '*.ex' '*.exs')
+
+if ((${#paths[@]} == 0)); then
+  exit 0
+fi
+
+if [[ "$mode" == "check" ]]; then
+  mise exec -- mix format --check-formatted "${paths[@]}"
+else
+  mise exec -- mix format "${paths[@]}"
+  git add -- "${paths[@]}"
+fi

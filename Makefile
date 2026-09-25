@@ -1,11 +1,12 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help bootstrap format lint test-fast test docs-check web-dev web-core-dev web-check web-e2e web-core-e2e check
+.PHONY: help bootstrap format lint check-staged test-fast test docs-check web-dev web-core-dev web-check web-e2e web-core-e2e check
 
 help:
 	@echo "bootstrap  Install and prepare local workspace dependencies"
 	@echo "format     Format maintained source files"
 	@echo "lint       Run non-mutating static checks"
+	@echo "check-staged Run fast checks for staged Elixir changes"
 	@echo "test-fast  Run the provisional production-core tests only"
 	@echo "test       Run Python and Elixir tests"
 	@echo "docs-check Validate repository and ADR documentation"
@@ -28,7 +29,7 @@ format:
 lint:
 	mise exec -- uv run ruff format --check tools tests/tools
 	mise exec -- uv run ruff check tools tests/tools
-	shellcheck .githooks/pre-push bin/bootstrap bin/phase0-check bin/core-check bin/ui1-local bin/ui1-test-backend
+	shellcheck .githooks/pre-commit .githooks/pre-push bin/bootstrap bin/core-check bin/format-staged-elixir bin/phase0-check bin/ui1-local bin/ui1-test-backend
 	cd spikes/ash-foundation-lab && mise exec -- mix format --check-formatted
 	cd spikes/ash-foundation-lab && mise exec -- mix ash_postgres.generate_migrations --check --migration-path priv/generated_migration_review/migrations --snapshot-path priv/generated_migration_review/resource_snapshots
 	cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix openapi.spec.json --spec AshFoundationLab.JsonApiRouter --check --pretty=true --filename priv/openapi/phase0-v1.json
@@ -52,6 +53,13 @@ lint:
 	cd clients/web && mise exec -- npm run lint
 	cd clients/web && mise exec -- npm run typecheck
 	cd clients/web/openapi-client-generator && mise exec -- npm run generate:check
+
+check-staged:
+	./bin/format-staged-elixir --check
+	mise exec -- env MIX_ENV=test mix compile --warnings-as-errors
+	cd apps/chimwemwe_core && mise exec -- mix credo --strict
+	$(MAKE) test-fast
+	git diff --cached --check
 
 test-fast:
 	mise exec -- env MIX_ENV=test mix ecto.create --quiet

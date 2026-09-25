@@ -17,7 +17,15 @@ git push -u origin main
 
 Do not store tokens in remotes, `.env` files, scripts, or documentation. Prefer the GitHub CLI credential helper when GitHub is selected. For another host, use its supported credential manager or SSH setup.
 
-`make bootstrap` configures the versioned `.githooks/pre-push` hook. The hook runs `make check` before Git sends commits. Do not bypass it to publish a failing branch.
+`make bootstrap` configures the versioned Git hooks. The pre-commit hook formats staged Elixir files and stages the resulting formatting-only updates. The pre-push hook runs `make check` before Git sends commits. Do not bypass it to publish a failing branch.
+
+For a short feedback loop before committing, run:
+
+```sh
+make check-staged
+```
+
+It checks formatting of staged Elixir files, compiles with warnings as errors, runs core Credo, the fast core test suite, and checks staged whitespace. It complements, but never replaces, `make check` before a push.
 
 Before making a public repository, select an explicit license and confirm that no architecture document or evidence has incompatible distribution terms.
 
