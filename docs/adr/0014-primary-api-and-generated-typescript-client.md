@@ -72,3 +72,4 @@ Use thin REST/OpenAPI adapters over explicit domain actions. Preserve action sem
 - [ADR 0002](0002-ash-adoption-criteria-and-fallback.md)
 - [ADR 0005](0005-domain-action-and-state-transition-convention.md)
 - [ADR 0020](0020-human-interface-experience-and-client-platform-boundary.md)
+- [ADR 0023](0023-sensitive-collection-enumeration-and-bulk-export-boundary.md)

@@ -156,7 +156,15 @@ FORBIDDEN_PHASE0_DIRECTORIES = (
 PHASE1_CORE_START_RECORD = "docs/phase-1/README.md"
 PHASE1_ALLOWED_APPS = {"chimwemwe_core"}
 
-IGNORED_DIRECTORY_NAMES = {".git", ".venv", "_build", "deps", "node_modules"}
+IGNORED_DIRECTORY_NAMES = {
+    ".git",
+    ".venv",
+    "_build",
+    "deps",
+    "node_modules",
+    "playwright-report",
+    "test-results",
+}
 
 LINK_PATTERN = re.compile(r"(?<!!)\[[^]]+\]\(([^)]+)\)")
 STATUS_PATTERN = re.compile(r"^- Status: (.+)$", re.MULTILINE)

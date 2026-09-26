@@ -183,7 +183,7 @@ defmodule Chimwemwe.Platform.AuthorityTest do
   test "authority resources are tenant-owned and expose only governed private actions" do
     assert :ok = ResourceContract.validate_domain(Platform)
 
-    assert 15 == length(Ash.Domain.Info.resources(Platform))
+    assert 19 == length(Ash.Domain.Info.resources(Platform))
 
     for resource <- Ash.Domain.Info.resources(Platform) do
       assert :tenant_owned == resource.__chimwemwe_resource_ownership__()
@@ -208,6 +208,17 @@ defmodule Chimwemwe.Platform.AuthorityTest do
     assert Enum.map(temporal_actions, & &1.name) == [:publish_revision, :correct_revision]
     assert Enum.all?(temporal_actions, &(not &1.public?))
 
+    fact_actions = ResourceInfo.actions(Chimwemwe.Platform.TemporalQualification.Fact)
+
+    assert Enum.map(fact_actions, & &1.name) == [:record_entry, :reverse_and_replace]
+    assert Enum.all?(fact_actions, &(not &1.public?))
+
+    consumer_actions =
+      ResourceInfo.actions(Chimwemwe.Platform.TemporalQualification.ConsumerBasis)
+
+    assert Enum.map(consumer_actions, & &1.name) == [:pin_revision, :reconcile_revision]
+    assert Enum.all?(consumer_actions, &(not &1.public?))
+
     activation_action =
       ResourceInfo.action(
         Chimwemwe.Platform.ModuleLifecycle.ModuleActivation,
@@ -217,6 +228,15 @@ defmodule Chimwemwe.Platform.AuthorityTest do
     assert activation_action.type == :action
     refute activation_action.public?
 
+    extension_action =
+      ResourceInfo.action(
+        Chimwemwe.Platform.GovernedExtension.ExtensionDefinition,
+        :publish_definition
+      )
+
+    assert extension_action.type == :action
+    refute extension_action.public?
+
     for resource <-
           Ash.Domain.Info.resources(Platform) --
             [
@@ -224,7 +244,10 @@ defmodule Chimwemwe.Platform.AuthorityTest do
               Chimwemwe.Platform.Authority.ActorRoleAssignment,
               Chimwemwe.Platform.Authority.Membership,
               Chimwemwe.Platform.TemporalQualification.Aggregate,
-              Chimwemwe.Platform.ModuleLifecycle.ModuleActivation
+              Chimwemwe.Platform.TemporalQualification.Fact,
+              Chimwemwe.Platform.TemporalQualification.ConsumerBasis,
+              Chimwemwe.Platform.ModuleLifecycle.ModuleActivation,
+              Chimwemwe.Platform.GovernedExtension.ExtensionDefinition
             ] do
       assert [] == ResourceInfo.actions(resource)
     end

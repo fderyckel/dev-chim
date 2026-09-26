@@ -1,6 +1,6 @@
 # Slice 1H-A module-lifecycle initial activation
 
-- Status: Implemented with focused and full production-core tests passing on 2026-09-25; complete repository verification blocked by concurrent UI-1A changes
+- Status: Implemented with focused, full production-core, and complete repository verification passing on 2026-09-25
 - Owner: Platform engineering
 - Governing records: [ADR 0001](../../adr/0001-modular-monolith-and-service-boundaries.md), [ADR 0003](../../adr/0003-tenant-model-and-optional-postgresql-rls.md), [ADR 0005](../../adr/0005-domain-action-and-state-transition-convention.md), and [ADR 0007](../../adr/0007-transactional-outbox-and-event-envelope.md)
 - Scope: neutral independent gates and safe initial activation only
@@ -101,18 +101,16 @@ against the synthetic PostgreSQL test database. `make test-fast` passes all 97 p
 tests. Dependency audit, unused-dependency check, and whitespace check pass; Credo and Dialyzer
 report no Slice 1H-A finding.
 
-The required repository-wide `make check` was run and is not green. It stops in the Phase 0
-validator because concurrent UI-1A work changed `mix.lock`, `Makefile`, `bin/bootstrap`, and
-`bin/core-check` without refreshing their recorded security-patch and clean-checkout evidence.
-Independent continuation also finds formatting and Credo issues under `local_bridge` plus
-Dialyzer findings in `lib/mix/tasks/ui1.openapi.check.ex`. Those files and evidence are outside
-Slice 1H-A and were preserved rather than rewritten. Full completion therefore requires the
-UI-1A work to close its own repository checks, followed by a fresh `make check`.
+The required repository-wide `make check` passed after UI-1A and the Ash 3.33.11 security patch
+were reconciled. The run passed 25 repository-tool tests, 106 Phase 0 tests, 97 production-core
+tests, 20 browser unit tests, all 19 browser scenarios, both Hex audits, both Dialyzer analyses,
+generated-contract drift, static analysis, and whitespace checks.
 
-## Remaining gate
+## Follow-up gate
 
-Slice 1H-A proves initial activation only. Slice 1H-B must separately define and prove
-deactivation versus ordinary work, dependency-safe drain, queued and in-flight behavior,
-mandatory audit/retention/outbox work, retained-data ownership, cursor and replay handling,
-compatible reactivation, projection rebuild, and reconciliation. No school business module is
-authorized by this evidence.
+Slice 1H-A proves initial activation only. The separately authorized
+[Slice 1H-B](module-lifecycle-drain-reactivation.md) now defines and proves deactivation versus
+ordinary work, dependency-safe drain, queued and in-flight behavior, mandatory
+audit/retention/outbox work, retained-data ownership, cursor and replay handling, compatible
+reactivation, projection rebuild, and reconciliation. Neither slice authorizes a school business
+module.

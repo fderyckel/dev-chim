@@ -1,13 +1,13 @@
 # Phase 1: core foundation
 
-- Status: Slices 1A through 1H-A and ADR 0018 T1-A/T1-B bounded increments implemented with focused and production-core tests passing; complete repository verification is currently blocked by concurrent UI-1A dependency/evidence and static-check changes; local synthetic UI-0 implemented; representative human review pending
+- Status: Slices 1A through 1H-B, ADR 0018 T1-A/T1-B/T1-C, and local UI-1A implemented; local synthetic UI-0 implemented; representative human review and the remaining ADR-specific gates are pending
 - Owner: Platform engineering
 - Start basis: explicit user direction on 2026-09-14, followed by the completed Phase 0 review on 2026-09-16
 - Entry basis: Ash is conditionally accepted; implementation proceeds only in explicitly authorized bounded slices and must satisfy the retained production gates
 
 ## Why this can start narrowly
 
-Phase 0 has direct evidence for named actions, tenant and capability denial, tenant-defined role composition, global authorization requirements, optimistic concurrency, transactional rollback and idempotency, generated-interface policy preservation, trusted placement input, module-gate separation, telemetry redaction, migration generation, and patch plus non-patch interface-framework upgrades. Ash 3.33.11 closes the recorded field-policy and bulk-private-argument advisories with focused regressions, and complete verification is being refreshed for the current combined candidate.
+Phase 0 has direct evidence for named actions, tenant and capability denial, tenant-defined role composition, global authorization requirements, optimistic concurrency, transactional rollback and idempotency, generated-interface policy preservation, trusted placement input, module-gate separation, telemetry redaction, migration generation, and patch plus non-patch interface-framework upgrades. Ash 3.33.11 closes the recorded field-policy and bulk-private-argument advisories with focused regressions, and complete verification passes for the current combined candidate.
 
 Phase 0 now has a three-run annual-envelope retained-data migration measurement, an accepted disposition for all eight Ash bounded conditions, architect-approved numeric technical targets, a provider-neutral PostgreSQL contract, a combined local capacity/recovery run, exact full-horizon local restore, and clean-checkout rehearsal. The raw local run preserves the pooled noisy-tenant failure; the pre-checkout application-boundary candidate passes three local reruns. The accountable review accepts Ash conditionally and carries deployment, production identity, durable routing/movement, real adapter, and independent security verification into the phases where those capabilities become real. Those gates still prevent broad production scaffolding or a school business module without explicit authorization.
 
@@ -186,6 +186,28 @@ school module. TR-01 through TR-07 therefore remain open as whole gates even tho
 branches of their action, authorization, concurrency, read, and atomic-evidence checks now have
 executable proof. See the [T1-B evidence](evidence/temporal-qualification-revision-boundary.md).
 
+## ADR 0018 T1-C append-only fact and reconciliation boundary
+
+T1-C adds separate private actions to record one immutable fact entry and to reverse and replace
+one exact entry under a single immutable operation. Exact retries return the one- or two-fact
+result; changed request or actor conflicts; tenant-and-target serialization plus PostgreSQL
+constraints prevent duplicate or branching correction. Exact fact, exact operation, and bounded
+scope-history reads require a distinct history capability. Minimal outbox payloads exclude fact
+quantities and effective dates.
+
+One neutral `ConsumerBasis` chain proves deliberate reconciliation. Pinning records one exact
+current source revision. A later source correction does not silently change that basis.
+Reconciliation requires both the exact current consumer basis and the exact current source
+revision, appends a consecutive successor, and preserves the original basis. Pin, reconcile, and
+history use separate capabilities; an outbox event is causation evidence and never authority.
+
+The reviewed migration orders the self-reference after its compound destination index, restores
+the prior fact guard on empty rollback, refuses rollback once T1-C state is retained, and passes
+apply/rollback/reapply plus drift checks. T1-C still adds no retention, hold, erasure, import,
+backup/restore, performance qualification, dispatcher, public API, reusable temporal library, or
+school module. ADR 0018 therefore remains Conditionally Accepted. See the
+[T1-C evidence](evidence/temporal-qualification-fact-and-reconciliation.md).
+
 ## Slice 1H-A independent module gates and initial activation
 
 Slice 1H-A promotes only the neutral lifecycle contract accepted in ADR 0001. A trusted immutable
@@ -208,8 +230,34 @@ CRUD remain fail closed.
 
 This slice adds no deactivation, drain, queue or consumer lifecycle, retained-data action,
 reactivation, entitlement management, provisioning, browser connection, or school module. See the
-[Slice 1H-A evidence](evidence/module-lifecycle-initial-activation.md). Slice 1H-B remains the next
-separately authorized lifecycle increment.
+[Slice 1H-A evidence](evidence/module-lifecycle-initial-activation.md).
+
+## Slice 1H-B controlled drain and compatible reactivation
+
+Slice 1H-B completes the neutral lifecycle state contract without adding a queue runtime or a
+business module. `ModuleActivation` remains the retained aggregate after deactivation and now
+records consumer, replay, and reconciled cursors; projection generation and readiness;
+reconciliation state; lifecycle timestamps; and retained ownership. A closed tenant-qualified
+`ModuleWorkItem` resource models ordinary and mandatory work state only.
+
+`ModuleLifecycle.deactivate/4` rejects active dependents, takes the same lifecycle transaction
+lock required by ordinary mutations, closes ordinary authority, parks queued or running ordinary
+work, records the replay boundary, and marks disposable projections stale in one exact-versioned,
+idempotent transaction. Both forced mutation/deactivation lock orders have deterministic outcomes:
+the first transaction completes and the waiting transaction re-evaluates current lifecycle state.
+
+Audit, outbox, retention, legal-hold, and reconciliation work remains available through the
+separate private `complete_mandatory_work` action and capability while ordinary authority is
+closed. `ModuleLifecycle.reactivate/4` requires explicit release compatibility, entitlement, and
+active compatible dependencies; requeues parked work, records reconciliation from the saved
+cursor, advances projection generation, and reopens ordinary authority only when state, audit,
+outbox, and idempotency evidence commit together.
+
+This slice implements a queue-neutral transactional contract. It adds no Oban worker, dispatcher,
+external consumer, projection adapter, cache/search/webhook/analytics integration, entitlement or
+offboarding workflow, retained-data read/export/correction/deletion action, public mutation,
+browser connection, provisioning surface, or school module. See the
+[Slice 1H-B evidence](evidence/module-lifecycle-drain-reactivation.md).
 
 ## UI-0 local browser boundary
 
@@ -250,10 +298,10 @@ or workflow is considered validated.
 
 - Phase 0 ADR outcomes and conditional gates are binding; an Accepted ADR is changed only by supersession.
 - `make check` proves repository consistency; it does not by itself approve a new production capability.
-- Only `apps/chimwemwe_core` is allowed during slices 1A through the current Slice 1H-A increment. A second production app or service needs explicit later-slice authorization.
+- Only `apps/chimwemwe_core` is allowed during slices 1A through the current Slice 1H-B increment. A second production app or service needs explicit later-slice authorization.
 - `clients/web` is allowed for UI-0 and only UI-1A's guarded, loopback, read-only core connection;
   it has no authority to become a production client, expose a write, or add real identity.
 - The core contains no production data or secrets and introduces no generic or public write invocation, experience-metadata engine, or public interface.
 - If a retained Ash gate fails and its explicit adapter fallback cannot preserve the platform invariants, ADR 0002 must be superseded before the affected business capability depends on it; the execution-context contract remains framework-neutral.
 
-See the [implementation plan](../plans/phase-1-core-foundation-plan.md), [UI-0 proposal](../plans/local-browser-experience-foundation-proposal.md), [UI-1A plan](../plans/local-browser-core-bridge-plan.md), [core boundary](../architecture/core-foundation-boundary.md), [domain-model authoring boundary](../architecture/domain-model-authoring-and-metadata.md), [slice 1A evidence](evidence/core-foundation.md), [slice 1B evidence](evidence/resource-descriptor.md), [slice 1C evidence](evidence/action-invocation.md), [slice 1D evidence](evidence/database-admission.md), [slice 1E evidence](evidence/trusted-persistence.md), [slice 1F evidence](evidence/tenant-authority.md), [Slice 1G-A role-rename evidence](evidence/authority-role-rename.md), [Slice 1G-B role-assignment evidence](evidence/authority-role-assignment.md), [ADR 0018 T1-A evidence](evidence/temporal-qualification-physical-model.md), [ADR 0018 T1-B evidence](evidence/temporal-qualification-revision-boundary.md), [Slice 1H-A evidence](evidence/module-lifecycle-initial-activation.md), [UI-0 evidence](evidence/local-browser-experience.md), [UI-1A evidence](evidence/local-browser-core-bridge.md), [migration discipline](../development/migrations.md), [Phase 0 status](../phase-0/README.md), and [review record](../phase-0/review-record.md).
+See the [implementation plan](../plans/phase-1-core-foundation-plan.md), [UI-0 proposal](../plans/local-browser-experience-foundation-proposal.md), [UI-1A plan](../plans/local-browser-core-bridge-plan.md), [core boundary](../architecture/core-foundation-boundary.md), [domain-model authoring boundary](../architecture/domain-model-authoring-and-metadata.md), [slice 1A evidence](evidence/core-foundation.md), [slice 1B evidence](evidence/resource-descriptor.md), [slice 1C evidence](evidence/action-invocation.md), [slice 1D evidence](evidence/database-admission.md), [slice 1E evidence](evidence/trusted-persistence.md), [slice 1F evidence](evidence/tenant-authority.md), [Slice 1G-A role-rename evidence](evidence/authority-role-rename.md), [Slice 1G-B role-assignment evidence](evidence/authority-role-assignment.md), [ADR 0018 T1-A evidence](evidence/temporal-qualification-physical-model.md), [ADR 0018 T1-B evidence](evidence/temporal-qualification-revision-boundary.md), [ADR 0018 T1-C evidence](evidence/temporal-qualification-fact-and-reconciliation.md), [Slice 1H-A evidence](evidence/module-lifecycle-initial-activation.md), [Slice 1H-B evidence](evidence/module-lifecycle-drain-reactivation.md), [UI-0 evidence](evidence/local-browser-experience.md), [UI-1A evidence](evidence/local-browser-core-bridge.md), [migration discipline](../development/migrations.md), [Phase 0 status](../phase-0/README.md), and [review record](../phase-0/review-record.md).

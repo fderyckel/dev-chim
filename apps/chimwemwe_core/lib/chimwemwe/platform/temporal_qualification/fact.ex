@@ -79,6 +79,9 @@ defmodule Chimwemwe.Platform.TemporalQualification.Fact do
         RETURNS trigger
         LANGUAGE plpgsql
         AS $$
+        DECLARE
+          operation_kind text;
+          operation_target uuid;
         BEGIN
           IF TG_OP = 'DELETE' THEN
             RAISE EXCEPTION USING
@@ -95,6 +98,61 @@ defmodule Chimwemwe.Platform.TemporalQualification.Fact do
           END IF;
 
           NEW.recorded_at := transaction_timestamp() AT TIME ZONE 'UTC';
+
+          SELECT kind, target_fact_id
+          INTO operation_kind, operation_target
+          FROM platform_temporal_qualification_fact_operations
+          WHERE id = NEW.operation_id
+            AND tenant_id = NEW.tenant_id
+            AND scope_id = NEW.scope_id;
+
+          IF operation_kind IS NULL THEN
+            RAISE EXCEPTION USING
+              ERRCODE = '23514',
+              CONSTRAINT = 'platform_temporal_fact_operation_missing',
+              MESSAGE = 'temporal qualification fact operation is missing';
+          END IF;
+
+          IF operation_kind = 'record' AND (
+            NEW.kind <> 'entry'
+            OR EXISTS (
+              SELECT 1
+              FROM platform_temporal_qualification_facts
+              WHERE tenant_id = NEW.tenant_id
+                AND operation_id = NEW.operation_id
+            )
+          ) THEN
+            RAISE EXCEPTION USING
+              ERRCODE = '23514',
+              CONSTRAINT = 'platform_temporal_fact_record_shape',
+              MESSAGE = 'record operation must create exactly one entry';
+          END IF;
+
+          IF operation_kind = 'reverse_and_replace' AND (
+            (NEW.kind = 'reversal' AND (
+              NEW.reverses_fact_id IS DISTINCT FROM operation_target
+              OR EXISTS (
+                SELECT 1
+                FROM platform_temporal_qualification_facts
+                WHERE tenant_id = NEW.tenant_id
+                  AND operation_id = NEW.operation_id
+                  AND kind = 'reversal'
+              )
+            ))
+            OR
+            (NEW.kind = 'entry' AND EXISTS (
+              SELECT 1
+              FROM platform_temporal_qualification_facts
+              WHERE tenant_id = NEW.tenant_id
+                AND operation_id = NEW.operation_id
+                AND kind = 'entry'
+            ))
+          ) THEN
+            RAISE EXCEPTION USING
+              ERRCODE = '23514',
+              CONSTRAINT = 'platform_temporal_fact_correction_shape',
+              MESSAGE = 'correction operation fact shape is invalid';
+          END IF;
 
           IF NEW.kind = 'reversal' AND NOT EXISTS (
             SELECT 1
@@ -154,11 +212,60 @@ defmodule Chimwemwe.Platform.TemporalQualification.Fact do
   end
 
   actions do
+    action :record_entry, :struct do
+      public? false
+      transaction? true
+      constraints instance_of: Chimwemwe.Platform.TemporalQualification.FactOperationResult
+
+      argument :scope_id, :uuid, allow_nil?: false
+      argument :effective_on, :date, allow_nil?: false
+      argument :quantity, :integer, allow_nil?: false
+
+      argument :reason_code, :string do
+        allow_nil? false
+        constraints min_length: 1, max_length: 80, trim?: true
+      end
+
+      argument :idempotency_key, :uuid, allow_nil?: false
+      argument :causation_id, :uuid, allow_nil?: false
+
+      run Chimwemwe.Platform.TemporalQualification.RecordFactEntry
+    end
+
+    action :reverse_and_replace, :struct do
+      public? false
+      transaction? true
+      constraints instance_of: Chimwemwe.Platform.TemporalQualification.FactOperationResult
+
+      argument :target_fact_id, :uuid, allow_nil?: false
+      argument :replacement_effective_on, :date, allow_nil?: false
+      argument :replacement_quantity, :integer, allow_nil?: false
+
+      argument :reason_code, :string do
+        allow_nil? false
+        constraints min_length: 1, max_length: 80, trim?: true
+      end
+
+      argument :idempotency_key, :uuid, allow_nil?: false
+      argument :causation_id, :uuid, allow_nil?: false
+
+      run Chimwemwe.Platform.TemporalQualification.ReverseAndReplaceFact
+    end
   end
 
   policies do
-    policy always() do
-      forbid_if always()
+    policy action(:record_entry) do
+      forbid_unless actor_present()
+
+      authorize_if {Chimwemwe.Platform.Policy.HasCapability,
+                    capability: "platform.temporal_qualification.facts.record"}
+    end
+
+    policy action(:reverse_and_replace) do
+      forbid_unless actor_present()
+
+      authorize_if {Chimwemwe.Platform.Policy.HasCapability,
+                    capability: "platform.temporal_qualification.facts.reverse_and_replace"}
     end
   end
 

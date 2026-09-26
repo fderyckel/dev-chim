@@ -1,6 +1,6 @@
 # Module activation and lifecycle
 
-- Status: Accepted architecture contract; Phase 1 Slice 1H-A initial activation implemented
+- Status: Accepted architecture contract; Phase 1 Slices 1H-A and 1H-B implemented
 - Owner: Architecture review group with platform and product engineering
 - Governing record: [ADR 0001](../adr/0001-modular-monolith-and-service-boundaries.md)
 - Review trigger: module contract, entitlement, activation, dependency, or deactivation semantics change
@@ -88,13 +88,43 @@ the requested code-owned actor capability. Activating a module therefore grants 
 capability. Neither the client nor action input can select tenant, repository, release state,
 entitlement, activation, dependencies, actor, or Ash authorization options.
 
-This slice adds no commercial entitlement workflow, deactivation, drain, reactivation, retained
-data action, public interface, provisioning flow, or business module. Those remain explicitly
-separate work, beginning with the bounded Slice 1H-B lifecycle proof.
+At Slice 1H-A completion there was no commercial entitlement workflow, deactivation, drain,
+reactivation, retained-data action, public interface, provisioning flow, or business module.
+Slice 1H-B separately adds only the neutral drain and reactivation proof below.
+
+## Phase 1 Slice 1H-B boundary
+
+Slice 1H-B implements the remaining neutral lifecycle state contract. The persistent activation
+aggregate remains the owner of its lifecycle state after deactivation and records consumer,
+replay, and reconciled cursors; projection generation and readiness; reconciliation state; and
+retained ownership. A closed tenant-qualified work resource models ordinary and mandatory work
+states without becoming a scheduler or queue implementation.
+
+Deactivation and ordinary mutations use the same tenant-and-module transaction lock. Deactivation
+rejects an active dependent, closes ordinary authority, parks queued or running ordinary work,
+retains mandatory work, records the replay boundary, and marks disposable projections stale in
+one exact-versioned transaction with audit, outbox, and idempotency evidence. A mutation that
+wins the lock commits before drain; a mutation that waits behind deactivation rechecks the gates
+and fails inactive.
+
+Mandatory audit, outbox, retention, legal-hold, and reconciliation work uses a separate private
+action and capability and does not reopen ordinary authority. Compatible reactivation requires
+current entitlement and dependencies plus an explicit release-owned `compatible_from` rule. It
+requeues parked work from the recorded cursor, records reconciliation, increments projection
+generation, and opens ordinary authority only when every authoritative and evidence write commits.
+
+The slice proves this state contract with synthetic facts. It adds no real Oban/outbox adapter,
+external consumer, cache/search/webhook/analytics integration, projection rebuilder, entitlement
+expiry, offboarding, retained-data access or deletion workflow, public interface, provisioning
+flow, or business module. See the
+[Slice 1H-B evidence](../phase-1/evidence/module-lifecycle-drain-reactivation.md).
 
 ## Phase 0 boundary and evidence
 
-Phase 0 recorded and pressure-tested the lifecycle contract only. It did not create a production module registry, entitlement service, UI, or school business module. Slice 1H-A now promotes only the trusted declaration, closed entitlement/activation state, initial activation, and ordinary gate described above.
+Phase 0 recorded and pressure-tested the lifecycle contract only. It did not create a production
+module registry, entitlement service, UI, or school business module. Slices 1H-A and 1H-B now
+promote the trusted declaration, closed entitlement/activation/work state, initial activation,
+ordinary gates, controlled drain, mandatory work, and compatible reactivation described above.
 
 Before this decision is accepted, a neutral synthetic module must prove that:
 

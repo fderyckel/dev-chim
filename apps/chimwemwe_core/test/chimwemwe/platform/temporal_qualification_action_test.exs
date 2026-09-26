@@ -16,6 +16,11 @@ defmodule Chimwemwe.Platform.TemporalQualificationActionTest do
 
   alias Chimwemwe.Platform.TemporalQualification.{
     Aggregate,
+    ConsumerHistoryView,
+    ConsumerResult,
+    FactHistoryView,
+    FactOperationResult,
+    FactView,
     HistoryView,
     RevisionResult,
     RevisionView
@@ -36,11 +41,19 @@ defmodule Chimwemwe.Platform.TemporalQualificationActionTest do
   @correct_capability "platform.temporal_qualification.revisions.correct"
   @current_capability "platform.temporal_qualification.revisions.read_current"
   @history_capability "platform.temporal_qualification.revisions.read_history"
+  @fact_record_capability "platform.temporal_qualification.facts.record"
+  @fact_correct_capability "platform.temporal_qualification.facts.reverse_and_replace"
+  @fact_read_capability "platform.temporal_qualification.facts.read_history"
+  @consumer_pin_capability "platform.temporal_qualification.consumers.pin"
+  @consumer_reconcile_capability "platform.temporal_qualification.consumers.reconcile"
+  @consumer_read_capability "platform.temporal_qualification.consumers.read_history"
 
   @tables [
+    "platform_temporal_qualification_consumer_bases",
     "platform_temporal_qualification_segments",
     "platform_temporal_qualification_revisions",
     "platform_temporal_qualification_facts",
+    "platform_temporal_qualification_fact_operations",
     "platform_temporal_qualification_aggregates",
     "platform_authority_action_idempotency",
     "platform_outbox_events",
@@ -442,6 +455,353 @@ defmodule Chimwemwe.Platform.TemporalQualificationActionTest do
              qualification_counts(runtime, context_a(), aggregate_id)
   end
 
+  test "records and reads an append-only fact operation with exact replay and redacted event evidence",
+       %{runtime: runtime} do
+    scope_id = UUID.generate()
+    idempotency_key = UUID.generate()
+    input = fact_input(scope_id, idempotency_key)
+
+    assert {:ok, %FactOperationResult{} = first} =
+             TemporalQualification.record_fact_entry(runtime, context_a(), input)
+
+    assert {:ok, ^first} =
+             TemporalQualification.record_fact_entry(runtime, context_a(), input)
+
+    assert first.operation.kind == :record
+    assert [%FactView{kind: :entry, quantity: 10} = entry] = first.operation.facts
+
+    assert {:ok, ^entry} =
+             TemporalQualification.get_fact(runtime, context_a(), entry.id)
+
+    assert {:ok, operation} =
+             TemporalQualification.get_fact_operation(
+               runtime,
+               context_a(),
+               first.operation.operation_id
+             )
+
+    assert operation == first.operation
+
+    assert {:ok, %FactHistoryView{operations: [^operation], truncated?: false}} =
+             TemporalQualification.list_fact_history(runtime, context_a(), scope_id)
+
+    assert {:ok, [[action_name, event_payload, result_payload]]} =
+             fact_evidence(runtime, first, idempotency_key)
+
+    assert action_name == "platform.temporal_qualification.fact.record"
+    assert event_payload["fact_ids"] == [entry.id]
+    refute Map.has_key?(event_payload, "quantity")
+    refute Map.has_key?(event_payload, "effective_on")
+    assert hd(result_payload["facts"])["quantity"] == 10
+
+    assert {:error, %TemporalQualificationError{code: :idempotency_conflict}} =
+             TemporalQualification.record_fact_entry(
+               runtime,
+               context_a(),
+               %{input | quantity: 11}
+             )
+
+    assert {:error, %TemporalQualificationError{code: :idempotency_conflict}} =
+             TemporalQualification.record_fact_entry(runtime, context_a_peer(), input)
+
+    assert {:error, %TemporalQualificationError{code: :forbidden}} =
+             TemporalQualification.record_fact_entry(runtime, context_a_denied(), input)
+
+    assert {:error, %ContextError{code: :missing_trusted_context}} =
+             TemporalQualification.record_fact_entry(runtime, %{tenant_id: @tenant_a}, input)
+
+    assert {:error, %TemporalQualificationError{code: :not_found}} =
+             TemporalQualification.get_fact(runtime, context_b(), entry.id)
+
+    assert {:error, %TemporalQualificationError{code: :forbidden}} =
+             TemporalQualification.get_fact(runtime, context_a_current(), entry.id)
+  end
+
+  test "reverses and replaces exactly once while racing corrections create no branch",
+       %{runtime: runtime} do
+    assert {:ok, original} =
+             TemporalQualification.record_fact_entry(
+               runtime,
+               context_a(),
+               fact_input(UUID.generate())
+             )
+
+    [target] = original.operation.facts
+    correction = fact_correction_input(target.id, 12)
+
+    assert {:ok, %FactOperationResult{} = corrected} =
+             TemporalQualification.reverse_and_replace_fact(
+               runtime,
+               context_a(),
+               correction
+             )
+
+    assert {:ok, ^corrected} =
+             TemporalQualification.reverse_and_replace_fact(
+               runtime,
+               context_a(),
+               correction
+             )
+
+    assert [reversal, replacement] = corrected.operation.facts
+    assert reversal.kind == :reversal
+    assert reversal.reverses_fact_id == target.id
+    assert reversal.quantity == -10
+    assert replacement.kind == :entry
+    assert replacement.quantity == 12
+
+    assert {:ok, %FactHistoryView{operations: operations}} =
+             TemporalQualification.list_fact_history(
+               runtime,
+               context_a(),
+               original.operation.scope_id
+             )
+
+    assert Enum.map(operations, & &1.kind) == [:record, :reverse_and_replace]
+
+    assert {:ok, racing_original} =
+             TemporalQualification.record_fact_entry(
+               runtime,
+               context_a(),
+               fact_input(UUID.generate())
+             )
+
+    [racing_target] = racing_original.operation.facts
+    parent = self()
+
+    tasks =
+      for quantity <- [20, 30] do
+        Task.async(fn ->
+          send(parent, {:ready, self()})
+
+          receive do
+            :go ->
+              TemporalQualification.reverse_and_replace_fact(
+                runtime,
+                context_a(),
+                fact_correction_input(racing_target.id, quantity)
+              )
+          end
+        end)
+      end
+
+    task_pids =
+      for _index <- 1..2 do
+        assert_receive {:ready, task_pid}
+        task_pid
+      end
+
+    Enum.each(task_pids, &send(&1, :go))
+    results = Enum.map(tasks, &Task.await(&1, 10_000))
+
+    assert 1 == Enum.count(results, &match?({:ok, %FactOperationResult{}}, &1))
+
+    assert 1 ==
+             Enum.count(results, fn
+               {:error, %TemporalQualificationError{code: :conflict}} -> true
+               _other -> false
+             end)
+
+    assert {:error, %TemporalQualificationError{code: :not_found}} =
+             TemporalQualification.reverse_and_replace_fact(
+               runtime,
+               context_b(),
+               fact_correction_input(target.id, 14)
+             )
+  end
+
+  test "keeps a consumer pinned until a separately authorized reconciliation",
+       %{runtime: runtime} do
+    aggregate_id = UUID.generate()
+    consumer_id = UUID.generate()
+
+    assert {:ok, revision_1} =
+             TemporalQualification.publish_revision(
+               runtime,
+               context_a(),
+               publish_input(aggregate_id)
+             )
+
+    pin_input = consumer_pin_input(consumer_id, aggregate_id, revision_1.revision_id)
+
+    assert {:ok, %ConsumerResult{} = pinned} =
+             TemporalQualification.pin_consumer_revision(runtime, context_a(), pin_input)
+
+    assert {:ok, ^pinned} =
+             TemporalQualification.pin_consumer_revision(runtime, context_a(), pin_input)
+
+    assert pinned.basis.basis_version == 1
+
+    assert {:ok, revision_2} =
+             TemporalQualification.correct_revision(
+               runtime,
+               context_a(),
+               correct_input(aggregate_id, revision_1.revision_id)
+             )
+
+    assert {:ok, still_pinned} =
+             TemporalQualification.get_consumer_current(runtime, context_a(), consumer_id)
+
+    assert still_pinned.revision_id == revision_1.revision_id
+
+    reconcile_input =
+      consumer_reconcile_input(
+        consumer_id,
+        pinned.basis.basis_id,
+        revision_2.revision_id,
+        revision_2.event_id
+      )
+
+    assert {:error, %TemporalQualificationError{code: :forbidden}} =
+             TemporalQualification.reconcile_consumer_revision(
+               runtime,
+               context_a_denied(),
+               reconcile_input
+             )
+
+    assert {:ok, still_pinned} ==
+             TemporalQualification.get_consumer_current(runtime, context_a(), consumer_id)
+
+    assert {:ok, %ConsumerResult{} = reconciled} =
+             TemporalQualification.reconcile_consumer_revision(
+               runtime,
+               context_a(),
+               reconcile_input
+             )
+
+    assert reconciled.basis.basis_version == 2
+    assert reconciled.basis.predecessor_basis_id == pinned.basis.basis_id
+    assert reconciled.basis.revision_id == revision_2.revision_id
+
+    assert {:ok, %ConsumerHistoryView{bases: [basis_1, basis_2], truncated?: false}} =
+             TemporalQualification.list_consumer_history(runtime, context_a(), consumer_id)
+
+    assert basis_1 == pinned.basis
+    assert basis_2 == reconciled.basis
+
+    assert {:error, %TemporalQualificationError{code: :forbidden}} =
+             TemporalQualification.get_consumer_current(
+               runtime,
+               context_a_current(),
+               consumer_id
+             )
+
+    assert {:error, %TemporalQualificationError{code: :not_found}} =
+             TemporalQualification.get_consumer_current(runtime, context_b(), consumer_id)
+  end
+
+  test "serializes racing reconciliation from one exact consumer basis", %{runtime: runtime} do
+    aggregate_id = UUID.generate()
+    consumer_id = UUID.generate()
+
+    assert {:ok, revision_1} =
+             TemporalQualification.publish_revision(
+               runtime,
+               context_a(),
+               publish_input(aggregate_id)
+             )
+
+    assert {:ok, pinned} =
+             TemporalQualification.pin_consumer_revision(
+               runtime,
+               context_a(),
+               consumer_pin_input(consumer_id, aggregate_id, revision_1.revision_id)
+             )
+
+    assert {:ok, revision_2} =
+             TemporalQualification.correct_revision(
+               runtime,
+               context_a(),
+               correct_input(aggregate_id, revision_1.revision_id)
+             )
+
+    parent = self()
+
+    tasks =
+      for _index <- 1..2 do
+        Task.async(fn ->
+          send(parent, {:ready, self()})
+
+          receive do
+            :go ->
+              TemporalQualification.reconcile_consumer_revision(
+                runtime,
+                context_a(),
+                consumer_reconcile_input(
+                  consumer_id,
+                  pinned.basis.basis_id,
+                  revision_2.revision_id,
+                  revision_2.event_id
+                )
+              )
+          end
+        end)
+      end
+
+    task_pids =
+      for _index <- 1..2 do
+        assert_receive {:ready, task_pid}
+        task_pid
+      end
+
+    Enum.each(task_pids, &send(&1, :go))
+    results = Enum.map(tasks, &Task.await(&1, 10_000))
+
+    assert 1 == Enum.count(results, &match?({:ok, %ConsumerResult{}}, &1))
+
+    assert 1 ==
+             Enum.count(results, fn
+               {:error, %TemporalQualificationError{code: :conflict}} -> true
+               _other -> false
+             end)
+
+    assert {:ok, %ConsumerHistoryView{bases: [basis_1, basis_2]}} =
+             TemporalQualification.list_consumer_history(runtime, context_a(), consumer_id)
+
+    assert basis_1.basis_id == pinned.basis.basis_id
+    assert basis_2.predecessor_basis_id == basis_1.basis_id
+    assert basis_2.revision_id == revision_2.revision_id
+  end
+
+  test "rolls back fact and consumer state with durable evidence after a late failure",
+       %{runtime: runtime} do
+    aggregate_id = UUID.generate()
+
+    assert {:ok, revision} =
+             TemporalQualification.publish_revision(
+               runtime,
+               context_a(),
+               publish_input(aggregate_id)
+             )
+
+    scope_id = UUID.generate()
+    consumer_id = UUID.generate()
+    fact_input = fact_input(scope_id)
+    pin_input = consumer_pin_input(consumer_id, aggregate_id, revision.revision_id)
+    install_t1c_completion_failure(runtime)
+
+    try do
+      assert {:error, %TemporalQualificationError{code: :retryable_dependency}} =
+               TemporalQualification.record_fact_entry(runtime, context_a(), fact_input)
+
+      assert {:error, %TemporalQualificationError{code: :retryable_dependency}} =
+               TemporalQualification.pin_consumer_revision(runtime, context_a(), pin_input)
+
+      assert {:ok, [[0, 0, 0, 0, 0]]} =
+               t1c_counts(runtime, scope_id, consumer_id)
+    after
+      remove_t1c_completion_failure(runtime)
+    end
+
+    assert {:ok, %FactOperationResult{}} =
+             TemporalQualification.record_fact_entry(runtime, context_a(), fact_input)
+
+    assert {:ok, %ConsumerResult{}} =
+             TemporalQualification.pin_consumer_revision(runtime, context_a(), pin_input)
+
+    assert {:ok, [[1, 1, 1, 2, 2]]} = t1c_counts(runtime, scope_id, consumer_id)
+  end
+
   defp seed_authority(runtime) do
     assert {:ok, :seeded} =
              Persistence.with_writer(runtime, context_a(), fn ->
@@ -464,7 +824,13 @@ defmodule Chimwemwe.Platform.TemporalQualificationActionTest do
                        @publish_capability,
                        @correct_capability,
                        @current_capability,
-                       @history_capability
+                       @history_capability,
+                       @fact_record_capability,
+                       @fact_correct_capability,
+                       @fact_read_capability,
+                       @consumer_pin_capability,
+                       @consumer_reconcile_capability,
+                       @consumer_read_capability
                      ],
                      into: %{} do
                    id = UUID.generate()
@@ -496,7 +862,13 @@ defmodule Chimwemwe.Platform.TemporalQualificationActionTest do
                      @publish_capability,
                      @correct_capability,
                      @current_capability,
-                     @history_capability
+                     @history_capability,
+                     @fact_record_capability,
+                     @fact_correct_capability,
+                     @fact_read_capability,
+                     @consumer_pin_capability,
+                     @consumer_reconcile_capability,
+                     @consumer_read_capability
                    ] do
                  capability_id = UUID.generate()
                  insert_capability(capability_id, @tenant_b, key)
@@ -589,6 +961,162 @@ defmodule Chimwemwe.Platform.TemporalQualificationActionTest do
 
   defp segment(effective_from, effective_until, value) do
     %{effective_from: effective_from, effective_until: effective_until, value: value}
+  end
+
+  defp fact_input(scope_id, idempotency_key \\ UUID.generate()) do
+    %{
+      scope_id: scope_id,
+      effective_on: ~D[2026-01-01],
+      quantity: 10,
+      reason_code: "synthetic_entry",
+      idempotency_key: idempotency_key,
+      causation_id: UUID.generate()
+    }
+  end
+
+  defp fact_correction_input(target_fact_id, replacement_quantity) do
+    %{
+      target_fact_id: target_fact_id,
+      replacement_effective_on: ~D[2026-02-01],
+      replacement_quantity: replacement_quantity,
+      reason_code: "synthetic_correction",
+      idempotency_key: UUID.generate(),
+      causation_id: UUID.generate()
+    }
+  end
+
+  defp consumer_pin_input(consumer_id, aggregate_id, revision_id) do
+    %{
+      consumer_id: consumer_id,
+      aggregate_id: aggregate_id,
+      revision_id: revision_id,
+      reason_code: "initial_basis",
+      idempotency_key: UUID.generate(),
+      causation_id: UUID.generate()
+    }
+  end
+
+  defp consumer_reconcile_input(
+         consumer_id,
+         expected_basis_id,
+         target_revision_id,
+         causation_id
+       ) do
+    %{
+      consumer_id: consumer_id,
+      expected_basis_id: expected_basis_id,
+      target_revision_id: target_revision_id,
+      reason_code: "deliberate_reconciliation",
+      idempotency_key: UUID.generate(),
+      causation_id: causation_id
+    }
+  end
+
+  defp fact_evidence(runtime, result, idempotency_key) do
+    Persistence.with_writer(runtime, context_a(), fn ->
+      Repo.query!(
+        """
+        SELECT audit.action_name, outbox.payload, claim.result_payload
+        FROM platform_authority_audit_events AS audit
+        JOIN platform_outbox_events AS outbox
+          ON outbox.tenant_id = audit.tenant_id AND outbox.audit_reference = audit.id
+        JOIN platform_authority_action_idempotency AS claim
+          ON claim.tenant_id = audit.tenant_id AND claim.audit_reference = audit.id
+        WHERE audit.tenant_id = $1
+          AND audit.id = $2
+          AND outbox.id = $3
+          AND claim.idempotency_key = $4
+        """,
+        Enum.map(
+          [@tenant_a, result.audit_reference, result.event_id, idempotency_key],
+          &dump/1
+        )
+      ).rows
+    end)
+  end
+
+  defp t1c_counts(runtime, scope_id, consumer_id) do
+    Persistence.with_writer(runtime, context_a(), fn ->
+      Repo.query!(
+        """
+        SELECT
+          (SELECT count(*) FROM platform_temporal_qualification_fact_operations
+           WHERE tenant_id = $1 AND scope_id = $2),
+          (SELECT count(*) FROM platform_temporal_qualification_facts
+           WHERE tenant_id = $1 AND scope_id = $2),
+          (SELECT count(*) FROM platform_temporal_qualification_consumer_bases
+           WHERE tenant_id = $1 AND consumer_id = $3),
+          (SELECT count(*) FROM platform_authority_audit_events
+           WHERE tenant_id = $1
+             AND aggregate_type IN (
+               'platform.temporal_qualification.fact_operation',
+               'platform.temporal_qualification.reconciliation_consumer'
+             )),
+          (SELECT count(*) FROM platform_outbox_events
+           WHERE tenant_id = $1
+             AND aggregate_type IN (
+               'platform.temporal_qualification.fact_operation',
+               'platform.temporal_qualification.reconciliation_consumer'
+             ))
+        """,
+        [dump(@tenant_a), dump(scope_id), dump(consumer_id)]
+      ).rows
+    end)
+  end
+
+  defp install_t1c_completion_failure(runtime) do
+    assert {:ok, :installed} =
+             Persistence.with_writer(runtime, context_a(), fn ->
+               Repo.query!(
+                 "DROP TRIGGER IF EXISTS test_fail_t1c_completion ON platform_authority_action_idempotency"
+               )
+
+               Repo.query!("DROP FUNCTION IF EXISTS test_fail_t1c_completion()")
+
+               Repo.query!("""
+               CREATE FUNCTION test_fail_t1c_completion()
+               RETURNS trigger
+               LANGUAGE plpgsql
+               AS $$
+               BEGIN
+                 IF NEW.status = 'completed' AND
+                    NEW.aggregate_type IN (
+                      'platform.temporal_qualification.fact_scope',
+                      'platform.temporal_qualification.fact',
+                      'platform.temporal_qualification.reconciliation_consumer'
+                    ) THEN
+                   RAISE EXCEPTION USING
+                     ERRCODE = '40001',
+                     MESSAGE = 'synthetic T1-C completion failure';
+                 END IF;
+
+                 RETURN NEW;
+               END;
+               $$;
+               """)
+
+               Repo.query!("""
+               CREATE TRIGGER test_fail_t1c_completion
+               BEFORE UPDATE OF status
+               ON platform_authority_action_idempotency
+               FOR EACH ROW
+               EXECUTE FUNCTION test_fail_t1c_completion();
+               """)
+
+               :installed
+             end)
+  end
+
+  defp remove_t1c_completion_failure(runtime) do
+    assert {:ok, :removed} =
+             Persistence.with_writer(runtime, context_a(), fn ->
+               Repo.query!(
+                 "DROP TRIGGER IF EXISTS test_fail_t1c_completion ON platform_authority_action_idempotency"
+               )
+
+               Repo.query!("DROP FUNCTION IF EXISTS test_fail_t1c_completion()")
+               :removed
+             end)
   end
 
   defp qualification_counts(runtime, context, aggregate_id) do

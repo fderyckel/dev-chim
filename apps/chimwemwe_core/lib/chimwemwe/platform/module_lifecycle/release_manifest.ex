@@ -10,7 +10,9 @@ defmodule Chimwemwe.Platform.ModuleLifecycle.ReleaseManifest do
   @version_pattern ~r/^[0-9]+\.[0-9]+\.[0-9]+(?:[+-][0-9A-Za-z.-]+)?$/
   @maximum_key_length 120
   @maximum_owner_length 120
-  @declaration_keys [:dependencies, :key, :owner, :version]
+  @required_declaration_keys [:dependencies, :key, :owner, :version]
+  @optional_declaration_keys [:compatible_from, :extension_contracts]
+  @extension_contract_keys [:key, :schema_version]
 
   @enforce_keys [:declarations]
   defstruct [:declarations]
@@ -19,8 +21,11 @@ defmodule Chimwemwe.Platform.ModuleLifecycle.ReleaseManifest do
           key: String.t(),
           version: String.t(),
           owner: String.t(),
-          dependencies: [String.t()]
+          dependencies: [String.t()],
+          compatible_from: [String.t()],
+          extension_contracts: [extension_contract()]
         }
+  @type extension_contract :: %{key: String.t(), schema_version: pos_integer()}
   @opaque t :: %__MODULE__{declarations: %{String.t() => declaration()}}
 
   @spec new([map()]) :: {:ok, t()} | {:error, :invalid_manifest}
@@ -58,6 +63,30 @@ defmodule Chimwemwe.Platform.ModuleLifecycle.ReleaseManifest do
 
   def fetch(_manifest, _key), do: {:error, :module_not_released}
 
+  @doc false
+  @spec fetch_extension(t(), String.t(), String.t()) ::
+          {:ok, extension_contract()} | {:error, :extension_contract_not_released}
+  def fetch_extension(manifest, module_key, extension_key) do
+    with {:ok, declaration} <- fetch(manifest, module_key),
+         %{key: ^extension_key} = extension <-
+           Enum.find(declaration.extension_contracts, &(&1.key == extension_key)) do
+      {:ok, extension}
+    else
+      _missing -> {:error, :extension_contract_not_released}
+    end
+  end
+
+  @doc false
+  @spec dependents(t(), String.t()) :: [String.t()]
+  def dependents(%__MODULE__{declarations: declarations}, key) when is_binary(key) do
+    declarations
+    |> Enum.filter(fn {_module_key, declaration} -> key in declaration.dependencies end)
+    |> Enum.map(fn {module_key, _declaration} -> module_key end)
+    |> Enum.sort()
+  end
+
+  def dependents(_manifest, _key), do: []
+
   defp normalize_declarations(declarations) do
     Enum.reduce_while(declarations, {:ok, %{}}, fn declaration, {:ok, acc} ->
       with {:ok, normalized} <- normalize_declaration(declaration),
@@ -71,18 +100,24 @@ defmodule Chimwemwe.Platform.ModuleLifecycle.ReleaseManifest do
 
   defp normalize_declaration(declaration)
        when is_map(declaration) and not is_struct(declaration) do
-    with true <- Enum.sort(Map.keys(declaration)) == @declaration_keys,
+    with true <- valid_declaration_keys?(Map.keys(declaration)),
          {:ok, key} <- normalize_key(Map.fetch!(declaration, :key)),
          {:ok, version} <- normalize_version(Map.fetch!(declaration, :version)),
          {:ok, owner} <- normalize_owner(Map.fetch!(declaration, :owner)),
          {:ok, dependencies} <- normalize_dependency_keys(Map.fetch!(declaration, :dependencies)),
+         {:ok, compatible_from} <-
+           normalize_compatible_versions(Map.get(declaration, :compatible_from, [version])),
+         {:ok, extension_contracts} <-
+           normalize_extension_contracts(Map.get(declaration, :extension_contracts, [])),
          false <- key in dependencies do
       {:ok,
        %{
          key: key,
          version: version,
          owner: owner,
-         dependencies: dependencies
+         dependencies: dependencies,
+         compatible_from: compatible_from,
+         extension_contracts: extension_contracts
        }}
     else
       _invalid -> {:error, :invalid_manifest}
@@ -90,6 +125,53 @@ defmodule Chimwemwe.Platform.ModuleLifecycle.ReleaseManifest do
   end
 
   defp normalize_declaration(_declaration), do: {:error, :invalid_manifest}
+
+  defp valid_declaration_keys?(keys) do
+    key_set = MapSet.new(keys)
+    required = MapSet.new(@required_declaration_keys)
+    allowed = MapSet.new(@required_declaration_keys ++ @optional_declaration_keys)
+
+    MapSet.subset?(required, key_set) and MapSet.subset?(key_set, allowed)
+  end
+
+  defp normalize_extension_contracts(contracts) when is_list(contracts) do
+    contracts
+    |> Enum.reduce_while({:ok, []}, fn contract, {:ok, acc} ->
+      case normalize_extension_contract(contract) do
+        {:ok, normalized} -> {:cont, {:ok, [normalized | acc]}}
+        {:error, :invalid_manifest} = error -> {:halt, error}
+      end
+    end)
+    |> case do
+      {:ok, normalized} ->
+        normalized = Enum.sort_by(normalized, & &1.key)
+
+        if Enum.uniq_by(normalized, & &1.key) == normalized do
+          {:ok, normalized}
+        else
+          {:error, :invalid_manifest}
+        end
+
+      error ->
+        error
+    end
+  end
+
+  defp normalize_extension_contracts(_contracts), do: {:error, :invalid_manifest}
+
+  defp normalize_extension_contract(contract)
+       when is_map(contract) and not is_struct(contract) do
+    with true <- MapSet.new(Map.keys(contract)) == MapSet.new(@extension_contract_keys),
+         {:ok, key} <- normalize_key(Map.fetch!(contract, :key)),
+         schema_version when is_integer(schema_version) and schema_version > 0 <-
+           Map.fetch!(contract, :schema_version) do
+      {:ok, %{key: key, schema_version: schema_version}}
+    else
+      _invalid -> {:error, :invalid_manifest}
+    end
+  end
+
+  defp normalize_extension_contract(_contract), do: {:error, :invalid_manifest}
 
   defp normalize_dependency_keys(dependencies) when is_list(dependencies) do
     with {:ok, normalized} <- normalize_keys(dependencies),
@@ -101,6 +183,30 @@ defmodule Chimwemwe.Platform.ModuleLifecycle.ReleaseManifest do
   end
 
   defp normalize_dependency_keys(_dependencies), do: {:error, :invalid_manifest}
+
+  defp normalize_compatible_versions(versions) when is_list(versions) and versions != [] do
+    with {:ok, normalized} <- normalize_versions(versions),
+         true <- length(normalized) == MapSet.size(MapSet.new(normalized)) do
+      {:ok, Enum.sort(normalized)}
+    else
+      _invalid -> {:error, :invalid_manifest}
+    end
+  end
+
+  defp normalize_compatible_versions(_versions), do: {:error, :invalid_manifest}
+
+  defp normalize_versions(versions) do
+    Enum.reduce_while(versions, {:ok, []}, fn version, {:ok, acc} ->
+      case normalize_version(version) do
+        {:ok, normalized} -> {:cont, {:ok, [normalized | acc]}}
+        {:error, :invalid_manifest} = error -> {:halt, error}
+      end
+    end)
+    |> case do
+      {:ok, normalized} -> {:ok, Enum.reverse(normalized)}
+      error -> error
+    end
+  end
 
   defp normalize_keys(keys) do
     Enum.reduce_while(keys, {:ok, []}, fn key, {:ok, acc} ->

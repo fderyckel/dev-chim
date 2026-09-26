@@ -25,6 +25,10 @@ def test_current_repository_contract_passes() -> None:
     assert CHECKER.validate_repository(ROOT) == []
 
 
+def test_generated_browser_reports_are_outside_documentation_validation() -> None:
+    assert {"playwright-report", "test-results"} <= CHECKER.IGNORED_DIRECTORY_NAMES
+
+
 def test_broken_relative_link_is_reported(tmp_path: Path) -> None:
     document = tmp_path / "document.md"
     document.write_text("# Document\n\n[Missing](missing.md)\n", encoding="utf-8")

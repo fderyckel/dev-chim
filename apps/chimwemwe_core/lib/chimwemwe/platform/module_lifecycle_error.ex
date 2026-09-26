@@ -6,15 +6,20 @@ defmodule Chimwemwe.Platform.ModuleLifecycleError do
   use Splode.Error, fields: [:code], class: :invalid
 
   @type code ::
-          :conflict
+          :active_dependents_present
+          | :conflict
           | :forbidden
           | :idempotency_conflict
           | :internal
           | :invalid_input
           | :invalid_manifest
+          | :lifecycle_conflict
+          | :mandatory_work_not_available
           | :module_inactive
+          | :module_not_inactive
           | :module_not_entitled
           | :module_not_released
+          | :module_version_incompatible
           | :required_dependency_inactive
           | :retryable_dependency
   @type t :: %__MODULE__{code: code()}

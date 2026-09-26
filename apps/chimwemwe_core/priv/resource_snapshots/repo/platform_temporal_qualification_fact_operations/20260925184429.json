@@ -1,0 +1,272 @@
+{
+  "attributes": [
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"gen_random_uuid()\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": true,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "tenant_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "scope_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "kind",
+      "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "target_fact_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "reason_code",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "recorded_at",
+      "type": "utc_datetime_usec"
+    }
+  ],
+  "base_filter": null,
+  "check_constraints": [
+    {
+      "attribute": [
+        "kind",
+        "target_fact_id"
+      ],
+      "base_filter": null,
+      "check": "(kind = 'record' AND target_fact_id IS NULL) OR\n(kind = 'reverse_and_replace' AND target_fact_id IS NOT NULL)\n",
+      "name": "platform_temporal_fact_operation_kind_shape"
+    },
+    {
+      "attribute": [
+        "reason_code"
+      ],
+      "base_filter": null,
+      "check": "char_length(reason_code) BETWEEN 1 AND 80 AND\nreason_code ~ '^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$'\n",
+      "name": "platform_temporal_fact_operation_reason_shape"
+    }
+  ],
+  "create_table_options": null,
+  "custom_indexes": [
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "id",
+        "tenant_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_fact_operations_id_tenant_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "id",
+        "tenant_id",
+        "scope_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "scope_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_fact_operations_scope_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "tenant_id",
+        "scope_id",
+        "recorded_at",
+        "id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "scope_id"
+        },
+        {
+          "type": "atom",
+          "value": "recorded_at"
+        },
+        {
+          "type": "atom",
+          "value": "id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_fact_operations_history_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": false,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "tenant_id",
+        "target_fact_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "target_fact_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_fact_operations_target_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": "kind = 'reverse_and_replace'"
+    }
+  ],
+  "custom_statements": [
+    {
+      "after_tables": [
+        "platform_temporal_qualification_fact_operations",
+        "platform_temporal_qualification_facts"
+      ],
+      "code?": false,
+      "down": "DROP FUNCTION guard_platform_temporal_fact_operation();",
+      "global?": true,
+      "name": "platform_temporal_fact_operation_guard_function",
+      "up": "CREATE FUNCTION guard_platform_temporal_fact_operation()\nRETURNS trigger\nLANGUAGE plpgsql\nAS $$\nBEGIN\n  IF TG_OP = 'DELETE' THEN\n    RAISE EXCEPTION USING\n      ERRCODE = '23514',\n      CONSTRAINT = 'platform_temporal_fact_operation_delete_forbidden',\n      MESSAGE = 'temporal qualification fact operation deletion is forbidden';\n  END IF;\n\n  IF TG_OP = 'UPDATE' THEN\n    RAISE EXCEPTION USING\n      ERRCODE = '23514',\n      CONSTRAINT = 'platform_temporal_fact_operation_immutable',\n      MESSAGE = 'temporal qualification fact operations are immutable';\n  END IF;\n\n  NEW.recorded_at := transaction_timestamp() AT TIME ZONE 'UTC';\n\n  IF NEW.kind = 'reverse_and_replace' AND NOT EXISTS (\n    SELECT 1\n    FROM platform_temporal_qualification_facts\n    WHERE id = NEW.target_fact_id\n      AND tenant_id = NEW.tenant_id\n      AND scope_id = NEW.scope_id\n      AND kind = 'entry'\n  ) THEN\n    RAISE EXCEPTION USING\n      ERRCODE = '23514',\n      CONSTRAINT = 'platform_temporal_fact_operation_target',\n      MESSAGE = 'temporal qualification correction target is invalid';\n  END IF;\n\n  RETURN NEW;\nEND;\n$$;\n"
+    },
+    {
+      "after_tables": [
+        "platform_temporal_qualification_fact_operations"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER platform_temporal_fact_operation_guard\n  ON platform_temporal_qualification_fact_operations;\n",
+      "global?": true,
+      "name": "platform_temporal_fact_operation_guard_trigger",
+      "up": "CREATE TRIGGER platform_temporal_fact_operation_guard\nBEFORE INSERT OR UPDATE OR DELETE\nON platform_temporal_qualification_fact_operations\nFOR EACH ROW\nEXECUTE FUNCTION guard_platform_temporal_fact_operation();\n"
+    }
+  ],
+  "has_create_action": false,
+  "hash": "0A039C01983A57EE884E27C6BD5959E412DBFA62C638E441AD3003CD180D24BF",
+  "identities": [],
+  "multitenancy": {
+    "attribute": "tenant_id",
+    "global": false,
+    "strategy": "attribute"
+  },
+  "repo": "Elixir.Chimwemwe.Repo",
+  "schema": null,
+  "table": "platform_temporal_qualification_fact_operations"
+}

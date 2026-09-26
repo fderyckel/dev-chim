@@ -211,6 +211,18 @@ It explicitly rejects recorded-time queries. It still does not implement append-
 a downstream consumer, retention/hold/erasure, import provenance, recovery, or performance
 qualification, so T1 and TR-01 through TR-07 remain open.
 
+The authorized [T1-C fact-and-reconciliation increment](../phase-1/evidence/temporal-qualification-fact-and-reconciliation.md)
+adds separate private record and reverse-and-replace actions with immutable operation identity,
+exact replay, one-winner correction races, minimized atomic evidence, and capability-separated
+exact/history reads. A neutral append-only consumer-basis chain proves that source correction does
+not mutate a pinned decision and that only a separately authorized action may reconcile to the
+exact current source revision. An event is causation evidence, never authority.
+
+T1-C closes the executable append-only branches of TR-01 through TR-05 and supplies one deliberate
+reconciliation mode. T1 remains incomplete: TR-06 retention/hold/erasure and deactivation access,
+TR-07 import provenance plus backup/restore/convergence, performance and recovery limits, and
+accountable residual-risk review remain open.
+
 ### T2 — first domain adoption
 
 Choose one separately authorized low-blast-radius domain. Its ADR or module contract declares temporal class, query modes, correction actions, consumer modes, retention, migration, and user experience. Reuse only the neutral primitives proven stable in T1.

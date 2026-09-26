@@ -1,6 +1,6 @@
 # Ash security-patch reviews
 
-- Status: Current candidate passes focused regression and both Hex audits; complete verification pending
+- Status: Passed
 - Owner: Platform engineering
 - Latest review: 2026-09-25
 - Machine record: [`ash-security-patch.json`](../../../spikes/ash-foundation-lab/priv/maintenance/ash-security-patch.json)
@@ -28,7 +28,7 @@ The forced dependency compile remains at 38 normalized warning groups. The Ash a
 
 The regenerated Phase 0 OpenAPI and TypeScript declarations remove only `range_adjacent`, `range_contains`, and `range_overlaps` from filters for the existing UUID, integer, string, and enum fields. They add no filter property and change no public path. The descriptor remains byte-stable. The machine record binds the current generated artifacts, while the earlier AshJsonApi non-patch record remains an immutable comparison of its own baseline and candidate.
 
-Both Hex audits pass. Complete repository verification is pending before this evidence is marked complete.
+Both Hex audits pass. The complete `make check` passed with 25 repository-tool tests, 106 Phase 0 Elixir/PostgreSQL tests, six Phase 0 TypeScript client tests, 97 production-core tests, 20 browser unit tests, 12 UI-0 browser scenarios, six connected UI-1A browser scenarios, and one unavailable-core recovery scenario. Both Dialyzer runs reported zero errors and zero skipped warnings.
 
 ## Prior review: Ash 3.33.4
 

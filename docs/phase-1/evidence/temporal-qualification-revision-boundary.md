@@ -1,6 +1,6 @@
 # ADR 0018 T1-B governed revision-boundary evidence
 
-- Status: Implemented; T1-B verification passing; complete repository verification blocked by concurrent out-of-scope checkout changes
+- Status: Implemented; T1-B and complete repository verification passing
 - Date: 2026-09-25
 - Owner: Platform engineering
 - Governing records: [ADR 0018](../../adr/0018-temporal-records-correction-audit-and-evidence-semantics.md), [decision review](../../architecture/temporal-records-decision-review.md), [temporal contract](../../architecture/temporal-records-correction-and-evidence.md), [ADR 0003](../../adr/0003-tenant-model-and-optional-postgresql-rls.md), [ADR 0005](../../adr/0005-domain-action-and-state-transition-convention.md), [ADR 0007](../../adr/0007-transactional-outbox-and-event-envelope.md), [ADR 0017](../../adr/0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md), and [threat model TM-01/TM-09/TM-10/TM-14/TM-15](../../security/threat-model.md)
@@ -130,14 +130,10 @@ Current T1-B result: 13 focused tests passed. Targeted formatting and strict Cre
 T1-B source/test files, migration/resource-snapshot drift passes, and Git whitespace validation
 passes.
 
-`make check` was run on 2026-09-25 and stopped in Phase 0 repository/documentation validation
-because concurrent local-bridge work changed the shared root dependency lock without refreshing
-the recorded Ash security-patch lock digest. The independent `bin/core-check` was also run and
-stopped at formatting on four concurrent `local_bridge` files. Those files and the dependency
-changes are outside T1-B and were not modified here. A separate full Dialyzer run likewise reached
-the analyzer but reported six errors only in concurrent module-lifecycle and local-bridge Mix-task
-files. Complete repository verification therefore cannot be claimed from this mixed checkout;
-rerun `make check` after that work is reconciled.
+`make check` passed on 2026-09-25 after the local-bridge, module-lifecycle, and Ash 3.33.11 patch
+work was reconciled. The complete run passed 25 repository-tool tests, 106 Phase 0 tests, 97
+production-core tests, 20 browser unit tests, all 19 browser scenarios, both Hex audits, both
+Dialyzer analyses, generated-contract drift, static analysis, and whitespace checks.
 
 ## Next gate
 

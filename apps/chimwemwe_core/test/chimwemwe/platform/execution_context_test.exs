@@ -22,12 +22,22 @@ defmodule Chimwemwe.Platform.ExecutionContextTest do
     TrustedPlacement
   }
 
-  alias Chimwemwe.Platform.TemporalQualification.{Aggregate, Fact, Revision, Segment}
+  alias Chimwemwe.Platform.TemporalQualification.{
+    Aggregate,
+    ConsumerBasis,
+    Fact,
+    FactOperation,
+    Revision,
+    Segment
+  }
 
   alias Chimwemwe.Platform.ModuleLifecycle.{
     ModuleActivation,
-    ModuleEntitlement
+    ModuleEntitlement,
+    ModuleWorkItem
   }
+
+  alias Chimwemwe.Platform.GovernedExtension.ExtensionDefinition
 
   @tenant_id "11111111-1111-4111-8111-111111111111"
   @other_tenant_id "22222222-2222-4222-8222-222222222222"
@@ -140,9 +150,13 @@ defmodule Chimwemwe.Platform.ExecutionContextTest do
                Aggregate,
                Revision,
                Segment,
+               FactOperation,
                Fact,
+               ConsumerBasis,
                ModuleEntitlement,
-               ModuleActivation
+               ModuleActivation,
+               ModuleWorkItem,
+               ExtensionDefinition
              ])
   end
 

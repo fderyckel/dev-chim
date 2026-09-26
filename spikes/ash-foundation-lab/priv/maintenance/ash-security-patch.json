@@ -72,7 +72,7 @@
   "verification": {
     "make_check": "pass",
     "focused_security_regression_tests": 3,
-    "repository_tool_tests": 24,
+    "repository_tool_tests": 25,
     "phase0_elixir_postgresql_tests": 106,
     "typescript_client_tests": 6,
     "production_core_tests": 97,

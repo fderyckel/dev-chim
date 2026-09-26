@@ -2,9 +2,10 @@ defmodule Chimwemwe.Platform.TemporalQualification do
   @moduledoc """
   Trusted boundary for the neutral ADR 0018 temporal qualification proof.
 
-  The boundary exposes two private resource-specific writes and five named reads.
-  It derives authority and routing from validated execution context and exposes no
-  generic Ash options, repository selector, public interface, or school vocabulary.
+  The boundary exposes private resource-specific revision, append-only fact, and
+  deliberate-reconciliation actions plus named reads. It derives authority and
+  routing from validated execution context and exposes no generic Ash options,
+  repository selector, public interface, or school vocabulary.
   """
 
   alias Chimwemwe.Platform.{
@@ -17,6 +18,15 @@ defmodule Chimwemwe.Platform.TemporalQualification do
 
   alias Chimwemwe.Platform.TemporalQualification.{
     Aggregate,
+    ConsumerBasisView,
+    ConsumerBoundary,
+    ConsumerHistoryView,
+    ConsumerResult,
+    FactBoundary,
+    FactHistoryView,
+    FactOperationResult,
+    FactOperationView,
+    FactView,
     HistoryView,
     RevisionRead,
     RevisionResult,
@@ -44,6 +54,69 @@ defmodule Chimwemwe.Platform.TemporalQualification do
   @reason_pattern ~r/^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*$/
   @current_read_capability "platform.temporal_qualification.revisions.read_current"
   @history_read_capability "platform.temporal_qualification.revisions.read_history"
+
+  @doc "Records one immutable neutral append-only entry."
+  @spec record_fact_entry(Supervisor.supervisor(), term(), map()) ::
+          {:ok, FactOperationResult.t()} | {:error, term()}
+  def record_fact_entry(runtime, context, input) do
+    FactBoundary.record_entry(runtime, context, input)
+  end
+
+  @doc "Reverses one exact entry and records its replacement in one operation."
+  @spec reverse_and_replace_fact(Supervisor.supervisor(), term(), map()) ::
+          {:ok, FactOperationResult.t()} | {:error, term()}
+  def reverse_and_replace_fact(runtime, context, input) do
+    FactBoundary.reverse_and_replace(runtime, context, input)
+  end
+
+  @doc "Returns one exact authorized append-only fact."
+  @spec get_fact(Supervisor.supervisor(), term(), term()) ::
+          {:ok, FactView.t()} | {:error, term()}
+  def get_fact(runtime, context, fact_id) do
+    FactBoundary.get_fact(runtime, context, fact_id)
+  end
+
+  @doc "Returns one exact authorized fact operation and all of its facts."
+  @spec get_fact_operation(Supervisor.supervisor(), term(), term()) ::
+          {:ok, FactOperationView.t()} | {:error, term()}
+  def get_fact_operation(runtime, context, operation_id) do
+    FactBoundary.get_operation(runtime, context, operation_id)
+  end
+
+  @doc "Returns bounded ordered append-only operations for one synthetic scope."
+  @spec list_fact_history(Supervisor.supervisor(), term(), term()) ::
+          {:ok, FactHistoryView.t()} | {:error, term()}
+  def list_fact_history(runtime, context, scope_id) do
+    FactBoundary.list_history(runtime, context, scope_id)
+  end
+
+  @doc "Pins a neutral durable consumer to one exact current source revision."
+  @spec pin_consumer_revision(Supervisor.supervisor(), term(), map()) ::
+          {:ok, ConsumerResult.t()} | {:error, term()}
+  def pin_consumer_revision(runtime, context, input) do
+    ConsumerBoundary.pin_revision(runtime, context, input)
+  end
+
+  @doc "Appends a deliberate consumer reconciliation to an exact current revision."
+  @spec reconcile_consumer_revision(Supervisor.supervisor(), term(), map()) ::
+          {:ok, ConsumerResult.t()} | {:error, term()}
+  def reconcile_consumer_revision(runtime, context, input) do
+    ConsumerBoundary.reconcile_revision(runtime, context, input)
+  end
+
+  @doc "Returns the latest immutable basis for one reconciliation consumer."
+  @spec get_consumer_current(Supervisor.supervisor(), term(), term()) ::
+          {:ok, ConsumerBasisView.t()} | {:error, term()}
+  def get_consumer_current(runtime, context, consumer_id) do
+    ConsumerBoundary.get_current(runtime, context, consumer_id)
+  end
+
+  @doc "Returns bounded immutable basis history for one reconciliation consumer."
+  @spec list_consumer_history(Supervisor.supervisor(), term(), term()) ::
+          {:ok, ConsumerHistoryView.t()} | {:error, term()}
+  def list_consumer_history(runtime, context, consumer_id) do
+    ConsumerBoundary.list_history(runtime, context, consumer_id)
+  end
 
   @doc "Publishes revision one for a new neutral aggregate."
   @spec publish_revision(Supervisor.supervisor(), term(), map()) ::

@@ -1,0 +1,389 @@
+{
+  "attributes": [
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"gen_random_uuid()\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": true,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "tenant_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "consumer_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "aggregate_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "index_where": null,
+        "match_tenant?": true,
+        "match_type": "full",
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "platform_temporal_consumer_basis_revision_tenant_fkey",
+        "on_delete": "restrict",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "platform_temporal_qualification_revisions"
+      },
+      "scale": null,
+      "size": null,
+      "source": "revision_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "operation_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "basis_version",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "index_where": null,
+        "match_tenant?": true,
+        "match_type": "simple",
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "platform_temporal_consumer_basis_predecessor_tenant_fkey",
+        "on_delete": "restrict",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "platform_temporal_qualification_consumer_bases"
+      },
+      "scale": null,
+      "size": null,
+      "source": "predecessor_basis_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "reason_code",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "recorded_at",
+      "type": "utc_datetime_usec"
+    }
+  ],
+  "base_filter": null,
+  "check_constraints": [
+    {
+      "attribute": [
+        "basis_version",
+        "predecessor_basis_id"
+      ],
+      "base_filter": null,
+      "check": "(basis_version = 1 AND predecessor_basis_id IS NULL) OR\n(basis_version > 1 AND predecessor_basis_id IS NOT NULL)\n",
+      "name": "platform_temporal_consumer_basis_chain_shape"
+    },
+    {
+      "attribute": [
+        "reason_code"
+      ],
+      "base_filter": null,
+      "check": "char_length(reason_code) BETWEEN 1 AND 80 AND\nreason_code ~ '^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$'\n",
+      "name": "platform_temporal_consumer_basis_reason_shape"
+    }
+  ],
+  "create_table_options": null,
+  "custom_indexes": [
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "id",
+        "tenant_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_consumer_bases_id_tenant_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "id",
+        "tenant_id",
+        "consumer_id",
+        "aggregate_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "consumer_id"
+        },
+        {
+          "type": "atom",
+          "value": "aggregate_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_consumer_bases_chain_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "tenant_id",
+        "consumer_id",
+        "basis_version"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "consumer_id"
+        },
+        {
+          "type": "atom",
+          "value": "basis_version"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_consumer_bases_version_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "tenant_id",
+        "consumer_id",
+        "recorded_at",
+        "id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "consumer_id"
+        },
+        {
+          "type": "atom",
+          "value": "recorded_at"
+        },
+        {
+          "type": "atom",
+          "value": "id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_consumer_bases_history_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": false,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "tenant_id",
+        "predecessor_basis_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "predecessor_basis_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_consumer_bases_successor_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": "predecessor_basis_id IS NOT NULL"
+    }
+  ],
+  "custom_statements": [
+    {
+      "after_tables": [
+        "platform_temporal_qualification_aggregates",
+        "platform_temporal_qualification_consumer_bases",
+        "platform_temporal_qualification_revisions"
+      ],
+      "code?": false,
+      "down": "DROP FUNCTION guard_platform_temporal_consumer_basis();",
+      "global?": true,
+      "name": "platform_temporal_consumer_basis_guard_function",
+      "up": "CREATE FUNCTION guard_platform_temporal_consumer_basis()\nRETURNS trigger\nLANGUAGE plpgsql\nAS $$\nDECLARE\n  prior_version bigint;\nBEGIN\n  IF TG_OP = 'DELETE' THEN\n    RAISE EXCEPTION USING\n      ERRCODE = '23514',\n      CONSTRAINT = 'platform_temporal_consumer_basis_delete_forbidden',\n      MESSAGE = 'temporal qualification consumer basis deletion is forbidden';\n  END IF;\n\n  IF TG_OP = 'UPDATE' THEN\n    RAISE EXCEPTION USING\n      ERRCODE = '23514',\n      CONSTRAINT = 'platform_temporal_consumer_basis_immutable',\n      MESSAGE = 'temporal qualification consumer bases are immutable';\n  END IF;\n\n  NEW.recorded_at := transaction_timestamp() AT TIME ZONE 'UTC';\n\n  IF NOT EXISTS (\n    SELECT 1\n    FROM platform_temporal_qualification_aggregates AS aggregate\n    JOIN platform_temporal_qualification_revisions AS revision\n      ON revision.tenant_id = aggregate.tenant_id\n     AND revision.aggregate_id = aggregate.id\n     AND revision.id = aggregate.current_revision_id\n    WHERE aggregate.tenant_id = NEW.tenant_id\n      AND aggregate.id = NEW.aggregate_id\n      AND revision.id = NEW.revision_id\n  ) THEN\n    RAISE EXCEPTION USING\n      ERRCODE = '23514',\n      CONSTRAINT = 'platform_temporal_consumer_basis_current_revision',\n      MESSAGE = 'consumer basis must reference the exact current source revision';\n  END IF;\n\n  IF NEW.basis_version > 1 THEN\n    SELECT basis_version\n    INTO prior_version\n    FROM platform_temporal_qualification_consumer_bases\n    WHERE id = NEW.predecessor_basis_id\n      AND tenant_id = NEW.tenant_id\n      AND consumer_id = NEW.consumer_id\n      AND aggregate_id = NEW.aggregate_id;\n\n    IF prior_version IS NULL OR NEW.basis_version <> prior_version + 1 THEN\n      RAISE EXCEPTION USING\n        ERRCODE = '23514',\n        CONSTRAINT = 'platform_temporal_consumer_basis_predecessor',\n        MESSAGE = 'consumer basis predecessor must be consecutive';\n    END IF;\n  END IF;\n\n  RETURN NEW;\nEND;\n$$;\n"
+    },
+    {
+      "after_tables": [
+        "platform_temporal_qualification_consumer_bases"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER platform_temporal_consumer_basis_guard\n  ON platform_temporal_qualification_consumer_bases;\n",
+      "global?": true,
+      "name": "platform_temporal_consumer_basis_guard_trigger",
+      "up": "CREATE TRIGGER platform_temporal_consumer_basis_guard\nBEFORE INSERT OR UPDATE OR DELETE\nON platform_temporal_qualification_consumer_bases\nFOR EACH ROW\nEXECUTE FUNCTION guard_platform_temporal_consumer_basis();\n"
+    }
+  ],
+  "has_create_action": false,
+  "hash": "5BDABF7DB5DAC4803D9F6807D4F751DFE8745285CC574D4D104E00961FAB743B",
+  "identities": [],
+  "multitenancy": {
+    "attribute": "tenant_id",
+    "global": false,
+    "strategy": "attribute"
+  },
+  "repo": "Elixir.Chimwemwe.Repo",
+  "schema": null,
+  "table": "platform_temporal_qualification_consumer_bases"
+}

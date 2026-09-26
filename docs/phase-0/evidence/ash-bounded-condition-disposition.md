@@ -27,6 +27,20 @@ François accepted the conditions on 2026-09-16 as Project Owner and interim Pla
 | Resource descriptor and metadata validator | Retain the one-way, derived, code-owned allowlist adapter | Before any production descriptor consumer, definition store, or renderer | Descriptor evolution, forbidden/stale/cross-tenant negatives, authorized execution, and security review per consumer | Stop metadata and keep explicit code-owned presentation contracts if policy is duplicated, authority-bearing references appear, or a second runtime schema engine is needed |
 | Tenant movement and non-HTTP routing | Retain the platform control-plane adapter; Ash remains the re-entered authorization boundary | Before a production registry, movement control plane, or non-HTTP adapter | Durable-registry movement, reconciliation, rollback, stale/forged/missing context, cross-placement, interface-class, and recovery cases | Keep placement static and block movement/adapter activation if the control plane cannot fail closed; request-selected placement is never a fallback |
 
+### Proposed closure direction for the page-limit boundary
+
+[ADR 0023](../../adr/0023-sensitive-collection-enumeration-and-bulk-export-boundary.md)
+proposes a stronger, classification- and scope-aware treatment for the third condition. A numeric
+page maximum remains necessary where pagination is allowed, but it is not sufficient when following
+all pages or varying searches, filters, sorts, or parallel requests can reconstruct a tenant-wide
+Confidential or Restricted collection. The proposal separates ordinary interactive reads from an
+explicitly authorized and audited bulk-export capability.
+
+This later proposal does not rewrite the Phase 0 evidence or close the condition. Until it is
+accepted and verified against a named production candidate, the retained page-limit guard and
+fail-closed fallback remain binding. Verification would close the condition only for the exact
+collection, task scope, interface, and data classification tested.
+
 ## Approval contract
 
 The machine record binds these rows one-to-one to the eight entries in the owned-boundary manifest and records:

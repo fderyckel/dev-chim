@@ -18,6 +18,7 @@ The platform is a security-first modular monolith around Phoenix, Ash under eval
 - [Module activation and lifecycle](module-activation-and-lifecycle.md)
 - [Quality-attribute targets](quality-attribute-targets.md)
 - [Deferred choices](deferred-choices.md)
+- [Assurance proportionality and module evolution](../adr/0024-assurance-proportionality-and-module-evolution.md)
 - [Architecture decisions](../adr/README.md)
 - [Threat model](../security/threat-model.md)
 

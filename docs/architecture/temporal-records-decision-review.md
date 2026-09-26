@@ -107,6 +107,18 @@ no downstream pin/follow/reconcile consumer, TR-06 has no retention/hold/erasure
 has no baseline import, reconciliation, backup/restore, or projection-convergence proof. TR-01
 through TR-07 therefore remain open and ADR 0018 remains Conditionally Accepted.
 
+The 2026-09-25 [T1-C fact-and-reconciliation evidence](../phase-1/evidence/temporal-qualification-fact-and-reconciliation.md)
+adds the append-only record and reverse-and-replace actions, immutable multi-fact operation
+identity, exact replay, correction-race serialization, capability-separated operation history,
+and one append-only deliberate-reconciliation consumer chain. It proves that a source correction
+does not silently reinterpret a pinned consumer and that an event identifier cannot authorize
+reconciliation.
+
+This closes the neutral append-only branches of TR-01 through TR-05 and one consumer mode under
+TR-05. It does not close TR-06 or TR-07, record production performance/migration/recovery limits,
+or supply the final accountable residual-risk review. ADR 0018 therefore remains Conditionally
+Accepted rather than moving to Accepted.
+
 ## Full Acceptance gate
 
 ADR 0018 may move from Conditionally Accepted to Accepted only after:
@@ -139,6 +151,7 @@ Reopen this decision when:
 - [ADR 0007](../adr/0007-transactional-outbox-and-event-envelope.md)
 - [ADR 0017](../adr/0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md)
 - [Slice 1G role-rename evidence](../phase-1/evidence/authority-role-rename.md)
+- [ADR 0018 T1-C evidence](../phase-1/evidence/temporal-qualification-fact-and-reconciliation.md)
 - [Production-core migration discipline](../development/migrations.md)
 - [Module activation and lifecycle](module-activation-and-lifecycle.md)
 - [Threat model](../security/threat-model.md)

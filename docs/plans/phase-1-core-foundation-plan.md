@@ -1,6 +1,6 @@
 # Phase 1 core-foundation implementation plan
 
-- Status: Slices 1A through 1H-A and ADR 0018 T1-A/T1-B bounded increments implemented; Slice 1H-A focused tests, full production-core tests, compile, migration lifecycle, snapshot drift, dependency audit, and scoped static checks pass, while complete repository verification is blocked by concurrent UI-1A dependency-evidence, formatting, Credo, and Dialyzer changes; Phase 0 decisions completed
+- Status: Slices 1A through 1H-B, ADR 0018 T1-A/T1-B/T1-C, and local UI-1A implemented; T1-C complete-repository verification pending; Phase 0 decisions completed
 - Owner: Platform engineering
 - Decision posture: Ash conditionally accepted; applicable ADR outcomes and production gates are binding
 - Review trigger: another authority mutation, a callable temporal action or read boundary, generic or public write invocation, a metadata consumer, a public interface, another app, or a school domain
@@ -250,6 +250,56 @@ T1-B may close executable portions of TR-01 through TR-05 only when its evidence
 TR-05 still requires consumer pin/follow/reconcile proof, while TR-06, TR-07, the reversal half of
 TR-01, and accountable Full Acceptance remain later bounded work.
 
+## ADR 0018 T1-C append-only correction and deliberate reconciliation
+
+The authorized third increment completes only the append-only action branch and one neutral
+deliberate-reconciliation consumer proof. It remains qualification-owned and synthetic. It adds
+no retention, legal-hold, erasure, import, recovery, dispatcher, public interface, school domain,
+or common temporal persistence library.
+
+1. Add separate private `Fact.record_entry` and `Fact.reverse_and_replace` actions. Recording
+   creates one writer-identified immutable entry. Correction targets one exact entry and creates
+   one derived full reversal plus one replacement under one writer-owned operation identity.
+   Neither action exposes generic insertion, deletion, adjustment, or caller-supplied recorded
+   time, fact identity, reversal quantity, operation identity, repository, or authority options.
+2. Require distinct code-owned record and reverse-and-replace capabilities. Revalidate trusted
+   context and current capability on the authoritative writer, serialize by tenant and target
+   scope or fact, and retain the database-enforced single-full-reversal and cross-scope guards.
+3. Bind idempotency to tenant, action, actor, target scope or fact, and the canonical request.
+   Exact and concurrent retries return the complete one- or two-fact result. Changed request or
+   actor conflicts, while racing different corrections of the same entry permit exactly one
+   reversal operation.
+4. Atomically commit all created facts, minimized audit evidence, one minimal outbox fact, and the
+   complete idempotency result. The outbox contains safe identifiers and counts, not quantities,
+   and cannot grant consumer authority.
+5. Add capability-protected exact fact, exact operation, and bounded scope-history reads. History
+   access is distinct from action authority and every query is writer-routed and tenant-qualified.
+6. Add one qualification-only append-only `ConsumerBasis` chain for deliberate reconciliation.
+   `pin_revision` creates basis version one against the exact current source revision;
+   `reconcile_revision` requires the exact current basis and exact current source revision, then
+   appends one successor basis without rewriting the historical basis. Pin and reconciliation are
+   separate private actions with separate code-owned capabilities, exact replay, audit, outbox,
+   and stable concurrent conflict.
+7. Enforce tenant-qualified source-revision and predecessor links, consecutive basis versions,
+   writer-assigned recorded time, immutability, and one successor per basis through reviewed
+   PostgreSQL constraints and triggers. An alternate writer cannot cross tenant/aggregate,
+   reconcile to a stale source revision, branch the consumer chain, or mutate prior basis.
+8. Prove success, exact and concurrent replay, changed-request/actor conflict, duplicate reversal,
+   stale and racing reconciliation, missing capability/context, cross-tenant/cross-scope
+   non-disclosure, event-without-authority denial, complete rollback after outbox insertion,
+   exact operation/history reads, preserved pinned history, and corrected net quantity.
+9. Generate and manually review the migration and snapshots, including compound tenant keys,
+   self-reference ordering, rollback refusal after retained consumer basis, apply/rollback/reapply,
+   and drift.
+10. Add no automatic event dispatch or consumer mutation, follow-current durable decision,
+    partial adjustment, reversal-of-reversal, retention/hold/erasure action, migration ledger,
+    projection store, production runtime wiring, reusable temporal framework, business vocabulary,
+    school module, UI, or public API.
+
+T1-C may close the append-only branches of TR-01 through TR-05 and proves one deliberate
+reconciliation mode. TR-06, TR-07, performance/recovery limits, accountable residual-risk review,
+and the complete repository gate remain required before ADR 0018 Full Acceptance.
+
 ## Slice 1H-A independent module gates and activation
 
 The authorized first module-lifecycle increment promotes only the release, entitlement,
@@ -297,6 +347,101 @@ prove deterministic deactivation versus ordinary work, drain/park behavior, mand
 retained-data ownership, dependency-safe deactivation, compatible reactivation, replay, and
 reconciliation before the production module-lifecycle gate is complete.
 
+## Slice 1H-B controlled drain and reactivation
+
+The separately authorized second lifecycle increment implements the remaining neutral lifecycle
+state contract. It does not add a real queue, consumer, projection adapter, public lifecycle API,
+entitlement workflow, or school module.
+
+1. Expand the immutable release declaration with an optional normalized `compatible_from` set.
+   Existing declarations default to their own version; reactivation may change version only when
+   the installed version is explicitly compatible.
+2. Keep `ModuleActivation` as the retained tenant-owned lifecycle aggregate. Expand it with
+   non-negative consumer, replay, and reconciled cursors; positive projection generation;
+   projection and reconciliation state; transition timestamps; and retained ownership fixed to
+   `retained` by PostgreSQL.
+3. Add closed tenant-owned `ModuleWorkItem` state with a compound tenant-qualified activation
+   relationship. Model ordinary, audit, outbox, retention, legal-hold, and reconciliation work
+   without adding a scheduler, dispatcher, consumer, or enqueueing API.
+4. Add private named `deactivate_module`, `complete_mandatory_work`, and `reactivate_module`
+   actions behind `ModuleLifecycle.deactivate/4`, `complete_mandatory_work/4`, and
+   `reactivate/4`. Give deactivation, mandatory work, and reactivation distinct code-owned
+   capabilities.
+5. Add the internal mutation-side `authorize_current_transaction/4` gate. Require an existing
+   writer transaction, take the same tenant-and-module transaction lock as lifecycle transitions,
+   and re-evaluate release, entitlement, activation, dependencies, and actor capability before
+   ordinary mutation proceeds.
+6. Reject deactivation while a current-manifest dependent remains active. Serialize a racing
+   dependent activation through the dependency activation row so either the dependency commits
+   first and blocks deactivation or deactivation commits first and the dependency activation sees
+   inactive state.
+7. Deactivate atomically: require active state and exact lifecycle version, park queued or running
+   ordinary work, preserve mandatory work, copy the consumer cursor to the replay boundary, mark
+   projections stale, require reconciliation, close ordinary authority, and commit minimized
+   audit, outbox, and exact idempotency evidence.
+8. Permit only non-ordinary mandatory work completion while inactive. Keep its capability
+   separate, retain the completed work item, advance the lifecycle version, and commit its state
+   and evidence together without reopening ordinary authority.
+9. Reactivate atomically only from inactive state with exact version, entitlement, compatible
+   release, and active compatible dependencies. Requeue parked ordinary work from the replay
+   boundary, record the reconciled cursor, increment projection generation, clear reconciliation
+   state, and open ordinary authority only when every state and evidence write commits.
+10. Prove both ordinary-mutation/deactivation lock orders, active-dependent rejection, queue and
+    in-flight parking, mandatory audit/outbox/retention completion, retained ownership, exact
+    replay, incompatible release denial, injected post-outbox rollback, cross-tenant database
+    rejection, migration rollback refusal with retained 1H-B state, empty rollback/reapply, and
+    generated migration/snapshot drift.
+
+Slice 1H-B is a production-core state contract with synthetic facts. Real Oban/outbox adapters,
+external consumers, cache or search invalidation, webhooks, analytical publications, projection
+rebuilders, and placement-movement replay remain fail-closed production integration gates.
+
+## Slice 1I-A governed presentation-definition contract
+
+The authorized first governed-extension increment promotes the descriptor compatibility and
+durable-definition boundary accepted by ADR 0019. It permits tenant-owned presentation choices
+only; it does not add a renderer, metadata execution, custom fields, runtime schema mutation, a
+workflow language, or a school business module.
+
+1. Extend each code-owned module release declaration with an optional, versioned list of extension
+   contract keys. Existing manifests default to no extension contracts, and malformed, duplicate,
+   or unknown declarations fail closed.
+2. Add a trusted immutable extension registry whose declarations bind one stable schema key and
+   positive schema version to one released module, one contract-valid Ash resource, one explicit
+   descriptor allowlist, and one supported presentation-definition kind. The registry derives the
+   descriptor from code on construction and accepts no tenant, policy, repository, or executable
+   input.
+3. Implement only the first typed presentation schema: a bounded title, ordered unique allowlisted
+   field references, bounded labels for those fields, and one allowlisted public read-action
+   reference. Reject every extra, private, stale, authority-shaped, executable, or incompatible
+   value. Derive the stored data classification from the highest referenced descriptor field.
+4. Add a closed tenant-owned `ExtensionDefinition` aggregate with a compound tenant-qualified
+   activation relationship, stable definition and schema keys, exact descriptor and module
+   versions, validated JSON content, derived classification, positive lock version, and trusted
+   actor attribution.
+5. Add the private named `publish_definition` action behind a Chimwemwe-owned
+   `GovernedExtension.publish_definition/5` boundary. Require exact input keys, validated context,
+   a code-owned registry and manifest, the release-declared schema version, exact descriptor
+   revision, module release/entitlement/activation/dependency gates, and the separate
+   `platform.extensions.definitions.publish` capability.
+6. Serialize publication with the module lifecycle lock and a tenant-definition lock. Expected
+   version zero creates the caller-supplied stable definition UUID; a positive exact version
+   revises the same aggregate. Stale versions, duplicate keys, cross-tenant IDs, inactive modules,
+   and changed idempotency reuse fail without mutation.
+7. Atomically commit the definition, minimized audit fact, minimal outbox fact, and completed
+   exact-result idempotency claim. Neither evidence payload contains presentation labels or other
+   definition content, and no stored definition grants read or mutation authority.
+8. Prove strict validation, classification propagation, compatible create and revision, exact and
+   concurrent replay, changed-request conflict, missing capability, every independent module gate,
+   cross-tenant non-disclosure and database rejection, alternate-write constraints, post-outbox
+   rollback, retained-state rollback refusal, empty rollback/reapply, and generated
+   migration/snapshot drift.
+
+Slice 1I-A creates no public API, browser connection, report dataset, renderer, generic metadata
+executor, arbitrary SQL or code path, custom-field store, schema compiler, visual builder, client
+authorization rule, provisioning surface, or education vocabulary. A later 1I increment requires
+separate authorization before a real module or interface consumes the stored definition.
+
 ## Acceptance checks
 
 - `Ash.Domain.Info.authorize(Chimwemwe.Platform)` returns `:always`.
@@ -335,7 +480,7 @@ reconciliation before the production module-lifecycle gate is complete.
 - The prior dynamic repository is restored after return or failure, and spawned work inherits no repository selection.
 - Missing runtime components fail closed with a non-disclosing retryable-dependency result.
 - Repository, placement, per-tenant, and per-placement configuration is explicit; there is no production database or capacity default.
-- All fifteen persistent platform resources are tenant-owned, contract-valid, and registered in the always-authorized actor-required domain. Module entitlement is action-closed, and module activation exposes only its private governed initial-activation action.
+- All registered persistent platform resources are tenant-owned, contract-valid, and registered in the always-authorized actor-required domain. Module entitlement and modeled work state are action-closed, and module activation exposes only its private governed lifecycle actions.
 - Direct and transitive capability grants resolve on the current writer and remain valid after a role rename.
 - Missing membership, missing grant, malformed capability, raw or mismatched context, stale routing, and unavailable runtime fail closed without disclosing graph contents.
 - Compound tenant foreign keys reject cross-tenant assignment, grant, and inclusion through alternate SQL writes.
@@ -364,6 +509,22 @@ reconciliation before the production module-lifecycle gate is complete.
 - Activation, minimized audit, transactional outbox, and completed idempotency evidence commit or roll back together; post-outbox failure leaves no facts and the same request can retry safely.
 - Compound tenant foreign keys and database checks reject cross-tenant entitlements, malformed keys or versions, inactive state, and non-positive lifecycle versions through alternate writes.
 - Slice 1H-A adds no entitlement-management API, deactivation, drain, queue or consumer lifecycle, retained-data action, reactivation, public invocation, browser connection, provisioning resource, or school module.
+- Deactivation rejects an active dependent and atomically closes ordinary authority, parks queued or running ordinary work, records the replay cursor, marks the projection stale, requires reconciliation, and retains tenant state.
+- Ordinary mutations and deactivation take the same lifecycle transaction lock; both forced lock orders have one deterministic winner and the waiting path re-evaluates current lifecycle state.
+- Audit, outbox, retention, legal-hold, and reconciliation work cannot be parked as ordinary work and may complete while inactive only through the separate mandatory-work capability.
+- Reactivation requires the exact inactive version, current entitlement, an explicitly compatible release, and active compatible dependencies; it records the reconciled cursor, requeues parked work, increments projection generation, and opens authority atomically.
+- Deactivation, mandatory-work completion, and reactivation bind exact idempotent replay to tenant, action, actor, aggregate, canonical request, and causation, with audit and outbox facts in the same transaction.
+- PostgreSQL rejects cross-tenant work references, unknown work or lifecycle states, parked mandatory work, negative cursors, inconsistent activation state, non-positive projection versions, and implicit release of retained ownership.
+- Slice 1H-B adds no entitlement-management or offboarding workflow, retained-data read/export/correction/deletion action, real queue/consumer/projection adapter, public invocation, browser connection, provisioning surface, or school module.
+- A module release declares governed extension contracts by stable key and positive schema version; existing declarations remain compatible and default to none.
+- A trusted extension registry derives exact descriptors only from contract-valid resources and explicit code-owned allowlists, and rejects duplicate, malformed, unsupported, or non-tenant-owned declarations.
+- Presentation content accepts only a bounded title, ordered allowlisted fields, labels for those fields, and one allowlisted public read action; private, stale, executable, authority-shaped, extra, and incompatible content fails closed.
+- Stored definition classification is derived from the highest referenced field and cannot be selected or lowered by the caller.
+- Definition publication requires validated tenant context, the release-declared extension contract, an active compatible module with active dependencies and entitlement, and the separate code-known publication capability.
+- Create and revision use exact optimistic versioning and exact idempotent replay; changed request or actor, stale version, duplicate key, inactive module, missing capability, and cross-tenant references leave no definition or evidence residue.
+- Definition state, minimized audit, minimal outbox, and completed idempotency evidence commit or roll back together, and retained definition content is absent from audit and outbox payloads.
+- Compound tenant constraints reject cross-tenant activation references, while database checks reject malformed keys, invalid descriptor revisions, unknown classifications, non-positive versions, and non-object content.
+- Slice 1I-A adds no renderer, execution path, custom fields, runtime schema or workflow language, generic metadata mutation, public interface, browser connection, provisioning surface, or school module.
 - The reviewed migration applies, rolls back, reapplies, and passes generated migration and snapshot drift checks.
 - Complete repository acceptance still requires `make check` and the Phase 0 exit review to pass;
   the current run stops on stale UI-1A dependency/security and clean-checkout evidence.
@@ -376,4 +537,24 @@ Slice 1E can be rolled back by removing the repository runtime, AshPostgres depe
 
 Slice 1H-A can roll back only while entitlement, activation, and associated audit, outbox, and idempotency facts are absent. The migration enforces that boundary. Once any such fact is retained, lifecycle removal requires forward repair or an approved recovery point; dropping the tables is prohibited.
 
-The role-rename, role-assignment, temporal-revision, and initial module-activation increments prove bounded resource-specific contracts. They do not authorize membership or role creation, capability grant, composition, revoke, public write invocation, outbox dispatch, retention deletion, provisioning, deactivation, reactivation, or a school module. Slice 1H-B is the next lifecycle gate and requires separate authorization plus drain, retained-data, concurrency, and recovery evidence. The Phase 0 descriptor artifact, report registry, and governed experience-metadata implementation remain disposable evidence and are not production APIs. Do not add a school business module until an explicit module slice is authorized.
+Slice 1H-B can roll back to the 1H-A schema only while no modeled work or 1H-B transition evidence
+exists and every activation still has its pristine active cursor, projection, reconciliation, and
+lifecycle state. The migration enforces that boundary. Once 1H-B state is retained, use forward
+repair or an approved recovery point; deactivation is never permission to drop module data.
+
+Slice 1I-A can roll back only while no governed definition exists and no publication audit,
+outbox, or idempotency fact is retained. Once a definition has been published, descriptor or
+schema evolution uses compatible forward migration and explicit revision; dropping definitions
+or silently rewriting their pinned contract is prohibited.
+
+The role-rename, role-assignment, temporal-qualification, and module-lifecycle increments prove
+bounded resource-specific contracts. They do not authorize membership or role creation,
+capability grant, composition, revoke, public write invocation, outbox dispatch, entitlement
+expiry, offboarding, retained-data deletion, provisioning, a real queue/consumer/projection
+adapter, or a school module. The next module-lifecycle work is real-adapter and operational
+qualification inside a separately authorized production-readiness boundary. The Phase 0
+descriptor artifact, report registry, and governed experience-metadata implementation remain
+disposable evidence and are not production APIs. Slice 1I-A may promote only its newly reviewed
+registry, validator, and durable definition boundary; it does not promote the spike report
+executor or renderer. Do not add a school business module until an explicit module slice is
+authorized.

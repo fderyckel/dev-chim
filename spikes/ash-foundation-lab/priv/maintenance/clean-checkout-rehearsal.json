@@ -2,29 +2,29 @@
   "bootstrap": {
     "clean_after": true,
     "command": "./bin/bootstrap",
-    "elapsed_ms": 162068.812,
+    "elapsed_ms": 267893.479,
     "exit_code": 0
   },
   "candidate": {
-    "base_revision": "a30107fee99ed660bbd20471fc574047d04bed12",
-    "candidate_commit": "cc3cfa4b7b53a91b2fb9308d9fcbb94e62fb7ea7",
-    "candidate_tree": "5f7c32fb7abf616443f427e785f45441bf8a9296",
+    "base_revision": "2e8d819a291283f4636190ce2ab9661008fc81ca",
+    "candidate_commit": "b97a963a9ddbc6ba3453cfaee3d2cad4e99650b7",
+    "candidate_tree": "a32a693e8e59de7472bdeb8b8ef3258db2388919",
     "clean_before_bootstrap": true,
     "tracked_patch_applied": true,
-    "untracked_paths_copied": 71
+    "untracked_paths_copied": 54
   },
   "command": "mise exec -- uv run python tools/rehearse_phase0_clean_checkout.py --output spikes/ash-foundation-lab/priv/maintenance/clean-checkout-rehearsal.json",
-  "elapsed_ms": 777673.258,
+  "elapsed_ms": 1000914.917,
   "limits": [
     "The candidate commit exists only inside the deleted temporary clone; the source working tree and history were not changed.",
     "Ignored dependency and build directories may be created by bootstrap and checks; Git source status remained clean.",
     "This local rehearsal does not establish remote CI, branch protection, or managed-service availability.",
     "The result artifact itself is written only after the isolated run and is therefore validated by the subsequent source-tree make check, not by its own candidate commit."
   ],
-  "rehearsed_on": "2026-09-24",
+  "rehearsed_on": "2026-09-25",
   "schema_version": 1,
   "source_sha256": {
-    "Makefile": "81336a5c53c71c56e5abee9215788d9996e435a4b0f4f55467c3ee6708fd43a1",
+    "Makefile": "60567268da6be3f41ee9b0cb47f5a497d2f8792c993bef1841301bfe30267cf7",
     "bin/bootstrap": "c0cdd41b0e3c08c033cd7aff92bdf63fdec29201021914abf3674cd0fa129bf3",
     "bin/core-check": "96cdc9abd46a4899236a0232dc26186eec54cecdec693e50b6ebfcb64067572a",
     "bin/phase0-check": "81e19436529d1f7c188380bec13debea5fd0a95802306c69f49f42d75f0e6b6e",
@@ -34,10 +34,10 @@
   "verification": {
     "clean_after": true,
     "command": "make check",
-    "elapsed_ms": 615114.677,
+    "elapsed_ms": 732278.969,
     "exit_code": 0,
     "extracted_test_counts": {
-      "elixir_test_results": 160,
+      "elixir_test_results": 203,
       "repository_tool_tests": 24,
       "typescript_tests": 6
     }

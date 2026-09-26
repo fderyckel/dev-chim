@@ -12,7 +12,15 @@ defmodule Chimwemwe.Platform.TemporalQualificationTest do
     TrustedPlacement
   }
 
-  alias Chimwemwe.Platform.TemporalQualification.{Aggregate, Fact, Revision, Segment}
+  alias Chimwemwe.Platform.TemporalQualification.{
+    Aggregate,
+    ConsumerBasis,
+    Fact,
+    FactOperation,
+    Revision,
+    Segment
+  }
+
   alias Chimwemwe.Repo
   alias Ecto.UUID
 
@@ -22,9 +30,11 @@ defmodule Chimwemwe.Platform.TemporalQualificationTest do
   @actor_b "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
 
   @tables [
+    "platform_temporal_qualification_consumer_bases",
     "platform_temporal_qualification_segments",
     "platform_temporal_qualification_revisions",
     "platform_temporal_qualification_facts",
+    "platform_temporal_qualification_fact_operations",
     "platform_temporal_qualification_aggregates"
   ]
 
@@ -43,7 +53,7 @@ defmodule Chimwemwe.Platform.TemporalQualificationTest do
   test "qualification resources are tenant-owned, contract-valid, and action-bounded" do
     assert :ok = ResourceContract.validate_domain(Chimwemwe.Platform)
 
-    for resource <- [Aggregate, Revision, Segment, Fact] do
+    for resource <- [Aggregate, Revision, Segment, FactOperation, Fact, ConsumerBasis] do
       assert :tenant_owned == resource.__chimwemwe_resource_ownership__()
       assert false == ResourceInfo.multitenancy_global?(resource)
     end
@@ -54,7 +64,23 @@ defmodule Chimwemwe.Platform.TemporalQualificationTest do
            ]
 
     for action <- ResourceInfo.actions(Aggregate), do: refute(action.public?)
-    for resource <- [Revision, Segment, Fact], do: assert([] == ResourceInfo.actions(resource))
+
+    assert Enum.map(ResourceInfo.actions(Fact), & &1.name) == [
+             :record_entry,
+             :reverse_and_replace
+           ]
+
+    assert Enum.map(ResourceInfo.actions(ConsumerBasis), & &1.name) == [
+             :pin_revision,
+             :reconcile_revision
+           ]
+
+    for resource <- [Fact, ConsumerBasis] do
+      for action <- ResourceInfo.actions(resource), do: refute(action.public?)
+    end
+
+    for resource <- [Revision, Segment, FactOperation],
+        do: assert([] == ResourceInfo.actions(resource))
   end
 
   test "preserves exact revisions while current and effective reads follow the selector", %{
@@ -299,35 +325,23 @@ defmodule Chimwemwe.Platform.TemporalQualificationTest do
       "platform_temporal_qualification_current_revision_monotonic"
     )
 
-    assert_constraint(
-      query(runtime, context_a(), insert_fact_sql(), [
-        dump(UUID.generate()),
-        dump(@tenant_a),
-        dump(scope_a_peer),
-        dump(UUID.generate()),
-        "reversal",
-        dump(fact_a),
-        ~D[2026-01-01],
-        -10,
-        ~N[2000-01-01 00:00:00.000000]
-      ]),
-      "platform_temporal_qualification_fact_reversal_target"
-    )
-
-    assert_constraint(
-      query(runtime, context_a(), insert_fact_sql(), [
-        dump(UUID.generate()),
-        dump(@tenant_a),
-        dump(scope_a),
-        dump(UUID.generate()),
-        "reversal",
-        dump(fact_b),
-        ~D[2026-01-01],
-        -10,
-        ~N[2000-01-01 00:00:00.000000]
-      ]),
-      "platform_temporal_qualification_fact_reversal_target"
-    )
+    for {scope_id, target_fact_id} <- [
+          {scope_a_peer, fact_a},
+          {scope_a, fact_b}
+        ] do
+      assert_constraint(
+        query(runtime, context_a(), insert_fact_operation_sql(), [
+          dump(UUID.generate()),
+          dump(@tenant_a),
+          dump(scope_id),
+          "reverse_and_replace",
+          dump(target_fact_id),
+          "synthetic_correction",
+          ~N[2000-01-01 00:00:00.000000]
+        ]),
+        "platform_temporal_fact_operation_target"
+      )
+    end
   end
 
   test "revision, segment, fact, and aggregate identity cannot be rewritten or deleted", %{
@@ -444,33 +458,29 @@ defmodule Chimwemwe.Platform.TemporalQualificationTest do
              )
 
     assert_constraint(
-      query(runtime, context_a(), insert_fact_sql(), [
+      query(runtime, context_a(), insert_fact_operation_sql(), [
         dump(UUID.generate()),
         dump(@tenant_a),
         dump(scope_id),
-        dump(UUID.generate()),
-        "reversal",
+        "reverse_and_replace",
         dump(original_id),
-        ~D[2026-01-01],
-        -10,
+        "duplicate_correction",
         ~N[2000-01-01 00:00:00.000000]
       ]),
-      "platform_temporal_qualification_fact_reversal_index"
+      "platform_temporal_fact_operations_target_index"
     )
 
     assert_constraint(
-      query(runtime, context_a(), insert_fact_sql(), [
+      query(runtime, context_a(), insert_fact_operation_sql(), [
         dump(UUID.generate()),
         dump(@tenant_a),
         dump(scope_id),
-        dump(UUID.generate()),
-        "reversal",
+        "reverse_and_replace",
         dump(reversal_id),
-        ~D[2026-01-01],
-        10,
+        "reverse_reversal",
         ~N[2000-01-01 00:00:00.000000]
       ]),
-      "platform_temporal_qualification_fact_reversal_target"
+      "platform_temporal_fact_operation_target"
     )
   end
 
@@ -548,6 +558,8 @@ defmodule Chimwemwe.Platform.TemporalQualificationTest do
          quantity,
          operation_id \\ UUID.generate()
        ) do
+    insert_fact_operation(tenant_id, scope_id, operation_id, kind, reversed_id)
+
     %{rows: [[recorded_at]]} =
       Repo.query!(insert_fact_sql(), [
         dump(id),
@@ -562,6 +574,23 @@ defmodule Chimwemwe.Platform.TemporalQualificationTest do
       ])
 
     recorded_at
+  end
+
+  defp insert_fact_operation(tenant_id, scope_id, operation_id, kind, reversed_id) do
+    {operation_kind, target_fact_id} =
+      if kind == "reversal",
+        do: {"reverse_and_replace", reversed_id},
+        else: {"record", nil}
+
+    Repo.query!(insert_fact_operation_sql() <> " ON CONFLICT (id) DO NOTHING", [
+      dump(operation_id),
+      dump(tenant_id),
+      dump(scope_id),
+      operation_kind,
+      dump_optional(target_fact_id),
+      "synthetic_fixture",
+      ~N[2000-01-01 00:00:00.000000]
+    ])
   end
 
   defp select_current(aggregate_id, tenant_id, revision_id) do
@@ -607,6 +636,14 @@ defmodule Chimwemwe.Platform.TemporalQualificationTest do
        effective_on, quantity, recorded_at)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
     RETURNING recorded_at
+    """
+  end
+
+  defp insert_fact_operation_sql do
+    """
+    INSERT INTO platform_temporal_qualification_fact_operations
+      (id, tenant_id, scope_id, kind, target_fact_id, reason_code, recorded_at)
+    VALUES ($1, $2, $3, $4, $5, $6, $7)
     """
   end
 

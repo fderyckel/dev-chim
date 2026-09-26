@@ -2,9 +2,10 @@ defmodule Chimwemwe.Platform.ModuleLifecycle do
   @moduledoc """
   Trusted release, entitlement, activation, dependency, and actor gate.
 
-  Slice 1H-A exposes one private initial-activation action and one ordinary
-  authorization check. It owns no commercial entitlement workflow, deactivation,
-  drain, reactivation, public interface, or business module.
+  Slice 1H adds private initial activation, controlled drain, mandatory-work,
+  and compatible reactivation actions plus ordinary read and transaction-locking
+  authorization checks. It owns no commercial entitlement workflow, scheduler,
+  public interface, or business module.
   """
 
   alias Chimwemwe.Platform.{
@@ -18,13 +19,16 @@ defmodule Chimwemwe.Platform.ModuleLifecycle do
   alias Chimwemwe.Platform.ModuleLifecycle.{
     ActivateModuleResult,
     ModuleActivation,
-    ReleaseManifest
+    ReleaseManifest,
+    TransitionResult
   }
 
   alias Chimwemwe.Repo
   alias Ecto.UUID
 
   @activate_input_keys [:causation_id, :expected_version, :idempotency_key, :module_key]
+  @transition_input_keys [:causation_id, :expected_version, :idempotency_key, :module_key]
+  @mandatory_work_input_keys @transition_input_keys ++ [:work_item_id]
   @module_key_pattern ~r/^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+$/
   @capability_pattern ~r/^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)+$/
   @maximum_key_length 120
@@ -48,6 +52,34 @@ defmodule Chimwemwe.Platform.ModuleLifecycle do
     end)
   end
 
+  @doc "Atomically closes ordinary module authority and parks modeled ordinary work."
+  @spec deactivate(Supervisor.supervisor(), ReleaseManifest.t(), term(), map()) ::
+          {:ok, TransitionResult.t()} | {:error, term()}
+  def deactivate(runtime, manifest, context, input) do
+    run_transition(runtime, manifest, context, input, :deactivate_module, :deactivate)
+  end
+
+  @doc "Completes mandatory lifecycle work without reopening ordinary module authority."
+  @spec complete_mandatory_work(Supervisor.supervisor(), ReleaseManifest.t(), term(), map()) ::
+          {:ok, TransitionResult.t()} | {:error, term()}
+  def complete_mandatory_work(runtime, manifest, context, input) do
+    run_transition(
+      runtime,
+      manifest,
+      context,
+      input,
+      :complete_mandatory_work,
+      :complete_mandatory_work
+    )
+  end
+
+  @doc "Reopens ordinary authority only after compatibility, replay, rebuild, and reconciliation."
+  @spec reactivate(Supervisor.supervisor(), ReleaseManifest.t(), term(), map()) ::
+          {:ok, TransitionResult.t()} | {:error, term()}
+  def reactivate(runtime, manifest, context, input) do
+    run_transition(runtime, manifest, context, input, :reactivate_module, :reactivate)
+  end
+
   @doc "Requires release, entitlement, activation, dependencies, and actor capability independently."
   @spec authorize(Supervisor.supervisor(), ReleaseManifest.t(), term(), term(), term()) ::
           :ok | {:error, term()}
@@ -66,6 +98,90 @@ defmodule Chimwemwe.Platform.ModuleLifecycle do
         )
       end
     end)
+  end
+
+  @doc false
+  @spec authorize_current_transaction(ReleaseManifest.t(), term(), term(), term()) ::
+          :ok | {:error, term()}
+  def authorize_current_transaction(manifest, context, module_key, capability) do
+    ExecutionContext.with_validated(context, fn validated_context ->
+      with true <- Repo.in_transaction?(),
+           {:ok, validated_manifest} <- validate_manifest(manifest),
+           {:ok, module_key} <- normalize_module_key(module_key),
+           {:ok, capability} <- normalize_capability(capability),
+           {:ok, declaration} <- fetch_release(validated_manifest, module_key),
+           :ok <- lock_lifecycle(TrustedActor.tenant_id(validated_context.actor), module_key) do
+        evaluate_gates(
+          validated_context,
+          validated_manifest,
+          declaration,
+          capability
+        )
+      else
+        false -> lifecycle_error(:retryable_dependency)
+        {:error, %ModuleLifecycleError{}} = error -> error
+      end
+    end)
+  rescue
+    _error -> lifecycle_error(:retryable_dependency)
+  catch
+    :exit, _reason -> lifecycle_error(:retryable_dependency)
+  end
+
+  defp run_transition(runtime, manifest, context, input, action, operation) do
+    ExecutionContext.with_validated(context, fn validated_context ->
+      with {:ok, validated_manifest} <- validate_manifest(manifest),
+           {:ok, normalized_input} <- normalize_transition_input(input, operation),
+           {:ok, _declaration} <- fetch_release(validated_manifest, normalized_input.module_key),
+           {:ok, action_input} <-
+             transition_action_input(
+               validated_context,
+               validated_manifest,
+               normalized_input,
+               action
+             ) do
+        run_transition_action(runtime, validated_context, action_input)
+      end
+    end)
+  end
+
+  defp transition_action_input(context, manifest, input, action) do
+    action_input =
+      Ash.ActionInput.for_action(ModuleActivation, action, input,
+        actor: context.actor,
+        authorize?: true,
+        context: action_context(context, manifest),
+        domain: Chimwemwe.Platform,
+        tenant: TrustedActor.tenant_id(context.actor)
+      )
+
+    if action_input.valid? do
+      {:ok, action_input}
+    else
+      lifecycle_error(:invalid_input)
+    end
+  rescue
+    _error -> lifecycle_error(:internal)
+  end
+
+  defp run_transition_action(runtime, context, action_input) do
+    case Persistence.with_writer(runtime, context, fn ->
+           Ash.run_action(action_input,
+             actor: context.actor,
+             authorize?: true,
+             domain: Chimwemwe.Platform,
+             tenant: TrustedActor.tenant_id(context.actor)
+           )
+         end) do
+      {:ok, {:ok, %TransitionResult{} = result}} -> {:ok, result}
+      {:ok, {:error, error}} -> map_action_error(error)
+      {:ok, _unexpected} -> lifecycle_error(:internal)
+      {:error, _reason} = error -> error
+    end
+  rescue
+    _error -> lifecycle_error(:retryable_dependency)
+  catch
+    :exit, _reason -> lifecycle_error(:retryable_dependency)
   end
 
   defp activation_input(context, manifest, input) do
@@ -185,6 +301,20 @@ defmodule Chimwemwe.Platform.ModuleLifecycle do
     end)
   end
 
+  defp lock_lifecycle(tenant_id, module_key) do
+    case Repo.query(
+           """
+           SELECT pg_advisory_xact_lock(
+             hashtextextended('platform-module-lifecycle:' || $1::text || ':' || $2, 0)
+           )
+           """,
+           [tenant_id, module_key]
+         ) do
+      {:ok, _result} -> :ok
+      {:error, _error} -> lifecycle_error(:retryable_dependency)
+    end
+  end
+
   defp normalize_activate_input(input) when is_map(input) and not is_struct(input) do
     with {:ok, normalized} <- normalize_input_keys(input),
          true <- Enum.sort(Map.keys(normalized)) == Enum.sort(@activate_input_keys),
@@ -207,9 +337,53 @@ defmodule Chimwemwe.Platform.ModuleLifecycle do
 
   defp normalize_activate_input(_input), do: lifecycle_error(:invalid_input)
 
+  defp normalize_transition_input(input, operation)
+       when is_map(input) and not is_struct(input) do
+    expected_keys =
+      if operation == :complete_mandatory_work,
+        do: @mandatory_work_input_keys,
+        else: @transition_input_keys
+
+    with {:ok, normalized} <- normalize_input_keys(input, expected_keys),
+         true <- Enum.sort(Map.keys(normalized)) == Enum.sort(expected_keys),
+         {:ok, module_key} <- normalize_module_key(normalized.module_key),
+         true <- is_integer(normalized.expected_version) and normalized.expected_version > 0,
+         {:ok, idempotency_key} <- cast_uuid(normalized.idempotency_key),
+         {:ok, causation_id} <- cast_uuid(normalized.causation_id),
+         {:ok, work_item_id} <- normalize_work_item_id(normalized, operation) do
+      normalized_input = %{
+        module_key: module_key,
+        expected_version: normalized.expected_version,
+        idempotency_key: idempotency_key,
+        causation_id: causation_id
+      }
+
+      if work_item_id do
+        {:ok, Map.put(normalized_input, :work_item_id, work_item_id)}
+      else
+        {:ok, normalized_input}
+      end
+    else
+      {:error, %ModuleLifecycleError{}} = error -> error
+      _invalid -> lifecycle_error(:invalid_input)
+    end
+  end
+
+  defp normalize_transition_input(_input, _operation), do: lifecycle_error(:invalid_input)
+
+  defp normalize_work_item_id(normalized, :complete_mandatory_work) do
+    cast_uuid(normalized.work_item_id)
+  end
+
+  defp normalize_work_item_id(_normalized, _operation), do: {:ok, nil}
+
   defp normalize_input_keys(input) do
+    normalize_input_keys(input, @activate_input_keys)
+  end
+
+  defp normalize_input_keys(input, allowed_keys) do
     Enum.reduce_while(input, {:ok, %{}}, fn {key, value}, {:ok, normalized} ->
-      with {:ok, normalized_key} <- activate_input_key(key),
+      with {:ok, normalized_key} <- input_key(key, allowed_keys),
            false <- Map.has_key?(normalized, normalized_key) do
         {:cont, {:ok, Map.put(normalized, normalized_key, value)}}
       else
@@ -218,12 +392,27 @@ defmodule Chimwemwe.Platform.ModuleLifecycle do
     end)
   end
 
-  defp activate_input_key(key) when key in @activate_input_keys, do: {:ok, key}
-  defp activate_input_key("causation_id"), do: {:ok, :causation_id}
-  defp activate_input_key("expected_version"), do: {:ok, :expected_version}
-  defp activate_input_key("idempotency_key"), do: {:ok, :idempotency_key}
-  defp activate_input_key("module_key"), do: {:ok, :module_key}
-  defp activate_input_key(_key), do: lifecycle_error(:invalid_input)
+  defp input_key(key, allowed_keys) when is_atom(key) do
+    if key in allowed_keys, do: {:ok, key}, else: lifecycle_error(:invalid_input)
+  end
+
+  defp input_key(key, allowed_keys) when is_binary(key) do
+    normalized_key =
+      case key do
+        "causation_id" -> :causation_id
+        "expected_version" -> :expected_version
+        "idempotency_key" -> :idempotency_key
+        "module_key" -> :module_key
+        "work_item_id" -> :work_item_id
+        _unknown -> nil
+      end
+
+    if normalized_key in allowed_keys,
+      do: {:ok, normalized_key},
+      else: lifecycle_error(:invalid_input)
+  end
+
+  defp input_key(_key, _allowed_keys), do: lifecycle_error(:invalid_input)
 
   defp normalize_module_key(module_key) when is_binary(module_key) do
     normalized = String.trim(module_key)

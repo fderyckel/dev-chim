@@ -1,0 +1,344 @@
+{
+  "attributes": [
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"gen_random_uuid()\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": true,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "tenant_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "scope_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "operation_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "kind",
+      "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "index_where": null,
+        "match_tenant?": true,
+        "match_type": "simple",
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "platform_temporal_fact_reversal_tenant_fkey",
+        "on_delete": "restrict",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "platform_temporal_qualification_facts"
+      },
+      "scale": null,
+      "size": null,
+      "source": "reverses_fact_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "effective_on",
+      "type": "date"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "quantity",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "recorded_at",
+      "type": "utc_datetime_usec"
+    }
+  ],
+  "base_filter": null,
+  "check_constraints": [
+    {
+      "attribute": [
+        "kind",
+        "reverses_fact_id"
+      ],
+      "base_filter": null,
+      "check": "(kind = 'entry' AND reverses_fact_id IS NULL) OR\n(kind = 'reversal' AND reverses_fact_id IS NOT NULL)\n",
+      "name": "platform_temporal_fact_kind_shape"
+    },
+    {
+      "attribute": [
+        "quantity"
+      ],
+      "base_filter": null,
+      "check": "quantity <> 0",
+      "name": "platform_temporal_fact_quantity_nonzero"
+    }
+  ],
+  "create_table_options": null,
+  "custom_indexes": [
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "id",
+        "tenant_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_qualification_facts_id_tenant_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "id",
+        "tenant_id",
+        "scope_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "scope_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_qualification_facts_scope_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "tenant_id",
+        "scope_id",
+        "recorded_at",
+        "id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "scope_id"
+        },
+        {
+          "type": "atom",
+          "value": "recorded_at"
+        },
+        {
+          "type": "atom",
+          "value": "id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_qualification_fact_history_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": false,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "tenant_id",
+        "operation_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "operation_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_qualification_fact_operation_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": false,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "tenant_id",
+        "reverses_fact_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "reverses_fact_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_qualification_fact_reversal_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": "kind = 'reversal'"
+    }
+  ],
+  "custom_statements": [
+    {
+      "after_tables": [
+        "platform_temporal_qualification_facts"
+      ],
+      "code?": false,
+      "down": "DROP FUNCTION guard_platform_temporal_qualification_fact();",
+      "global?": true,
+      "name": "platform_temporal_qualification_fact_guard_function",
+      "up": "CREATE FUNCTION guard_platform_temporal_qualification_fact()\nRETURNS trigger\nLANGUAGE plpgsql\nAS $$\nDECLARE\n  operation_kind text;\n  operation_target uuid;\nBEGIN\n  IF TG_OP = 'DELETE' THEN\n    RAISE EXCEPTION USING\n      ERRCODE = '23514',\n      CONSTRAINT = 'platform_temporal_qualification_fact_delete_forbidden',\n      MESSAGE = 'temporal qualification fact deletion is forbidden';\n  END IF;\n\n  IF TG_OP = 'UPDATE' THEN\n    RAISE EXCEPTION USING\n      ERRCODE = '23514',\n      CONSTRAINT = 'platform_temporal_qualification_fact_immutable',\n      MESSAGE = 'temporal qualification facts are immutable';\n  END IF;\n\n  NEW.recorded_at := transaction_timestamp() AT TIME ZONE 'UTC';\n\n  SELECT kind, target_fact_id\n  INTO operation_kind, operation_target\n  FROM platform_temporal_qualification_fact_operations\n  WHERE id = NEW.operation_id\n    AND tenant_id = NEW.tenant_id\n    AND scope_id = NEW.scope_id;\n\n  IF operation_kind IS NULL THEN\n    RAISE EXCEPTION USING\n      ERRCODE = '23514',\n      CONSTRAINT = 'platform_temporal_fact_operation_missing',\n      MESSAGE = 'temporal qualification fact operation is missing';\n  END IF;\n\n  IF operation_kind = 'record' AND (\n    NEW.kind <> 'entry'\n    OR EXISTS (\n      SELECT 1\n      FROM platform_temporal_qualification_facts\n      WHERE tenant_id = NEW.tenant_id\n        AND operation_id = NEW.operation_id\n    )\n  ) THEN\n    RAISE EXCEPTION USING\n      ERRCODE = '23514',\n      CONSTRAINT = 'platform_temporal_fact_record_shape',\n      MESSAGE = 'record operation must create exactly one entry';\n  END IF;\n\n  IF operation_kind = 'reverse_and_replace' AND (\n    (NEW.kind = 'reversal' AND (\n      NEW.reverses_fact_id IS DISTINCT FROM operation_target\n      OR EXISTS (\n        SELECT 1\n        FROM platform_temporal_qualification_facts\n        WHERE tenant_id = NEW.tenant_id\n          AND operation_id = NEW.operation_id\n          AND kind = 'reversal'\n      )\n    ))\n    OR\n    (NEW.kind = 'entry' AND EXISTS (\n      SELECT 1\n      FROM platform_temporal_qualification_facts\n      WHERE tenant_id = NEW.tenant_id\n        AND operation_id = NEW.operation_id\n        AND kind = 'entry'\n    ))\n  ) THEN\n    RAISE EXCEPTION USING\n      ERRCODE = '23514',\n      CONSTRAINT = 'platform_temporal_fact_correction_shape',\n      MESSAGE = 'correction operation fact shape is invalid';\n  END IF;\n\n  IF NEW.kind = 'reversal' AND NOT EXISTS (\n    SELECT 1\n    FROM platform_temporal_qualification_facts\n    WHERE id = NEW.reverses_fact_id\n      AND tenant_id = NEW.tenant_id\n      AND scope_id = NEW.scope_id\n      AND kind = 'entry'\n  ) THEN\n    RAISE EXCEPTION USING\n      ERRCODE = '23514',\n      CONSTRAINT = 'platform_temporal_qualification_fact_reversal_target',\n      MESSAGE = 'temporal qualification reversal target is invalid';\n  END IF;\n\n  RETURN NEW;\nEND;\n$$;\n"
+    },
+    {
+      "after_tables": [
+        "platform_temporal_qualification_facts"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER platform_temporal_qualification_fact_guard\n  ON platform_temporal_qualification_facts;\n",
+      "global?": true,
+      "name": "platform_temporal_qualification_fact_guard_trigger",
+      "up": "CREATE TRIGGER platform_temporal_qualification_fact_guard\nBEFORE INSERT OR UPDATE OR DELETE\nON platform_temporal_qualification_facts\nFOR EACH ROW\nEXECUTE FUNCTION guard_platform_temporal_qualification_fact();\n"
+    }
+  ],
+  "has_create_action": false,
+  "hash": "9AA76C22E4318477E64893CD1DC5A73CF3184CE9161AA8EB21D9AF821B84FF7A",
+  "identities": [],
+  "multitenancy": {
+    "attribute": "tenant_id",
+    "global": false,
+    "strategy": "attribute"
+  },
+  "repo": "Elixir.Chimwemwe.Repo",
+  "schema": null,
+  "table": "platform_temporal_qualification_facts"
+}

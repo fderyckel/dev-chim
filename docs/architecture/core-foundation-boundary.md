@@ -1,6 +1,6 @@
 # Core foundation boundary
 
-- Status: Slices 1A through 1H-A and ADR 0018 T1-A/T1-B bounded increments implemented under completed Phase 0 decisions
+- Status: Slices 1A through 1H-B and ADR 0018 T1-A/T1-B/T1-C bounded increments implemented under completed Phase 0 decisions
 - Owner: Platform engineering
 - Governing records: [ADR 0001](../adr/0001-modular-monolith-and-service-boundaries.md), [ADR 0002](../adr/0002-ash-adoption-criteria-and-fallback.md), [ADR 0003](../adr/0003-tenant-model-and-optional-postgresql-rls.md), [ADR 0005](../adr/0005-domain-action-and-state-transition-convention.md), [ADR 0007](../adr/0007-transactional-outbox-and-event-envelope.md), [ADR 0017](../adr/0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md), [ADR 0018](../adr/0018-temporal-records-correction-audit-and-evidence-semantics.md), and [ADR 0019](../adr/0019-domain-model-authoring-and-governed-metadata.md)
 - Review trigger: identity or placement integration, another authority mutation, public write invocation, or a retained Ash production gate
@@ -16,7 +16,7 @@ Request metadata adds a correlation identifier, purpose, and locale only after t
 
 ## Ash boundary
 
-`Chimwemwe.Platform` is the production Ash domain. It always runs authorization and requires an actor. Slice 1F replaces its deliberate empty baseline with six persistent authority resources: tenant membership, role, capability, actor-role assignment, role-capability grant, and role inclusion. Slice 1G-A adds closed authority-audit, outbox, and idempotency resources. ADR 0018 T1-A adds four temporal-qualification resources. Slice 1H-A adds closed module-entitlement and module-activation resources. All fifteen are tenant-owned and policy-protected. `ModuleActivation.activate_module` is private and capability-protected; its supported entry point is the trusted `ModuleLifecycle.activate/4` boundary.
+`Chimwemwe.Platform` is the production Ash domain. It always runs authorization and requires an actor. Slice 1F replaces its deliberate empty baseline with six persistent authority resources: tenant membership, role, capability, actor-role assignment, role-capability grant, and role inclusion. Slice 1G-A adds closed authority-audit, outbox, and idempotency resources. ADR 0018 T1-A adds four temporal-qualification resources and T1-C adds the closed operation identity plus consumer-basis chain. Slice 1H-A adds closed module-entitlement and module-activation resources, and Slice 1H-B adds closed modeled module-work state. Every registered resource is tenant-owned and policy-protected. Temporal and module-lifecycle actions are private and capability-protected behind their trusted resource-specific boundaries.
 
 `Chimwemwe.Platform.Resource` is the code-owned base for future platform resources. It requires an explicit `:tenant_owned` or `:global_reference` ownership declaration and owns the Ash policy-authorizer configuration. `Chimwemwe.Platform.ResourceContract` audits every registered resource and the domain itself in the required test suite. A tenant-owned resource must use private, non-null `tenant_id` attribute multitenancy with no global fallback; a global-reference resource cannot silently carry tenant state; and create, update, and destroy actions cannot use their generic type name.
 
@@ -42,7 +42,7 @@ Slice 1E turns the earlier admission and routing contracts into one bounded Post
 
 The runtime accepts route and pool configuration only at startup. The operation API has no repository, database, tenant, placement, routing, or raw Ecto option. Unknown tenants and stale or forged placement details return the same non-disclosing route failure. Missing runtime components fail closed as a retryable dependency. A spawned process inherits neither the dynamic repository nor permission to use it; asynchronous work must establish and validate its own context.
 
-The repository module and migration baseline are production code. Slice 1F adds the authority graph tables, Slice 1G-A adds the three closed write-evidence tables, ADR 0018 T1-A adds the synthetic temporal-qualification tables, and Slice 1H-A adds tenant-qualified entitlement and activation tables. T1-B changes no table: it uses those reviewed constraints and the existing closed safe-write evidence tables for a neutral qualification action. No runtime is installed under `Chimwemwe.Application` until a later deployment slice provides trusted route data, credentials, and measured explicit limits. The registry remains an immutable integration seam rather than the durable placement and movement control plane required before production movement.
+The repository module and migration baseline are production code. Slice 1F adds the authority graph tables, Slice 1G-A adds the three closed write-evidence tables, ADR 0018 T1-A adds the synthetic temporal-qualification tables, Slice 1H-A adds tenant-qualified entitlement and activation tables, and Slice 1H-B expands the activation aggregate plus closed tenant-qualified modeled work. T1-B changes no table. T1-C adds fact-operation and consumer-basis tables, same-scope operation guards, a tenant-qualified consumer chain, and retained-state rollback refusal. It reuses the existing closed safe-write evidence tables without promoting a common temporal persistence abstraction. No runtime is installed under `Chimwemwe.Application` until a later deployment slice provides trusted route data, credentials, and measured explicit limits. The registry remains an immutable integration seam rather than the durable placement and movement control plane required before production movement.
 
 ## Tenant-authority boundary
 
@@ -60,12 +60,18 @@ The production dependencies are pinned to the exact Ash, AshPostgres, and PicoSA
 
 ## Neutral temporal qualification boundary
 
-`Chimwemwe.Platform.TemporalQualification` is the only supported T1-B entry point. It validates
+`Chimwemwe.Platform.TemporalQualification` is the only supported T1-B/T1-C entry point. It validates
 trusted context before input, derives tenant and writer placement, and exposes separate private
 publication and exact-target correction actions. The actions use distinct capability keys, lock
 the tenant-and-aggregate write scope, re-authorize from current writer state, and atomically
 create the immutable revision and segments, advance the current selector, write minimized audit
 and outbox evidence, and complete an exact replay result.
+
+T1-C adds separate private record and reverse-and-replace fact actions plus exact operation and
+bounded scope-history reads. One neutral consumer-basis chain remains pinned after source
+correction until a separately authorized reconcile action appends a successor against the exact
+current source revision. The event identifier is causation evidence only and grants no authority.
+Fact and consumer transactions retain the same atomic state/audit/outbox/idempotency contract.
 
 Named reads stay on the writer. Current/effective authority does not grant exact/history access,
 and unsupported recorded-time reads return a typed failure only after history authorization. The
@@ -84,14 +90,22 @@ The transaction serializes by tenant and module, binds exact replay to tenant, a
 module declaration, expected version, and causation, then commits activation, audit, outbox, and
 idempotency evidence together. `ModuleLifecycle.authorize/5` evaluates all gates again for an
 ordinary code-owned capability. It accepts no caller-selected gate, role, tenant, repository, or
-Ash options. Deactivation, drain, reactivation, commercial entitlement, and module-specific data
-ownership remain the next explicit lifecycle boundary.
+Ash options.
+
+Slice 1H-B adds private deactivation, mandatory-work, and compatible-reactivation actions.
+Deactivation and the internal mutation-side gate share one tenant-and-module transaction lock.
+Deactivation rejects active dependents, closes ordinary authority, parks modeled ordinary work,
+records the consumer replay cursor, and marks projections stale without deleting retained state.
+Mandatory audit, outbox, retention, legal-hold, and reconciliation work stays available through a
+separate capability. Reactivation requires explicit release compatibility and active dependencies,
+requeues parked work, records reconciliation, advances projection generation, and reopens ordinary
+authority only in the same transaction as audit, outbox, and exact idempotency evidence.
 
 ## Fail-closed contract
 
 Core work can run through the context guard only after all identifiers and metadata validate and the authenticated tenant matches the routed tenant. Missing context, raw maps, malformed identifiers, non-positive routing versions, unsupported placement profiles, blank purpose, and tenant mismatch return typed, non-disclosing errors before the supplied operation executes.
 
-The core validates context shape and source separation, resolves an immutable startup-owned route to a scoped Ecto repository, and authorizes code-known capability requirements from current tenant-owned data. It can rename one role, assign one existing membership to one existing role, qualify neutral revision publication/correction, and initially activate one entitled released module through bounded private actions while storing audit/outbox/idempotency facts. It can also serve capability-separated neutral temporal reads and independently gate ordinary module use. It does not authenticate a user, provide a durable placement registry, expose a public interface, dispatch an event, provide a general authority-administration or entitlement-management surface, or authorize a school domain.
+The core validates context shape and source separation, resolves an immutable startup-owned route to a scoped Ecto repository, and authorizes code-known capability requirements from current tenant-owned data. It can rename one role, assign one existing membership to one existing role, qualify neutral revision publication/correction, append a neutral reversal/replacement operation, deliberately reconcile one neutral consumer, and activate, drain, perform mandatory work for, and compatibly reactivate one entitled released module through bounded private actions while storing audit/outbox/idempotency facts. It can also serve capability-separated neutral temporal reads and independently gate ordinary module use. It does not authenticate a user, provide a durable placement registry, expose a public interface, dispatch an event, provide a general authority-administration or entitlement-management surface, or authorize a school domain.
 
 ## Explicit non-goals
 
@@ -99,10 +113,10 @@ The core validates context shape and source separation, resolves an immutable st
 - no membership/role creation, capability grant, role inclusion, revoke, generic CRUD, public write invocation, or production data;
 - no descriptor consumer or checked production descriptor artifact, experience metadata, custom-field store, or alternate schema source;
 - no Phoenix endpoint or public API;
-- no entitlement-management API, module deactivation, drain, retained-data lifecycle, compatible reactivation, or school business module;
-- no callable temporal reversal, retention, hold, erasure, import, or migration action and no reusable temporal persistence library;
+- no entitlement-management or offboarding API, retained-data read/export/correction/deletion action, real queue/consumer/projection adapter, or school business module;
+- no temporal retention, hold, erasure, import, backup/restore, or migration action and no reusable temporal persistence library;
 - no Oban worker or outbox dispatcher;
 - no external service, web workspace, or production infrastructure; and
 - no claim that Phase 0 completion authorizes any capability outside the explicitly approved slice.
 
-See the [Phase 1 core-foundation plan](../plans/phase-1-core-foundation-plan.md), [slice 1C invocation evidence](../phase-1/evidence/action-invocation.md), [slice 1D admission evidence](../phase-1/evidence/database-admission.md), [slice 1E persistence evidence](../phase-1/evidence/trusted-persistence.md), [slice 1F authority evidence](../phase-1/evidence/tenant-authority.md), [Slice 1G-A role-rename evidence](../phase-1/evidence/authority-role-rename.md), [Slice 1G-B role-assignment evidence](../phase-1/evidence/authority-role-assignment.md), [ADR 0018 T1-A evidence](../phase-1/evidence/temporal-qualification-physical-model.md), [ADR 0018 T1-B evidence](../phase-1/evidence/temporal-qualification-revision-boundary.md), [Slice 1H-A module-lifecycle evidence](../phase-1/evidence/module-lifecycle-initial-activation.md), [domain-model authoring boundary](domain-model-authoring-and-metadata.md), [trusted-routing evidence](../phase-0/evidence/trusted-routing.md), and [threat model](../security/threat-model.md).
+See the [Phase 1 core-foundation plan](../plans/phase-1-core-foundation-plan.md), [slice 1C invocation evidence](../phase-1/evidence/action-invocation.md), [slice 1D admission evidence](../phase-1/evidence/database-admission.md), [slice 1E persistence evidence](../phase-1/evidence/trusted-persistence.md), [slice 1F authority evidence](../phase-1/evidence/tenant-authority.md), [Slice 1G-A role-rename evidence](../phase-1/evidence/authority-role-rename.md), [Slice 1G-B role-assignment evidence](../phase-1/evidence/authority-role-assignment.md), [ADR 0018 T1-A evidence](../phase-1/evidence/temporal-qualification-physical-model.md), [ADR 0018 T1-B evidence](../phase-1/evidence/temporal-qualification-revision-boundary.md), [ADR 0018 T1-C evidence](../phase-1/evidence/temporal-qualification-fact-and-reconciliation.md), [Slice 1H-A module-lifecycle evidence](../phase-1/evidence/module-lifecycle-initial-activation.md), [Slice 1H-B drain/reactivation evidence](../phase-1/evidence/module-lifecycle-drain-reactivation.md), [domain-model authoring boundary](domain-model-authoring-and-metadata.md), [trusted-routing evidence](../phase-0/evidence/trusted-routing.md), and [threat model](../security/threat-model.md).

@@ -66,11 +66,11 @@ authentication, or hand-maintained public APIs.
 - local in-app browser smoke review: default and 320-pixel layouts inspected; 320-pixel document
   width equalled viewport width; both selectors operated; save remained disabled; no browser
   warnings or errors were recorded; and
-- complete `make check`: not green in the combined worktree. A newly applied concurrent Ash
-  dependency patch still records its complete verification as pending, and the clean-checkout
-  rehearsal predates this worktree, so `make docs-check` correctly reports both records as stale.
-  UI-1A's connected browser command passes against the patched core, but this evidence cannot
-  mark the repository gate complete.
+- complete `make check` in an isolated clean checkout: passed after the concurrent Ash 3.33.11
+  security patch, with 24 repository-tool tests, 106 Phase 0 tests, 97 production-core tests,
+  20 browser unit tests, 12 UI-0 browser scenarios, 6 connected UI-1A browser scenarios, and 1
+  unavailable-recovery scenario. Both Hex audits and both Dialyzer runs passed with zero skipped
+  warnings; bootstrap and verification left the candidate checkout clean.
 
 The browser and automated checks are engineering qualification evidence. They do not validate
 school terminology with representative users, accept ADR 0022, authorize UI-1B, or establish a

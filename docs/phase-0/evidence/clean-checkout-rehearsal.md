@@ -2,7 +2,7 @@
 
 - Status: Passed
 - Owner: Platform engineering
-- Rehearsed: 2026-09-24
+- Rehearsed: 2026-09-25
 - Machine record: [`clean-checkout-rehearsal.json`](../../../spikes/ash-foundation-lab/priv/maintenance/clean-checkout-rehearsal.json)
 - Harness: [`rehearse_phase0_clean_checkout.py`](../../../tools/rehearse_phase0_clean_checkout.py)
 
