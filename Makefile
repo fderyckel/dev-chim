@@ -1,9 +1,10 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help bootstrap format lint check-staged test-fast test docs-check web-dev web-core-dev web-check web-e2e web-core-e2e check
+.PHONY: help bootstrap fix format lint check-staged test-fast test docs-check web-dev web-core-dev web-check web-e2e web-core-e2e check
 
 help:
 	@echo "bootstrap  Install and prepare local workspace dependencies"
+	@echo "fix        Apply safe formatter and linter fixes"
 	@echo "format     Format maintained source files"
 	@echo "lint       Run non-mutating static checks"
 	@echo "check-staged Run fast checks for staged Elixir changes"
@@ -19,6 +20,10 @@ help:
 
 bootstrap:
 	./bin/bootstrap
+
+fix:
+	mise exec -- uv run ruff check --fix tools tests/tools
+	$(MAKE) format
 
 format:
 	mise exec -- uv run ruff format tools tests/tools
@@ -58,6 +63,7 @@ check-staged:
 	./bin/format-staged-elixir --check
 	mise exec -- env MIX_ENV=test mix compile --warnings-as-errors
 	cd apps/chimwemwe_core && mise exec -- mix credo --strict
+	mise exec -- mix dialyzer
 	$(MAKE) test-fast
 	git diff --cached --check
 

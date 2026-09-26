@@ -22,6 +22,8 @@
 ## Commands
 
 ```sh
+make fix
+make check-staged
 make test-fast
 make test
 make lint
@@ -34,14 +36,23 @@ make check
 
 ### Fast development loop
 
+`make fix` applies Ruff's safe lint fixes and then runs Ruff formatting, Elixir `mix format`, and
+Prettier. It intentionally does not rewrite Credo or Dialyzer findings because those tools report
+design, maintainability, and inferred-type questions that require developer intent.
+
+`make check-staged` validates a staged Elixir candidate with formatting, warnings-as-errors
+compilation, strict Credo, Dialyzer, the production-core test suite, and staged whitespace. The
+pre-commit hook invokes it automatically whenever an Elixir file is staged.
+
 `make test-fast` creates and migrates the synthetic production-core test database, then runs only the bounded production-core test suite. It is the default short loop for core resource, action, policy, execution-context, descriptor, trusted read-invocation, admission, persistence-routing, and tenant-authority work. It does not run the disposable Ash lab, Python repository checks, generated-artifact drift checks, TypeScript contracts, lint, dependency audit, or static analysis.
 
 `make web-check` runs the UI-0 format, JavaScript, CSS contract, type, unit,
 component, automated accessibility, and guarded production-build checks.
-`make web-e2e` first satisfies that contract, then starts the built workspace and
+`make web-e2e` first satisfies that contract, then starts the built workspace on the dedicated
+test port `3020` by default and
 uses Chromium at 320, 768, and 1440 CSS pixels. Tests locate controls and
 content through accessible roles, names, and visible status text rather than CSS
-selectors. `make web-dev` is the only supported local start command; it sets the
+selectors. `CHIMWEMWE_UI0_E2E_PORT` may select another free test port. `make web-dev` is the only supported local start command; it sets the
 explicit synthetic-prototype guard and serves on `http://127.0.0.1:3000`.
 
 `make web-core-e2e` verifies the generated UI-1A contract, then starts the dedicated synthetic

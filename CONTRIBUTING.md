@@ -5,7 +5,7 @@
 1. Start from an up-to-date `main` branch.
 2. Create a short-lived branch named `type/short-description`, for example `docs/adr-process` or `spike/ash-tenancy`.
 3. Make one coherent change. Update documentation and tests in the same change as behaviour.
-4. Use `make test-fast` while iterating, then run `make format` and `make check` before sharing the change.
+4. Use `make fix` and `make test-fast` while iterating. Stage the candidate, run `make check-staged`, then run `make check` before sharing the change.
 5. Review the diff for secrets, generated noise, tenant-safety regressions, and accidental business-module scope.
 6. Push the branch and open a pull request. Do not push directly to a protected `main` branch.
 

@@ -1,6 +1,6 @@
 # Phase 1 core-foundation implementation plan
 
-- Status: Slices 1A through 1I-B, ADR 0018 T1-A/T1-B/T1-C, and local UI-1A implemented; Slice 1I-B focused, production-core, and complete repository verification passing; Phase 0 decisions completed
+- Status: Slices 1A through 1J-A, ADR 0018 T1-A/T1-B/T1-C, and local UI-1A implemented; Slice 1J-A bounded internal outbox delivery verification passing while wider operational-readiness gates remain open; Phase 0 decisions completed
 - Owner: Platform engineering
 - Decision posture: Ash conditionally accepted; applicable ADR outcomes and production gates are binding
 - Review trigger: another authority mutation, a callable temporal action or read boundary, generic or public write invocation, a metadata consumer, a public interface, another app, or a school domain
@@ -478,6 +478,47 @@ or add report, export, cache, search, custom-field, runtime-schema, provisioning
 authority. Action execution remains behind a later independently reviewed TM-16 boundary where the
 real actor and tenant must be re-authorized by the referenced named action.
 
+## Slice 1J-A outbox delivery lease and operational status
+
+The authorized first operational-readiness increment opens only a durable internal delivery
+boundary for the transactional outbox already required by ADR 0007. It does not install a worker,
+call an external consumer, or qualify a production deployment.
+
+1. Add an immutable code-owned consumer registry. Each declaration has a stable key, an exact
+   event-type and schema-version allowlist, a bounded batch size, a bounded lease duration, a
+   bounded attempt limit, and a bounded retry delay. Runtime or request input cannot invent a
+   consumer, widen its subscription, select a classification, or alter those limits.
+2. Add one closed tenant-owned delivery resource keyed by event and consumer. It records only
+   lease, attempt, retry/dead-letter, completion, and optimistic-version state; the immutable
+   outbox event remains the source envelope. Compound tenant constraints prevent a delivery from
+   referencing another tenant's event.
+3. Add `Outbox.claim/4`, `acknowledge/6`, and `fail/7` boundaries behind the separate
+   code-known `platform.outbox.dispatch` capability. Each boundary revalidates trusted context,
+   resolves the authoritative writer through current placement, and uses tenant-qualified exact
+   predicates. Claiming uses deterministic order, database row locks, and skip-locked competition;
+   an expired lease may be reclaimed but an active lease may not.
+4. Dispatch only events whose type, schema version, classification, tenant, and routing version
+   match the trusted current contract. A stored event never chooses its repository or destination.
+   Stale-route events remain unclaimed and visible only as a count to authorized operational
+   status.
+5. Make acknowledgement and failure exact-token state transitions. Repeating the same completed
+   acknowledgement or recorded failure returns the same result; a different or expired token,
+   wrong consumer, wrong tenant, or incompatible state fails without mutation. Retry delay and
+   dead-letter transition derive only from the code-owned declaration.
+6. Add an authorized `Outbox.status/4` boundary behind
+   `platform.outbox.observe`. It returns counts and the oldest pending timestamp only, with no
+   tenant, actor, event, aggregate, payload, audit, repository, placement, or lease identifiers.
+7. Prove missing dispatch/observe capability, cross-tenant and stale-route non-disclosure,
+   subscription and schema filtering, bounded batches, competing claims, active and expired
+   leases, exact acknowledgement/failure replay, retry availability, dead-letter transition,
+   unavailable persistence, and alternate-write constraints.
+
+Slice 1J-A does not execute an event consumer, add Oban or another scheduler, publish externally,
+replay a dead letter, alter an immutable outbox event, expose an HTTP or browser surface, select a
+deployment, claim multi-node admission readiness, perform migration or recovery qualification, or
+substitute repository checks for the independent security/privacy review required before real
+restricted data. Those remain later Slice 1J gates.
+
 ## Acceptance checks
 
 - `Ash.Domain.Info.authorize(Chimwemwe.Platform)` returns `:always`.
@@ -566,6 +607,12 @@ real actor and tenant must be re-authorized by the referenced named action.
 - Resolved definitions exactly match the current code-owned schema, resource, descriptor, normalized content, and derived classification, and their stored module version is exact or explicitly compatible with the active release.
 - Resolution returns no tenant, actor, activation, entitlement, repository, placement, authority, audit, outbox, or idempotency identifiers and never invokes the stored action reference.
 - Slice 1I-B adds no renderer, domain-record read, generic executor, public interface, browser connection, report/export surface, provisioning path, or school module.
+- Code-owned outbox consumer declarations fix the exact event and schema subscription, batch size, lease, retry delay, and attempt limit; caller or event data cannot widen them.
+- Claiming requires validated current tenant placement and the separate dispatch capability, accepts only internal current-route events, returns a bounded deterministic batch, and gives concurrent claimers one active lease.
+- Acknowledgement and failure require the exact active database-timed lease token; exact completed or failed replay is idempotent, changed tokens or failure codes conflict, delayed retries are unavailable until due, and the declared attempt limit dead-letters the delivery.
+- The observe capability is independent from dispatch. Status returns only consumer-scoped counts and the oldest pending timestamp, including stale-route counts without tenant, actor, event, payload, audit, placement, repository, or lease identifiers.
+- Compound tenant constraints reject cross-tenant delivery references, state checks reject inconsistent alternate writes, and unavailable persistence fails closed.
+- Slice 1J-A adds no worker, scheduler, consumer execution, external publication, replay administration, public interface, production deployment qualification, or independent security/privacy approval.
 - The reviewed migration applies, rolls back, reapplies, and passes generated migration and snapshot drift checks.
 - Complete repository acceptance passes through `make check`, including the Phase 0 contract,
   production core, generated interfaces, dependency and type checks, and browser suites.
@@ -593,15 +640,23 @@ resolver, internal view, and focused tests while retaining every valid Slice 1I-
 publication fact. Removing 1I-B cannot authorize direct reads of the definition table or bypass the
 separate capability and compatibility contract.
 
+Slice 1J-A can roll back only while no outbox delivery attempt has been retained. Its migration
+refuses destructive rollback after the first claim. Once delivery state exists, consumer or schema
+evolution requires compatible forward migration, an explicit drain/reconciliation plan, or an
+approved recovery point; deleting delivery evidence or rewinding an immutable event is prohibited.
+
 The role-rename, role-assignment, temporal-qualification, and module-lifecycle increments prove
 bounded resource-specific contracts. They do not authorize membership or role creation,
-capability grant, composition, revoke, public write invocation, outbox dispatch, entitlement
-expiry, offboarding, retained-data deletion, provisioning, a real queue/consumer/projection
-adapter, or a school module. The next module-lifecycle work is real-adapter and operational
-qualification inside a separately authorized production-readiness boundary. The Phase 0
+capability grant, composition, revoke, public write invocation, entitlement expiry, offboarding,
+retained-data deletion, provisioning, a real queue/consumer/projection adapter, or a school
+module. Slice 1J-A authorizes only internal outbox lease state and transition/status boundaries;
+it does not authorize consumer execution or replay administration. The next operational work is a
+separately bounded 1J increment covering real adapters, replay controls, and deployment evidence.
+The Phase 0
 descriptor artifact, report registry, and governed experience-metadata implementation remain
 disposable evidence and are not production APIs. Slices 1I-A and 1I-B promote only the reviewed
 registry, validator, durable definition boundary, and exact internal compatibility resolver; they
-do not promote the spike report executor or renderer. The next Phase 1 boundary is Slice 1J
-operational readiness. Do not add a school business module until an explicit module slice is
-authorized.
+do not promote the spike report executor or renderer. Slice 1J remains open until multi-node
+admission, selected-deployment capacity/recovery/movement, migration rehearsal, and independent
+security/privacy review pass for the actual environment. Do not add a school business module
+until an explicit module slice is authorized.

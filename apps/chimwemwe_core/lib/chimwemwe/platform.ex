@@ -11,7 +11,9 @@ defmodule Chimwemwe.Platform do
   Slice 1H adds closed module entitlement, activation, and modeled work state
   plus private governed activation, drain, mandatory-work, and reactivation
   actions. Slice 1I-A adds one closed tenant-owned governed presentation
-  definition and its private publication action. The base-resource, resource-audit, trusted
+  definition and its private publication action. Slice 1J-A adds closed
+  tenant-owned outbox delivery state behind a code-owned consumer registry and
+  internal lease boundary. The base-resource, resource-audit, trusted
   invocation, admission, persistence, and resource-specific governed boundaries
   remain the supported paths into this domain.
   """
@@ -32,6 +34,7 @@ defmodule Chimwemwe.Platform do
     resource Chimwemwe.Platform.Authority.RoleInclusion
     resource Chimwemwe.Platform.Authority.AuditEvent
     resource Chimwemwe.Platform.OutboxEvent
+    resource Chimwemwe.Platform.Outbox.Delivery
     resource Chimwemwe.Platform.Authority.ActionIdempotency
     resource Chimwemwe.Platform.TemporalQualification.Aggregate
     resource Chimwemwe.Platform.TemporalQualification.Revision

@@ -1,4 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-exec "$(cd "$(dirname "$0")/.." && pwd -P)/bin/format-staged-elixir"
+repo_root=$(cd "$(dirname "$0")/.." && pwd -P)
+
+"$repo_root/bin/format-staged-elixir"
+
+if git -C "$repo_root" diff --cached --quiet -- '*.ex' '*.exs'; then
+  exit 0
+fi
+
+make -C "$repo_root" check-staged

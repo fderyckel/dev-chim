@@ -28,14 +28,14 @@ not independent evidence.
 
 ## Local pre-commit boundary
 
-The versioned pre-commit hook remains intentionally narrow: it formats staged `.ex` and `.exs`
-files and stages only those mechanical changes. This catches formatter drift before the commit
-exists without selecting a database, running browser tests, contacting external services, or
-making a commit depend on a slow environment.
+The versioned pre-commit hook applies `mix format` only to staged `.ex` and `.exs` files and stages
+those mechanical changes. When Elixir is staged, it then requires `make check-staged`: formatting,
+warnings-as-errors compilation, core Credo, Dialyzer, the synthetic fast suite, and staged
+whitespace. Non-Elixir commits skip this gate. It catches the common local Elixir failures before
+the commit exists without running browser tests or contacting external services.
 
-`make check-staged` is an explicit, opt-in developer loop. It checks staged Elixir formatting,
-compiles with warnings as errors, runs core Credo and the synthetic fast suite, and checks staged
-whitespace. It is not a replacement for `make check`, a required pre-commit action, or CI.
+`make check-staged` remains a bounded developer gate, not a replacement for the complete
+pre-push `make check` contract or future independent CI.
 
 ## Readiness sequence
 

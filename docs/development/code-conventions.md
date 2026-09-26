@@ -23,6 +23,7 @@
 - Use type hints for public functions and `pathlib.Path` for paths.
 - Use the standard library unless a dependency clearly improves correctness.
 - Ruff owns formatting and linting; pytest owns tests.
+- `make fix` applies Ruff's safe fixes before the repository formatters run.
 - Invoke Python through `uv run` rather than a global environment.
 
 ## Shell
@@ -30,4 +31,3 @@
 - Use POSIX `sh` for repository entrypoints unless a documented feature requires another shell.
 - Start scripts with `set -eu`, quote variables, resolve the repository root, and use explicit paths for destructive operations.
 - ShellCheck must pass.
-

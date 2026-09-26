@@ -1,6 +1,6 @@
 # Phase 1: core foundation
 
-- Status: Slices 1A through 1I-B, ADR 0018 T1-A/T1-B/T1-C, and local UI-1A implemented; Slice 1I-B focused, production-core, and complete repository verification passing; local synthetic UI-0 implemented; representative human review and the remaining ADR-specific gates are pending
+- Status: Slices 1A through 1J-A, ADR 0018 T1-A/T1-B/T1-C, and local UI-1A implemented; Slice 1J-A opens only the bounded internal outbox lease/status boundary and does not complete operational readiness; local synthetic UI-0 implemented; representative human review and the remaining ADR-specific gates are pending
 - Owner: Platform engineering
 - Start basis: explicit user direction on 2026-09-14, followed by the completed Phase 0 review on 2026-09-16
 - Entry basis: Ash is conditionally accepted; implementation proceeds only in explicitly authorized bounded slices and must satisfy the retained production gates
@@ -308,6 +308,27 @@ an Ash/public/HTTP/browser read, add a checked public descriptor artifact, or cr
 cache, search, custom-field, runtime-schema, provisioning, or education-domain authority. See the
 [Slice 1I-B evidence](evidence/governed-extension-resolution.md).
 
+## Slice 1J-A internal outbox delivery lease
+
+Slice 1J-A implements the first bounded operational-readiness increment selected by ADR 0007. A
+code-owned immutable registry declares each internal consumer's exact event/schema subscription,
+batch size, lease duration, retry delay, and attempt limit. `Outbox.claim/4`, `acknowledge/6`, and
+`fail/7` require the separate `platform.outbox.dispatch` capability; `Outbox.status/4` requires
+`platform.outbox.observe`.
+
+Claiming revalidates trusted tenant placement, accepts only internal events on the current routing
+version, and uses deterministic tenant-qualified database leases with skip-locked competition.
+Acknowledgement and failure require the exact active lease token and database time. Retried
+failures become available only after the declared delay and become dead letters at the declared
+attempt limit. Delivery state has a compound tenant-qualified event reference and closed Ash
+surface. Sanitized status exposes only consumer-scoped counts and the oldest pending timestamp.
+
+The slice installs no worker or scheduler, executes no consumer, publishes nothing externally,
+and adds no replay-administration, HTTP, browser, or production-runtime surface. Multi-node
+admission, real adapters, replay controls, migration/recovery rehearsal for the selected
+environment, capacity and movement qualification, and independent security/privacy review remain
+open 1J gates. See the [Slice 1J-A evidence](evidence/outbox-delivery-lease.md).
+
 ## UI-0 local browser boundary
 
 UI-0 implements only the local experience-validation slice authorized on 2026-09-24. It adds a separate Next.js, React, and TypeScript workspace under `clients/web` with:
@@ -347,7 +368,7 @@ or workflow is considered validated.
 
 - Phase 0 ADR outcomes and conditional gates are binding; an Accepted ADR is changed only by supersession.
 - `make check` proves repository consistency; it does not by itself approve a new production capability.
-- Only `apps/chimwemwe_core` is allowed during slices 1A through the current Slice 1I-B increment. A second production app or service needs explicit later-slice authorization.
+- Only `apps/chimwemwe_core` is allowed during slices 1A through the current Slice 1J-A increment. A second production app or service needs explicit later-slice authorization.
 - `clients/web` is allowed for UI-0 and only UI-1A's guarded, loopback, read-only core connection;
   it has no authority to become a production client, expose a write, or add real identity.
 - The core contains no production data or secrets and introduces no generic or public write invocation, metadata renderer or execution engine, or public interface.

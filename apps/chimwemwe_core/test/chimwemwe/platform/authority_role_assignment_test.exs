@@ -30,6 +30,7 @@ defmodule Chimwemwe.Platform.AuthorityRoleAssignmentTest do
 
   @authority_tables [
     "platform_authority_action_idempotency",
+    "platform_outbox_deliveries",
     "platform_outbox_events",
     "platform_authority_audit_events",
     "platform_role_inclusions",

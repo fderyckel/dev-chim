@@ -16,8 +16,10 @@ The execution sequences are in the [Phase 0 implementation plan](docs/plans/phas
 
 ```sh
 make bootstrap
+make fix
 make format
 make lint
+make check-staged
 make test-fast
 make test
 make docs-check
@@ -30,6 +32,8 @@ make check
 ```
 
 These commands are the project contract. Editor tasks and future CI jobs must call them rather than recreating different check sequences.
+`make fix` applies Ruff's safe fixes, then runs the repository-owned Python, Elixir, and web formatters.
+`make check-staged` is the pre-commit Elixir gate: formatting, warnings-as-errors compilation, strict Credo, Dialyzer, core tests, and staged whitespace.
 `make test-fast` is the short production-core feedback loop during development; it does not replace `make check` before sharing a change.
 `make web-dev` starts the explicitly synthetic, local-only UI-0 experience at `http://127.0.0.1:3000`.
 `make web-core-dev` starts the guarded UI-1A qualification at

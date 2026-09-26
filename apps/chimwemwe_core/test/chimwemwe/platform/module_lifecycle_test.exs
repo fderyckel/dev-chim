@@ -43,6 +43,7 @@ defmodule Chimwemwe.Platform.ModuleLifecycleTest do
   @tables [
     "platform_governed_extension_definitions",
     "platform_authority_action_idempotency",
+    "platform_outbox_deliveries",
     "platform_outbox_events",
     "platform_authority_audit_events",
     "platform_module_work_items",

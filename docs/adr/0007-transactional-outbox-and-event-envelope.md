@@ -47,7 +47,15 @@ Events carry the minimum necessary data, never become an authorization or placem
 
 ## Validation evidence
 
-The [Ash pressure-test](../phase-0/evidence/ash-pressure-test.md#transactional-outbox-slice) proves a successful action writes state, audit reference, and one minimal event fact together, while an injected failure after the event insert rolls all three back. It also proves missing correlation and causation context prevents the transition. Full consumer dispatch, retry, replay, retention, and placement-movement reconciliation belong to later phases.
+The [Ash pressure-test](../phase-0/evidence/ash-pressure-test.md#transactional-outbox-slice) proves a successful action writes state, audit reference, and one minimal event fact together, while an injected failure after the event insert rolls all three back. It also proves missing correlation and causation context prevents the transition.
+
+[Slice 1J-A](../phase-1/evidence/outbox-delivery-lease.md) adds the first production-core delivery
+evidence: exact code-owned subscriptions, tenant/current-route/internal-classification claim
+filtering, bounded skip-locked leases, database-timed exact acknowledgement and failure, retry and
+dead-letter transitions, separate dispatch/observe authority, count-only status, and compound
+tenant delivery constraints. It deliberately executes no consumer and supplies no worker, external
+publisher, replay administration, retention policy, or placement-movement reconciliation. Those
+remain later operational-readiness gates.
 
 ## Fallback and exit cost
 

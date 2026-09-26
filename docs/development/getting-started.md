@@ -43,8 +43,10 @@ pg_isready
 
 ```sh
 git status --short
-make format
-make test
+make fix
+make test-fast
+git add path/to/changed-file ...
+make check-staged
 make check
 ```
 

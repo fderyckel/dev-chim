@@ -1,6 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const ui0Port = process.env.CHIMWEMWE_UI0_E2E_PORT ?? "3000";
+const ui0Port = process.env.CHIMWEMWE_UI0_E2E_PORT ?? "3020";
 
 if (!/^[1-9][0-9]{0,4}$/.test(ui0Port) || Number(ui0Port) > 65_535) {
   throw new Error("CHIMWEMWE_UI0_E2E_PORT must be a valid TCP port.");
