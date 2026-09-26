@@ -13,7 +13,9 @@ defmodule Chimwemwe.Platform do
   actions. Slice 1I-A adds one closed tenant-owned governed presentation
   definition and its private publication action. Slice 1J-A adds closed
   tenant-owned outbox delivery state behind a code-owned consumer registry and
-  internal lease boundary. The base-resource, resource-audit, trusted
+  internal lease boundary. Slice 1J-B adds a closed durable consumer receipt,
+  database-local consumer execution, explicit supervision, and exact governed
+  replay. The base-resource, resource-audit, trusted
   invocation, admission, persistence, and resource-specific governed boundaries
   remain the supported paths into this domain.
   """
@@ -35,6 +37,7 @@ defmodule Chimwemwe.Platform do
     resource Chimwemwe.Platform.Authority.AuditEvent
     resource Chimwemwe.Platform.OutboxEvent
     resource Chimwemwe.Platform.Outbox.Delivery
+    resource Chimwemwe.Platform.Outbox.ConsumerReceipt
     resource Chimwemwe.Platform.Authority.ActionIdempotency
     resource Chimwemwe.Platform.TemporalQualification.Aggregate
     resource Chimwemwe.Platform.TemporalQualification.Revision

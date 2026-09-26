@@ -5,6 +5,8 @@
 - Owner: Product and platform engineering
 - Governing record: [ADR 0021](../adr/0021-academic-calendar-authority-and-template-adoption.md)
 - Scope: paper walkthrough over synthetic data; no production resource, migration, interface, or school policy
+- Later scope correction: the scenarios remain evidence, but ADR 0025 requires broader
+  learning-institution and recursive-unit validation before ADR 0021 can be accepted
 
 ## Purpose
 

@@ -56,6 +56,7 @@ defmodule Chimwemwe.Platform.TemporalQualificationActionTest do
     "platform_temporal_qualification_fact_operations",
     "platform_temporal_qualification_aggregates",
     "platform_authority_action_idempotency",
+    "platform_outbox_consumer_receipts",
     "platform_outbox_deliveries",
     "platform_outbox_events",
     "platform_authority_audit_events",

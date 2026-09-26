@@ -5,9 +5,11 @@ defmodule Chimwemwe.Platform.OutboxError do
 
   @type code ::
           :conflict
+          | :consumer_rejected
           | :consumer_not_available
           | :forbidden
           | :internal
+          | :invalid_contract
           | :invalid_input
           | :invalid_registry
           | :not_found

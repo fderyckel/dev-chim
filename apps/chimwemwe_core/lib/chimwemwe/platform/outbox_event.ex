@@ -3,9 +3,10 @@ defmodule Chimwemwe.Platform.OutboxEvent do
   Immutable, tenant-owned event fact committed with authoritative state.
 
   This resource defines the accepted ADR 0007 envelope for production-core writes.
-  Slice 1J-A may lease the immutable fact to a code-declared internal consumer,
-  while retention, replay administration, consumer execution, and external
-  publication remain deferred.
+  Slice 1J-A may lease the immutable fact to a code-declared internal consumer.
+  Slice 1J-B adds database-local execution with durable receipts and exact
+  governed dead-letter replay. Retention, replay ranges/cursors, external
+  publication, and wider operational qualification remain deferred.
   """
 
   use Chimwemwe.Platform.Resource,

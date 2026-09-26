@@ -57,6 +57,14 @@ tenant delivery constraints. It deliberately executes no consumer and supplies n
 publisher, replay administration, retention policy, or placement-movement reconciliation. Those
 remain later operational-readiness gates.
 
+[Slice 1J-B](../phase-1/evidence/outbox-supervised-consumption-and-replay.md) adds the next bounded
+production-core evidence: code-owned handler revisions, authoritative database-local execution,
+durable exact-delivery receipts, acknowledgement-crash idempotency, an explicitly configured
+supervised dispatcher, capability-separated exact dead-letter replay, and minimized replay audit
+plus exact-result evidence. It installs no production application child and adds no external
+publisher, replay range/cursor control, module drain integration, retention policy, placement
+movement, restore/convergence qualification, or selected-environment readiness claim.
+
 ## Fallback and exit cost
 
 Add a broker only when measured throughput, retention, or consumer isolation cannot be met by PostgreSQL/Oban. The outbox remains the commit boundary.

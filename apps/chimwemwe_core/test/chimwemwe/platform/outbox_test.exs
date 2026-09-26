@@ -13,7 +13,18 @@ defmodule Chimwemwe.Platform.OutboxTest do
     TrustedPlacement
   }
 
-  alias Chimwemwe.Platform.Outbox.{ConsumerRegistry, DeliveryResult, Envelope, Status}
+  alias Chimwemwe.Platform.Outbox.{
+    ConsumerRegistry,
+    ConsumptionResult,
+    DeliveryResult,
+    Dispatcher,
+    DispatcherStatus,
+    Envelope,
+    ReplayInput,
+    ReplayResult,
+    Status
+  }
+
   alias Chimwemwe.Repo
   alias Ecto.UUID
   alias Postgrex.Error, as: PostgrexError
@@ -24,12 +35,15 @@ defmodule Chimwemwe.Platform.OutboxTest do
   @dispatcher_b "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
   @dispatch_only_a "dddddddd-dddd-4ddd-8ddd-dddddddddddd"
   @observe_only_a "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee"
+  @replay_only_a "ffffffff-ffff-4fff-8fff-ffffffffffff"
   @dispatch_capability "platform.outbox.dispatch"
   @observe_capability "platform.outbox.observe"
+  @replay_capability "platform.outbox.replay"
   @consumer_key "platform.operations.test_sink"
   @event_type "platform.authority.role.renamed"
 
   @tables [
+    "platform_outbox_consumer_receipts",
     "platform_outbox_deliveries",
     "platform_authority_action_idempotency",
     "platform_outbox_events",
@@ -43,6 +57,11 @@ defmodule Chimwemwe.Platform.OutboxTest do
   ]
 
   setup do
+    if :ets.whereis(:chimwemwe_outbox_test_consumer) != :undefined do
+      :ets.delete(:chimwemwe_outbox_test_consumer)
+    end
+
+    :ets.new(:chimwemwe_outbox_test_consumer, [:named_table, :public, :set])
     runtime = start_supervised!({PersistenceRuntime, runtime_options()})
     clear_tenants(runtime)
     seed_authority(runtime)
@@ -54,6 +73,8 @@ defmodule Chimwemwe.Platform.OutboxTest do
     assert {:ok, declaration} = ConsumerRegistry.fetch(registry, @consumer_key)
     assert declaration.batch_size == 2
     assert declaration.lease_ms == 60_000
+    assert declaration.handler == Chimwemwe.Test.OutboxConsumer
+    assert declaration.handler_revision == 1
     assert ConsumerRegistry.event_pairs(declaration) == {[@event_type], [1]}
 
     assert {:error, :invalid_registry} =
@@ -70,6 +91,12 @@ defmodule Chimwemwe.Platform.OutboxTest do
                  events: [%{type: @event_type, schema_versions: [1, 1]}]
                })
              ])
+
+    assert {:error, :invalid_registry} =
+             ConsumerRegistry.new([consumer_declaration(%{handler: String})])
+
+    assert {:error, :invalid_registry} =
+             ConsumerRegistry.new([consumer_declaration(%{handler_revision: 0})])
   end
 
   test "claims only the current tenant, route, subscription, schema, and bounded batch", %{
@@ -122,6 +149,9 @@ defmodule Chimwemwe.Platform.OutboxTest do
 
     assert {:error, %ContextError{code: :missing_trusted_context}} =
              Outbox.status(runtime, registry(), %{tenant_id: @tenant_a}, @consumer_key)
+
+    assert {:error, %ContextError{code: :missing_trusted_context}} =
+             Outbox.replay(runtime, registry(), nil, @consumer_key, :caller_map)
 
     assert {:error, %OutboxError{code: :forbidden}} =
              Outbox.status(runtime, registry(), context_dispatch_only_a(), @consumer_key)
@@ -310,10 +340,312 @@ defmodule Chimwemwe.Platform.OutboxTest do
              Outbox.status(runtime, registry, context_dispatcher_a(), @consumer_key)
   end
 
+  test "receipt makes redelivery idempotent across the acknowledgement crash window", %{
+    runtime: runtime
+  } do
+    event_id = insert_event(runtime, context_dispatcher_a())
+    assert {:ok, [%Envelope{} = first]} = claim(runtime)
+
+    assert {:ok, %ConsumptionResult{state: :processed} = consumed} =
+             Outbox.consume(runtime, registry(), context_dispatcher_a(), @consumer_key, first)
+
+    assert :ets.lookup(:chimwemwe_outbox_test_consumer, event_id) == [{event_id, 1}]
+    expire_lease(runtime, context_dispatcher_a(), event_id)
+
+    assert {:ok, [%Envelope{} = second]} = claim(runtime)
+
+    assert {:ok, %ConsumptionResult{state: :already_processed} = retained} =
+             Outbox.consume(runtime, registry(), context_dispatcher_a(), @consumer_key, second)
+
+    assert retained.result_digest == consumed.result_digest
+    assert :ets.lookup(:chimwemwe_outbox_test_consumer, event_id) == [{event_id, 1}]
+
+    assert {:error, %OutboxError{code: :conflict}} =
+             Outbox.consume(
+               runtime,
+               registry(%{handler_revision: 2}),
+               context_dispatcher_a(),
+               @consumer_key,
+               second
+             )
+
+    assert {:ok, %DeliveryResult{status: :completed}} =
+             acknowledge(runtime, event_id, second.lease_token)
+  end
+
+  test "consumption rejects expired leases and stale routes before handler execution", %{
+    runtime: runtime
+  } do
+    event_id = insert_event(runtime, context_dispatcher_a())
+    assert {:ok, [%Envelope{} = envelope]} = claim(runtime)
+    expire_lease(runtime, context_dispatcher_a(), event_id)
+
+    assert {:error, %OutboxError{code: :conflict}} =
+             Outbox.consume(runtime, registry(), context_dispatcher_a(), @consumer_key, envelope)
+
+    assert :ets.lookup(:chimwemwe_outbox_test_consumer, event_id) == []
+
+    assert {:ok, [%Envelope{} = reclaimed]} = claim(runtime)
+    change_event_route(runtime, context_dispatcher_a(), event_id, 6)
+
+    assert {:error, %OutboxError{code: :conflict}} =
+             Outbox.consume(runtime, registry(), context_dispatcher_a(), @consumer_key, reclaimed)
+
+    assert :ets.lookup(:chimwemwe_outbox_test_consumer, event_id) == []
+  end
+
+  test "explicitly supervised dispatcher consumes and acknowledges a bounded batch", %{
+    runtime: runtime
+  } do
+    event_id = insert_event(runtime, context_dispatcher_a())
+
+    dispatcher =
+      start_supervised!(
+        {Dispatcher,
+         runtime: runtime,
+         registry: registry(),
+         context: context_dispatcher_a(),
+         consumer_key: @consumer_key,
+         poll_interval_ms: 300_000}
+      )
+
+    assert {:ok,
+            %DispatcherStatus{
+              acknowledged_count: 1,
+              processed_count: 1,
+              skipped_count: 0,
+              failed_count: 0,
+              last_polled_at: %DateTime{}
+            }} = Dispatcher.dispatch_now(dispatcher)
+
+    assert %DispatcherStatus{acknowledged_count: 1} = Dispatcher.status(dispatcher)
+    assert :ets.lookup(:chimwemwe_outbox_test_consumer, event_id) == [{event_id, 1}]
+
+    assert {:ok, %Status{completed: 1}} =
+             Outbox.status(runtime, registry(), context_dispatcher_a(), @consumer_key)
+  end
+
+  test "dispatcher contains handler exceptions and enters the bounded dead letter flow", %{
+    runtime: runtime
+  } do
+    _event_id = insert_event(runtime, context_dispatcher_a())
+
+    rejecting_registry =
+      registry(%{handler: Chimwemwe.Test.RejectingOutboxConsumer, max_attempts: 1})
+
+    dispatcher =
+      start_supervised!(
+        {Dispatcher,
+         runtime: runtime,
+         registry: rejecting_registry,
+         context: context_dispatcher_a(),
+         consumer_key: @consumer_key,
+         poll_interval_ms: 300_000}
+      )
+
+    assert {:ok, %DispatcherStatus{failed_count: 1, acknowledged_count: 0}} =
+             Dispatcher.dispatch_now(dispatcher)
+
+    assert {:ok, %Status{dead_letter: 1}} =
+             Outbox.status(
+               runtime,
+               rejecting_registry,
+               context_dispatcher_a(),
+               @consumer_key
+             )
+  end
+
+  test "malformed consumer results roll back receipts and enter the bounded dead letter flow", %{
+    runtime: runtime
+  } do
+    event_id = insert_event(runtime, context_dispatcher_a())
+
+    invalid_registry =
+      registry(%{handler: Chimwemwe.Test.InvalidOutboxConsumer, max_attempts: 1})
+
+    assert {:ok, [%Envelope{lease_token: lease_token} = envelope]} =
+             claim(runtime, invalid_registry)
+
+    assert {:error, %OutboxError{code: :invalid_contract}} =
+             Outbox.consume(
+               runtime,
+               invalid_registry,
+               context_dispatcher_a(),
+               @consumer_key,
+               envelope
+             )
+
+    assert receipt_count(runtime, context_dispatcher_a(), event_id) == 0
+
+    assert {:ok, %DeliveryResult{status: :dead_letter}} =
+             Outbox.fail(
+               runtime,
+               invalid_registry,
+               context_dispatcher_a(),
+               @consumer_key,
+               event_id,
+               lease_token,
+               :invalid_contract
+             )
+  end
+
+  test "exact replay is capability-separated, audited, idempotent, and resets the attempt cycle",
+       %{
+         runtime: runtime
+       } do
+    event_id = insert_event(runtime, context_dispatcher_a())
+    replay_registry = registry(%{max_attempts: 1})
+    assert {:ok, [%Envelope{lease_token: token}]} = claim(runtime, replay_registry)
+
+    assert {:ok, %DeliveryResult{status: :dead_letter, lock_version: dead_version}} =
+             Outbox.fail(
+               runtime,
+               replay_registry,
+               context_dispatcher_a(),
+               @consumer_key,
+               event_id,
+               token,
+               :consumer_rejected
+             )
+
+    input = replay_input(event_id, dead_version)
+
+    assert {:error, %OutboxError{code: :forbidden}} =
+             Outbox.replay(
+               runtime,
+               replay_registry,
+               context_dispatch_only_a(),
+               @consumer_key,
+               input
+             )
+
+    assert {:error, %OutboxError{code: :forbidden}} =
+             Outbox.claim(runtime, replay_registry, context_replay_only_a(), @consumer_key)
+
+    change_event_route(runtime, context_dispatcher_a(), event_id, 6)
+
+    assert {:error, %OutboxError{code: :conflict}} =
+             Outbox.replay(
+               runtime,
+               replay_registry,
+               context_replay_only_a(),
+               @consumer_key,
+               input
+             )
+
+    change_event_route(runtime, context_dispatcher_a(), event_id, 7)
+
+    assert {:ok, %ReplayResult{status: :available, replay_count: 1} = replayed} =
+             Outbox.replay(
+               runtime,
+               replay_registry,
+               context_replay_only_a(),
+               @consumer_key,
+               input
+             )
+
+    assert replayed.lock_version == dead_version + 1
+
+    assert {:ok, ^replayed} =
+             Outbox.replay(
+               runtime,
+               replay_registry,
+               context_replay_only_a(),
+               @consumer_key,
+               input
+             )
+
+    assert {:error, %OutboxError{code: :conflict}} =
+             Outbox.replay(
+               runtime,
+               replay_registry,
+               context_dispatcher_a(),
+               @consumer_key,
+               input
+             )
+
+    assert {:error, %OutboxError{code: :conflict}} =
+             Outbox.replay(
+               runtime,
+               registry(%{handler_revision: 2, max_attempts: 1}),
+               context_replay_only_a(),
+               @consumer_key,
+               input
+             )
+
+    changed_input = %{input | reason_code: "operator.changed"}
+
+    assert {:error, %OutboxError{code: :conflict}} =
+             Outbox.replay(
+               runtime,
+               replay_registry,
+               context_replay_only_a(),
+               @consumer_key,
+               changed_input
+             )
+
+    assert {:error, %OutboxError{code: :not_found}} =
+             Outbox.replay(
+               runtime,
+               replay_registry,
+               context_dispatcher_b(),
+               @consumer_key,
+               %{input | idempotency_key: UUID.generate()}
+             )
+
+    assert {:ok, [%Envelope{attempt_count: 1}]} = claim(runtime, replay_registry)
+    assert replay_evidence_counts(runtime, context_dispatcher_a(), event_id) == {1, 1}
+  end
+
+  test "concurrent exact replay produces one transition and one retained result", %{
+    runtime: runtime
+  } do
+    event_id = insert_event(runtime, context_dispatcher_a())
+    replay_registry = registry(%{max_attempts: 1})
+    assert {:ok, [%Envelope{lease_token: token}]} = claim(runtime, replay_registry)
+
+    assert {:ok, %DeliveryResult{lock_version: dead_version}} =
+             Outbox.fail(
+               runtime,
+               replay_registry,
+               context_dispatcher_a(),
+               @consumer_key,
+               event_id,
+               token,
+               :consumer_rejected
+             )
+
+    input = replay_input(event_id, dead_version)
+
+    results =
+      for _index <- 1..2 do
+        Task.async(fn ->
+          Outbox.replay(
+            runtime,
+            replay_registry,
+            context_replay_only_a(),
+            @consumer_key,
+            input
+          )
+        end)
+      end
+      |> Enum.map(&Task.await(&1, 5_000))
+
+    assert [{:ok, first}, {:ok, second}] = results
+    assert first == second
+    assert first.replay_count == 1
+    assert replay_evidence_counts(runtime, context_dispatcher_a(), event_id) == {1, 1}
+  end
+
   test "unavailable persistence and alternate tenant/state writes fail closed", %{
     runtime: runtime
   } do
     event_id = insert_event(runtime, context_dispatcher_a())
+
+    assert {:ok, [%Envelope{} = envelope]} = claim(runtime)
+
+    assert {:error, %PersistenceError{code: :retryable_dependency}} =
+             Outbox.consume(self(), registry(), context_dispatcher_a(), @consumer_key, envelope)
 
     assert {:error, %PersistenceError{code: :retryable_dependency}} =
              Outbox.claim(self(), registry(), context_dispatcher_a(), @consumer_key)
@@ -323,11 +655,22 @@ defmodule Chimwemwe.Platform.OutboxTest do
 
     own_event_id = insert_event(runtime, context_dispatcher_b())
 
+    assert {:error, %PostgrexError{postgres: %{code: :foreign_key_violation}}} =
+             insert_receipt_directly(runtime, context_dispatcher_b(), event_id)
+
     assert {:error, %PostgrexError{postgres: %{code: :check_violation}}} =
              insert_delivery_directly(runtime, context_dispatcher_b(), own_event_id,
                status: "completed",
                lease_token: UUID.generate(),
                completed_at: nil
+             )
+
+    assert {:ok, [%Envelope{}]} =
+             Outbox.claim(runtime, registry(), context_dispatcher_b(), @consumer_key)
+
+    assert {:error, %PostgrexError{postgres: %{code: :check_violation}}} =
+             insert_receipt_directly(runtime, context_dispatcher_b(), own_event_id,
+               result_digest: <<1>>
              )
   end
 
@@ -356,6 +699,8 @@ defmodule Chimwemwe.Platform.OutboxTest do
       %{
         key: @consumer_key,
         events: [%{type: @event_type, schema_versions: [1]}],
+        handler: Chimwemwe.Test.OutboxConsumer,
+        handler_revision: 1,
         batch_size: 2,
         lease_ms: 60_000,
         max_attempts: 3,
@@ -368,7 +713,8 @@ defmodule Chimwemwe.Platform.OutboxTest do
   defp seed_authority(runtime) do
     seed_tenant(runtime, context_dispatcher_a(), @tenant_a, @dispatcher_a, [
       @dispatch_capability,
-      @observe_capability
+      @observe_capability,
+      @replay_capability
     ])
 
     seed_actor(runtime, context_dispatcher_a(), @tenant_a, @dispatch_only_a, [
@@ -379,9 +725,14 @@ defmodule Chimwemwe.Platform.OutboxTest do
       @observe_capability
     ])
 
+    seed_actor(runtime, context_dispatcher_a(), @tenant_a, @replay_only_a, [
+      @replay_capability
+    ])
+
     seed_tenant(runtime, context_dispatcher_b(), @tenant_b, @dispatcher_b, [
       @dispatch_capability,
-      @observe_capability
+      @observe_capability,
+      @replay_capability
     ])
   end
 
@@ -563,6 +914,97 @@ defmodule Chimwemwe.Platform.OutboxTest do
     update_delivery_time(runtime, context, event_id, "available_at = NOW() - INTERVAL '1 second'")
   end
 
+  defp change_event_route(runtime, context, event_id, routing_version) do
+    assert {:ok, :updated} =
+             Persistence.with_writer(runtime, context, fn ->
+               Repo.query!(
+                 """
+                 UPDATE platform_outbox_events
+                    SET routing_version = $3
+                  WHERE tenant_id = $1 AND id = $2
+                 """,
+                 [
+                   dump(TrustedActor.tenant_id(context.actor)),
+                   dump(event_id),
+                   routing_version
+                 ]
+               )
+
+               :updated
+             end)
+  end
+
+  defp replay_input(event_id, expected_lock_version) do
+    %ReplayInput{
+      event_id: event_id,
+      expected_lock_version: expected_lock_version,
+      idempotency_key: UUID.generate(),
+      causation_id: UUID.generate(),
+      reason_code: "operator.recovery"
+    }
+  end
+
+  defp replay_evidence_counts(runtime, context, event_id) do
+    assert {:ok, counts} =
+             Persistence.with_writer(runtime, context, fn ->
+               tenant_id = dump(TrustedActor.tenant_id(context.actor))
+               event_id = dump(event_id)
+
+               %{rows: [[audit_count]]} =
+                 Repo.query!(
+                   """
+                   SELECT count(*)
+                     FROM platform_authority_audit_events
+                    WHERE tenant_id = $1
+                      AND aggregate_id = $2
+                      AND action_name = 'platform.outbox.delivery.replay'
+                   """,
+                   [tenant_id, event_id]
+                 )
+
+               %{rows: [[idempotency_count]]} =
+                 Repo.query!(
+                   """
+                   SELECT count(*)
+                     FROM platform_authority_action_idempotency
+                    WHERE tenant_id = $1
+                      AND aggregate_id = $2
+                      AND action_name = 'platform.outbox.delivery.replay'
+                   """,
+                   [tenant_id, event_id]
+                 )
+
+               {audit_count, idempotency_count}
+             end)
+
+    counts
+  end
+
+  defp receipt_count(runtime, context, event_id) do
+    assert {:ok, count} =
+             Persistence.with_writer(runtime, context, fn ->
+               %{rows: [[count]]} =
+                 Repo.query!(
+                   """
+                   SELECT count(*)
+                     FROM platform_outbox_consumer_receipts
+                    WHERE tenant_id = $1
+                      AND event_id = $2
+                      AND consumer_key = $3
+                   """,
+                   [
+                     dump(TrustedActor.tenant_id(context.actor)),
+                     dump(event_id),
+                     @consumer_key
+                   ]
+                 )
+
+               count
+             end)
+
+    count
+  end
+
   defp update_delivery_time(runtime, context, event_id, expression) do
     assert {:ok, :updated} =
              Persistence.with_writer(runtime, context, fn ->
@@ -618,6 +1060,32 @@ defmodule Chimwemwe.Platform.OutboxTest do
     end
   end
 
+  defp insert_receipt_directly(runtime, context, event_id, overrides \\ []) do
+    Persistence.with_writer(runtime, context, fn ->
+      Repo.query(
+        """
+        INSERT INTO platform_outbox_consumer_receipts (
+          id, tenant_id, event_id, consumer_key, handler_revision, event_type,
+          schema_version, routing_version, result_digest, processed_at, inserted_at
+        )
+        VALUES ($1, $2, $3, $4, 1, $5, 1, 7, $6, NOW(), NOW())
+        """,
+        [
+          dump(UUID.generate()),
+          dump(TrustedActor.tenant_id(context.actor)),
+          dump(event_id),
+          @consumer_key,
+          @event_type,
+          Keyword.get(overrides, :result_digest, :crypto.strong_rand_bytes(32))
+        ]
+      )
+    end)
+    |> case do
+      {:ok, {:error, error}} -> {:error, error}
+      other -> other
+    end
+  end
+
   defp clear_tenants(runtime) do
     Enum.each([context_dispatcher_a(), context_dispatcher_b()], fn context ->
       assert {:ok, :cleared} =
@@ -657,6 +1125,7 @@ defmodule Chimwemwe.Platform.OutboxTest do
   defp context_dispatcher_b, do: context(@dispatcher_b, @tenant_b)
   defp context_dispatch_only_a, do: context(@dispatch_only_a, @tenant_a)
   defp context_observe_only_a, do: context(@observe_only_a, @tenant_a)
+  defp context_replay_only_a, do: context(@replay_only_a, @tenant_a)
 
   defp context(actor_id, tenant_id) do
     {:ok, actor} =

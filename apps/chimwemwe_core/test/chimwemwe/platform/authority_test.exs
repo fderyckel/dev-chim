@@ -30,6 +30,7 @@ defmodule Chimwemwe.Platform.AuthorityTest do
   @correlation_id "cccccccc-cccc-4ccc-8ccc-cccccccccccc"
   @authority_tables [
     "platform_authority_action_idempotency",
+    "platform_outbox_consumer_receipts",
     "platform_outbox_deliveries",
     "platform_outbox_events",
     "platform_authority_audit_events",
@@ -184,7 +185,7 @@ defmodule Chimwemwe.Platform.AuthorityTest do
   test "authority resources are tenant-owned and expose only governed private actions" do
     assert :ok = ResourceContract.validate_domain(Platform)
 
-    assert 20 == length(Ash.Domain.Info.resources(Platform))
+    assert 21 == length(Ash.Domain.Info.resources(Platform))
 
     for resource <- Ash.Domain.Info.resources(Platform) do
       assert :tenant_owned == resource.__chimwemwe_resource_ownership__()

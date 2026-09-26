@@ -52,8 +52,12 @@ defmodule Chimwemwe.Platform.Outbox.Delivery do
         check: "status IN ('available', 'leased', 'completed', 'dead_letter')"
       )
 
-      check_constraint(:attempt_count, "platform_outbox_delivery_attempts_must_be_positive",
-        check: "attempt_count >= 1"
+      check_constraint(:attempt_count, "platform_outbox_delivery_attempts_must_be_non_negative",
+        check: "attempt_count >= 0"
+      )
+
+      check_constraint(:replay_count, "platform_outbox_delivery_replays_must_be_non_negative",
+        check: "replay_count >= 0"
       )
 
       check_constraint(:lock_version, "platform_outbox_delivery_version_must_be_positive",
@@ -132,7 +136,14 @@ defmodule Chimwemwe.Platform.Outbox.Delivery do
     attribute :attempt_count, :integer do
       allow_nil? false
       public? false
-      constraints min: 1
+      constraints min: 0
+    end
+
+    attribute :replay_count, :integer do
+      allow_nil? false
+      default 0
+      public? false
+      constraints min: 0
     end
 
     attribute :lock_version, :integer do

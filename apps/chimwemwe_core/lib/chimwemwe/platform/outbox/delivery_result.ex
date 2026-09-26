@@ -13,7 +13,7 @@ defmodule Chimwemwe.Platform.Outbox.DeliveryResult do
   ]
 
   @type t :: %__MODULE__{
-          attempt_count: pos_integer(),
+          attempt_count: non_neg_integer(),
           available_at: DateTime.t() | nil,
           completed_at: DateTime.t() | nil,
           consumer_key: String.t(),

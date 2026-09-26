@@ -5,6 +5,7 @@
 - Accountable owner: Product and platform engineering
 - Deciders: Architecture review group, product owner, school-domain representative, and security architecture
 - Supersedes: None
+- Revision state: Reframing required by ADR 0025 before acceptance
 
 ## Context
 
@@ -13,6 +14,30 @@ Chimwemwe needs academic years and periods before attendance, admissions, timeta
 The same implementation also distributes authority across Academic Year, Term, School Calendar, School Calendar Term, and generated start/end events. Current-year resolution may return several records, school hierarchy and global defaults are implicit fallbacks, admission visibility is stored on the year, and save callbacks create secondary calendar state. A local source inventory on 2026-09-24 found downstream Academic Year links in 58 DocTypes and downstream Term links in 15 DocTypes across 11 modules after excluding their defining and duplicate calendar records. A field-for-field port would therefore preserve duplicate truth and couple many future modules to settings-layer behaviour.
 
 This record proposes the durable boundary for a future academics business module. It does not authorize a production resource, migration, public interface, scheduler, or user interface.
+
+## Scope correction required before acceptance
+
+[ADR 0025](0025-learning-institution-operating-system-and-institutional-structure.md) records
+Chimwemwe as an operating system for learning institutions and replaces a flat school scope with
+recursive institutional units. The existing `school_scope_id`, single-school terminology, and one
+primary institutional calendar assumption in this proposal are therefore not acceptance
+candidates as written.
+
+The Frappe findings and synthetic calendar scenarios remain useful source evidence, but the next
+revision must determine explicitly:
+
+- whether an academic calendar belongs to one exact institutional unit, a programme, or another
+  separately owned academic scope;
+- how a university, faculty, school, department, combined school, and age-phase division adopt or
+  publish calendars without silent hierarchy inheritance;
+- how several simultaneous programme, intake, semester, term, block, or year-round calendars are
+  represented without conflicting authority; and
+- which downstream records pin an exact calendar revision and institutional unit.
+
+No implementation or acceptance review may treat ancestor selection, unit parentage, or a user's
+active institutional-unit context as calendar authority. This section constrains the existing
+proposal until its full decision, action, migration, and validation sections are revised through
+the ADR process.
 
 ## Decision drivers
 
@@ -131,6 +156,8 @@ Before production data exists, exit cost is limited to documentation and prototy
 - Template adoption creates unacceptable duplication or cannot express legitimate school variation.
 - A proposal introduces implicit hierarchy fallback, generic CRUD, live template inheritance, runtime schema mutation, or a second calendar authority.
 - The first real Frappe shadow import reveals material semantics not covered by this model.
+- ADR 0025 or representative learning-institution scenarios show that one school-scoped primary
+  calendar cannot represent the required institutional or programme context.
 
 ## Related records
 
@@ -145,5 +172,6 @@ Before production data exists, exit cost is limited to documentation and prototy
 - [ADR 0018](0018-temporal-records-correction-audit-and-evidence-semantics.md)
 - [ADR 0019](0019-domain-model-authoring-and-governed-metadata.md)
 - [ADR 0020](0020-human-interface-experience-and-client-platform-boundary.md)
+- [ADR 0025](0025-learning-institution-operating-system-and-institutional-structure.md)
 - [Module activation and lifecycle](../architecture/module-activation-and-lifecycle.md)
 - [Threat model](../security/threat-model.md)

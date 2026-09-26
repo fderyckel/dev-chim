@@ -1,13 +1,21 @@
 # Academic calendar authority
 
-- Status: Proposed; no implementation authorization
+- Status: Proposed; scope revision required by ADR 0025; no implementation authorization
 - Owner: Product and platform engineering
 - Governing record: [ADR 0021](../adr/0021-academic-calendar-authority-and-template-adoption.md)
-- Review trigger: ADR acceptance, temporal-record decision, real migration fixture, or first authorized academics-module slice
+- Review trigger: ADR 0025 alignment, ADR acceptance, temporal-record decision, real migration
+  fixture, or first authorized academics-module slice
 
 ## Purpose and boundary
 
 This contract translates the useful academic-year and academic-term concepts from the supplied Frappe implementation into Chimwemwe without copying its DocType structure. It defines a future business-module boundary and migration target. It does not create a production resource, table, application, public API, scheduler, or user interface.
+
+The current `school_scope_id` examples predate
+[ADR 0025](../adr/0025-learning-institution-operating-system-and-institutional-structure.md). They
+remain design evidence only. Before acceptance, this contract must use the recursive institutional
+model, distinguish exact institutional-unit scope from programme or other academic scope, and
+cover simultaneous calendar patterns used across learning institutions. No current school-scoped
+identifier or hierarchy fallback is approved as a stable contract.
 
 The module owns school-calendar meaning. The platform kernel continues to own trusted tenant and actor context, capability evaluation, persistence routing, module lifecycle, audit conventions, idempotency, and outbox infrastructure. Other school modules consume stable calendar identifiers and named reads; they do not recreate current-year rules.
 

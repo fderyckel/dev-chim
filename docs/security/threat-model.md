@@ -9,6 +9,7 @@
 
 - tenant identity, actor identity, sessions, credentials, and service accounts;
 - tenant-defined roles, capabilities, relationships, and support grants;
+- institutional-unit identities, recursive parentage, affiliations, sites, and structure history;
 - child, safeguarding, education, employment, and operational records;
 - uploaded files, derivatives, reports, exports, evidence, and audit history;
 - resource descriptors, view and report definitions, and tenant-owned experience metadata;
@@ -29,6 +30,8 @@ See [data classification](data-classification.md).
 8. Authenticated tenant context to the placement registry and database, queue, storage, cache, search, analytics, and telemetry routing.
 9. Module release, entitlement, activation, dependency, and authorization gates to every interface and asynchronous consumer.
 10. Code-defined Ash resources to derived descriptors and tenant-owned view or report metadata.
+11. Tenant-owned institutional hierarchy to explicit authorization scopes, reporting datasets,
+    configuration adoption, sites, and downstream domain references.
 
 Every boundary authenticates the caller or service, propagates tenant and correlation context, minimizes data, and records safe evidence. No projection, cache, solver, renderer, provider, or interface grants authority independently.
 
@@ -45,13 +48,14 @@ Every boundary authenticates the caller or service, propagates tenant and correl
 | TM-07 | Search, realtime, or read-model authorization drift | Critical | Tenant-filter before retrieval, re-authorization on access, rebuild/deletion controls | Restricted-result and stale-access tests | Platform engineering |
 | TM-08 | AI prompt injection, cross-tenant retrieval, or unverified write | Critical | Provider-neutral gateway, curated tools, real actor/tenant, minimization, confirmation, kill switch | Adversarial AI evaluation in Phase 11 | Security architecture |
 | TM-09 | Sensitive logs, traces, events, or evidence | High | Minimal payloads, classification, source redaction, safe identifiers | [Captured correlated telemetry allowlist and redaction assertions](../phase-0/evidence/ash-pressure-test.md#telemetry-and-redaction-slice); third-party logger review remains | Platform engineering |
-| TM-10 | State commits without durable side-effect fact, event without state, or unsafe cross-tenant/stale-route delivery | High | Transactional outbox, rollback, code-owned subscriptions, tenant/current-route leases, exact-token transitions | [Injected Ash transaction-failure test](../phase-0/evidence/ash-pressure-test.md#transactional-outbox-slice) and [bounded Slice 1J-A delivery evidence](../phase-1/evidence/outbox-delivery-lease.md); consumer execution, replay administration, retention, movement, and real-environment recovery remain open | Platform engineering |
+| TM-10 | State commits without durable side-effect fact, event without state, or unsafe cross-tenant/stale-route delivery | High | Transactional outbox, rollback, code-owned subscriptions and handler revisions, tenant/current-route leases, exact-token transitions, atomic consumer receipts, governed replay | [Injected Ash transaction-failure test](../phase-0/evidence/ash-pressure-test.md#transactional-outbox-slice), [bounded Slice 1J-A delivery evidence](../phase-1/evidence/outbox-delivery-lease.md), and [Slice 1J-B database-local consumption and exact replay evidence](../phase-1/evidence/outbox-supervised-consumption-and-replay.md); external effects, replay ranges/cursors, retention, movement, restore/convergence, and real-environment recovery remain open | Platform engineering |
 | TM-11 | Forged, stale, or conflicting placement routes a tenant to another database, queue, or storage namespace | Critical | Authenticated versioned registry, placement membership constraint, least-privilege credentials, no default fallback | [Pooled/dedicated, non-HTTP, movement, reconciliation, version-conflict, rollback, and stale-route tests](../phase-0/evidence/trusted-routing.md); durable control-plane and real-adapter drills remain | Security architecture |
 | TM-12 | A synchronized write burst or noisy pooled tenant denies service or delays authorization, outbox, and recovery work | High | Per-tenant fairness, bounded bulk actions, pool budgets, pre-checkout backpressure, mixed-load targets, dedicated-placement escape path | [Raw burst/failure](../phase-0/evidence/capacity-and-recovery-measurement.md), [pre-checkout local proof](../phase-0/evidence/precheckout-admission-measurement.md), and [full-horizon local restore](../phase-0/evidence/full-horizon-restore-measurement.md); multi-node, report-overlap, and selected-deployment tests remain production-readiness gates | Platform engineering and operations |
-| TM-13 | Module activation bypasses authorization, or deactivation loses data, audit, jobs, events, or compliance access | Critical | Independent server-side gates, explicit dependencies, controlled drain, retained-data ownership, replay/reconciliation | [Accepted gate matrix, concurrent deactivation, drain, retained-data, and reactivation contract](../phase-0/evidence/module-lifecycle.md); real queue/outbox/drain/replay integrations remain production gates | Platform engineering and security architecture |
+| TM-13 | Module activation bypasses authorization, or deactivation loses data, audit, jobs, events, or compliance access | Critical | Independent server-side gates, explicit dependencies, controlled drain, retained-data ownership, replay/reconciliation | [Accepted gate matrix, concurrent deactivation, drain, retained-data, and reactivation contract](../phase-0/evidence/module-lifecycle.md); Slice 1J-B exact replay is deliberately not integrated with module drain/reactivation, so that real queue/outbox integration remains a production gate | Platform engineering and security architecture |
 | TM-14 | A stale or misrouted replica supplies revoked authorization, old placement/module state, or a contradictory read-after-write result | Critical | Central consistency classes, writer-only security decisions, lag gates, read-only credentials, and no request-selected repository | Replica-lag/outage, revocation, immediate-confirmation, and cross-placement negative tests | Platform engineering and security architecture |
 | TM-15 | A replayed or mutated idempotency key duplicates a transition, suppresses another actor's action, crosses tenant boundaries, or separates state from its durable event | High | Tenant-and-action uniqueness, actor/aggregate/canonical-request binding, writer transaction, exact-result replay, stable conflict, and bounded retention policy | [Exact, conflicting, cross-tenant, concurrent, rollback, and alternate-write tests](../phase-0/evidence/ash-pressure-test.md#idempotency-and-generated-typescript-client-slice); retention and abuse limits remain | Platform engineering and security architecture |
 | TM-16 | Malicious, cross-tenant, stale, or incompatible experience metadata exposes a forbidden field or action, broadens a report, or bypasses a domain rule | Critical | Code-defined authority, allowlisted versioned descriptors, tenant-qualified definitions, no arbitrary SQL or code, fail-closed validation, and re-authorization at execution | [Scenario 15 adversarial definition/execution tests](../phase-0/evidence/resource-authoring-and-governed-metadata.md) plus [Slice 1I-A publication evidence](../phase-1/evidence/governed-extension-definitions.md) and [Slice 1I-B exact compatibility-resolution evidence](../phase-1/evidence/governed-extension-resolution.md); independent security review is still required before stored-action execution, rendering, or a public consumer | Platform engineering and security architecture |
+| TM-17 | Institutional nesting, a hierarchy move, or an active-unit selector silently widens access, reporting, configuration, module, or placement scope | Critical | Same-tenant acyclic canonical parentage; stable unit IDs; hierarchy separated from explicit exact-unit or descendant scope, reporting, configuration adoption, sites, module gates, and placement; governed move-impact checks | Proposed ADR 0025 and Phase 2.1 scenario plan; cross-tenant/cycle, move-impact, no-authority-inheritance, bounded-traversal, and alternate-write tests remain open before L1 | Institutional-structure domain ownership and security architecture |
 
 ## Assumptions and scope limits
 
@@ -60,6 +64,8 @@ Every boundary authenticates the caller or service, propagates tenant and correl
 - Application policy is the accepted authorization layer. RLS remains an evidence-driven backstop decision.
 - The five-school topology and attendance calculations are planning hypotheses, not accepted production sizing or placement evidence.
 - The placement registry and module lifecycle are Phase 0 contracts only; production implementations are outside this phase.
+- Recursive institutional structure is an ADR 0025 proposal only; no persistent unit, parentage,
+  descendant-scope, or hierarchy-move implementation is authorized.
 - The local developer account and device security remain outside repository enforcement, but secrets and production data are prohibited.
 
 ## Residual-risk process
@@ -76,6 +82,7 @@ François accepts the bounded Phase 0 residual risk as interim Security/Privacy 
 - [ADR 0015](../adr/0015-ai-gateway-tool-exposure-and-evaluation-policy.md)
 - [ADR 0017](../adr/0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md)
 - [ADR 0019](../adr/0019-domain-model-authoring-and-governed-metadata.md)
+- [ADR 0025](../adr/0025-learning-institution-operating-system-and-institutional-structure.md)
 - [Tenant placement and workload capacity](../architecture/tenant-placement-and-capacity.md)
 - [PostgreSQL availability, recovery, and read routing](../architecture/postgresql-availability-recovery-and-read-routing.md)
 - [Module activation and lifecycle](../architecture/module-activation-and-lifecycle.md)

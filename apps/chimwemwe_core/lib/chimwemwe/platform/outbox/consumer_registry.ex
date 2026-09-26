@@ -12,7 +12,16 @@ defmodule Chimwemwe.Platform.Outbox.ConsumerRegistry do
   @maximum_lease_ms 300_000
   @maximum_attempts 25
   @maximum_retry_ms 86_400_000
-  @declaration_keys [:batch_size, :events, :key, :lease_ms, :max_attempts, :retry_ms]
+  @declaration_keys [
+    :batch_size,
+    :events,
+    :handler,
+    :handler_revision,
+    :key,
+    :lease_ms,
+    :max_attempts,
+    :retry_ms
+  ]
   @event_keys [:schema_versions, :type]
 
   @enforce_keys [:declarations]
@@ -22,6 +31,8 @@ defmodule Chimwemwe.Platform.Outbox.ConsumerRegistry do
   @type declaration :: %{
           key: String.t(),
           events: [event_contract()],
+          handler: module(),
+          handler_revision: pos_integer(),
           batch_size: pos_integer(),
           lease_ms: pos_integer(),
           max_attempts: pos_integer(),
@@ -88,6 +99,9 @@ defmodule Chimwemwe.Platform.Outbox.ConsumerRegistry do
     with true <- Enum.sort(Map.keys(declaration)) == @declaration_keys,
          {:ok, key} <- normalize_key(Map.fetch!(declaration, :key)),
          {:ok, events} <- normalize_events(Map.fetch!(declaration, :events)),
+         {:ok, handler} <- normalize_handler(Map.fetch!(declaration, :handler)),
+         {:ok, handler_revision} <-
+           positive_integer(Map.fetch!(declaration, :handler_revision)),
          {:ok, batch_size} <-
            bounded_integer(Map.fetch!(declaration, :batch_size), 1, @maximum_batch_size),
          {:ok, lease_ms} <-
@@ -100,6 +114,8 @@ defmodule Chimwemwe.Platform.Outbox.ConsumerRegistry do
        %{
          key: key,
          events: events,
+         handler: handler,
+         handler_revision: handler_revision,
          batch_size: batch_size,
          lease_ms: lease_ms,
          max_attempts: max_attempts,
@@ -164,6 +180,29 @@ defmodule Chimwemwe.Platform.Outbox.ConsumerRegistry do
   end
 
   defp normalize_key(_value), do: {:error, :invalid_registry}
+
+  defp normalize_handler(handler) when is_atom(handler) do
+    behaviours =
+      if Code.ensure_loaded?(handler) do
+        handler.module_info(:attributes)
+        |> Keyword.get_values(:behaviour)
+        |> List.flatten()
+      else
+        []
+      end
+
+    if Chimwemwe.Platform.Outbox.Consumer in behaviours and
+         function_exported?(handler, :consume, 2) do
+      {:ok, handler}
+    else
+      {:error, :invalid_registry}
+    end
+  end
+
+  defp normalize_handler(_handler), do: {:error, :invalid_registry}
+
+  defp positive_integer(value) when is_integer(value) and value > 0, do: {:ok, value}
+  defp positive_integer(_value), do: {:error, :invalid_registry}
 
   defp bounded_integer(value, minimum, maximum)
        when is_integer(value) and value >= minimum and value <= maximum,

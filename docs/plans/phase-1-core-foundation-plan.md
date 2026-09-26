@@ -1,6 +1,6 @@
 # Phase 1 core-foundation implementation plan
 
-- Status: Slices 1A through 1J-A, ADR 0018 T1-A/T1-B/T1-C, and local UI-1A implemented; Slice 1J-A bounded internal outbox delivery verification passing while wider operational-readiness gates remain open; Phase 0 decisions completed
+- Status: Slices 1A through 1J-B, ADR 0018 T1-A/T1-B/T1-C, and local UI-1A implemented; Slice 1J-B supervised database-local consumption and exact replay verification passing while wider operational-readiness gates remain open; Phase 0 decisions completed
 - Owner: Platform engineering
 - Decision posture: Ash conditionally accepted; applicable ADR outcomes and production gates are binding
 - Review trigger: another authority mutation, a callable temporal action or read boundary, generic or public write invocation, a metadata consumer, a public interface, another app, or a school domain
@@ -519,6 +519,54 @@ deployment, claim multi-node admission readiness, perform migration or recovery 
 substitute repository checks for the independent security/privacy review required before real
 restricted data. Those remain later Slice 1J gates.
 
+## Slice 1J-B supervised internal consumption and exact replay
+
+The authorized second operational-readiness increment adds one database-local consumer execution
+contract, one explicitly supervised dispatcher, durable idempotent receipts, and exact audited
+dead-letter replay. It remains an internal synthetic qualification and does not complete the wider
+operational-readiness gate.
+
+1. Extend each immutable code-owned consumer declaration with one loaded handler module and a
+   positive handler revision. The handler is selected only by trusted release code, must implement
+   the bounded Chimwemwe consumer behaviour, and cannot be supplied by an event, request, or replay
+   input.
+2. Add one closed tenant-owned consumer receipt keyed by event and consumer. The receipt pins the
+   event type/schema/routing contract, handler revision, result digest, and writer time. Compound
+   constraints bind it to both the tenant event and its exact tenant/consumer delivery.
+3. Execute only database-local handlers inside the authoritative writer transaction. Recheck the
+   dispatch capability, active exact lease, tenant, current route, classification, subscription,
+   schema, and handler revision before the handler runs. Commit the handler's database effect and
+   receipt together; if an exact receipt already exists, skip the handler and return the retained
+   outcome. External network or filesystem side effects remain prohibited.
+4. Add a `Dispatcher` process with a bounded poll interval and explicit runtime, registry, context,
+   and consumer key. It claims through Slice 1J-A, consumes through the receipt boundary, then
+   acknowledges; typed failures enter the existing retry/dead-letter transition. It exposes only
+   count/timestamp process status, carries no production defaults, and is startable under an
+   explicit supervisor without being installed in the application supervisor.
+5. Preserve crash-window safety: a process failure after the consumer transaction but before
+   acknowledgement may redeliver, but the retained receipt prevents the database-local effect from
+   executing twice. A changed handler revision, contract, tenant, route, or lease fails closed.
+6. Add `Outbox.replay/5` behind the separate `platform.outbox.replay` capability. Replay accepts one
+   exact event, code-owned consumer, exact dead-letter lock version, stable reason code,
+   idempotency key, and causation identifier. It never accepts payload edits, a destination, a
+   handler, a tenant, a repository, or a placement.
+7. Serialize replay, bind exact idempotency to tenant/action/actor/event/consumer/handler revision/version/reason,
+   atomically reset only the dead-letter attempt cycle, increment replay and lock versions, and
+   record minimized authority audit plus the completed exact result against the original event.
+   Exact replay returns the same result; changed input or actor conflicts.
+8. Prove supervised polling, handler exception containment, bounded retry and dead-letter flow,
+   receipt idempotency across the acknowledgement crash window, handler-revision mismatch,
+   dispatch/replay capability separation, cross-tenant non-disclosure, stale route and expired
+   lease denial, concurrent exact replay, alternate-write constraints, and unavailable dependency
+   behaviour.
+
+Slice 1J-B does not add Oban, a production application child, external publication, a network or
+filesystem consumer, replay ranges or cursor rewinds, payload editing, retention deletion, a
+public event browser, module drain/reactivation integration, production telemetry infrastructure,
+deployment selection, multi-node admission qualification, restore/convergence evidence, or the
+independent security/privacy review required before Restricted data. Those remain later Slice 1J
+and Phase 2.0 gates.
+
 ## Acceptance checks
 
 - `Ash.Domain.Info.authorize(Chimwemwe.Platform)` returns `:always`.
@@ -613,6 +661,13 @@ restricted data. Those remain later Slice 1J gates.
 - The observe capability is independent from dispatch. Status returns only consumer-scoped counts and the oldest pending timestamp, including stale-route counts without tenant, actor, event, payload, audit, placement, repository, or lease identifiers.
 - Compound tenant constraints reject cross-tenant delivery references, state checks reject inconsistent alternate writes, and unavailable persistence fails closed.
 - Slice 1J-A adds no worker, scheduler, consumer execution, external publication, replay administration, public interface, production deployment qualification, or independent security/privacy approval.
+- Code-owned consumer declarations pin one loaded behaviour module and positive handler revision; malformed modules and revisions fail before event lookup.
+- Consumption requires the dispatch capability and exact active database-timed lease, rereads the authoritative tenant/current-route/internal event, and commits the bounded handler result digest with one exact-delivery receipt.
+- Redelivery after receipt commit skips handler execution; changed handler revision, route, tenant, subscription, schema, classification, or lease conflicts without another effect.
+- An explicitly supervised dispatcher has no production defaults or application-supervisor child, exposes count/time status only, and contains typed handler failures through the bounded retry/dead-letter transitions.
+- Exact dead-letter replay requires separate replay authority, serializes on event/consumer, binds idempotency to actor, handler revision, and canonical input, resets only the attempt cycle, increments replay/lock versions, and records minimized audit plus the exact result against the original event.
+- Concurrent exact replay returns one retained result; changed input or actor conflicts, cross-tenant lookup is non-disclosing, and compound receipt constraints reject alternate cross-tenant or wrong-delivery writes.
+- Slice 1J-B adds no external or filesystem consumer, external publication, replay range/cursor, payload edit, retention deletion, module drain integration, production telemetry, selected-environment qualification, restore/convergence evidence, or independent security/privacy approval.
 - The reviewed migration applies, rolls back, reapplies, and passes generated migration and snapshot drift checks.
 - Complete repository acceptance passes through `make check`, including the Phase 0 contract,
   production core, generated interfaces, dependency and type checks, and browser suites.
@@ -645,13 +700,20 @@ refuses destructive rollback after the first claim. Once delivery state exists, 
 evolution requires compatible forward migration, an explicit drain/reconciliation plan, or an
 approved recovery point; deleting delivery evidence or rewinding an immutable event is prohibited.
 
+Slice 1J-B can roll back only while no consumer receipt, replay cycle, replay audit, or replay
+idempotency evidence is retained. Its migration refuses to remove the receipt table or replay
+counter after that boundary. Once retained, handler and replay evolution require compatible
+forward migration, drain/reconciliation, or an approved recovery point.
+
 The role-rename, role-assignment, temporal-qualification, and module-lifecycle increments prove
 bounded resource-specific contracts. They do not authorize membership or role creation,
 capability grant, composition, revoke, public write invocation, entitlement expiry, offboarding,
 retained-data deletion, provisioning, a real queue/consumer/projection adapter, or a school
-module. Slice 1J-A authorizes only internal outbox lease state and transition/status boundaries;
-it does not authorize consumer execution or replay administration. The next operational work is a
-separately bounded 1J increment covering real adapters, replay controls, and deployment evidence.
+module. Slice 1J-A authorizes internal outbox lease state and transition/status boundaries, while
+Slice 1J-B authorizes only supervised database-local consumption and exact audited dead-letter
+replay. The next operational work remains separately bounded: module drain integration, replay
+ranges/cursors, external adapters, operational telemetry/runbooks, restore/convergence, and
+selected-environment qualification.
 The Phase 0
 descriptor artifact, report registry, and governed experience-metadata implementation remain
 disposable evidence and are not production APIs. Slices 1I-A and 1I-B promote only the reviewed

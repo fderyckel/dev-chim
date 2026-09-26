@@ -2,14 +2,23 @@ defmodule Chimwemwe.Platform.Outbox do
   @moduledoc """
   Tenant-safe internal delivery boundary for durable outbox facts.
 
-  This boundary leases, acknowledges, and records failed delivery attempts. It
-  does not execute consumer code, schedule work, or publish outside the core.
+  This boundary leases events, runs database-local code-owned consumers with
+  durable receipts, acknowledges or records failed attempts, and governs exact
+  dead-letter replay. It does not publish outside the core.
   """
 
   alias Ash.Type.UUID
 
   alias Chimwemwe.Platform.ExecutionContext
-  alias Chimwemwe.Platform.Outbox.{ConsumerRegistry, DeliveryBoundary}
+
+  alias Chimwemwe.Platform.Outbox.{
+    ConsumerRegistry,
+    ConsumptionBoundary,
+    DeliveryBoundary,
+    ReplayBoundary,
+    ReplayInput
+  }
+
   alias Chimwemwe.Platform.OutboxError
 
   @failure_codes [:consumer_rejected, :invalid_contract, :retryable_dependency]
@@ -68,6 +77,38 @@ defmodule Chimwemwe.Platform.Outbox do
     end)
   end
 
+  @doc "Runs one exact active lease through its code-owned database-local consumer."
+  @spec consume(Supervisor.supervisor(), term(), term(), term(), term()) ::
+          {:ok, Chimwemwe.Platform.Outbox.ConsumptionResult.t()} | {:error, term()}
+  def consume(runtime, registry, context, consumer_key, envelope) do
+    ExecutionContext.with_validated(context, fn validated_context ->
+      with {:ok, registry} <- revalidate_registry(registry),
+           {:ok, declaration} <- fetch_consumer(registry, consumer_key),
+           {:ok, event_id, lease_token} <- validate_envelope(envelope) do
+        ConsumptionBoundary.consume(
+          runtime,
+          validated_context,
+          declaration,
+          event_id,
+          lease_token
+        )
+      end
+    end)
+  end
+
+  @doc "Releases one exact dead-letter delivery through governed audited replay."
+  @spec replay(Supervisor.supervisor(), term(), term(), term(), term()) ::
+          {:ok, Chimwemwe.Platform.Outbox.ReplayResult.t()} | {:error, term()}
+  def replay(runtime, registry, context, consumer_key, input) do
+    ExecutionContext.with_validated(context, fn validated_context ->
+      with {:ok, registry} <- revalidate_registry(registry),
+           {:ok, declaration} <- fetch_consumer(registry, consumer_key),
+           {:ok, normalized} <- validate_replay_input(input) do
+        ReplayBoundary.replay(runtime, validated_context, declaration, normalized)
+      end
+    end)
+  end
+
   @doc "Returns sanitized count-only status for one code-owned consumer."
   @spec status(Supervisor.supervisor(), term(), term(), term()) ::
           {:ok, Chimwemwe.Platform.Outbox.Status.t()} | {:error, term()}
@@ -103,6 +144,49 @@ defmodule Chimwemwe.Platform.Outbox do
 
   defp validate_failure_code(code) when code in @failure_codes, do: {:ok, code}
   defp validate_failure_code(_code), do: outbox_error(:invalid_input)
+
+  defp validate_envelope(%Chimwemwe.Platform.Outbox.Envelope{} = envelope) do
+    with {:ok, event_id} <- cast_uuid(envelope.event_id),
+         {:ok, lease_token} <- cast_uuid(envelope.lease_token) do
+      {:ok, event_id, lease_token}
+    end
+  end
+
+  defp validate_envelope(_envelope), do: outbox_error(:invalid_input)
+
+  defp validate_replay_input(%ReplayInput{} = input) do
+    with {:ok, event_id} <- cast_uuid(input.event_id),
+         {:ok, idempotency_key} <- cast_uuid(input.idempotency_key),
+         {:ok, causation_id} <- cast_uuid(input.causation_id),
+         true <- is_integer(input.expected_lock_version) and input.expected_lock_version > 0,
+         {:ok, reason_code} <- validate_reason_code(input.reason_code) do
+      {:ok,
+       %ReplayInput{
+         event_id: event_id,
+         expected_lock_version: input.expected_lock_version,
+         idempotency_key: idempotency_key,
+         causation_id: causation_id,
+         reason_code: reason_code
+       }}
+    else
+      _invalid -> outbox_error(:invalid_input)
+    end
+  end
+
+  defp validate_replay_input(_input), do: outbox_error(:invalid_input)
+
+  defp validate_reason_code(value) when is_binary(value) do
+    normalized = String.trim(value)
+
+    if byte_size(normalized) in 1..120 and
+         Regex.match?(~r/^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*$/, normalized) do
+      {:ok, normalized}
+    else
+      outbox_error(:invalid_input)
+    end
+  end
+
+  defp validate_reason_code(_value), do: outbox_error(:invalid_input)
 
   defp outbox_error(code), do: {:error, %OutboxError{code: code}}
 end

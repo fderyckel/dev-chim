@@ -1,6 +1,6 @@
 # Phase 1: core foundation
 
-- Status: Slices 1A through 1J-A, ADR 0018 T1-A/T1-B/T1-C, and local UI-1A implemented; Slice 1J-A opens only the bounded internal outbox lease/status boundary and does not complete operational readiness; local synthetic UI-0 implemented; representative human review and the remaining ADR-specific gates are pending
+- Status: Slices 1A through 1J-B, ADR 0018 T1-A/T1-B/T1-C, and local UI-1A implemented; Slice 1J-B adds only supervised database-local consumption and exact governed replay and does not complete operational readiness; local synthetic UI-0 implemented; representative human review and the remaining ADR-specific gates are pending
 - Owner: Platform engineering
 - Start basis: explicit user direction on 2026-09-14, followed by the completed Phase 0 review on 2026-09-16
 - Entry basis: Ash is conditionally accepted; implementation proceeds only in explicitly authorized bounded slices and must satisfy the retained production gates
@@ -329,6 +329,38 @@ admission, real adapters, replay controls, migration/recovery rehearsal for the 
 environment, capacity and movement qualification, and independent security/privacy review remain
 open 1J gates. See the [Slice 1J-A evidence](evidence/outbox-delivery-lease.md).
 
+## Slice 1J-B supervised internal consumption and exact replay
+
+Slice 1J-B extends the code-owned consumer declaration with one loaded handler module and positive
+handler revision. `Outbox.consume/5` ignores event-supplied authority, rereads and locks the exact
+tenant delivery and immutable event on the current writer, rechecks the dispatch capability,
+active database-timed lease, route, internal classification, subscription, schema, and handler
+revision, then runs only the declared database-local callback inside that writer transaction.
+
+A closed tenant-owned receipt pins event, consumer, event contract, handler revision, result
+digest, and writer time to the exact delivery. The handler effect and receipt commit together. A
+redelivery after a receipt commit but before acknowledgement returns the retained digest without
+running the handler again; a changed handler revision or event contract conflicts.
+
+The `Dispatcher` is startable only with an explicit runtime, registry, trusted context, consumer
+key, and bounded poll interval. It is supervised by its caller, claims one bounded batch, consumes,
+then acknowledges, and routes typed callback failures into the existing retry/dead-letter state.
+It is not installed under `Chimwemwe.Application`, owns no production placement default, and
+exposes count-and-time process status only.
+
+`Outbox.replay/5` requires the independent `platform.outbox.replay` capability and accepts only one
+exact code-declared consumer, event UUID, dead-letter lock version, stable reason, idempotency key,
+and causation identifier. It serializes the exact delivery, resets only that attempt cycle,
+increments replay and lock versions, and records minimized authority audit plus an exact completed
+idempotency result against the original event. Exact replay returns the retained result; changed
+input or actor conflicts.
+
+This slice does not add Oban, a production application child, an external or filesystem consumer,
+external publication, replay ranges/cursors, payload editing, retention deletion, module
+drain/reactivation integration, production telemetry, deployment qualification, restore or
+convergence evidence, or independent security/privacy approval. See the
+[Slice 1J-B evidence](evidence/outbox-supervised-consumption-and-replay.md).
+
 ## UI-0 local browser boundary
 
 UI-0 implements only the local experience-validation slice authorized on 2026-09-24. It adds a separate Next.js, React, and TypeScript workspace under `clients/web` with:
@@ -368,10 +400,10 @@ or workflow is considered validated.
 
 - Phase 0 ADR outcomes and conditional gates are binding; an Accepted ADR is changed only by supersession.
 - `make check` proves repository consistency; it does not by itself approve a new production capability.
-- Only `apps/chimwemwe_core` is allowed during slices 1A through the current Slice 1J-A increment. A second production app or service needs explicit later-slice authorization.
+- Only `apps/chimwemwe_core` is allowed during slices 1A through the current Slice 1J-B increment. A second production app or service needs explicit later-slice authorization.
 - `clients/web` is allowed for UI-0 and only UI-1A's guarded, loopback, read-only core connection;
   it has no authority to become a production client, expose a write, or add real identity.
 - The core contains no production data or secrets and introduces no generic or public write invocation, metadata renderer or execution engine, or public interface.
 - If a retained Ash gate fails and its explicit adapter fallback cannot preserve the platform invariants, ADR 0002 must be superseded before the affected business capability depends on it; the execution-context contract remains framework-neutral.
 
-See the [implementation plan](../plans/phase-1-core-foundation-plan.md), [UI-0 proposal](../plans/local-browser-experience-foundation-proposal.md), [UI-1A plan](../plans/local-browser-core-bridge-plan.md), [core boundary](../architecture/core-foundation-boundary.md), [domain-model authoring boundary](../architecture/domain-model-authoring-and-metadata.md), [slice 1A evidence](evidence/core-foundation.md), [slice 1B evidence](evidence/resource-descriptor.md), [slice 1C evidence](evidence/action-invocation.md), [slice 1D evidence](evidence/database-admission.md), [slice 1E evidence](evidence/trusted-persistence.md), [slice 1F evidence](evidence/tenant-authority.md), [Slice 1G-A role-rename evidence](evidence/authority-role-rename.md), [Slice 1G-B role-assignment evidence](evidence/authority-role-assignment.md), [ADR 0018 T1-A evidence](evidence/temporal-qualification-physical-model.md), [ADR 0018 T1-B evidence](evidence/temporal-qualification-revision-boundary.md), [ADR 0018 T1-C evidence](evidence/temporal-qualification-fact-and-reconciliation.md), [Slice 1H-A evidence](evidence/module-lifecycle-initial-activation.md), [Slice 1H-B evidence](evidence/module-lifecycle-drain-reactivation.md), [Slice 1I-A evidence](evidence/governed-extension-definitions.md), [Slice 1I-B evidence](evidence/governed-extension-resolution.md), [UI-0 evidence](evidence/local-browser-experience.md), [UI-1A evidence](evidence/local-browser-core-bridge.md), [migration discipline](../development/migrations.md), [Phase 0 status](../phase-0/README.md), and [review record](../phase-0/review-record.md).
+See the [implementation plan](../plans/phase-1-core-foundation-plan.md), [UI-0 proposal](../plans/local-browser-experience-foundation-proposal.md), [UI-1A plan](../plans/local-browser-core-bridge-plan.md), [core boundary](../architecture/core-foundation-boundary.md), [domain-model authoring boundary](../architecture/domain-model-authoring-and-metadata.md), [slice 1A evidence](evidence/core-foundation.md), [slice 1B evidence](evidence/resource-descriptor.md), [slice 1C evidence](evidence/action-invocation.md), [slice 1D evidence](evidence/database-admission.md), [slice 1E evidence](evidence/trusted-persistence.md), [slice 1F evidence](evidence/tenant-authority.md), [Slice 1G-A role-rename evidence](evidence/authority-role-rename.md), [Slice 1G-B role-assignment evidence](evidence/authority-role-assignment.md), [ADR 0018 T1-A evidence](evidence/temporal-qualification-physical-model.md), [ADR 0018 T1-B evidence](evidence/temporal-qualification-revision-boundary.md), [ADR 0018 T1-C evidence](evidence/temporal-qualification-fact-and-reconciliation.md), [Slice 1H-A evidence](evidence/module-lifecycle-initial-activation.md), [Slice 1H-B evidence](evidence/module-lifecycle-drain-reactivation.md), [Slice 1I-A evidence](evidence/governed-extension-definitions.md), [Slice 1I-B evidence](evidence/governed-extension-resolution.md), [Slice 1J-A evidence](evidence/outbox-delivery-lease.md), [Slice 1J-B evidence](evidence/outbox-supervised-consumption-and-replay.md), [UI-0 evidence](evidence/local-browser-experience.md), [UI-1A evidence](evidence/local-browser-core-bridge.md), [migration discipline](../development/migrations.md), [Phase 0 status](../phase-0/README.md), and [review record](../phase-0/review-record.md).
