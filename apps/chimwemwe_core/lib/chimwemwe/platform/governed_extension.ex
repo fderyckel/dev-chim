@@ -1,13 +1,24 @@
 defmodule Chimwemwe.Platform.GovernedExtension do
   @moduledoc """
-  Trusted publication boundary for tenant-owned governed presentation definitions.
+  Trusted publication and exact resolution boundary for tenant-owned governed
+  presentation definitions.
 
   Slice 1I-A validates an immutable code-owned registry and module release,
-  then invokes one private named action. It does not render or execute metadata.
+  then invokes one private named action. Slice 1I-B resolves one exact compatible
+  definition for an internal consumer. Neither slice renders metadata or executes
+  its referenced action.
   """
 
   alias Chimwemwe.Platform.{ExecutionContext, GovernedExtensionError, Persistence, TrustedActor}
-  alias Chimwemwe.Platform.GovernedExtension.{ExtensionDefinition, PublishResult, Registry}
+
+  alias Chimwemwe.Platform.GovernedExtension.{
+    DefinitionResolver,
+    DefinitionView,
+    ExtensionDefinition,
+    PublishResult,
+    Registry
+  }
+
   alias Chimwemwe.Platform.ModuleLifecycle.ReleaseManifest
   alias Ecto.UUID
 
@@ -50,6 +61,30 @@ defmodule Chimwemwe.Platform.GovernedExtension do
                normalized_input
              ) do
         run_action(runtime, validated_context, action_input)
+      end
+    end)
+  end
+
+  @doc "Resolves one exact compatible definition without executing its action reference."
+  @spec resolve_definition(
+          Supervisor.supervisor(),
+          ReleaseManifest.t(),
+          Registry.t(),
+          term(),
+          term()
+        ) :: {:ok, DefinitionView.t()} | {:error, term()}
+  def resolve_definition(runtime, manifest, registry, context, definition_id) do
+    ExecutionContext.with_validated(context, fn validated_context ->
+      with {:ok, validated_manifest} <- validate_manifest(manifest),
+           {:ok, validated_registry} <- validate_registry(registry),
+           {:ok, definition_id} <- cast_uuid(definition_id) do
+        DefinitionResolver.resolve(
+          runtime,
+          validated_manifest,
+          validated_registry,
+          validated_context,
+          definition_id
+        )
       end
     end)
   end

@@ -41,6 +41,7 @@ defmodule Chimwemwe.Platform.ModuleLifecycleTest do
   @reactivate_action "platform.module_lifecycle.reactivate"
 
   @tables [
+    "platform_governed_extension_definitions",
     "platform_authority_action_idempotency",
     "platform_outbox_events",
     "platform_authority_audit_events",

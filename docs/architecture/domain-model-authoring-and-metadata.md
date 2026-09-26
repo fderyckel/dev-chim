@@ -1,6 +1,6 @@
 # Domain model authoring and metadata boundary
 
-- Status: Proposed during Phase 0
+- Status: Accepted architecture; resource descriptor and Slice 1I-A/1I-B governed presentation-definition boundaries implemented
 - Owner: Platform engineering
 - Governing record: [ADR 0019](../adr/0019-domain-model-authoring-and-governed-metadata.md)
 - Review trigger: authoring-scenario evidence, first persistent resource, or any runtime model-customization proposal
@@ -86,7 +86,30 @@ The neutral, disposable exercise is now recorded in [resource-authoring and gove
 6. Attempts to reference a private field, an unapproved action, another tenant's definition, arbitrary SQL, or an old incompatible descriptor fail closed.
 7. A field rename and representative Ash upgrade demonstrate drift detection and a controlled compatibility path.
 
-The exercise passed with bounded remediation: it removes copied type, constraint, policy, tenant, and module ownership from view/report definitions while adding a checked descriptor, validator, execution registry, and compatibility contract. It did not add a second schema or policy engine. It is evidence for ADRs 0002 and 0019, not acceptance of either ADR or authorization to add a school business module.
+The exercise passed with bounded remediation: it removes copied type, constraint, policy, tenant, and module ownership from view/report definitions while adding a checked descriptor, validator, execution registry, and compatibility contract. It did not add a second schema or policy engine. It supplied evidence for ADRs 0002 and 0019, but did not itself authorize a school business module.
+
+## Slice 1I-A implementation
+
+Slice 1I-A promotes only the first durable definition contract. Code-owned release declarations
+list stable extension schema keys and versions. A trusted immutable registry derives a descriptor
+from a contract-valid tenant-owned Ash resource and explicit field/action allowlists, then accepts
+only bounded presentation content. A tenant can choose a title, field order, field labels, and one
+allowlisted public read action; it cannot select a private reference, authorization rule, query,
+code path, tenant, repository, or executable behavior.
+
+The closed tenant-owned definition pins module version, schema version, descriptor revision,
+resource reference, derived classification, and optimistic lock version. Publication rechecks the
+independent module gates and a separate actor capability on the writer and records minimized audit,
+outbox, and exact-replay evidence in the same transaction. There is no renderer or live consumer,
+so retaining a valid definition does not expose or execute data. See the
+[Slice 1I-A evidence](../phase-1/evidence/governed-extension-definitions.md).
+
+Slice 1I-B adds only exact internal compatibility resolution. Before returning one stored
+definition, the resolver requires separate read authority, all current module gates, exact current
+schema/resource/descriptor/content/classification agreement, and an exact or explicitly compatible
+module version. It returns metadata only and never invokes the stored action reference. There is no
+enumeration, public contract, renderer, or domain-record read. See the
+[Slice 1I-B evidence](../phase-1/evidence/governed-extension-resolution.md).
 
 ## Reports, views, security, and APIs
 
@@ -121,7 +144,7 @@ This is how Chimwemwe supports broad school needs without pretending every futur
 - Defer custom-field storage, a general UI renderer, a visual model builder, and a schema compiler until measured use cases justify them.
 - Re-run tenant, authorization, migration, report, and generated-interface negative tests whenever the authoring contract changes.
 
-## Developer workflow after acceptance
+## Developer workflow
 
 1. Start with the provisional Chimwemwe base resource and declare whether the resource is tenant-owned or global reference data.
 2. Define fields, relationships, named actions, policies, tenancy, and business invariants in Ash code.

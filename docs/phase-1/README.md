@@ -1,6 +1,6 @@
 # Phase 1: core foundation
 
-- Status: Slices 1A through 1H-B, ADR 0018 T1-A/T1-B/T1-C, and local UI-1A implemented; local synthetic UI-0 implemented; representative human review and the remaining ADR-specific gates are pending
+- Status: Slices 1A through 1I-B, ADR 0018 T1-A/T1-B/T1-C, and local UI-1A implemented; Slice 1I-B focused, production-core, and complete repository verification passing; local synthetic UI-0 implemented; representative human review and the remaining ADR-specific gates are pending
 - Owner: Platform engineering
 - Start basis: explicit user direction on 2026-09-14, followed by the completed Phase 0 review on 2026-09-16
 - Entry basis: Ash is conditionally accepted; implementation proceeds only in explicitly authorized bounded slices and must satisfy the retained production gates
@@ -259,6 +259,55 @@ offboarding workflow, retained-data read/export/correction/deletion action, publ
 browser connection, provisioning surface, or school module. See the
 [Slice 1H-B evidence](evidence/module-lifecycle-drain-reactivation.md).
 
+## Slice 1I-A governed presentation definitions
+
+Slice 1I-A implements the first durable governed-extension boundary accepted by ADR 0019 without
+creating a renderer or a second domain model. Code-owned module releases may declare versioned
+extension contracts. A trusted immutable registry binds each supported schema to one released
+module and a descriptor derived from a contract-valid tenant-owned resource and explicit
+allowlists.
+
+The only supported schema is a bounded presentation definition containing a title, ordered
+allowlisted fields, labels for those fields, and one allowlisted public read action. Validation
+rejects extra, private, stale, executable, authority-shaped, or incompatible content and derives
+the retained classification from the most sensitive referenced field.
+
+`GovernedExtension.publish_definition/5` is the sole publication boundary. It revalidates trusted
+context, the release and registry contract, all independent module gates, and the separate
+publication capability on the authoritative writer. Exact optimistic versioning, definition and
+lifecycle locks, exact replay, and one transaction bind tenant-owned definition state to minimized
+audit, outbox, and idempotency evidence. The evidence omits labels and definition content.
+
+This slice adds no public API, browser connection, real module consumer, report dataset, renderer,
+metadata execution, custom fields, runtime schema or workflow language, visual builder,
+provisioning surface, or education vocabulary. See the
+[Slice 1I-A evidence](evidence/governed-extension-definitions.md).
+
+## Slice 1I-B exact definition resolution
+
+Slice 1I-B closes the Phase 1 governed-extension contract with one internal consumer boundary.
+`GovernedExtension.resolve_definition/5` accepts one caller-known definition UUID and returns an
+immutable compatible definition view. It exposes no enumeration, search, filtering, history, or
+bulk-read surface.
+
+The resolver requires the separate `platform.extensions.definitions.read` capability before
+definition lookup, then rechecks that capability together with release, entitlement, active
+version, and dependency gates under the module lifecycle lock. Missing and cross-tenant IDs return
+the same not-found result. Publication authority does not imply read authority.
+
+Resolution derives the module and resource contract from the current trusted registry, not stored
+or caller-selected authority. It requires the retained schema version, resource reference,
+descriptor revision, normalized content, and derived classification to match current code. The
+published module version must equal the active release or be explicitly listed in its
+`compatible_from` contract. The returned view reports `exact` or `compatible` and excludes tenant,
+actor, activation, entitlement, placement, repository, authority, audit, outbox, and idempotency
+identifiers.
+
+This slice does not execute the stored read action, fetch domain records, render a component, expose
+an Ash/public/HTTP/browser read, add a checked public descriptor artifact, or create report, export,
+cache, search, custom-field, runtime-schema, provisioning, or education-domain authority. See the
+[Slice 1I-B evidence](evidence/governed-extension-resolution.md).
+
 ## UI-0 local browser boundary
 
 UI-0 implements only the local experience-validation slice authorized on 2026-09-24. It adds a separate Next.js, React, and TypeScript workspace under `clients/web` with:
@@ -298,10 +347,10 @@ or workflow is considered validated.
 
 - Phase 0 ADR outcomes and conditional gates are binding; an Accepted ADR is changed only by supersession.
 - `make check` proves repository consistency; it does not by itself approve a new production capability.
-- Only `apps/chimwemwe_core` is allowed during slices 1A through the current Slice 1H-B increment. A second production app or service needs explicit later-slice authorization.
+- Only `apps/chimwemwe_core` is allowed during slices 1A through the current Slice 1I-B increment. A second production app or service needs explicit later-slice authorization.
 - `clients/web` is allowed for UI-0 and only UI-1A's guarded, loopback, read-only core connection;
   it has no authority to become a production client, expose a write, or add real identity.
-- The core contains no production data or secrets and introduces no generic or public write invocation, experience-metadata engine, or public interface.
+- The core contains no production data or secrets and introduces no generic or public write invocation, metadata renderer or execution engine, or public interface.
 - If a retained Ash gate fails and its explicit adapter fallback cannot preserve the platform invariants, ADR 0002 must be superseded before the affected business capability depends on it; the execution-context contract remains framework-neutral.
 
-See the [implementation plan](../plans/phase-1-core-foundation-plan.md), [UI-0 proposal](../plans/local-browser-experience-foundation-proposal.md), [UI-1A plan](../plans/local-browser-core-bridge-plan.md), [core boundary](../architecture/core-foundation-boundary.md), [domain-model authoring boundary](../architecture/domain-model-authoring-and-metadata.md), [slice 1A evidence](evidence/core-foundation.md), [slice 1B evidence](evidence/resource-descriptor.md), [slice 1C evidence](evidence/action-invocation.md), [slice 1D evidence](evidence/database-admission.md), [slice 1E evidence](evidence/trusted-persistence.md), [slice 1F evidence](evidence/tenant-authority.md), [Slice 1G-A role-rename evidence](evidence/authority-role-rename.md), [Slice 1G-B role-assignment evidence](evidence/authority-role-assignment.md), [ADR 0018 T1-A evidence](evidence/temporal-qualification-physical-model.md), [ADR 0018 T1-B evidence](evidence/temporal-qualification-revision-boundary.md), [ADR 0018 T1-C evidence](evidence/temporal-qualification-fact-and-reconciliation.md), [Slice 1H-A evidence](evidence/module-lifecycle-initial-activation.md), [Slice 1H-B evidence](evidence/module-lifecycle-drain-reactivation.md), [UI-0 evidence](evidence/local-browser-experience.md), [UI-1A evidence](evidence/local-browser-core-bridge.md), [migration discipline](../development/migrations.md), [Phase 0 status](../phase-0/README.md), and [review record](../phase-0/review-record.md).
+See the [implementation plan](../plans/phase-1-core-foundation-plan.md), [UI-0 proposal](../plans/local-browser-experience-foundation-proposal.md), [UI-1A plan](../plans/local-browser-core-bridge-plan.md), [core boundary](../architecture/core-foundation-boundary.md), [domain-model authoring boundary](../architecture/domain-model-authoring-and-metadata.md), [slice 1A evidence](evidence/core-foundation.md), [slice 1B evidence](evidence/resource-descriptor.md), [slice 1C evidence](evidence/action-invocation.md), [slice 1D evidence](evidence/database-admission.md), [slice 1E evidence](evidence/trusted-persistence.md), [slice 1F evidence](evidence/tenant-authority.md), [Slice 1G-A role-rename evidence](evidence/authority-role-rename.md), [Slice 1G-B role-assignment evidence](evidence/authority-role-assignment.md), [ADR 0018 T1-A evidence](evidence/temporal-qualification-physical-model.md), [ADR 0018 T1-B evidence](evidence/temporal-qualification-revision-boundary.md), [ADR 0018 T1-C evidence](evidence/temporal-qualification-fact-and-reconciliation.md), [Slice 1H-A evidence](evidence/module-lifecycle-initial-activation.md), [Slice 1H-B evidence](evidence/module-lifecycle-drain-reactivation.md), [Slice 1I-A evidence](evidence/governed-extension-definitions.md), [Slice 1I-B evidence](evidence/governed-extension-resolution.md), [UI-0 evidence](evidence/local-browser-experience.md), [UI-1A evidence](evidence/local-browser-core-bridge.md), [migration discipline](../development/migrations.md), [Phase 0 status](../phase-0/README.md), and [review record](../phase-0/review-record.md).

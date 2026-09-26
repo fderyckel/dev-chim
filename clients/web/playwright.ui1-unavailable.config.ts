@@ -14,7 +14,7 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "npm run dev -- --port 3012",
+    command: "npm run start",
     url: "http://127.0.0.1:3012/authority/assignments",
     reuseExistingServer: false,
     timeout: 60_000,
@@ -24,6 +24,7 @@ export default defineConfig({
       CHIMWEMWE_UI1_BRIDGE_TOKEN:
         "ui1-playwright-unavailable-token-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       CHIMWEMWE_UI1_LOCAL: "true",
+      PORT: "3012",
     },
   },
 });

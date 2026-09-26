@@ -127,11 +127,10 @@ defmodule Chimwemwe.Platform.ModuleLifecycle.ReleaseManifest do
   defp normalize_declaration(_declaration), do: {:error, :invalid_manifest}
 
   defp valid_declaration_keys?(keys) do
-    key_set = MapSet.new(keys)
-    required = MapSet.new(@required_declaration_keys)
-    allowed = MapSet.new(@required_declaration_keys ++ @optional_declaration_keys)
+    allowed = @required_declaration_keys ++ @optional_declaration_keys
 
-    MapSet.subset?(required, key_set) and MapSet.subset?(key_set, allowed)
+    Enum.all?(@required_declaration_keys, &(&1 in keys)) and
+      Enum.all?(keys, &(&1 in allowed))
   end
 
   defp normalize_extension_contracts(contracts) when is_list(contracts) do
@@ -161,7 +160,7 @@ defmodule Chimwemwe.Platform.ModuleLifecycle.ReleaseManifest do
 
   defp normalize_extension_contract(contract)
        when is_map(contract) and not is_struct(contract) do
-    with true <- MapSet.new(Map.keys(contract)) == MapSet.new(@extension_contract_keys),
+    with true <- Enum.sort(Map.keys(contract)) == @extension_contract_keys,
          {:ok, key} <- normalize_key(Map.fetch!(contract, :key)),
          schema_version when is_integer(schema_version) and schema_version > 0 <-
            Map.fetch!(contract, :schema_version) do

@@ -1,6 +1,6 @@
 # Phase 1 core-foundation implementation plan
 
-- Status: Slices 1A through 1H-B, ADR 0018 T1-A/T1-B/T1-C, and local UI-1A implemented; T1-C complete-repository verification pending; Phase 0 decisions completed
+- Status: Slices 1A through 1I-B, ADR 0018 T1-A/T1-B/T1-C, and local UI-1A implemented; Slice 1I-B focused, production-core, and complete repository verification passing; Phase 0 decisions completed
 - Owner: Platform engineering
 - Decision posture: Ash conditionally accepted; applicable ADR outcomes and production gates are binding
 - Review trigger: another authority mutation, a callable temporal action or read boundary, generic or public write invocation, a metadata consumer, a public interface, another app, or a school domain
@@ -16,7 +16,7 @@
 | [ADR 0007](../adr/0007-transactional-outbox-and-event-envelope.md) | The first write commits one minimal durable event fact with its state | Dispatcher, retry, operational replay, retention, and movement reconciliation |
 | [ADR 0017](../adr/0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md) | One authoritative writer boundary, explicit pool budgets, admission before checkout, and no request-selected repository | Selected-deployment topology, failover, recovery, multi-node calibration, and production credentials |
 | [ADR 0018](../adr/0018-temporal-records-correction-audit-and-evidence-semantics.md) | Separate publication and correction intent, immutable operation results, explicit temporal reads, and evidence-layer separation | Retention/hold/erasure, reversal action, consumer reconciliation, migration provenance, backup/restore, and accountable Full Acceptance |
-| [ADR 0019](../adr/0019-domain-model-authoring-and-governed-metadata.md) | Code-owned base-resource convention, structural audit, and a small derived descriptor contract proven by disposable Phase 0 evidence | Descriptor consumers, governed metadata, persistence, and their closure gates |
+| [ADR 0019](../adr/0019-domain-model-authoring-and-governed-metadata.md) | Code-owned base-resource convention, structural audit, derived descriptor contract, and the first typed tenant-owned presentation-definition publication boundary | Real module/interface consumers, rendering, compatible schema evolution, reports, and any later metadata type |
 | [Retained-data migration evidence](../phase-0/evidence/retained-data-migration-rehearsal.md) | Keep migration choreography explicit and resource-specific | Production-shaped measurements, mixed-release deployment, recovery proof, and an authorized persistent resource |
 | [Trusted-routing evidence](../phase-0/evidence/trusted-routing.md) | Raw request placement is not accepted; missing or stale routing fails closed | Live registry and repository selection |
 | [Pre-checkout admission evidence](../phase-0/evidence/precheckout-admission-measurement.md) | Acquire node-local tenant and placement capacity before any repository callback | Multi-node coordination, selected-deployment calibration, and live pool integration |
@@ -442,6 +442,42 @@ executor, arbitrary SQL or code path, custom-field store, schema compiler, visua
 authorization rule, provisioning surface, or education vocabulary. A later 1I increment requires
 separate authorization before a real module or interface consumes the stored definition.
 
+## Slice 1I-B exact definition resolution
+
+The authorized second governed-extension increment adds the first internal consumer of retained
+definitions without creating a renderer or executing the referenced domain read. It resolves one
+caller-known definition UUID only; enumeration, search, history, and bulk access remain absent.
+
+1. Add a trusted `GovernedExtension.resolve_definition/5` boundary that accepts only the configured
+   persistence runtime, immutable release manifest, immutable extension registry, validated
+   execution context, and one exact definition UUID.
+2. Require the separate code-known `platform.extensions.definitions.read` capability before loading
+   definition state, then recheck that capability together with release, entitlement, active
+   version, and dependency gates under the module lifecycle transaction lock.
+3. Read only through a tenant-qualified exact identifier and return the same non-disclosing
+   not-found result for absent and cross-tenant definitions. Do not add list, filter, search,
+   history, or public Ash read actions.
+4. Re-resolve the stored schema through the current trusted registry and release declaration.
+   Require exact schema version, resource reference, descriptor revision, normalized content, and
+   derived classification. Stored metadata never selects the resource, module, tenant, capability,
+   repository, or action implementation.
+5. Permit an exact current module version or a prior stored module version explicitly listed in the
+   current release's `compatible_from` contract. Return whether the definition is `exact` or
+   `compatible`; reject every implicit, stale, unknown, or changed contract.
+6. Return an immutable internal view containing only the compatible definition contract and content,
+   version/classification facts, and exact/compatible status. Exclude tenant, actor, activation,
+   entitlement, repository, placement, authority graph, and evidence identifiers.
+7. Prove missing read authority, publish/read capability separation, inactive or incompatible
+   lifecycle state, descriptor/schema drift, invalid retained content or lowered classification,
+   missing and cross-tenant identifiers, exact and explicitly compatible resolution, and database
+   failure classification.
+
+Slice 1I-B does not execute the stored `read_action`, fetch domain records, render a component,
+expose a browser or HTTP interface, add a checked public descriptor artifact, enumerate definitions,
+or add report, export, cache, search, custom-field, runtime-schema, provisioning, or school-domain
+authority. Action execution remains behind a later independently reviewed TM-16 boundary where the
+real actor and tenant must be re-authorized by the referenced named action.
+
 ## Acceptance checks
 
 - `Ash.Domain.Info.authorize(Chimwemwe.Platform)` returns `:always`.
@@ -525,9 +561,14 @@ separate authorization before a real module or interface consumes the stored def
 - Definition state, minimized audit, minimal outbox, and completed idempotency evidence commit or roll back together, and retained definition content is absent from audit and outbox payloads.
 - Compound tenant constraints reject cross-tenant activation references, while database checks reject malformed keys, invalid descriptor revisions, unknown classifications, non-positive versions, and non-object content.
 - Slice 1I-A adds no renderer, execution path, custom fields, runtime schema or workflow language, generic metadata mutation, public interface, browser connection, provisioning surface, or school module.
+- Exact definition resolution requires a separate read capability before state lookup and rechecks that capability with every independent module gate under the lifecycle lock.
+- Missing and cross-tenant definition identifiers are non-disclosing; no list, search, filter, history, or bulk definition read exists.
+- Resolved definitions exactly match the current code-owned schema, resource, descriptor, normalized content, and derived classification, and their stored module version is exact or explicitly compatible with the active release.
+- Resolution returns no tenant, actor, activation, entitlement, repository, placement, authority, audit, outbox, or idempotency identifiers and never invokes the stored action reference.
+- Slice 1I-B adds no renderer, domain-record read, generic executor, public interface, browser connection, report/export surface, provisioning path, or school module.
 - The reviewed migration applies, rolls back, reapplies, and passes generated migration and snapshot drift checks.
-- Complete repository acceptance still requires `make check` and the Phase 0 exit review to pass;
-  the current run stops on stale UI-1A dependency/security and clean-checkout evidence.
+- Complete repository acceptance passes through `make check`, including the Phase 0 contract,
+  production core, generated interfaces, dependency and type checks, and browser suites.
 
 ## Rollback and next gate
 
@@ -547,6 +588,11 @@ outbox, or idempotency fact is retained. Once a definition has been published, d
 schema evolution uses compatible forward migration and explicit revision; dropping definitions
 or silently rewriting their pinned contract is prohibited.
 
+Slice 1I-B adds no schema and mutates no retained state. It can be removed by deleting the exact
+resolver, internal view, and focused tests while retaining every valid Slice 1I-A definition and
+publication fact. Removing 1I-B cannot authorize direct reads of the definition table or bypass the
+separate capability and compatibility contract.
+
 The role-rename, role-assignment, temporal-qualification, and module-lifecycle increments prove
 bounded resource-specific contracts. They do not authorize membership or role creation,
 capability grant, composition, revoke, public write invocation, outbox dispatch, entitlement
@@ -554,7 +600,8 @@ expiry, offboarding, retained-data deletion, provisioning, a real queue/consumer
 adapter, or a school module. The next module-lifecycle work is real-adapter and operational
 qualification inside a separately authorized production-readiness boundary. The Phase 0
 descriptor artifact, report registry, and governed experience-metadata implementation remain
-disposable evidence and are not production APIs. Slice 1I-A may promote only its newly reviewed
-registry, validator, and durable definition boundary; it does not promote the spike report
-executor or renderer. Do not add a school business module until an explicit module slice is
+disposable evidence and are not production APIs. Slices 1I-A and 1I-B promote only the reviewed
+registry, validator, durable definition boundary, and exact internal compatibility resolver; they
+do not promote the spike report executor or renderer. The next Phase 1 boundary is Slice 1J
+operational readiness. Do not add a school business module until an explicit module slice is
 authorized.

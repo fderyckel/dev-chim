@@ -8,6 +8,7 @@ defmodule Chimwemwe.Platform.GovernedExtensionError do
           | :forbidden
           | :idempotency_conflict
           | :internal
+          | :incompatible_definition
           | :invalid_definition
           | :invalid_input
           | :invalid_manifest

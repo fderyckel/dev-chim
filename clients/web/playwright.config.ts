@@ -1,5 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const ui0Port = process.env.CHIMWEMWE_UI0_E2E_PORT ?? "3000";
+
+if (!/^[1-9][0-9]{0,4}$/.test(ui0Port) || Number(ui0Port) > 65_535) {
+  throw new Error("CHIMWEMWE_UI0_E2E_PORT must be a valid TCP port.");
+}
+
+const ui0BaseUrl = `http://127.0.0.1:${ui0Port}`;
+
 export default defineConfig({
   testDir: "./tests/e2e",
   testIgnore: ["ui1-*.spec.ts"],
@@ -9,7 +17,7 @@ export default defineConfig({
   workers: 1,
   reporter: [["line"]],
   use: {
-    baseURL: "http://127.0.0.1:3000",
+    baseURL: ui0BaseUrl,
     trace: "retain-on-failure",
   },
   projects: [
@@ -28,11 +36,12 @@ export default defineConfig({
   ],
   webServer: {
     command: "npm run start",
-    url: "http://127.0.0.1:3000",
+    url: ui0BaseUrl,
     reuseExistingServer: false,
     timeout: 30_000,
     env: {
       CHIMWEMWE_UI0_SYNTHETIC: "true",
+      PORT: ui0Port,
     },
   },
 });

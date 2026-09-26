@@ -36,7 +36,7 @@ export default defineConfig({
       timeout: 60_000,
     },
     {
-      command: "npm run dev -- --port 3011",
+      command: "npm run start",
       url: "http://127.0.0.1:3011/authority/assignments",
       reuseExistingServer: false,
       timeout: 60_000,
@@ -45,6 +45,7 @@ export default defineConfig({
         CHIMWEMWE_UI1_API_URL: "http://127.0.0.1:4011",
         CHIMWEMWE_UI1_BRIDGE_TOKEN: testToken,
         CHIMWEMWE_UI1_LOCAL: "true",
+        PORT: "3011",
       },
     },
   ],

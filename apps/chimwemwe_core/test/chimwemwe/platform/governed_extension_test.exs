@@ -6,12 +6,13 @@ defmodule Chimwemwe.Platform.GovernedExtensionTest do
     GovernedExtension,
     GovernedExtensionError,
     Persistence,
+    PersistenceError,
     PersistenceRuntime,
     TrustedActor,
     TrustedPlacement
   }
 
-  alias Chimwemwe.Platform.GovernedExtension.{PublishResult, Registry}
+  alias Chimwemwe.Platform.GovernedExtension.{DefinitionView, PublishResult, Registry}
   alias Chimwemwe.Platform.ModuleLifecycle.ReleaseManifest
   alias Chimwemwe.Platform.ResourceDescriptorTest.NeutralTenantResource
   alias Chimwemwe.Repo
@@ -26,6 +27,7 @@ defmodule Chimwemwe.Platform.GovernedExtensionTest do
   @module_key "platform.qualification.extensions"
   @schema_key "platform.qualification.records.presentation"
   @publish_capability "platform.extensions.definitions.publish"
+  @read_capability "platform.extensions.definitions.read"
   @action_name "platform.extensions.definition.publish"
   @event_type "platform.extensions.definition.published"
 
@@ -170,6 +172,239 @@ defmodule Chimwemwe.Platform.GovernedExtensionTest do
 
     assert {:ok, [[2, "Configured neutral records"]]} =
              read_definition(fixture.runtime, context_admin_a(), first.id)
+  end
+
+  test "resolves one exact compatible definition into a minimized internal view", fixture do
+    input = publish_input()
+    assert {:ok, published} = publish(fixture.runtime, context_admin_a(), input)
+
+    assert {:ok,
+            %DefinitionView{
+              id: id,
+              definition_key: "tenant.neutral_records.default_view",
+              schema_key: @schema_key,
+              schema_version: 1,
+              module_key: @module_key,
+              published_module_version: "1.0.0",
+              active_module_version: "1.0.0",
+              resource_ref: "neutral_record",
+              descriptor_revision: revision,
+              classification: :restricted,
+              content: resolved_content,
+              lock_version: 1,
+              compatibility: :exact
+            } = view} =
+             GovernedExtension.resolve_definition(
+               fixture.runtime,
+               manifest(),
+               registry(),
+               context_admin_a(),
+               published.id
+             )
+
+    assert id == published.id
+    assert revision == descriptor_revision()
+    assert resolved_content == content()
+
+    for excluded <- [
+          :tenant_id,
+          :actor_id,
+          :module_activation_id,
+          :entitlement_id,
+          :placement,
+          :repository,
+          :audit_reference,
+          :event_id
+        ] do
+      refute Map.has_key?(view, excluded)
+    end
+
+    refute function_exported?(GovernedExtension, :list_definitions, 4)
+    refute function_exported?(GovernedExtension, :execute_definition, 5)
+  end
+
+  test "keeps publication and exact resolution authority separate and tenant-safe", fixture do
+    input = publish_input()
+    assert {:ok, published} = publish(fixture.runtime, context_admin_a(), input)
+    remove_read_grant(fixture.runtime, context_admin_a())
+
+    assert {:error, %GovernedExtensionError{code: :forbidden}} =
+             GovernedExtension.resolve_definition(
+               fixture.runtime,
+               manifest(),
+               registry(),
+               context_admin_a(),
+               published.id
+             )
+
+    assert {:ok, %PublishResult{lock_version: 2}} =
+             publish(
+               fixture.runtime,
+               context_admin_a(),
+               %{
+                 input
+                 | content: %{content() | "title" => "Still publishable"},
+                   expected_version: 1,
+                   idempotency_key: UUID.generate(),
+                   causation_id: UUID.generate()
+               }
+             )
+
+    assert {:error, %GovernedExtensionError{code: :not_found}} =
+             GovernedExtension.resolve_definition(
+               fixture.runtime,
+               manifest(),
+               registry(),
+               context_admin_b(),
+               published.id
+             )
+
+    assert {:error, %GovernedExtensionError{code: :invalid_input}} =
+             GovernedExtension.resolve_definition(
+               fixture.runtime,
+               manifest(),
+               registry(),
+               context_admin_b(),
+               "not-a-definition-id"
+             )
+  end
+
+  test "requires an exact or explicitly compatible active module release", fixture do
+    assert {:ok, published} = publish(fixture.runtime, context_admin_a(), publish_input())
+    update_activation_version(fixture.runtime, context_admin_a(), fixture.activation_a, "1.1.0")
+
+    incompatible_release =
+      release_declaration()
+      |> Map.put(:version, "1.1.0")
+      |> Map.put(:compatible_from, ["1.1.0"])
+      |> manifest()
+
+    assert {:error, %GovernedExtensionError{code: :incompatible_definition}} =
+             GovernedExtension.resolve_definition(
+               fixture.runtime,
+               incompatible_release,
+               registry(),
+               context_admin_a(),
+               published.id
+             )
+
+    compatible_release =
+      release_declaration()
+      |> Map.put(:version, "1.1.0")
+      |> Map.put(:compatible_from, ["1.0.0"])
+      |> manifest()
+
+    assert {:ok,
+            %DefinitionView{
+              published_module_version: "1.0.0",
+              active_module_version: "1.1.0",
+              compatibility: :compatible
+            }} =
+             GovernedExtension.resolve_definition(
+               fixture.runtime,
+               compatible_release,
+               registry(),
+               context_admin_a(),
+               published.id
+             )
+
+    set_activation_state(fixture.runtime, context_admin_a(), fixture.activation_a, "inactive")
+
+    assert {:error, %GovernedExtensionError{code: :module_gate_failed}} =
+             GovernedExtension.resolve_definition(
+               fixture.runtime,
+               compatible_release,
+               registry(),
+               context_admin_a(),
+               published.id
+             )
+  end
+
+  test "rejects schema, descriptor, retained-content, and classification drift", fixture do
+    assert {:ok, published} = publish(fixture.runtime, context_admin_a(), publish_input())
+
+    changed_descriptor_registry =
+      registry_declaration()
+      |> Map.put(
+        :descriptor_contract,
+        Map.put(@descriptor_contract, :model_version, 2)
+      )
+      |> registry()
+
+    assert {:error, %GovernedExtensionError{code: :incompatible_definition}} =
+             GovernedExtension.resolve_definition(
+               fixture.runtime,
+               manifest(),
+               changed_descriptor_registry,
+               context_admin_a(),
+               published.id
+             )
+
+    changed_schema_registry =
+      registry_declaration()
+      |> Map.put(:schema_version, 2)
+      |> registry()
+
+    changed_schema_manifest =
+      [%{key: @schema_key, schema_version: 2}]
+      |> release_declaration()
+      |> manifest()
+
+    assert {:error, %GovernedExtensionError{code: :incompatible_definition}} =
+             GovernedExtension.resolve_definition(
+               fixture.runtime,
+               changed_schema_manifest,
+               changed_schema_registry,
+               context_admin_a(),
+               published.id
+             )
+
+    corrupt_definition(
+      fixture.runtime,
+      context_admin_a(),
+      published.id,
+      %{content: %{content() | "fields" => ["neutral_record.private"]}}
+    )
+
+    assert {:error, %GovernedExtensionError{code: :incompatible_definition}} =
+             GovernedExtension.resolve_definition(
+               fixture.runtime,
+               manifest(),
+               registry(),
+               context_admin_a(),
+               published.id
+             )
+
+    corrupt_definition(
+      fixture.runtime,
+      context_admin_a(),
+      published.id,
+      %{content: content(), classification: "public"}
+    )
+
+    assert {:error, %GovernedExtensionError{code: :incompatible_definition}} =
+             GovernedExtension.resolve_definition(
+               fixture.runtime,
+               manifest(),
+               registry(),
+               context_admin_a(),
+               published.id
+             )
+  end
+
+  test "fails closed when the exact-resolution persistence runtime is unavailable" do
+    {:ok, runtime} = PersistenceRuntime.start_link(runtime_options())
+    Process.unlink(runtime)
+    :ok = Supervisor.stop(runtime)
+
+    assert {:error, %PersistenceError{code: :retryable_dependency}} =
+             GovernedExtension.resolve_definition(
+               runtime,
+               manifest(),
+               registry(),
+               context_admin_a(),
+               UUID.generate()
+             )
   end
 
   test "returns exact and concurrent replay and rejects changed idempotency reuse", fixture do
@@ -398,8 +633,8 @@ defmodule Chimwemwe.Platform.GovernedExtensionTest do
     GovernedExtension.publish_definition(runtime, manifest(), registry(), context, input)
   end
 
-  defp manifest do
-    {:ok, manifest} = ReleaseManifest.new([release_declaration()])
+  defp manifest(declaration \\ release_declaration()) do
+    {:ok, manifest} = ReleaseManifest.new([declaration])
     manifest
   end
 
@@ -418,8 +653,8 @@ defmodule Chimwemwe.Platform.GovernedExtensionTest do
     }
   end
 
-  defp registry do
-    {:ok, registry} = Registry.new([registry_declaration()])
+  defp registry(declaration \\ registry_declaration()) do
+    {:ok, registry} = Registry.new([declaration])
     registry
   end
 
@@ -481,6 +716,7 @@ defmodule Chimwemwe.Platform.GovernedExtensionTest do
       capability_id: UUID.generate(),
       entitlement_id: UUID.generate(),
       membership_id: UUID.generate(),
+      read_capability_id: UUID.generate(),
       role_id: UUID.generate()
     }
 
@@ -488,9 +724,15 @@ defmodule Chimwemwe.Platform.GovernedExtensionTest do
              Persistence.with_writer(runtime, context, fn ->
                insert_membership(ids.membership_id, tenant_id, actor_id)
                insert_role(ids.role_id, tenant_id)
-               insert_capability(ids.capability_id, tenant_id)
+               insert_capability(ids.capability_id, tenant_id, @publish_capability)
+               insert_capability(ids.read_capability_id, tenant_id, @read_capability)
                insert_assignment(tenant_id, ids.membership_id, ids.role_id)
-               if grant?, do: insert_grant(tenant_id, ids.role_id, ids.capability_id)
+
+               if grant? do
+                 insert_grant(tenant_id, ids.role_id, ids.capability_id)
+                 insert_grant(tenant_id, ids.role_id, ids.read_capability_id)
+               end
+
                insert_entitlement(ids.entitlement_id, tenant_id)
                insert_activation(ids.activation_id, ids.entitlement_id, tenant_id)
                :seeded
@@ -527,13 +769,13 @@ defmodule Chimwemwe.Platform.GovernedExtensionTest do
     )
   end
 
-  defp insert_capability(id, tenant_id) do
+  defp insert_capability(id, tenant_id, capability) do
     Repo.query!(
       """
       INSERT INTO platform_capabilities (id, tenant_id, key, inserted_at, updated_at)
       VALUES ($1, $2, $3, NOW(), NOW())
       """,
-      [dump(id), dump(tenant_id), @publish_capability]
+      [dump(id), dump(tenant_id), capability]
     )
   end
 
@@ -644,6 +886,48 @@ defmodule Chimwemwe.Platform.GovernedExtensionTest do
                )
 
                :deleted
+             end)
+  end
+
+  defp remove_read_grant(runtime, context) do
+    assert {:ok, :removed} =
+             Persistence.with_writer(runtime, context, fn ->
+               Repo.query!(
+                 """
+                 DELETE FROM platform_role_capability_grants AS role_grant
+                 USING platform_capabilities AS capability
+                 WHERE role_grant.tenant_id = $1
+                   AND capability.tenant_id = role_grant.tenant_id
+                   AND capability.id = role_grant.capability_id
+                   AND capability.key = $2
+                 """,
+                 [dump(TrustedActor.tenant_id(context.actor)), @read_capability]
+               )
+
+               :removed
+             end)
+  end
+
+  defp corrupt_definition(runtime, context, definition_id, overrides) do
+    assert {:ok, :corrupted} =
+             Persistence.with_writer(runtime, context, fn ->
+               Repo.query!(
+                 """
+                 UPDATE platform_governed_extension_definitions
+                 SET content = COALESCE($3::jsonb, content),
+                     classification = COALESCE($4, classification),
+                     updated_at = NOW()
+                 WHERE tenant_id = $1 AND id = $2
+                 """,
+                 [
+                   dump(TrustedActor.tenant_id(context.actor)),
+                   dump(definition_id),
+                   Map.get(overrides, :content),
+                   Map.get(overrides, :classification)
+                 ]
+               )
+
+               :corrupted
              end)
   end
 
