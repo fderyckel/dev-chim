@@ -19,7 +19,7 @@ echo "[2/12] Python lint"
 mise exec -- uv run ruff check tools tests/tools
 
 echo "[3/12] Shell lint"
-shellcheck .githooks/pre-push bin/bootstrap bin/phase0-check
+shellcheck .githooks/pre-push bin/bootstrap bin/phase0-check bin/with-verification-lock
 
 echo "[4/12] Repository and documentation conventions"
 mise exec -- uv run python tools/check_phase0.py

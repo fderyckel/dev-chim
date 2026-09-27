@@ -45,10 +45,28 @@ test("keyboard navigation reaches the preview and its recovery language", async 
   await expect(page.getByRole("status").last()).toContainText("What to do:");
 });
 
-test("home and preview reflow without page-level horizontal scrolling", async ({
+test("the structure prototype separates containment and blocks unknown move impacts", async ({
   page,
 }) => {
-  for (const path of ["/", "/ui-preview"]) {
+  await page.goto("/institutional-structure");
+
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Institutional structure" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("list", { name: "Institutional containment" }),
+  ).toBeVisible();
+  await expect(page.getByText("Containment only")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sites" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Affiliations" })).toBeVisible();
+  await expect(page.getByText("Blocks move")).toBeVisible();
+  await expect(page.getByRole("button")).toHaveCount(0);
+});
+
+test("local prototype pages reflow without page-level horizontal scrolling", async ({
+  page,
+}) => {
+  for (const path of ["/", "/institutional-structure", "/ui-preview"]) {
     await page.goto(path);
     const widths = await page.evaluate(() => ({
       viewport: window.innerWidth,
@@ -62,10 +80,10 @@ test("home and preview reflow without page-level horizontal scrolling", async ({
   }
 });
 
-test("home and preview have no automatically detectable accessibility violations", async ({
+test("local prototype pages have no automatically detectable accessibility violations", async ({
   page,
 }) => {
-  for (const path of ["/", "/ui-preview"]) {
+  for (const path of ["/", "/institutional-structure", "/ui-preview"]) {
     await page.goto(path);
     const result = await new AxeBuilder({ page }).analyze();
 

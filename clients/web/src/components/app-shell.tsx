@@ -11,6 +11,11 @@ type AppShellProps = Readonly<{
 
 const ui0Navigation = [
   { key: "home" as const, label: "Home", href: "/" },
+  {
+    key: "structure" as const,
+    label: "Structure prototype",
+    href: "/institutional-structure",
+  },
   { key: "preview" as const, label: "UI preview", href: "/ui-preview" },
 ];
 
@@ -24,7 +29,7 @@ export function AppShell({ activePage, context, children }: AppShellProps) {
             label: "Assignments",
             href: "/authority/assignments",
           },
-          ui0Navigation[1],
+          ui0Navigation[2],
         ]
       : ui0Navigation;
   const connected = context.experience === "ui1";
@@ -98,7 +103,13 @@ export function AppShell({ activePage, context, children }: AppShellProps) {
                   aria-current={activePage === item.key ? "page" : undefined}
                 >
                   <span className="c-primary-nav__icon" aria-hidden="true">
-                    {item.key === "home" ? "⌂" : item.key === "assignments" ? "◇" : "◫"}
+                    {item.key === "home"
+                      ? "⌂"
+                      : item.key === "assignments"
+                        ? "◇"
+                        : item.key === "structure"
+                          ? "⊞"
+                          : "◫"}
                   </span>
                   {item.label}
                 </Link>

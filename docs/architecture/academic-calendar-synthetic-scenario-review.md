@@ -117,7 +117,7 @@ If an emergency closure is declared after publication, callers need a new attrib
 | Should callers provide a time zone? | No | Convert instants server-side with the stored IANA zone; explicit dates are school-local dates |
 | Do templates need relative expressions in v1? | No evidence | Use concrete target-year values and defer relative rules |
 | Can template changes update published years? | No | Compare only; explicit adoption is limited to drafts |
-| Is the published-correction paper model settled? | Yes, as an immutable successor publication revision | [ADR 0018](../adr/0018-temporal-records-correction-audit-and-evidence-semantics.md) is Conditionally Accepted; its neutral and calendar-domain executable conditions remain prerequisites |
+| Is the published-correction paper model settled? | Yes, as an immutable successor publication revision | [ADR 0018](../adr/0018-temporal-records-correction-audit-and-evidence-semantics.md) is Accepted at the platform level; calendar-domain correction, retention, and executable evidence remain prerequisites |
 | Are simultaneous programme calendars within one school scope validated? | No | Keep them outside v1 and retain the ADR review trigger |
 
 ## Adopted refinements

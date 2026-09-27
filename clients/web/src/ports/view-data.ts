@@ -1,4 +1,4 @@
-export type NavigationKey = "home" | "assignments" | "preview";
+export type NavigationKey = "home" | "assignments" | "structure" | "preview";
 
 export type PrototypeContext = Readonly<{
   experience: "ui0" | "ui1";
@@ -62,11 +62,59 @@ export type PreviewViewData = Readonly<{
   states: ReadonlyArray<InterfaceState>;
 }>;
 
+export type InstitutionalUnitClassification = "institution" | "organizational_unit";
+
+export type InstitutionalUnitNode = Readonly<{
+  id: string;
+  name: string;
+  classification: InstitutionalUnitClassification;
+  localLabel: string;
+  code: string;
+  status: "current" | "closed";
+  children: ReadonlyArray<InstitutionalUnitNode>;
+}>;
+
+export type StructureRelationship = Readonly<{
+  label: string;
+  detail: string;
+}>;
+
+export type MoveImpact = Readonly<{
+  meaning: string;
+  outcome: "unchanged" | "requires_reconciliation" | "blocks_move";
+  detail: string;
+}>;
+
+export type InstitutionalStructureViewData = Readonly<{
+  context: PrototypeContext;
+  roots: ReadonlyArray<InstitutionalUnitNode>;
+  selectedUnit: Readonly<{
+    id: string;
+    name: string;
+    classification: InstitutionalUnitClassification;
+    localLabel: string;
+    code: string;
+    timeZone: string;
+    status: "current" | "closed";
+    currentParent: string;
+    site: string;
+  }>;
+  sites: ReadonlyArray<StructureRelationship>;
+  affiliations: ReadonlyArray<StructureRelationship>;
+  movePreview: Readonly<{
+    unit: string;
+    from: string;
+    to: string;
+    impacts: ReadonlyArray<MoveImpact>;
+  }>;
+}>;
+
 /**
  * UI-0's deliberately small, read-only boundary. It has no mutation method and
  * accepts no actor, tenant, capability, repository, placement, or routing input.
  */
 export interface ViewDataPort {
   getHome(): Promise<HomeViewData>;
+  getInstitutionalStructure(): Promise<InstitutionalStructureViewData>;
   getPreview(): Promise<PreviewViewData>;
 }

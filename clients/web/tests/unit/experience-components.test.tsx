@@ -5,9 +5,11 @@ import { describe, expect, it } from "vitest";
 
 import { AppShell } from "../../src/components/app-shell";
 import { HomeView } from "../../src/components/home-view";
+import { InstitutionalStructurePrototype } from "../../src/components/institutional-structure-prototype";
 import { InterfaceStateExplorer } from "../../src/components/interface-state-explorer";
 import type {
   HomeViewData,
+  InstitutionalStructureViewData,
   InterfaceState,
   PrototypeContext,
 } from "../../src/ports/view-data";
@@ -67,6 +69,80 @@ const states: ReadonlyArray<InterfaceState> = [
   },
 ];
 
+const structure: InstitutionalStructureViewData = {
+  context,
+  roots: [
+    {
+      id: "root-a",
+      name: "Example University",
+      classification: "institution",
+      localLabel: "University",
+      code: "EU",
+      status: "current",
+      children: [
+        {
+          id: "unit-a",
+          name: "Example Department",
+          classification: "organizational_unit",
+          localLabel: "Department",
+          code: "EU-ED",
+          status: "current",
+          children: [],
+        },
+      ],
+    },
+    {
+      id: "root-b",
+      name: "Example Early Learning Centre",
+      classification: "institution",
+      localLabel: "Early Learning Centre",
+      code: "EELC",
+      status: "current",
+      children: [],
+    },
+  ],
+  selectedUnit: {
+    id: "unit-a",
+    name: "Example Department",
+    classification: "organizational_unit",
+    localLabel: "Department",
+    code: "EU-ED",
+    timeZone: "Africa/Blantyre",
+    status: "current",
+    currentParent: "Example University",
+    site: "Shared learning site",
+  },
+  sites: [
+    {
+      label: "Shared learning site",
+      detail: "Serves both roots without becoming their parent.",
+    },
+  ],
+  affiliations: [
+    {
+      label: "Joint programme",
+      detail: "Connects units without creating another canonical parent.",
+    },
+  ],
+  movePreview: {
+    unit: "Example Department",
+    from: "Example University",
+    to: "Another reviewed unit",
+    impacts: [
+      {
+        meaning: "Authorization",
+        outcome: "unchanged",
+        detail: "Parentage grants no access.",
+      },
+      {
+        meaning: "Unknown consumer",
+        outcome: "blocks_move",
+        detail: "The move remains unavailable.",
+      },
+    ],
+  },
+};
+
 describe("the UI-0 experience components", () => {
   it("presents a labelled, synthetic home experience through semantic landmarks", async () => {
     render(
@@ -113,5 +189,30 @@ describe("the UI-0 experience components", () => {
 
     await user.click(screen.getByRole("button", { name: "Return to ready" }));
     expect(screen.getByRole("status")).toHaveTextContent("This view is up to date");
+  });
+
+  it("separates containment from sites, affiliations, and authority", async () => {
+    render(
+      <AppShell activePage="structure" context={context}>
+        <InstitutionalStructurePrototype viewData={structure} />
+      </AppShell>,
+    );
+
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Institutional structure" }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole("list", { name: "Institutional containment" }),
+    ).toBeVisible();
+    expect(screen.getByText("Containment only")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Sites" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Affiliations" })).toBeVisible();
+    expect(screen.getByText("Blocks move")).toBeVisible();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+
+    const accessibility = await runAccessibilityScan(document.body, {
+      rules: { "color-contrast": { enabled: false } },
+    });
+    expect(accessibility.violations).toEqual([]);
   });
 });

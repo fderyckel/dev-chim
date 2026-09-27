@@ -1,9 +1,14 @@
 # ADR 0023: Sensitive-collection enumeration and bulk-export boundary
 
-- Status: Proposed
+- Status: Conditionally Accepted
 - Date: 2026-09-25
+- Decision date: 2026-09-27
+- Accountable approver: François — Project Owner and interim Security/Privacy Owner
 - Accountable owner: Security architecture with platform and product engineering
 - Deciders: Project owner, security/privacy owner, platform engineering, and product engineering
+- Conditions: every production collection is qualified independently; no ordinary sensitive
+  tenant-wide traversal; no bulk export without a separate named, authorized, audited, expiring,
+  and retention-governed workflow; independent review before real Restricted child data
 - Supersedes: None
 
 ## Context
@@ -19,9 +24,10 @@ including child, guardian, safeguarding, health, employment, and sensitive opera
 The boundary must prevent an ordinary list or search API from becoming an undeclared export path
 while preserving deliberately bounded school tasks.
 
-This proposal is a candidate treatment for the **Page-limit edge adapter** production condition in
+This decision is the governing treatment for the **Page-limit edge adapter** production condition in
 the [Ash bounded-condition disposition](../phase-0/evidence/ash-bounded-condition-disposition.md).
-It does not authorize a public API, a school module, or a production export.
+Conditional acceptance establishes the policy but does not close that candidate-specific
+condition or authorize a public API, a learning-institution module, or a production export.
 
 ## Decision drivers
 
@@ -39,13 +45,13 @@ It does not authorize a public API, a school module, or a production export.
 2. Prohibit pagination for every endpoint. This prevents traversal but is unnecessarily broad for
    public reference data and for deliberately bounded, authorized task sets.
 3. Apply a classification- and scope-aware non-enumeration boundary, with separate bulk-export
-   authority. This is the proposed option.
+   authority. This is the selected option.
 4. Depend only on rate limiting or an API gateway. These are useful defence-in-depth controls but
    do not define record authority and can be bypassed by another interface or slow extraction.
 
 ## Decision
 
-Adopt, subject to accountable review and evidence, the following invariant:
+Adopt the following invariant as binding policy:
 
 > An ordinary API must not provide a pagination or query path that lets a caller reconstruct a
 > whole tenant-wide Confidential or Restricted collection. Bulk extraction is a separate named,
@@ -118,10 +124,16 @@ including integrations, jobs, reports, search, support tools, and direct generat
 
 ## Validation evidence
 
-No production sensitive-collection endpoint or export currently supplies acceptance evidence for
-this proposal. The Phase 0 page-limit test remains useful but proves only single-request bounds.
+### Decision-level evidence and candidate qualification
 
-Acceptance for each production candidate requires:
+The accountable decision accepts the invariant because the Phase 0 page-limit proof demonstrates
+the single-request gap, AC-17 names cumulative traversal as an abuse case, and the accepted
+classification, tenant, authorization, generated-contract, and fail-closed interface boundaries
+provide the necessary policy context. No production sensitive-collection endpoint or export
+currently supplies candidate qualification evidence. The Phase 0 page-limit test remains useful
+but proves only single-request bounds.
+
+Qualification for each production candidate requires:
 
 1. route, action, OpenAPI, and generated-client inventories with no generic sensitive `list all` or
    raw pagination/query escape hatch;
@@ -142,6 +154,19 @@ Acceptance for each production candidate requires:
 Passing these checks closes the page-limit condition only for the named production capability and
 candidate tested. It is not blanket approval for another collection, query shape, interface, or
 data classification.
+
+## Accountable decision
+
+On 2026-09-27, François conditionally accepted option 3 and authorized the separation between the
+governing policy and per-capability proof. Conditional acceptance makes non-enumeration and
+separate export authority mandatory now; it does not claim that a production collection, public
+route, cumulative-abuse control, or export implementation has passed.
+
+The nine candidate checks above remain fail-closed production gates. A candidate without complete
+evidence stays unavailable or uses the thin purpose-built adapter fallback. Independent
+security/privacy review remains mandatory before real Restricted child data. A future candidate
+cannot cite this ADR's status as blanket permission to enumerate another collection, query shape,
+interface, or classification.
 
 ## Fallback and exit cost
 

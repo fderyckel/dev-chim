@@ -14,10 +14,12 @@ neutral module lifecycle; Slices 1I-A and 1I-B add governed presentation definit
 internal resolution; Slices 1J-A and 1J-B add internal delivery leases, supervised database-local
 consumption, durable receipts, and exact governed dead-letter replay. Phase 2 has started with the
 L0 entry decision register. Slice 2.0-B completes the local operational-outbox foundation, and
-Slice 2.0-C completes the neutral temporal retention/recovery engineering boundary. Accountable
-ADR 0018 acceptance, production identity and interfaces, selected-deployment qualification, and
-independent review remain explicit Phase 2 gates. None of this adds a learning-institution business module,
-production identity, public interface, or real-data authority.
+Slice 2.0-C completes the neutral temporal retention/recovery engineering boundary. ADR 0018 is
+Accepted at the platform level after its 2026-09-27 accountable post-evidence review. Production
+identity architecture is accepted in ADR 0027 with ZITADEL Cloud Europe as the first broker
+candidate, but its implementation, public interfaces, selected-deployment qualification, domain
+records policy, and independent review remain explicit later Phase 2 gates. None of this adds a
+learning-institution business module, production identity, public interface, or real-data authority.
 
 ## Start here
 
@@ -82,6 +84,7 @@ and a server-owned ephemeral session. It is read-only and is not production auth
   harness to the existing core. It uses synthetic server-owned context, checked OpenAPI and
   generated TypeScript types, and exposes no assignment write or production identity path.
 - Phase 2's bounded implementation sequence is authorized. Slice 2.0-A is in progress, and its
-  entry register records Slice 2.0-B and the Slice 2.0-C engineering boundary as complete while
-  L1 through L4 remain blocked until their accountable evidence gates pass; no institutional
-  resource, production identity, public route, deployment, or real data is eligible yet.
+  entry register records Slice 2.0-B and Slice 2.0-C engineering as complete and ADR 0027 as
+  Accepted. Bounded synthetic Slice 2.0-D engineering is eligible while L1 through L4 remain
+  blocked until their accountable evidence gates pass; no institutional resource, production
+  identity, public route, deployment, or real data is eligible yet.

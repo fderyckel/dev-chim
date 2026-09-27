@@ -8,7 +8,7 @@
 | AC-01 | A tenant A actor requests or guesses tenant B identifiers | Return no unauthorized data or existence signal; audit the attempt safely |
 | AC-02 | A request, job, event, cache lookup, or AI tool omits tenant context | Fail closed before data access or mutation |
 | AC-03 | A tenant renames or composes roles to gain capabilities not granted by policy | Resolve capabilities from validated tenant data; reject cycles/escalation |
-| AC-04 | Support accesses a tenant without approved purpose, assurance, or expiry | Deny and record an attributable security event |
+| AC-04 | Support accesses a tenant without independent approval, approved purpose/ticket, current strong assurance, bounded capability, visible elevated mode, or expiry | Deny, preserve the real support identity, end elevation, and record an attributable minimized security event; never impersonate a tenant user |
 | AC-05 | An upload exploits type confusion, parser bugs, decompression, or active content | Quarantine, validate, scan, isolate, limit, and reject unsafe derivatives |
 | AC-06 | A user exports more data than an ordinary read permits | Re-evaluate policy, require assurance where defined, bound scope, and audit |
 | AC-07 | A realtime subscription or search projection leaks a previously allowed record | Re-authorize, tenant-filter, invalidate, and deny stale access |

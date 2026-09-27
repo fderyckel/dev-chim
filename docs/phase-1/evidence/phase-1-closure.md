@@ -24,8 +24,8 @@ without reopening Phase 1:
 | Gate transferred at closure | Owning Phase 2 boundary | Current disposition |
 | --- | --- | --- |
 | Replay ranges/cursors, module-aware consumer drain/reactivation integration, operational telemetry/runbooks, and local restore/replay convergence | Slice 2.0-B | Satisfied after Phase 1 closure for the provider-neutral local synthetic L1 foundation; selected-deployment and real-module evidence remain separately gated |
-| Temporal retention, legal hold, redaction/erasure evidence, migration provenance, restore, projection convergence, performance limits, and ADR 0018 final review | Slice 2.0-C | Blocks L1 |
-| Production identity, session, and bounded support access | Slice 2.0-D | Blocks L2 |
+| Temporal retention, legal hold, redaction/erasure evidence, migration provenance, restore, projection convergence, performance limits, and ADR 0018 final review | Slice 2.0-C | Satisfied after Phase 1 closure for the neutral local synthetic L1 foundation; ADR 0018 was Accepted on 2026-09-27, while domain policy and L3 qualification remain separately gated |
+| Production identity, session, and bounded support access | Slice 2.0-D | ADR 0027 decision gate Accepted on 2026-09-27; bounded synthetic engineering is eligible, while implementation evidence still blocks L2 |
 | Production browser/API candidate and representative experience evidence | Slice 2.0-E | Blocks L2 |
 | Multi-node admission and selected-deployment capacity, recovery, routing, movement, migration, backup, restore, rollback, secrets, edge, and observability qualification | Phase 2 L3 admission | Blocks L3 |
 | Independent security/privacy review and learning-institution records ownership | Phase 2 L3 admission | Blocks real Restricted data and L3 |
@@ -68,7 +68,8 @@ Closure requires all of the following:
 Phase 1 completion does not mean:
 
 - operational outbox and module drain are complete for a real module;
-- ADR 0018 has Full Acceptance;
+- Phase 1 completion itself supplied ADR 0018 Full Acceptance; that separate decision was recorded
+  on 2026-09-27 after Slice 2.0-C evidence and accountable review;
 - a deployment, provider, production database topology, identity provider, or operating owner is
   selected;
 - multi-node admission, tenant movement, migration, failover, backup, restore, convergence, or

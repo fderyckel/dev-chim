@@ -28,6 +28,7 @@ describe("the synthetic view-data adapter", () => {
 
     const firstHome = await syntheticViewData.getHome();
     const secondHome = await syntheticViewData.getHome();
+    const structure = await syntheticViewData.getInstitutionalStructure();
     const preview = await syntheticViewData.getPreview();
 
     expect(secondHome).toEqual(firstHome);
@@ -43,6 +44,26 @@ describe("the synthetic view-data adapter", () => {
       "conflict",
       "unexpected",
     ]);
-    expect(Object.keys(syntheticViewData).sort()).toEqual(["getHome", "getPreview"]);
+    expect(structure.roots).toHaveLength(3);
+    expect(structure.roots.map((root) => root.localLabel)).toEqual([
+      "University",
+      "Community college",
+      "Early Learning Centre",
+    ]);
+    expect(structure.roots.every((root) => root.classification === "institution")).toBe(
+      true,
+    );
+    const selectedInTree = structure.roots[0]?.children[0]?.children[0];
+    expect(selectedInTree?.id).toBe(structure.selectedUnit.id);
+    expect(selectedInTree?.classification).toBe(structure.selectedUnit.classification);
+    expect(selectedInTree?.localLabel).toBe(structure.selectedUnit.localLabel);
+    expect(
+      structure.movePreview.impacts.some((impact) => impact.outcome === "blocks_move"),
+    ).toBe(true);
+    expect(Object.keys(syntheticViewData).sort()).toEqual([
+      "getHome",
+      "getInstitutionalStructure",
+      "getPreview",
+    ]);
   });
 });

@@ -1,9 +1,15 @@
 # ADR 0027: Production identity, session, and support-access boundary
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-09-26
+- Decision date: 2026-09-27
+- Accountable approver: François — Project Owner and interim Security/Privacy Owner
 - Accountable owner: Security architecture and platform engineering
 - Deciders: Project owner, security architecture, platform engineering, and product experience
+- Selected arrangement: ZITADEL Cloud Europe as federation broker; Chimwemwe as the OIDC relying
+  party through Ash Authentication
+- Conditions: no real identity, public route, or L2 claim until Slice 2.0-D implementation evidence,
+  selected-deployment controls, contractual/privacy review, and the separate public boundary pass
 - Supersedes: None
 
 ## Context
@@ -54,30 +60,32 @@ revocable support access rather than a hidden operator bypass.
    and account-lifecycle operations in the product core. Rejected for the first production
    boundary: it creates a large credentials and recovery security surface before a school journey
    or operating envelope is selected.
-3. Use Ash Authentication as the server-side OIDC relying-party and session layer, with a selected
-   federation broker or directly registered shared provider upstream. Selected as the proposed
-   architecture. The actual broker and any direct provider are **not selected by this ADR** and
-   must pass the linked decision evidence before this record can be accepted.
+3. Use Ash Authentication as the server-side OIDC relying-party and session layer, with ZITADEL
+   Cloud Europe as the first federation broker. Selected. ZITADEL provides one allowlisted OIDC
+   issuer to Chimwemwe while brokering approved institutional OIDC or SAML providers and native
+   invited identities. The provider and region remain subject to contractual, privacy, deployment,
+   and implementation gates before real use.
 4. Give the browser a long-lived bearer token that directly carries tenant, role, or support
    authority. Rejected: browser-held authority makes revocation, tenant switching, assurance,
    safe logging, and support constraints harder to enforce and audit.
 
 ## Decision
 
-Subject to accountable acceptance, Chimwemwe will use `ash_authentication` as the application
+Chimwemwe will use `ash_authentication` as the application
 authentication boundary and `ash_authentication_phoenix` for the reviewed Phoenix routes and
 session integration. The first browser strategy will be Ash Authentication's OIDC strategy using
 the authorization-code flow with PKCE and a session-bound nonce. It will validate an authentication
 response from a selected, standards-compatible identity arrangement and establish an
 application-owned, opaque session. The browser receives only a secure, `HttpOnly`, host-scoped
-session cookie; it never chooses a tenant, placement, role, capability, support grant, or repository
-through a token claim, cookie, header, route, query parameter, or form value.
+session cookie; no token claim, cookie, header, route, query parameter, or form value establishes
+tenant, placement, role, capability, support-grant, or repository authority.
 
-This is a protocol and trust-boundary decision, not a vendor selection. A later accountable
-provider/federation selection must be recorded against the [decision evidence plan](../phase-2/identity-session-and-support-access-decision-evidence.md).
-Until then this ADR remains Proposed and no production provider connection, public sign-in, callback,
-or credential configuration is authorized. The explicitly requested local proof may use synthetic
-credentials and a loopback-only Ash Authentication session to exercise the database boundary.
+The accepted first broker is ZITADEL Cloud in its Europe data region. This is a provider selection
+for Slice 2.0-D engineering, not a deployment or production-readiness decision. Contract and DPA
+execution, subprocessor and transfer review, an exact non-production integration, operational
+rehearsal, selected-deployment controls, and independent review remain required before real
+identity data or a public sign-in. The local proof may continue to use synthetic credentials and a
+loopback-only Ash Authentication session to exercise the database boundary.
 
 ### Federation model
 
@@ -85,17 +93,19 @@ The preferred multi-institution topology is:
 
 ```text
 school Google Workspace, Microsoft Entra, or other institutional IdP
-    -> selected federation broker
+    -> approved ZITADEL organization connection
+    -> ZITADEL Cloud Europe
     -> Ash Authentication OIDC strategy in Chimwemwe
     -> IdentityAccount / Actor -> current Membership -> tenant-defined authorization
 ```
 
-The broker is responsible for the institution-specific connection and, where needed, translates a
+ZITADEL is responsible for the institution-specific connection and, where needed, translates a
 standards-supported upstream protocol such as SAML into the one reviewed OIDC contract presented to
 Chimwemwe. This gives each institution the option to bring its own Google, Microsoft, or other SSO
 provider without requiring a new Ash strategy, callback route, or issuer trust rule for every
-tenant. Direct Google or Microsoft sign-in may be approved for a shared population only if it uses
-the same reviewed Ash OIDC/session boundary and account-link controls.
+tenant. A ZITADEL-native invitation supplies the initial path for people without an institutional
+account. Direct Google or Microsoft sign-in is outside the accepted first topology and is a review
+trigger even if it would use the same Ash OIDC/session boundary.
 
 An identifier, domain, or institution choice supplied before sign-in may help the broker discover an
 upstream connection. It is not a Chimwemwe tenant, placement, membership, or authorization selector.
@@ -105,7 +115,7 @@ state.
 ### Separate the four meanings
 
 1. **External identity proof:** Ash Authentication's OIDC strategy accepts a subject only from the
-   selected broker or directly registered provider's allowlisted issuer. Its verified issuer and
+   selected broker's allowlisted issuer. Its verified issuer and
    subject identify the proof; its unverified profile fields do not grant authority.
 2. **Application actor and account link:** the application keeps a stable actor and a unique,
    auditable link from verified `(issuer, subject)` to that actor. Ash Authentication's identity
@@ -123,6 +133,15 @@ state.
    an actor with one or more people, guardianships, employments, applications, or community
    affiliations. It is outside this ADR and cannot be inferred from an identity-provider claim.
 
+The initial tenant-administrator bootstrap is not “first login wins.” A separately governed
+provisioning workflow must prepare the tenant-owned actor, membership, tenant-defined role
+assignment, and one-time invitation before authentication. The public acceptance action binds the
+verified `(issuer, subject)` only to that pre-approved actor through a single-use, hashed,
+tenant-bound invitation that expires after 30 minutes. It accepts no role, capability, tenant, or
+placement from the browser, records audit and outbox evidence, invalidates the invitation on exact
+success, and fails closed on replay, changed identity, expiry, existing link, or tenant mismatch.
+No hidden or standing break-glass administrator is included in the initial slice.
+
 ### Authentication and session rules
 
 The first browser adapter must configure Ash Authentication's OIDC strategy for the
@@ -134,24 +153,35 @@ planned key rotation; unknown or conflicting keys fail closed. Provider client i
 secrets are supplied only through the reviewed runtime secret mechanism, never resource DSL literals
 or committed configuration.
 
-The application session is opaque, random, server-controlled, and rotated at authentication,
+The accepted configuration requires `code_verifier true`, generated nonce, state validation,
+`registration_enabled? false`, a provider-identity resource keyed by `(issuer, subject)`,
+`trust_email_verified? false`, RS256, an exact callback allowlist, and one allowlisted ZITADEL
+issuer/discovery origin. Chimwemwe requests no `offline_access` and does not retain provider access
+or refresh tokens after callback processing. Any custom callback, token validator, or browser-token
+workaround fails the decision.
+
+The application session is database-backed, opaque, random, server-controlled, and rotated at authentication,
 tenant switch, assurance elevation, and other reviewed privilege boundaries. It has explicit
 idle and absolute expiry, logout, global or actor-scoped revocation, and per-session invalidation.
-Exact durations, refresh behaviour, assurance mapping, cookie policy, and selected deployment
-controls are acceptance evidence, not defaults hidden in code. Browser state-changing requests
-also require CSRF and origin protections; session and sensitive responses use no-store controls
-and safe, non-disclosing errors and logs.
+The one-time sign-in attempt expires after ten minutes. An ordinary application session has a
+30-minute idle and eight-hour absolute lifetime. An elevated support session has a ten-minute idle
+and at most 60-minute absolute lifetime and can never outlive its grant. The browser cookie is
+`Secure`, `HttpOnly`, host-only, `SameSite=Lax`, and uses a `__Host-` name. Browser state-changing
+requests also require CSRF and origin protections; session and sensitive responses use no-store
+controls and safe, non-disclosing errors and logs.
 
-Credential enrolment, password recovery, MFA recovery, and credential revocation belong to the
-selected identity arrangement. Chimwemwe recovery may disable an account link, invalidate
+Credential enrolment, password recovery, MFA recovery, and credential revocation belong to
+ZITADEL or the approved upstream institutional provider. Chimwemwe recovery may disable an account link, invalidate
 application sessions, or require a new approved invitation; it does not reset or receive provider
-credentials. A non-human service identity uses a separately selected, narrowly scoped server-to-
-server flow, never a browser cookie or a human support grant.
+credentials. A non-human service identity uses a separate ZITADEL service account with short-lived
+`private_key_jwt` credentials and a stable application service actor. Personal access tokens,
+browser cookies, human support grants, and provider roles are forbidden for service identity.
 
 ### Tenant selection and support access
 
 After authentication, the server may present the memberships the actor can currently use. The
-selected tenant is server-side session context and is resolved through current membership and
+browser may return an opaque membership reference only as an untrusted selection request. The
+selected tenant is server-side session context and is resolved on the writer through current membership and
 trusted placement; it is not trusted from an external claim. A membership, role, entitlement,
 module activation, placement, or session change immediately affects the next named action and
 cannot be bypassed with a stale page or session.
@@ -159,12 +189,18 @@ cannot be bypassed with a stale page or session.
 TM-03 support access is a future, separately authorized `SupportAccessGrant` boundary. A grant
 must name the acting support actor, target tenant, approved purpose and ticket or approval
 reference, least set of capabilities, required assurance, start and expiry, grantor, and audit
-correlation. The server validates that it is still active on every elevated use. The support
+correlation. The grant lasts at most 60 minutes, uses no wildcard, and requires a separate
+authorized grantor; the support actor cannot self-approve. The initial support population uses
+ZITADEL-native identities with WebAuthn/passkey MFA. Elevation requires an allowlisted `acr`/`amr`
+mapping and `auth_time` no older than five minutes. Missing, ambiguous, or stale assurance denies
+elevation. The server validates that the grant is still active on every elevated use. The support
 experience visibly identifies the support actor, target tenant, purpose, and expiry; it has no
 background or reusable standing mode. Revocation, expiry, lost assurance, changed scope,
 missing purpose, or a tenant mismatch ends the elevated context immediately. A support grant is
 not a tenant membership, does not create a person relationship, and cannot weaken normal module,
-field, or action authorization.
+field, or action authorization. The initial support path never impersonates another user and
+cannot delegate grant administration, account-link administration, arbitrary role/grant changes,
+bulk export, or background work.
 
 ## Consequences
 
@@ -180,9 +216,10 @@ field, or action authorization.
 
 ### Negative
 
-- A compatible `ash_authentication` / `ash_authentication_phoenix` version, provider/federation
-  evaluation, privacy review, operational ownership, and incident runbooks are required before the
-  decision can be accepted.
+- The selected managed broker introduces contract, subprocessor, transfer, regional-processing,
+  availability, recovery, and exit dependencies that must pass before real use.
+- The currently compatible `ash_authentication` / `ash_authentication_phoenix` pair is a release
+  candidate and must pass the complete implementation gate or be upgraded to a reviewed stable pair.
 - The first public workflow must wait for application session, callback, tenant-selection, and
   support controls rather than reusing UI-1A.
 - Account-linking and relationship semantics require later named actions and cannot be solved by
@@ -198,9 +235,11 @@ only the minimum safe identifiers and evidence needed for revocation and audit; 
 credentials, provider assertions, child data, and detailed denial reasons must not enter logs,
 telemetry, fixtures, or committed evidence.
 
-The provider evaluation must establish data-processing, residency, retention, breach-notification,
-availability, recovery, export, deletion, and contract-exit responsibilities before any real data
-is used. The local proof's additive migration creates only synthetic-account/session records and
+The public-source review selects ZITADEL Cloud Europe while explicitly recording that its DPA
+permits subprocessors and protected transfers outside the EU/EEA and that its export does not
+carry the event stream or every credential artifact. Contract execution must establish
+data-processing, residency, retention, breach-notification, availability, recovery, export,
+deletion, and exit responsibilities before any real data is used. The local proof's additive migration creates only synthetic-account/session records and
 institutional SSO metadata with a secret reference; it is not a production schema approval. A later
 production implementation must retain the stable application actor, make account-link migration
 explicit and reversible, preserve tenant-qualified audit evidence, and prove that a provider switch
@@ -210,9 +249,10 @@ cannot grant or widen access.
 
 The local proof supplies a database-backed account, revocable session-token records, and an
 authenticated administration page for synthetic SSO metadata. It does not provide provider login,
-account linking, membership resolution, support access, or production evidence. Before acceptance,
-accountable reviewers must approve the
-[identity, session, and support-access decision evidence plan](../phase-2/identity-session-and-support-access-decision-evidence.md), including:
+account linking, membership resolution, support access, or production evidence. The accountable
+reviewers approved the [decision evidence plan](../phase-2/identity-session-and-support-access-decision-evidence.md)
+and [decision review](../phase-2/identity-session-and-support-access-decision-review.md) for
+architecture entry. Slice 2.0-D implementation must still supply:
 
 - an evaluated Ash Authentication integration and provider/federation arrangement with a secure
   exit path, named operational owner, assurance/recovery mapping, and data-processing disposition;
@@ -224,12 +264,32 @@ accountable reviewers must approve the
 - TM-03 negative tests for missing purpose, insufficient assurance, expired/revoked grant,
   cross-tenant reuse, capability widening, background reuse, and complete start/use/end audit;
 - incident, key-rotation, provider-outage, account-link, session-revocation, and support-grant
-  runbooks; and
+  rehearsal against the accepted [operating runbook](../operations/identity-session-and-support-access.md); and
 - `make check` after the bounded implementation is authorized.
+
+## Accountable decision
+
+On 2026-09-27, François accepted this ADR and the ZITADEL Cloud Europe candidate after reviewing
+the provider comparison, Ash compatibility seam, threat treatment, session and support limits,
+privacy/exit constraints, test design, and operating outline. The acceptance authorizes the
+synthetic, non-production Slice 2.0-D engineering entry in the already accepted Phase 2 sequence.
+
+The following conditions remain binding:
+
+- no real identity, provider credential, institutional connection, public callback, or L2 claim
+  exists until the complete Slice 2.0-D implementation evidence passes;
+- Europe-region selection does not replace DPA, subprocessor, transfer, retention, deletion,
+  breach, and independent privacy review;
+- ZITADEL organization, role, domain, profile, or assurance claims never create Chimwemwe
+  membership, capability, institutional relationship, tenant placement, or support authority;
+- support remains non-impersonating, separately approved, visible, tenant-specific, strongly
+  assured, least-privilege, short-lived, and rechecked on every use; and
+- failure of a provider, dependency, assurance mapping, operational rehearsal, or exit requirement
+  closes or removes the affected route instead of weakening the boundary.
 
 ## Fallback and exit cost
 
-Until the decision is accepted and implemented, no production identity route exists; the fallback
+Until the decision is implemented and its later gates pass, no production identity route exists; the fallback
 is to keep L2 and public workflows closed and retain UI-1A solely as its removable local synthetic
 qualification harness. If the selected provider/federation arrangement cannot satisfy the
 evidence, do not weaken session or support controls—select another reviewed arrangement or keep
@@ -262,4 +322,6 @@ retain a standing support grant.
 - [Phase 2 entry proposal](../plans/phase-2-entry-and-school-structure-proposal.md)
 - [Identity, people, relationships, and access proposal](../plans/phase-2-identity-people-relationships-and-access-proposal.md)
 - [Phase 2 entry decision register](../phase-2/entry-decision-register.md)
+- [Identity, session, and support-access decision review](../phase-2/identity-session-and-support-access-decision-review.md)
+- [Identity, session, and support-access operating runbook](../operations/identity-session-and-support-access.md)
 - [Threat model](../security/threat-model.md), especially TM-01, TM-02, and TM-03

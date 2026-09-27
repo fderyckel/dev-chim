@@ -1,6 +1,6 @@
 # Institutional-structure decision evidence plan
 
-- Status: L0 approval plan; evidence collection and accountable review remain open
+- Status: L0 evidence package in review; G2, accountable reviews, and G6 remain open
 - Date: 2026-09-27
 - Accountable owner: Product and institutional-structure domain ownership
 - Decision record: [ADR 0025](../adr/0025-learning-institution-operating-system-and-institutional-structure.md)
@@ -18,10 +18,13 @@ history, and strict separation of hierarchy from authority, reporting, configura
 lifecycle, and placement. Acceptance would make the first synthetic persistence slice eligible
 for its separately recorded entry decision. It would not prove or authorize that implementation.
 
-**Current disposition: open.** The product direction is approved, and the repository records the
-recursive candidate and its boundaries. The cross-context scenario outcomes, representative
-institution reviews, hierarchy-navigation prototype, migration walkthroughs, and TM-17/AC-18
-review are not yet complete. ADR 0025 therefore remains Proposed and Slice 2.1-B remains blocked.
+**Current disposition: partially prepared, not approved.** The product direction is approved. The
+[scenario and vocabulary walkthrough](institutional-structure-scenario-review.md),
+[security/migration/temporal review](institutional-structure-security-migration-review.md), and
+[read-only experience evidence](institutional-structure-experience-evidence.md) now prepare the
+engineering evidence for G1, G3, G4, and the technical portion of G5. Their accountable reviews
+remain open. No named representative-institution review is recorded for G2, and G6 cannot occur
+before those reviews. ADR 0025 therefore remains Proposed and Slice 2.1-B remains blocked.
 
 ## Decision question
 
@@ -58,14 +61,14 @@ hierarchy from authority blocks acceptance.
 
 ## Approval gates
 
-| Gate | Required artifact or review | Pass condition | Accountable reviewers |
-| --- | --- | --- | --- |
-| G1 — scenarios and vocabulary | Completed eight-scenario walkthrough and decision disposition for IS-01 through IS-12 | Every context is representable without weakening tenant, identity, parentage, or separation invariants | Product owner, institutional-structure domain owner, platform engineering |
-| G2 — representative institutions | Recorded review across materially different learning environments | No unresolved rejection; local terminology maps without becoming fixed roles or arbitrary schema | Representative learning-institution domain owners and product owner |
-| G3 — security and privacy | TM-17/AC-18 treatment matrix and negative-test specification | Cross-tenant links, cycles, enumeration, selector misuse, and implicit widening all fail closed by design | Security/privacy and platform engineering |
-| G4 — migration and correction | Source-to-target mapping fixtures, ambiguity report, temporal classification, correction/retention disposition | The mapping preserves source evidence, invents no history, creates no access, and has governed unresolved outcomes | Domain ownership, platform engineering, records/migration review |
-| G5 — experience and accessibility | Read-only synthetic hierarchy-navigation and move-preview prototype | Users can distinguish tenant, unit, site, affiliation, and access scope; traversal is bounded and accessible | Product experience and representative institution reviewers |
-| G6 — accountable decision | Signed decision record with evidence links, residual risks, and implementation conditions | Every blocking issue is closed or narrowed through an explicit fail-closed condition; the product owner records the outcome | Named ADR deciders |
+| Gate | Required artifact or review | Pass condition | Accountable reviewers | Current status |
+| --- | --- | --- | --- | --- |
+| G1 — scenarios and vocabulary | Completed eight-scenario walkthrough and decision disposition for IS-01 through IS-12 | Every context is representable without weakening tenant, identity, parentage, or separation invariants | Product owner, institutional-structure domain owner, platform engineering | Engineering walkthrough prepared; accountable review open |
+| G2 — representative institutions | Recorded review across materially different learning environments | No unresolved rejection; local terminology maps without becoming fixed roles or arbitrary schema | Representative learning-institution domain owners and product owner | Open; all three named-reviewer records are empty |
+| G3 — security and privacy | TM-17/AC-18 treatment matrix and negative-test specification | Cross-tenant links, cycles, enumeration, selector misuse, and implicit widening all fail closed by design | Security/privacy and platform engineering | Design matrix prepared; accountable review and later executable proofs open |
+| G4 — migration and correction | Source-to-target mapping fixtures, ambiguity report, temporal classification, correction/retention disposition | The mapping preserves source evidence, invents no history, creates no access, and has governed unresolved outcomes | Domain ownership, platform engineering, records/migration review | Two compare-only fixtures and temporal disposition prepared; accountable review open |
+| G5 — experience and accessibility | Read-only synthetic hierarchy-navigation and move-preview prototype | Users can distinguish tenant, unit, site, affiliation, and access scope; traversal is bounded and accessible | Product experience and representative institution reviewers | Technical prototype and complete repository gate passed; accountable product-experience and representative review open |
+| G6 — accountable decision | Signed decision record with evidence links, residual risks, and implementation conditions | Every blocking issue is closed or narrowed through an explicit fail-closed condition; the product owner records the outcome | Named ADR deciders | Blocked by open G1–G5 reviews |
 
 ## Required scenario pack
 
@@ -228,6 +231,34 @@ learning-institution-side records owner remain mandatory before real Restricted 
 pilot; they are not prerequisites for an L0 logical-model decision unless the decision review
 introduces a real-data or external trust boundary.
 
+### Prepared G6 review agenda
+
+The following candidate residual risks and implementation conditions are prepared for challenge;
+they are not accepted until the named reviewers amend or approve them:
+
+1. the two proposed structural classifications may omit a distinction needed by one of the three
+   representative contexts;
+2. sibling-scoped current-code uniqueness may not match a representative migration or lookup
+   practice;
+3. institution-local `Date` precision and its captured IANA time zone may not match every
+   reorganization, site, or affiliation event;
+4. `joint_programme` may belong to the later programme domain rather than the first
+   structure-owned affiliation catalog;
+5. reopening or superseding a closed unit is deliberately deferred to a separately accepted named
+   action contract;
+6. cycle serialization, bounded traversal, move-impact revalidation, and alternate-write denial
+   are specified but remain unproved until their named L1 slices pass;
+7. the read-only prototype has focused engineering evidence but no representative usability
+   acceptance; and
+8. real-data classification, retention, legal hold, export, redaction, deletion, and records
+   ownership remain unset, so real import and an L3 pilot stay prohibited.
+
+If ADR 0025 is later accepted, Slice 2.1-B must remain synthetic and must not treat acceptance as
+proof of a database constraint, concurrency behavior, authorization path, public interface,
+module activation, migration, or production readiness. Any unresolved G2 objection affecting
+tenant ownership, UUID identity, parentage, or hierarchy's non-authority rule blocks acceptance
+rather than becoming a later implementation condition.
+
 ## Entry and exit effect
 
 This approval plan is complete as a planning artifact when it is linked from ADR 0025, the ADR
@@ -243,6 +274,9 @@ acceptance is not permission to skip those implementation gates.
 ## Related records
 
 - [ADR 0025](../adr/0025-learning-institution-operating-system-and-institutional-structure.md)
+- [Scenario and vocabulary review](institutional-structure-scenario-review.md)
+- [Security, migration, and temporal review](institutional-structure-security-migration-review.md)
+- [Experience and representative-review evidence](institutional-structure-experience-evidence.md)
 - [Phase 2 entry and institutional-structure proposal](../plans/phase-2-entry-and-school-structure-proposal.md)
 - [Phase 2 entry decision register](entry-decision-register.md)
 - [ADR 0018 temporal records contract](../adr/0018-temporal-records-correction-audit-and-evidence-semantics.md)

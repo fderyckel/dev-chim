@@ -1,8 +1,9 @@
 # ADR 0018: Temporal records, correction, audit, and evidence semantics
 
-- Status: Conditionally Accepted
+- Status: Accepted
 - Date: 2026-09-24
-- Decision date: 2026-09-24
+- Conditional decision date: 2026-09-24
+- Full acceptance date: 2026-09-27
 - Accountable owner: Platform engineering and domain records owners
 - Deciders: François — Project Owner and interim Security/Privacy Owner, with architecture review
 - Required later reviewers: independent security/privacy reviewer before real restricted data; school records and applicable domain owners before first domain adoption
@@ -121,8 +122,9 @@ The 2026-09-24 [decision review](../architecture/temporal-records-decision-revie
 The 2026-09-25 [T1-C evidence](../phase-1/evidence/temporal-qualification-fact-and-reconciliation.md)
 implements the neutral append-only record/reversal branch and one deliberate-reconciliation
 consumer. It closes those executable portions of TR-01 through TR-05 only. TR-06, TR-07,
-performance/migration/recovery limits, and final accountable review remain open, so this ADR stays
-Conditionally Accepted.
+performance/migration/recovery limits, and final accountable review remained open at that
+checkpoint, so the ADR remained Conditionally Accepted until the later Slice 2.0-C evidence and
+2026-09-27 review.
 
 The 2026-09-26
 [Slice 2.0-C evidence](../phase-2/temporal-completion-and-recovery-evidence.md) completes the
@@ -133,13 +135,20 @@ refusal; a real PostgreSQL dump/restore and post-restore convergence rehearsal; 
 measurement and limits. The result remains synthetic and provider-neutral. It does not define a
 domain retention policy, qualify a selected deployment, or promote a common temporal library.
 
-The Full Acceptance gate is not silently rewritten. Project-owner authorization for the
-implementation sequence is recorded, but the accountable post-evidence residual-risk review is
-still pending. This ADR therefore remains Conditionally Accepted until that review is recorded.
+On 2026-09-27, François completed the accountable post-evidence review of the Slice 2.0-C results
+and approved all six recorded residual risks as bounded downstream conditions. The verified
+candidate had already passed the complete repository gate without skipped required checks; the
+approval did not require a duplicate run. The review retains domain-owned retention and erasure
+policy, restore-time erasure reapplication, selected-deployment qualification, downstream
+propagation evidence, independent review before Restricted data, and TR-08's common-library
+restraint. With that review recorded, the Full Acceptance gate is satisfied and this ADR is
+**Accepted** at the platform level.
 
 The executable proof for the first authorized implementation must include positive and negative capability tests, missing-context and cross-tenant denial, direct alternate-write constraints, stale and concurrent revision conflicts, exact idempotent replay, changed-request rejection, effective-interval overlap rejection, transaction rollback across state/audit/outbox/idempotency, revision-specific and current reads, downstream reconciliation, retention/legal-hold behaviour, erasure receipt behaviour, and backup/restore of the correction chain.
 
-Planned tests and this documentation do not satisfy the binding conditions or authorize a production domain implementation.
+Acceptance of this platform contract does not by itself authorize a production domain
+implementation. The first adopting module must still satisfy its domain-specific proof and
+release-level gates.
 
 ## Fallback and exit cost
 

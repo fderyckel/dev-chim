@@ -1,9 +1,14 @@
 # ADR 0022: Local read-only browser-to-core bridge
 
-- Status: Proposed
+- Status: Conditionally Accepted
 - Date: 2026-09-25
+- Decision date: 2026-09-27
+- Accountable approver: François — Project Owner and interim Security/Privacy Owner
 - Accountable owner: Product experience and platform engineering
 - Deciders: Product owner, architecture review group, security architecture, and web engineering
+- Conditions: representative school-user terminology/usability review; UI-1A remains loopback-only,
+  synthetic, read-only, and removable; production identity, writes, and deployment require separate
+  accepted boundaries
 - Supersedes: None
 
 ## Context
@@ -102,7 +107,7 @@ reviewed identity and revocation contract.
 
 ## Validation evidence
 
-Before this ADR can be accepted, UI-1A must prove:
+Before this ADR can reach full Acceptance, UI-1A must prove:
 
 1. the local bridge cannot start without the explicit local guard and server token;
 2. a valid server-owned session reaches only its tenant's membership and role options;
@@ -114,8 +119,31 @@ Before this ADR can be accepted, UI-1A must prove:
    usable at narrow, medium, and wide viewports; and
 7. `make check` passes with the local integration tests included.
 
-Representative human review remains necessary before the screen or terminology is considered
-validated. This qualification uses synthetic data only.
+The [UI-1A evidence record](../phase-1/evidence/local-browser-core-bridge.md) records the local
+guard, tenant-isolation, denial, non-disclosure, OpenAPI/client-drift, accessibility, viewport, and
+complete repository verification required above. Representative human review remains necessary
+before the screen or terminology is considered validated. This qualification uses synthetic data
+only.
+
+## Accountable decision
+
+On 2026-09-27, François conditionally accepted option 1 for the exact local qualification scope
+after reviewing the implemented evidence and authorizing this status transition. The decision
+accepts the technical browser-to-core proof; it does not validate school terminology, authorize
+UI-1B, create a production public interface, or treat the local token as authentication.
+
+The following conditions remain binding:
+
+- representative school users must review the assignment-preparation terminology and usability
+  before the experience is described as human-validated;
+- `CHIMWEMWE_UI1_LOCAL`, loopback binding, synthetic data, server-owned context, read-only routing,
+  and the disabled mutation boundary remain mandatory;
+- any write, real identity, tenant switcher, browser persistence, external binding, or deployment
+  proposal requires its own accepted decision and candidate evidence; and
+- the local token registry must be removed or superseded, never promoted, when the production
+  identity/session and public-interface boundaries are selected.
+
+A failed condition removes or disables the local bridge; it never broadens the interface.
 
 ## Fallback and exit cost
 
@@ -142,4 +170,3 @@ UI-0 until a real identity slice is selected.
 - [ADR 0020](0020-human-interface-experience-and-client-platform-boundary.md)
 - [Threat model](../security/threat-model.md)
 - [UI-0 proposal](../plans/local-browser-experience-foundation-proposal.md)
-

@@ -6,7 +6,11 @@
 The platform is a security-first modular monolith around Phoenix, Ash under evaluation, and PostgreSQL. Human interfaces, integrations, jobs, and AI call the same named domain actions and authorization boundary.
 
 - [System context](system-context.md)
+- [Identity, session, and support-access decision review](../phase-2/identity-session-and-support-access-decision-review.md)
 - [Learning-institution operating system and recursive institutional structure](../adr/0025-learning-institution-operating-system-and-institutional-structure.md)
+- [Institutional-structure scenario and vocabulary review](../phase-2/institutional-structure-scenario-review.md)
+- [Institutional-structure security, migration, and temporal review](../phase-2/institutional-structure-security-migration-review.md)
+- [Institutional-structure experience evidence](../phase-2/institutional-structure-experience-evidence.md)
 - [Core foundation boundary](core-foundation-boundary.md)
 - [Domain model authoring and metadata](domain-model-authoring-and-metadata.md)
 - [Temporal records, correction, and evidence](temporal-records-correction-and-evidence.md)
@@ -20,6 +24,7 @@ The platform is a security-first modular monolith around Phoenix, Ash under eval
 - [Quality-attribute targets](quality-attribute-targets.md)
 - [Deferred choices](deferred-choices.md)
 - [Assurance proportionality and module evolution](../adr/0024-assurance-proportionality-and-module-evolution.md)
+- [Experience design system and governed personalization](../adr/0028-experience-design-system-and-governed-personalization.md)
 - [Architecture decisions](../adr/README.md)
 - [Threat model](../security/threat-model.md)
 

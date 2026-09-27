@@ -1,5 +1,6 @@
 import type {
   HomeViewData,
+  InstitutionalStructureViewData,
   PreviewViewData,
   PrototypeContext,
   ViewDataPort,
@@ -146,11 +147,149 @@ const preview: PreviewViewData = {
   ],
 };
 
+const institutionalStructure: InstitutionalStructureViewData = {
+  context,
+  roots: [
+    {
+      id: "10000000-0000-4000-8000-000000000001",
+      name: "Mphamvu University",
+      classification: "institution",
+      localLabel: "University",
+      code: "MU",
+      status: "current",
+      children: [
+        {
+          id: "10000000-0000-4000-8000-000000000011",
+          name: "School of Learning Sciences",
+          classification: "organizational_unit",
+          localLabel: "School",
+          code: "MU-LS",
+          status: "current",
+          children: [
+            {
+              id: "10000000-0000-4000-8000-000000000111",
+              name: "Department of Inclusive Education",
+              classification: "organizational_unit",
+              localLabel: "Department",
+              code: "MU-LS-IE",
+              status: "current",
+              children: [],
+            },
+          ],
+        },
+        {
+          id: "10000000-0000-4000-8000-000000000012",
+          name: "School of Community Education",
+          classification: "organizational_unit",
+          localLabel: "School",
+          code: "MU-CE",
+          status: "current",
+          children: [],
+        },
+        {
+          id: "10000000-0000-4000-8000-000000000013",
+          name: "Former Foundation Studies Unit",
+          classification: "organizational_unit",
+          localLabel: "Department",
+          code: "MU-FS",
+          status: "closed",
+          children: [],
+        },
+      ],
+    },
+    {
+      id: "20000000-0000-4000-8000-000000000001",
+      name: "Lusungu Community College",
+      classification: "institution",
+      localLabel: "Community college",
+      code: "LCC",
+      status: "current",
+      children: [],
+    },
+    {
+      id: "30000000-0000-4000-8000-000000000001",
+      name: "Nthambi Early Learning Centre",
+      classification: "institution",
+      localLabel: "Early Learning Centre",
+      code: "NELC",
+      status: "current",
+      children: [],
+    },
+  ],
+  selectedUnit: {
+    id: "10000000-0000-4000-8000-000000000111",
+    name: "Department of Inclusive Education",
+    classification: "organizational_unit",
+    localLabel: "Department",
+    code: "MU-LS-IE",
+    timeZone: "Africa/Blantyre",
+    status: "current",
+    currentParent: "School of Learning Sciences",
+    site: "City Learning Centre",
+  },
+  sites: [
+    {
+      label: "City Learning Centre",
+      detail:
+        "Shared by Mphamvu University and Lusungu Community College; it is not either institution's parent.",
+    },
+    {
+      label: "Riverside Early Learning Site",
+      detail:
+        "Associated with Nthambi Early Learning Centre through a separate site relationship.",
+    },
+  ],
+  affiliations: [
+    {
+      label: "Joint teacher-education programme",
+      detail:
+        "Connects the selected department and Lusungu Community College without adding a second canonical parent.",
+    },
+  ],
+  movePreview: {
+    unit: "Department of Inclusive Education",
+    from: "School of Learning Sciences",
+    to: "School of Community Education",
+    impacts: [
+      {
+        meaning: "Authorization",
+        outcome: "unchanged",
+        detail: "Parentage grants no capability or descendant record access.",
+      },
+      {
+        meaning: "Reporting",
+        outcome: "requires_reconciliation",
+        detail:
+          "One explicit descendant-scope report must be recalculated before the move.",
+      },
+      {
+        meaning: "Calendar and configuration",
+        outcome: "unchanged",
+        detail: "No live parent inheritance exists; explicit adoptions remain pinned.",
+      },
+      {
+        meaning: "Module activation and placement",
+        outcome: "unchanged",
+        detail:
+          "Tenant lifecycle and placement are independent of the institutional tree.",
+      },
+      {
+        meaning: "Unregistered downstream consumer",
+        outcome: "blocks_move",
+        detail: "The move remains unavailable until every effect is classified.",
+      },
+    ],
+  },
+};
+
 assertSyntheticExperienceIsExplicitlyEnabled();
 
 export const syntheticViewData: ViewDataPort = {
   async getHome() {
     return home;
+  },
+  async getInstitutionalStructure() {
+    return institutionalStructure;
   },
   async getPreview() {
     return preview;

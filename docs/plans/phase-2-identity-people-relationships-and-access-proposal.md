@@ -37,9 +37,9 @@ and employment records from the first institutional-structure module. See the
 
 Consequently:
 
-- Slice 2.0-D's L0 decision and evidence work may proceed under the existing authorized Phase 2
-  sequence, but it cannot select an identity provider or add a production session until its ADR is
-  accepted.
+- Accepted ADR 0027 selects ZITADEL Cloud Europe and closes Slice 2.0-D's L0 architecture decision
+  gate. Bounded synthetic engineering may proceed under the authorized Phase 2 sequence, but no
+  real provider connection, public session, L2 claim, or real-data authority exists yet.
 - The People, Relationships, and Access sequence below is a **proposed Phase 2.2 follow-on**. This
   document permits no code, migration, resource, capability, public route, session, or real data
   for it. Project-owner authorization and the stated ADRs are required before its L0 work is treated
@@ -89,13 +89,13 @@ result, not an authorization source.
 
 ### Production identity, session, and support-access ADR
 
-Slice 2.0-D now has proposed [ADR 0027](../adr/0027-production-identity-session-and-support-access.md),
-which adopts Ash Authentication as the application identity/session layer and decides a
-provider-neutral federation-broker/OIDC and support-grant boundary. It does **not** select a
-provider or authorize implementation. The linked
-[decision-evidence plan](../phase-2/identity-session-and-support-access-decision-evidence.md) must
-be reviewed and the ADR accepted before a provider or federation arrangement can be selected. That
-review must evaluate the candidate arrangement against these requirements:
+Slice 2.0-D now has accepted [ADR 0027](../adr/0027-production-identity-session-and-support-access.md),
+which adopts Ash Authentication as the application identity/session layer and selects ZITADEL
+Cloud Europe for the first federation-broker/OIDC candidate. Its linked
+[decision review](../phase-2/identity-session-and-support-access-decision-review.md) accepts the
+account-link, application-session, tenant-selection, assurance, service-identity, and
+non-impersonating support-grant boundaries. Slice 2.0-D implementation must prove these
+requirements before L2:
 
 - stable provider/subject identity, verified issuer/audience/signature handling, account-linking
   rules, and a safe migration or provider exit path;
@@ -110,10 +110,10 @@ review must evaluate the candidate arrangement against these requirements:
 - separately authorized support grants with explicit tenant, approved purpose, ticket or approval
   reference, assurance, bounded capabilities, expiry, revocation, and start/use/end evidence.
 
-The ADR must compare at least a managed external provider, a standards-based institution-managed
-federation, and a self-managed credential system. A decision that merely names an SSO brand is not
-enough; the selected option must meet the lifecycle, assurance, recovery, revocation, audit, and
-exit requirements above.
+The decision review compares a managed external provider, standards-based institution-managed
+federation, and self-managed alternatives. ZITADEL Cloud Europe is selected because it meets the
+architecture criteria with explicit lifecycle, assurance, recovery, revocation, audit, privacy,
+and exit conditions; naming the service alone would not have satisfied the gate.
 
 ### People, relationship, and account-association ADR
 
@@ -144,18 +144,22 @@ not verified.
 
 **Release level:** L0, within the existing authorized Slice 2.0-D.
 
-1. Review proposed ADR 0027, its threat treatment, and the decision-evidence plan with the named
-   deciders; leave the gate explicitly open if no provider/federation arrangement is yet suitable.
-2. Build a non-production decision harness or execute the documented test plan for callback validation,
-   signature/key rotation, session expiry, revocation, recovery, tenant selection, and support
-   grants. It must use synthetic identities and contain no real credentials.
-3. Define the initial-tenant-administrator bootstrap. It must be a named, attributable,
-   time-bounded provisioning action or a separately governed operational procedure; it cannot be a
-   hidden global administrator, a fixed role constant, or a default privilege on first login.
-4. Decide which recovery and support incidents require stronger assurance, two-person approval, or
-   an explicit break-glass record.
-5. Record the selected deployment owner, key/secret owner, incident owner, and the failure states
-   shown to users.
+**Status:** Complete on 2026-09-27 through accepted ADR 0027, its decision review, evidence plan,
+threat disposition, and operating runbook.
+
+1. The named deciders reviewed and accepted ADR 0027 and its provider, threat, privacy, assurance,
+   account-link, tenant-selection, service-identity, support, and exit dispositions.
+2. The evidence plan defines the synthetic callback, key-rotation, session, revocation, recovery,
+   tenant-selection, and support-grant positive and negative proofs for implementation.
+3. The accepted boundary defines a single-use, hashed, tenant-bound, 30-minute initial-
+   administrator invitation tied to pre-approved actor, membership, and tenant-defined role state;
+   first login never wins authority and no standing break-glass account exists.
+4. Elevated support requires a second authorized grantor, broker-native passkey/WebAuthn MFA,
+   assurance no older than five minutes, and a grant of at most 60 minutes. Missing or uncertain
+   evidence fails closed.
+5. Platform engineering owns identity configuration and key/secret operations with security
+   architecture approval; François is the interim incident/privacy escalation owner. Deployment
+   ownership remains a separate production gate until a deployment is selected.
 
 **Exit evidence:** accepted ADR, threat and abuse-case review, accountable owners, provider
 evaluation and exit plan, session/support test design, recovery/key-rotation/incident runbooks, and
@@ -284,19 +288,21 @@ to the threat model.
 
 ## Explicit non-goals
 
-This proposal does not select an identity provider, add credentials, create a production session,
-ship a public route, define an admissions workflow, or introduce real people or restricted data.
+This proposal selects no provider beyond ADR 0027's ZITADEL Cloud Europe candidate and does not add
+credentials, create a production session, ship a public route, define an admissions workflow, or
+introduce real people or restricted data.
 It also does not define a universal person graph, fixed job titles, automatic role assignment,
 client-side authorization, a generic user/role administration screen, a household model, payroll,
 health, safeguarding, learner records, enrolment, or alumni/community engagement functionality.
 
 ## Acceptance and next decision
 
-The immediate deliverable is the Slice 2.0-D.1 decision pack and the proposed Slice 2.2-A scenario
-pack. The first implementation request must name the exact slice, release level, ADR status,
+The Slice 2.0-D.1 decision pack is complete and accepted; the immediate implementation deliverable
+is the bounded synthetic Slice 2.0-D boundary, alongside the proposed Slice 2.2-A scenario pack.
+The first implementation request must name the exact slice, release level, ADR status,
 accountable owner, data classification, and verification evidence it will produce. Passing
-`make check` proves repository consistency; it does not select an identity provider, accept an ADR,
-or open a higher release level.
+`make check` proves repository consistency; it does not create a provider contract, authorize real
+identity data, or open a higher release level.
 
 ## Related records
 

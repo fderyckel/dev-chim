@@ -205,7 +205,7 @@ The reviewed migration orders the self-reference after its compound destination 
 the prior fact guard on empty rollback, refuses rollback once T1-C state is retained, and passes
 apply/rollback/reapply plus drift checks. T1-C still adds no retention, hold, erasure, import,
 backup/restore, performance qualification, dispatcher, public API, reusable temporal library, or
-school module. ADR 0018 therefore remains Conditionally Accepted. See the
+school module. At that T1-C checkpoint ADR 0018 therefore remained Conditionally Accepted. See the
 [T1-C evidence](evidence/temporal-qualification-fact-and-reconciliation.md).
 
 ## Slice 1H-A independent module gates and initial activation
@@ -400,8 +400,11 @@ or workflow is considered validated.
 
 - Phase 1 completion means the authorized bounded core-foundation implementation is complete. It
   does not mean the platform is production-ready or eligible for real Restricted data. Real
-  module-consumer drain integration, temporal retention/recovery, production identity and public
-  interfaces, selected-deployment qualification, and independent review remain Phase 2 gates.
+  module-consumer qualification, production identity and public interfaces, selected-deployment
+  qualification, domain records policy, and independent review remain Phase 2 gates. Slice 2.0-C
+  and the 2026-09-27 ADR 0018 acceptance later closed only the neutral local temporal L1 gate;
+  accepted ADR 0027 closes only the identity/session/support architecture gate and leaves Slice
+  2.0-D implementation and L2 evidence open.
 - Phase 0 ADR outcomes and conditional gates are binding; an Accepted ADR is changed only by supersession.
 - `make check` proves repository consistency; it does not by itself approve a new production capability.
 - Only `apps/chimwemwe_core` is allowed during slices 1A through the current Slice 1J-B increment. A second production app or service needs explicit later-slice authorization.

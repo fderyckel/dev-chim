@@ -1,7 +1,8 @@
 # Slice 2.0-C temporal completion and recovery evidence
 
-- Status: Engineering implementation complete; accountable ADR acceptance review pending
+- Status: Engineering implementation and accountable ADR acceptance review complete
 - Date: 2026-09-26
+- Acceptance review date: 2026-09-27
 - Scope: Local synthetic neutral proof only
 - Accountable owner: François — Project Owner and interim Security/Privacy Owner
 - Delivery owner: Platform engineering
@@ -91,7 +92,7 @@ revision, fact-operation, or consumer-basis history read. It exposes no bulk ret
 erasure, or projection action. A real domain must set its own row-volume, retention, burst, lock,
 WAL, backup, and recovery budgets before adoption.
 
-## Residual risks for accountable review
+## Accountable residual-risk disposition
 
 1. The erasure behavior is a synthetic redaction contract, not a legal conclusion or domain
    schedule. Domain records owners still own actual policy.
@@ -105,10 +106,12 @@ WAL, backup, and recovery budgets before adoption.
    before restricted child data or a pilot.
 6. One neutral proof does not justify a universal temporal library; TR-08 remains binding.
 
-Project-owner authorization to implement the Phase 2 sequence is recorded and no additional
-implementation authorization is pending. ADR 0018 remains **Conditionally Accepted** until the
-accountable owner reviews this completed evidence and the residual risks above; this document does
-not fabricate that later review.
+On 2026-09-27, François, as Project Owner and interim Security/Privacy Owner, reviewed and approved
+all six residual risks above. They remain binding downstream conditions: the approval does not
+create a real retention policy, qualify a selected deployment, approve Restricted data, substitute
+for independent or learning-institution records review, or permit a universal temporal library.
+This dated post-evidence decision is distinct from the earlier implementation authorization and
+moves ADR 0018 to **Accepted** at the platform level.
 
 ## Verification
 
@@ -123,6 +126,8 @@ not fabricate that later review.
   errors/skips, and no migration, generated-contract, formatting, lint, or whitespace drift.
 - Isolated clean-checkout bootstrap plus `make check`: passed; the recorded candidate was clean
   before bootstrap and remained clean after verification.
+- The 2026-09-27 acceptance reused the already completed full-gate result; it did not run a
+  duplicate `make check` or clean-checkout rehearsal.
 
 ## Related records
 

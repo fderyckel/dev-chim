@@ -1,0 +1,100 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  echo "usage: $0 -- command [argument ...]" >&2
+  exit 64
+}
+
+if [[ $# -lt 2 || $1 != "--" ]]; then
+  usage
+fi
+
+shift
+
+repo_root=$(cd "$(dirname "$0")/.." && pwd -P)
+git_common_dir=$(git -C "$repo_root" rev-parse --git-common-dir)
+
+if [[ $git_common_dir != /* ]]; then
+  git_common_dir=$(cd "$repo_root/$git_common_dir" && pwd -P)
+fi
+
+lock_dir="$git_common_dir/chimwemwe-verification.lock"
+owner_file="$lock_dir/owner"
+owner=${CHIMWEMWE_VERIFICATION_OWNER:-${CODEX_THREAD_ID:-unknown}}
+command_description="$*"
+
+read_owner_value() {
+  local key=$1
+
+  sed -n "s/^${key}=//p" "$owner_file" | head -n 1
+}
+
+report_live_owner() {
+  local owner_pid owner_started_at owner_name owner_command
+
+  owner_pid=$(read_owner_value pid)
+  owner_started_at=$(read_owner_value started_at)
+  owner_name=$(read_owner_value owner)
+  owner_command=$(read_owner_value command)
+
+  echo "Verification gate already running; refusing a competing run." >&2
+  echo "Lock: $lock_dir" >&2
+  echo "PID: ${owner_pid:-unknown}" >&2
+  echo "Started: ${owner_started_at:-unknown}" >&2
+  echo "Owner: ${owner_name:-unknown}" >&2
+  echo "Command: ${owner_command:-unknown}" >&2
+  echo "Wait for that gate to finish, or coordinate with its owner before retrying." >&2
+  exit 75
+}
+
+recover_stale_lock() {
+  local owner_pid
+
+  owner_pid=$(read_owner_value pid)
+
+  if [[ -z $owner_pid || ! $owner_pid =~ ^[0-9]+$ ]]; then
+    echo "Verification lock metadata is incomplete; refusing to remove $lock_dir." >&2
+    exit 75
+  fi
+
+  if kill -0 "$owner_pid" 2>/dev/null; then
+    report_live_owner
+  fi
+
+  echo "Recovering stale verification lock left by exited PID $owner_pid." >&2
+  rm -f "$owner_file"
+
+  if ! rmdir "$lock_dir"; then
+    echo "Could not recover stale verification lock at $lock_dir." >&2
+    exit 75
+  fi
+}
+
+if ! mkdir "$lock_dir" 2>/dev/null; then
+  if [[ ! -d $lock_dir ]]; then
+    echo "Could not create verification lock at $lock_dir." >&2
+    exit 75
+  fi
+
+  recover_stale_lock
+
+  if ! mkdir "$lock_dir" 2>/dev/null; then
+    report_live_owner
+  fi
+fi
+
+umask 077
+started_at=$(date -u "+%Y-%m-%dT%H:%M:%SZ")
+printf 'pid=%s\nstarted_at=%s\nowner=%s\ncommand=%s\n' \
+  "$$" "$started_at" "$owner" "$command_description" > "$owner_file"
+
+release_lock() {
+  rm -f "$owner_file"
+  rmdir "$lock_dir" 2>/dev/null || true
+}
+
+trap release_lock EXIT HUP INT TERM
+
+echo "Verification gate lease acquired (owner: $owner)." >&2
+"$@"

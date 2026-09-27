@@ -233,13 +233,18 @@ source parent link into an access grant or invents history that the source canno
 
 ## Validation evidence
 
-Current evidence is the project owner's product direction, the existing tenant and authority
-contracts, and the Phase 2 candidate review. It establishes the need to replace the flat school
-boundary but does not prove a physical model or authorize persistence. The
+Current evidence includes the project owner's product direction, the existing tenant and authority
+contracts, and the Phase 2 candidate review. The
 [institutional-structure decision evidence plan](../phase-2/institutional-structure-decision-evidence.md)
-now defines the decision questions, six approval gates, eight-scenario pack, representative-review
-coverage, TM-17/AC-18 matrix, migration review, experience prototype, temporal disposition, and
-accountable decision record required for acceptance. It is a plan, not completed evidence.
+defines the six approval gates. Its linked
+[scenario and vocabulary walkthrough](../phase-2/institutional-structure-scenario-review.md),
+[security/migration/temporal review](../phase-2/institutional-structure-security-migration-review.md),
+and [read-only experience evidence](../phase-2/institutional-structure-experience-evidence.md)
+prepare the engineering evidence for G1, G3, G4, and the technical portion of G5.
+
+Those artifacts do not approve themselves. The named accountable reviews are still open, no
+representative-institution review is recorded for G2, and no G6 decision can yet be signed. They
+therefore do not prove a physical model or authorize persistence; this ADR remains Proposed.
 
 Acceptance requires at least these synthetic scenarios:
 
@@ -292,6 +297,9 @@ downstream reference reconciliation, access/report impact review, and retained-h
 - [Phase 2 entry and institutional-structure proposal](../plans/phase-2-entry-and-school-structure-proposal.md)
 - [Phase 2 entry decision register](../phase-2/entry-decision-register.md)
 - [Institutional-structure decision evidence plan](../phase-2/institutional-structure-decision-evidence.md)
+- [Institutional-structure scenario and vocabulary review](../phase-2/institutional-structure-scenario-review.md)
+- [Institutional-structure security, migration, and temporal review](../phase-2/institutional-structure-security-migration-review.md)
+- [Institutional-structure experience evidence](../phase-2/institutional-structure-experience-evidence.md)
 - [System context](../architecture/system-context.md)
 - [ADR 0001](0001-modular-monolith-and-service-boundaries.md)
 - [ADR 0003](0003-tenant-model-and-optional-postgresql-rls.md)

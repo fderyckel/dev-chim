@@ -15,7 +15,7 @@
 | [ADR 0005](../adr/0005-domain-action-and-state-transition-convention.md) | No generic business mutation or CRUD surface; first private production named action | Additional resource actions and any public action/error contract |
 | [ADR 0007](../adr/0007-transactional-outbox-and-event-envelope.md) | The first write commits one minimal durable event fact with its state | Dispatcher, retry, operational replay, retention, and movement reconciliation |
 | [ADR 0017](../adr/0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md) | One authoritative writer boundary, explicit pool budgets, admission before checkout, and no request-selected repository | Selected-deployment topology, failover, recovery, multi-node calibration, and production credentials |
-| [ADR 0018](../adr/0018-temporal-records-correction-audit-and-evidence-semantics.md) | Separate publication and correction intent, immutable operation results, explicit temporal reads, and evidence-layer separation | Retention/hold/erasure, reversal action, consumer reconciliation, migration provenance, backup/restore, and accountable Full Acceptance |
+| [ADR 0018](../adr/0018-temporal-records-correction-audit-and-evidence-semantics.md) | Separate publication and correction intent, immutable operation results, explicit temporal reads, and evidence-layer separation | Neutral retention/recovery and accountable Full Acceptance were completed later in Slice 2.0-C; domain policy, selected-deployment qualification, and TR-08 remain later gates |
 | [ADR 0019](../adr/0019-domain-model-authoring-and-governed-metadata.md) | Code-owned base-resource convention, structural audit, derived descriptor contract, and the first typed tenant-owned presentation-definition publication boundary | Real module/interface consumers, rendering, compatible schema evolution, reports, and any later metadata type |
 | [Retained-data migration evidence](../phase-0/evidence/retained-data-migration-rehearsal.md) | Keep migration choreography explicit and resource-specific | Production-shaped measurements, mixed-release deployment, recovery proof, and an authorized persistent resource |
 | [Trusted-routing evidence](../phase-0/evidence/trusted-routing.md) | Raw request placement is not accepted; missing or stale routing fails closed | Live registry and repository selection |
@@ -298,7 +298,7 @@ or common temporal persistence library.
 
 T1-C may close the append-only branches of TR-01 through TR-05 and proves one deliberate
 reconciliation mode. TR-06, TR-07, performance/recovery limits, accountable residual-risk review,
-and the complete repository gate remain required before ADR 0018 Full Acceptance.
+and the complete repository gate remained required before the later ADR 0018 Full Acceptance.
 
 ## Slice 1H-A independent module gates and activation
 

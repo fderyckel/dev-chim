@@ -1,7 +1,8 @@
 # Temporal records, correction, and evidence contract
 
-- Status: Conditionally Accepted; neutral TR-01 through TR-07 engineering is complete, accountable
-  acceptance review and TR-08 remain binding, and no production-domain implementation is authorized
+- Status: Accepted at the platform level; neutral TR-01 through TR-07 engineering and the
+  2026-09-27 accountable review are complete, TR-08 remains binding, and each domain still needs
+  its own authorization and acceptance evidence
 - Owner: Platform engineering with domain records and security/privacy owners
 - Governing record: [ADR 0018](../adr/0018-temporal-records-correction-audit-and-evidence-semantics.md)
 - Review trigger: first durable correction action, first effective-dated resource, first ledger reversal, or retention/legal-hold implementation
@@ -223,7 +224,7 @@ T1-C closes the executable append-only branches of TR-01 through TR-05 and suppl
 reconciliation mode. At that increment T1 remained incomplete: TR-06 retention/hold/erasure and
 deactivation access,
 TR-07 import provenance plus backup/restore/convergence, performance and recovery limits, and
-accountable residual-risk review remain open.
+accountable residual-risk review remained open.
 
 The authorized
 [Slice 2.0-C completion](../phase-2/temporal-completion-and-recovery-evidence.md) adds the remaining
@@ -231,9 +232,10 @@ neutral retention, legal-hold, erasure-receipt, import-provenance, conflict-reco
 projection-convergence actions and database constraints. Empty migration rollback/reapply,
 retained rollback refusal, PostgreSQL backup/restore, post-restore governed projection rebuild, and
 bounded local performance/storage evidence close the engineering work for TR-01 through TR-07.
-The accountable post-evidence review is still pending, and TR-08 still blocks any universal
-temporal persistence library. No learning-institution domain or real retention policy is inferred
-from the neutral proof.
+On 2026-09-27, the accountable owner reviewed the completed evidence and approved all six residual
+risks as downstream conditions. TR-08 still blocks any universal temporal persistence library. No
+learning-institution domain, selected deployment, or real retention policy is inferred from the
+neutral proof.
 
 ### T2 — first domain adoption
 

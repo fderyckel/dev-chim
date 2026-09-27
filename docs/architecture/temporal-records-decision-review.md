@@ -1,7 +1,8 @@
 # Temporal records decision review
 
-- Decision: Conditionally Accept ADR 0018
-- Decision date: 2026-09-24
+- Decision: Accept ADR 0018
+- Conditional decision date: 2026-09-24
+- Full acceptance date: 2026-09-27
 - Accountable approver: François — Project Owner and interim Security/Privacy Owner
 - Architecture owner: Platform engineering
 - Governing record: [ADR 0018](../adr/0018-temporal-records-correction-audit-and-evidence-semantics.md)
@@ -29,19 +30,52 @@ François authorizes this conditional platform decision as Project Owner and cur
 
 This separation is deliberate: ADR 0018 accepts a platform vocabulary and fail-closed proof contract, not a school's retention schedule, accounting treatment, safeguarding process, or lawful-erasure determination.
 
-## Options considered
+## Full Acceptance decision
 
-### Fully Accept now
+On 2026-09-27, François reviewed the completed Slice 2.0-C evidence and approved all six residual
+risks recorded in that evidence. The complete repository gate had already passed for the accepted
+candidate with no skipped required checks, so this review does not request or claim a duplicate
+run.
 
-Rejected. No neutral temporal implementation yet proves revision chains, multi-fact correction results, revision-scoped intervals, temporal reads, retention/legal hold, erasure receipts, or recovery. Full Acceptance would convert planned evidence into an unsupported completion claim.
+The six approved dispositions are:
+
+1. Synthetic erasure remains engineering evidence, not a legal conclusion or domain retention
+   schedule; each adopting domain retains an accountable policy owner.
+2. Offline backups may retain protected bytes until approved expiry; restore must reapply current
+   erasure state before interfaces reopen.
+3. Local single-node evidence is not selected-deployment qualification; capacity, locks, WAL,
+   RPO/RTO, encryption, and operator execution remain L3 gates.
+4. Every external projection, cache, search, analytics, export, or integration adapter must prove
+   its own propagation and acknowledgement behavior before adoption.
+5. Independent security/privacy and learning-institution records-owner review remain mandatory
+   before Restricted data or a pilot.
+6. TR-08 remains binding: one neutral proof does not authorize a universal temporal persistence
+   library.
+
+These are accepted downstream conditions, not unresolved platform-level blockers. ADR 0018 is
+therefore Accepted for bounded domain-owned implementations. This acceptance neither defines a
+real institution's records policy nor qualifies a deployment, public interface, or real-data
+pilot.
+
+## Initial options considered on 2026-09-24
+
+### Fully Accept at the initial review
+
+Rejected at the initial review. No neutral temporal implementation yet proved revision chains,
+multi-fact correction results, revision-scoped intervals, temporal reads, retention/legal hold,
+erasure receipts, or recovery. Full Acceptance then would have converted planned evidence into an
+unsupported completion claim.
 
 ### Keep Proposed until all runtime proof exists
 
 Rejected. The paper model, alternatives, fallback, failure modes, three materially different scenarios, and five refinements are sufficiently stable to govern a bounded neutral proof. Keeping the decision entirely Proposed would obscure which principles are settled and make the proof less accountable.
 
-### Conditionally Accept with fail-closed implementation gates
+### Conditionally Accept with fail-closed implementation gates at the initial review
 
-Accepted. The shared vocabulary, classifications, named-action semantics, evidence separation, consumer modes, and non-goals become the governing contract. Physical schemas, common libraries, domain reason codes, retention periods, erasure policy, and school-module adoption remain evidence- and owner-dependent.
+Accepted at the initial review. The shared vocabulary, classifications, named-action semantics,
+evidence separation, consumer modes, and non-goals became the governing contract. Physical
+schemas, common libraries, domain reason codes, retention periods, erasure policy, and
+school-module adoption remained evidence- and owner-dependent.
 
 ## Accepted now
 
@@ -105,7 +139,8 @@ This closes the executable revision branches of TR-02 through TR-05, but not tho
 whole T1 gates. The append-only fact still has no governed reversal/replacement action, TR-05 has
 no downstream pin/follow/reconcile consumer, TR-06 has no retention/hold/erasure proof, and TR-07
 has no baseline import, reconciliation, backup/restore, or projection-convergence proof. TR-01
-through TR-07 therefore remain open and ADR 0018 remains Conditionally Accepted.
+through TR-07 therefore remained open at that checkpoint, and ADR 0018 remained Conditionally
+Accepted.
 
 The 2026-09-25 [T1-C fact-and-reconciliation evidence](../phase-1/evidence/temporal-qualification-fact-and-reconciliation.md)
 adds the append-only record and reverse-and-replace actions, immutable multi-fact operation
@@ -116,8 +151,8 @@ reconciliation.
 
 This closes the neutral append-only branches of TR-01 through TR-05 and one consumer mode under
 TR-05. It does not close TR-06 or TR-07, record production performance/migration/recovery limits,
-or supply the final accountable residual-risk review. ADR 0018 therefore remains Conditionally
-Accepted rather than moving to Accepted.
+or supply the final accountable residual-risk review. At that checkpoint ADR 0018 therefore
+remained Conditionally Accepted rather than moving to Accepted.
 
 The 2026-09-26
 [Slice 2.0-C evidence](../phase-2/temporal-completion-and-recovery-evidence.md) closes the neutral
@@ -128,15 +163,14 @@ database-write rejection, retained rollback refusal, PostgreSQL dump/restore, go
 convergence, and bounded local performance/storage measurement.
 
 The implementation is not a school records policy, selected-deployment qualification, or second
-domain. TR-08 therefore continues to prohibit a universal persistence abstraction. The remaining
-Full Acceptance step is the accountable owner's review of the completed evidence and its stated
-residual risks. Implementation authorization has already been supplied; that earlier direction is
-not relabelled as a post-evidence review. Until the latter is recorded, ADR 0018 remains
-Conditionally Accepted.
+domain. TR-08 therefore continues to prohibit a universal persistence abstraction. On 2026-09-27,
+the accountable owner separately reviewed this completed evidence and approved all six stated
+residual risks as the downstream conditions recorded above. That post-evidence review completes
+the Full Acceptance step without relabelling the earlier implementation authorization.
 
-## Full Acceptance gate
+## Full Acceptance gate — satisfied on 2026-09-27
 
-ADR 0018 may move from Conditionally Accepted to Accepted only after:
+The gate required:
 
 1. TR-01 through TR-07 have executable evidence for the neutral proof;
 2. `make check` passes for the candidate without skipped required checks;
@@ -145,6 +179,10 @@ ADR 0018 may move from Conditionally Accepted to Accepted only after:
 5. any condition failure has either been repaired, explicitly narrowed with a fail-closed fallback, or handled by a superseding ADR.
 
 Independent security/privacy review remains mandatory before real restricted child data. A school records owner and any domain-specific legal, finance, or safeguarding owner review the first applicable domain contract; those reviews are not fabricated by this platform-level decision.
+
+TR-01 through TR-07, the complete repository gate, the recorded local limits, and the accountable
+residual-risk review are satisfied for the neutral platform proof. TR-08 remains a deliberate
+restraint on shared-library promotion rather than a blocker for domain-owned implementations.
 
 ## Review triggers
 

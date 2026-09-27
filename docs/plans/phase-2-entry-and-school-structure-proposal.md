@@ -226,6 +226,13 @@ reject a universal temporal persistence abstraction until two real domains justi
 **Outcome:** every public request and support action receives trusted context from a reviewed
 identity and session chain.
 
+Accepted [ADR 0027](../adr/0027-production-identity-session-and-support-access.md) and its
+[decision review](../phase-2/identity-session-and-support-access-decision-review.md) close the L0
+decision gate by selecting ZITADEL Cloud Europe, the Ash OIDC relying-party seam, application-owned
+sessions, explicit account links, writer-resolved tenant context, and non-impersonating support
+grants. Bounded synthetic implementation may begin; no real provider connection, public route, or
+L2 claim exists yet.
+
 1. Select an identity-provider and account-linking boundary without copying the local UI-1A token
    registry into production.
 2. Define sign-in, callback, session creation, rotation, idle/absolute expiry, logout, revocation,

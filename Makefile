@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help bootstrap fix format lint check-staged test-fast test docs-check auth-demo web-dev web-core-dev web-check web-e2e web-core-e2e check
+.PHONY: help bootstrap fix format lint check-staged check-staged-unlocked test-fast test docs-check auth-demo web-dev web-core-dev web-check web-e2e web-core-e2e check check-unlocked
 
 help:
 	@echo "bootstrap  Install and prepare local workspace dependencies"
@@ -35,7 +35,7 @@ format:
 lint:
 	mise exec -- uv run ruff format --check tools tests/tools
 	mise exec -- uv run ruff check tools tests/tools
-	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/bootstrap bin/core-check bin/format-staged-elixir bin/phase0-check bin/ui1-local bin/ui1-test-backend
+	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/bootstrap bin/core-check bin/format-staged-elixir bin/phase0-check bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
 	cd spikes/ash-foundation-lab && mise exec -- mix format --check-formatted
 	cd spikes/ash-foundation-lab && mise exec -- mix ash_postgres.generate_migrations --check --migration-path priv/generated_migration_review/migrations --snapshot-path priv/generated_migration_review/resource_snapshots
 	cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix openapi.spec.json --spec AshFoundationLab.JsonApiRouter --check --pretty=true --filename priv/openapi/phase0-v1.json
@@ -61,6 +61,9 @@ lint:
 	cd clients/web/openapi-client-generator && mise exec -- npm run generate:check
 
 check-staged:
+	./bin/with-verification-lock -- $(MAKE) check-staged-unlocked
+
+check-staged-unlocked:
 	./bin/format-staged-elixir --check
 	mise exec -- env MIX_ENV=test mix compile --warnings-as-errors
 	cd apps/chimwemwe_core && mise exec -- mix credo --strict
@@ -108,6 +111,9 @@ web-core-e2e: web-check
 	cd clients/web && mise exec -- npm run test:e2e:ui1-unavailable
 
 check:
+	./bin/with-verification-lock -- $(MAKE) check-unlocked
+
+check-unlocked:
 	./bin/phase0-check
 	./bin/core-check
 	$(MAKE) web-e2e web-core-e2e
