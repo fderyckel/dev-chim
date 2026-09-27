@@ -52,11 +52,11 @@ defmodule Chimwemwe.AuthDemo.Bootstrap do
       {:ok, []} ->
         SsoConnection
         |> Ash.Changeset.for_create(:register_connection, %{
-          name: "Northstar Google Workspace",
-          provider: :google,
-          issuer_url: "https://accounts.google.com",
-          client_id: "northstar-school-demo-client",
-          secret_reference: "identity/northstar/google-client-secret",
+          name: "Northstar Entra OIDC",
+          protocol: :oidc,
+          issuer_url: "https://login.microsoftonline.com/synthetic-tenant-id/v2.0",
+          client_id: "northstar-synthetic-client",
+          secret_reference: "identity/northstar/oidc-client-secret",
           allowed_domains: "northstar-school.test"
         })
         |> Ash.create!(actor: account, tenant: tenant_id)

@@ -1,6 +1,7 @@
 # Phase 2 entry decision register
 
-- Status: In progress; Slice 2.0-B and Slice 2.0-C engineering complete, ADR 0027 accepted
+- Status: In progress; Slices 2.0-B, 2.0-C, and internal 2.0-D.2a through D.2c engineering
+  complete, provider-neutral ADR 0029 accepted
 - Prepared on: 2026-09-26
 - Last reviewed: 2026-09-27
 - Accountable owner: François — Project Owner and interim Security/Privacy Owner
@@ -33,8 +34,8 @@ its stated entry conditions are satisfied. At the current evidence level, no per
 | Temporal retention, erasure, migration, and recovery | ADR 0018 T1-A/T1-B/T1-C plus Slice 2.0-C provide executable TR-01 through TR-07 evidence, explicit local limits, retained-data migration refusal, PostgreSQL dump/restore, and governed projection convergence. On 2026-09-27, the accountable approver reviewed and approved all six residual risks after the complete repository gate had passed. | Satisfied for the neutral local synthetic L1 foundation; ADR 0018 is Accepted. Domain policy, selected-deployment qualification, independent review, downstream propagation, and TR-08 remain later or candidate-specific gates. | None for L1 foundation | Platform engineering, domain records owners, and the accountable approver |
 | Institutional-structure meaning and module boundary | ADR 0025 records the learning-institution operating-system direction. Its [decision evidence plan](institutional-structure-decision-evidence.md) now links an engineering scenario/vocabulary walkthrough, TM-17/AC-18 design matrix, compare-only migration fixtures, temporal disposition, and local read-only synthetic hierarchy/move-preview prototype. | Partial at L0 only. Named accountable G1/G3/G4/G5 reviews, all three representative-institution records for G2, and G6 remain open. ADR 0025 must be accepted before any Slice 2.1-B persistence. | L1 | Learning-institution operations domain owner, product engineering, platform engineering, and security/privacy review |
 | First learning-institution state-transition qualification | Accepted ADRs require the first real named actions to preserve tenant routing, authorization, constraints, optimistic concurrency, exact idempotency, audit, outbox, rollback, and non-disclosure. Neutral proofs do not close the production-candidate gate automatically. | Open until Slice 2.1-B's foundation and ADR entry conditions are satisfied and its exact action/resource evidence passes. | L1 | Platform engineering and learning-institution operations domain owner |
-| Production identity and session chain | Accepted [ADR 0027](../adr/0027-production-identity-session-and-support-access.md) and its [decision review](identity-session-and-support-access-decision-review.md) select ZITADEL Cloud Europe, the Ash OIDC relying-party seam, explicit issuer/subject links, application-owned opaque sessions, writer-resolved tenant selection, bounded assurance, and separate service identities. UI-1A remains local-only. | Satisfied for entering bounded synthetic Slice 2.0-D engineering. No production callback, provider credential, application session, account-link action, selected-deployment qualification, or L2 evidence exists yet. | L2 | Security architecture and platform engineering |
-| Bounded support access | TM-03 and accepted ADR 0027 define a non-impersonating, independently approved, one-tenant, purpose/ticket-bound, strongly assured, allowlisted, visible grant lasting at most 60 minutes. | Satisfied for Slice 2.0-D design entry only. The grant resource/actions, elevated-session experience, per-use recheck, revocation, minimized start/use/end evidence, and complete negative suite remain implementation gates. | L2 | Security architecture with product and platform engineering |
+| Production identity and session chain | Accepted [ADR 0029](../adr/0029-provider-neutral-identity-federation-and-directory-connections.md) and its [decision review](identity-session-and-support-access-decision-review.md) establish a provider-neutral OIDC/gateway seam, protocol-qualified external-identity links, application-owned opaque sessions, writer-resolved tenant selection, bounded assurance, separate service identities, and optional separately gated SCIM provisioning. The [implementation evidence](identity-session-and-support-access-implementation-evidence.md) proves the internal connection/link/invitation and opaque-session boundaries with synthetic data. Microsoft Entra ID, hybrid/on-premises Active Directory, Google Workspace, generic OIDC, and qualified SAML gateway paths remain supported candidates rather than prequalified providers. | Satisfied through Slice 2.0-D.2b at L0. No production callback, provider credential, directory sync, selected-connection/deployment qualification, or L2 evidence exists; connected D.3 remains blocked. | L2 | Security architecture and platform engineering |
+| Bounded support access | TM-03 and accepted ADR 0029 retain a non-impersonating, independently approved, one-tenant, purpose/ticket-bound, strongly assured, allowlisted grant lasting at most 60 minutes. The internal grant resource and named approve/activate/use/revoke/end actions now prove per-use recheck, revocation, minimized evidence, concurrency, rollback, and the complete synthetic negative matrix. | Satisfied through Slice 2.0-D.2c at L0. A visible connected elevated-session experience and its public-contract evidence remain D.3 gates. | L2 | Security architecture with product and platform engineering |
 | Public browser/API contract | ADRs 0014, 0020, 0022, and 0023 are conditionally accepted. ADR 0022 accepts only UI-1A's loopback, read-only, synthetic qualification; ADR 0023 makes non-enumeration and separate export authority binding without qualifying a production collection. | Open; select and accept the exact production session/public-interface candidate and prove it in Slice 2.0-E. UI-1A cannot be promoted, and every sensitive collection retains ADR 0023's candidate-specific gates. | L2 | Platform and web engineering, product experience, and security architecture |
 | Selected deployment and operational qualification | No hosting or deployment environment is selected. Existing capacity, admission, movement, failover, and restore evidence is local and provider-neutral; it is not deployment qualification. | Open. Selection must name topology, region/residency, identities, secrets, edge/TLS, database, queues, storage, observability, backup, restore, rollback, and operating owners. | L3 | Project owner, platform engineering, operations, and security architecture |
 | Independent security/privacy review | The Phase 0 threat model is an accepted engineering baseline. François remains the interim owner; no independent reviewer is named. | Open; real Restricted data and a pilot remain prohibited. | L3 | Project owner must name the independent reviewer; the reviewer owns the recorded challenge and residual-risk disposition |
@@ -61,7 +62,7 @@ qualify the first learning-institution module or its public client.
 
 | Boundary | Current governing position | Slice 2.0-A disposition |
 | --- | --- | --- |
-| Production identity, session, and support access | Trusted-context contracts and TM-03 exist. Accepted ADR 0027 selects ZITADEL Cloud Europe behind Ash OIDC, application-owned sessions, explicit account links, writer-resolved tenant context, separate service identities, and non-impersonating support grants; conditionally accepted ADR 0022 still limits its token to local qualification. | L0 decision gate satisfied. Bounded synthetic Slice 2.0-D engineering is eligible; implementation, contractual/privacy, selected-deployment, public-boundary, independent-review, and real-data gates remain closed. |
+| Production identity, session, and support access | Trusted-context contracts and TM-03 exist. Accepted ADR 0029 supersedes ADR 0027's provider selection and defines provider-neutral qualified OIDC/gateway connections, application-owned sessions, explicit external-identity links, writer-resolved tenant context, separate service identities, separately gated provisioning, and non-impersonating support grants; conditionally accepted ADR 0022 still limits its token to local qualification. | L0 decision gate and internal D.2a through D.2c synthetic implementation are satisfied. Per-connection contractual/privacy, selected-deployment, public-boundary, independent-review, and real-data gates remain closed. |
 | First public browser/API boundary | ADRs 0014, 0020, 0022, and 0023 are conditional. ADR 0022 is local-only, while ADR 0023 accepts the non-enumeration policy but no production collection candidate. | Missing production-candidate acceptance. The later decision must keep page/query bounds, named actions, stable errors, idempotency, field policy, module gates, tenant non-disclosure, cumulative-exposure controls, and separate export authority explicit. |
 | Recursive institutional structure | ADR 0025 records the approved product direction but remains a Proposed data-model and domain-boundary decision. Engineering artifacts now prepare G1, G3, G4, and technical G5 without claiming reviewer approval. | Complete the named accountable reviews, obtain early-childhood/combined-school, college/community-college, and university review for G2, then record G6. Slice 2.1-A must obtain accountable acceptance for ADR 0025 before persistence. |
 | Deployment candidate | ADRs 0003 and 0017 define provider-neutral placement, availability, recovery, and routing contracts. | Unselected. Local PostgreSQL and browser evidence must not be relabelled as a deployment candidate. |
@@ -79,7 +80,7 @@ qualify the first learning-institution module or its public client.
 ## Slice 2.0-A remaining exit work
 
 Slice 2.0-A is started, not complete. Its identity/session/support decision item is satisfied by
-accepted ADR 0027. Its exit remains blocked until:
+accepted ADR 0029. Its exit remains blocked until:
 
 1. the production public browser/API decision is accepted or superseded for the first journey;
 2. a deployment candidate and the distinction between local and deployment evidence are recorded;
@@ -92,6 +93,12 @@ accepted ADR 0027. Its exit remains blocked until:
 Authorization is complete. While these exit items remain open, the accepted sequence permits the
 Phase 2.0 foundation work and Slice 2.1-A L0 scenario/decision work described by the proposal, but
 not Slice 2.1-B persistence or any higher release level.
+
+Slices **2.0-D.2a through 2.0-D.2c are complete at L0 with synthetic data**. The next identity
+entry is D.3, but it remains behind acceptance of the exact public browser/API candidate. Slice
+2.0-E also needs one accepted institutional-structure workflow, so it cannot complete before ADR
+0025 G1 through G6 and Slice 2.1 persistence entry. This dependency ordering does not reopen or
+weaken the completed internal identity foundation.
 
 ## Evidence references
 
@@ -106,9 +113,11 @@ not Slice 2.1-B persistence or any higher release level.
 - [Slice 2.0-C temporal completion and recovery evidence](temporal-completion-and-recovery-evidence.md)
 - [Temporal retention and recovery runbook](../operations/temporal-retention-and-recovery.md)
 - [ADR 0026](../adr/0026-module-aware-outbox-cursors-and-reconciliation.md)
-- [ADR 0027](../adr/0027-production-identity-session-and-support-access.md)
+- [ADR 0029](../adr/0029-provider-neutral-identity-federation-and-directory-connections.md)
+- [Superseded ADR 0027](../adr/0027-production-identity-session-and-support-access.md)
 - [Identity, session, and support-access decision evidence plan](identity-session-and-support-access-decision-evidence.md)
 - [Identity, session, and support-access decision review](identity-session-and-support-access-decision-review.md)
+- [Identity, session, and support-access implementation evidence](identity-session-and-support-access-implementation-evidence.md)
 - [Identity, session, and support-access operating runbook](../operations/identity-session-and-support-access.md)
 - [Institutional-structure decision evidence plan](institutional-structure-decision-evidence.md)
 - [Institutional-structure scenario and vocabulary review](institutional-structure-scenario-review.md)

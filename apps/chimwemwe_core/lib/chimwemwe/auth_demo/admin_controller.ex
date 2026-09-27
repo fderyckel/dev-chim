@@ -131,9 +131,9 @@ defmodule Chimwemwe.AuthDemo.AdminController do
           <div class="grid">
             <section>
               <h2>Institution sign-in connections</h2>
-              <p class="muted">Google Workspace, Microsoft Entra ID, a standards-based OIDC provider, or a SAML provider through the chosen federation broker.</p>
+              <p class="muted">Use one provider-neutral contract for Microsoft Entra ID, Google Workspace, or another OIDC provider. Hybrid/on-premises Active Directory connects through Entra synchronization or a qualified AD FS/SAML gateway; SAML assertions are not processed directly by this proof.</p>
               <table>
-                <thead><tr><th>Connection</th><th>Provider</th><th>Issuer</th><th>Client ID</th><th>Allowed domains</th><th>Status</th><th>Change</th></tr></thead>
+                <thead><tr><th>Connection</th><th>Protocol</th><th>Issuer</th><th>Client ID</th><th>Routing domains</th><th>Status</th><th>Change</th></tr></thead>
                 <tbody>#{connection_rows}</tbody>
               </table>
             </section>
@@ -141,12 +141,12 @@ defmodule Chimwemwe.AuthDemo.AdminController do
               <h2>Add a connection</h2>
               <form method="post" action="/connections">
                 <input type="hidden" name="_csrf_token" value="#{escape(csrf_token)}">
-                <label>Name<input name="connection[name]" required maxlength="120" placeholder="Northstar Microsoft Entra ID"></label>
-                <label>Provider<select name="connection[provider]"><option value="google">Google Workspace</option><option value="microsoft">Microsoft Entra ID</option><option value="oidc">Other OIDC provider</option><option value="saml">SAML through federation broker</option></select></label>
-                <label>Issuer URL<input name="connection[issuer_url]" required maxlength="500" placeholder="https://login.microsoftonline.com/&lt;tenant-id&gt;/v2.0"></label>
-                <label>Client ID<input name="connection[client_id]" required maxlength="500" placeholder="Provider application client ID"></label>
-                <label>Secret reference<input name="connection[secret_reference]" required maxlength="500" placeholder="identity/northstar/microsoft-client-secret"></label>
-                <label>Allowed email domains<input name="connection[allowed_domains]" maxlength="1000" placeholder="northstar-school.test, northstar.edu"></label>
+                <label>Name<input name="connection[name]" required maxlength="120" placeholder="Northstar Entra OIDC"></label>
+                <label>Protocol<select name="connection[protocol]"><option value="oidc">OpenID Connect (direct or brokered)</option><option value="saml">SAML through a qualified gateway</option></select></label>
+                <label>Issuer or entity URL<input name="connection[issuer_url]" required maxlength="500" placeholder="https://identity.example.test/issuer"></label>
+                <label>Client or audience ID<input name="connection[client_id]" required maxlength="500" placeholder="Registered application identifier"></label>
+                <label>Secret reference<input name="connection[secret_reference]" required maxlength="500" placeholder="identity/northstar/sign-in-secret"></label>
+                <label>Routing email domains<input name="connection[allowed_domains]" maxlength="1000" placeholder="northstar-school.test, northstar.edu"></label>
                 <button type="submit">Save as draft</button>
               </form>
               <p class="muted">An active connection still needs a verified redirect URI, issuer, client ID, secret reference, and domain policy before it can be used for sign-in.</p>
@@ -168,7 +168,7 @@ defmodule Chimwemwe.AuthDemo.AdminController do
     """
     <tr>
       <td><strong>#{escape(connection.name)}</strong><br><span class="muted">Secret ref: #{escape(connection.secret_reference)}</span></td>
-      <td>#{escape(Atom.to_string(connection.provider))}</td>
+      <td>#{escape(connection.protocol |> Atom.to_string() |> String.upcase())}</td>
       <td>#{escape(connection.issuer_url)}</td>
       <td>#{escape(connection.client_id)}</td>
       <td>#{escape(connection.allowed_domains)}</td>

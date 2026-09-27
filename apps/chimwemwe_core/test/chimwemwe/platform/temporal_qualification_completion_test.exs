@@ -41,6 +41,11 @@ defmodule Chimwemwe.Platform.TemporalQualificationCompletionTest do
   ]
 
   @tables [
+    "identity_support_access_grants",
+    "identity_application_sessions",
+    "identity_invitations",
+    "identity_external_identity_links",
+    "identity_connections",
     "platform_temporal_qualification_current_projections",
     "platform_temporal_qualification_retention_receipts",
     "platform_temporal_qualification_retention_controls",

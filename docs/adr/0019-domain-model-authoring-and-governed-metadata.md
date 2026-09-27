@@ -9,7 +9,11 @@
 
 ## Context
 
-Chimwemwe needs a productive way to add and evolve school capabilities without making every local variation a code release. Frappe-style runtime metadata is flexible, while Odoo-style source models and Ash resources make types, behaviour, policy, and migrations reviewable. Treating both as authoritative would create two model engines whose schema, security, API, and upgrade behaviour could diverge.
+Chimwemwe needs a productive way to add and evolve school capabilities without making every local
+variation a code release. Runtime-metadata systems are flexible, while source-controlled domain
+models and Ash resources make types, behaviour, policy, and migrations reviewable. Treating both
+as authoritative would create two model engines whose schema, security, API, and upgrade behaviour
+could diverge.
 
 Ash already provides a declarative source model for resources, fields, relationships, calculations, named actions, policies, and tenancy. Its resource information APIs can support derived development tools. It does not by itself provide a safe tenant-operated runtime domain-model designer, and Chimwemwe should not build one speculatively.
 

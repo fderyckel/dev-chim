@@ -9,9 +9,19 @@
 
 ## Context
 
-Chimwemwe needs academic years and periods before attendance, admissions, timetabling, assessment, reporting, and other school modules can use a shared temporal context. The supplied Frappe implementation provides useful evidence: academic years and terms are explicit records, schools may select a calendar, and many dependent records keep year or term references.
+Chimwemwe needs academic years and periods before attendance, admissions, timetabling, assessment,
+reporting, and other school modules can use a shared temporal context. The supplied legacy
+implementation provides useful evidence: academic years and terms are explicit records, schools
+may select a calendar, and many dependent records keep year or term references.
 
-The same implementation also distributes authority across Academic Year, Term, School Calendar, School Calendar Term, and generated start/end events. Current-year resolution may return several records, school hierarchy and global defaults are implicit fallbacks, admission visibility is stored on the year, and save callbacks create secondary calendar state. A local source inventory on 2026-09-24 found downstream Academic Year links in 58 DocTypes and downstream Term links in 15 DocTypes across 11 modules after excluding their defining and duplicate calendar records. A field-for-field port would therefore preserve duplicate truth and couple many future modules to settings-layer behaviour.
+The same implementation also distributes authority across academic year, term, school calendar,
+calendar-period, and generated boundary-event records. Current-year resolution may return several
+records, school hierarchy and global defaults are implicit fallbacks, admission visibility is
+stored on the year, and save callbacks create secondary calendar state. A local source inventory
+on 2026-09-24 found downstream academic-year links in 58 record types and downstream term links in
+15 record types across 11 modules after excluding their defining and duplicate calendar records. A
+field-for-field port would therefore preserve duplicate truth and couple many future modules to
+settings-layer behaviour.
 
 This record proposes the durable boundary for a future academics business module. It does not authorize a production resource, migration, public interface, scheduler, or user interface.
 
@@ -23,7 +33,7 @@ recursive institutional units. The existing `school_scope_id`, single-school ter
 primary institutional calendar assumption in this proposal are therefore not acceptance
 candidates as written.
 
-The Frappe findings and synthetic calendar scenarios remain useful source evidence, but the next
+The source-system findings and synthetic calendar scenarios remain useful evidence, but the next
 revision must determine explicitly:
 
 - whether an academic calendar belongs to one exact institutional unit, a programme, or another
@@ -45,7 +55,7 @@ the ADR process.
 - Deterministic current-context resolution for browser, mobile, jobs, imports, and integrations.
 - Fast reuse across schools without live inheritance, tenant forks, or copied code.
 - Named, authorized changes with tenant isolation, concurrency control, audit, and recoverability.
-- Stable identifiers for downstream modules and migration from existing Frappe references.
+- Stable identifiers for downstream modules and migration from existing source references.
 - Explicit module, entitlement, activation, and authorization gates.
 - A bounded first model that can grow from evidence without becoming a universal temporal or workflow engine.
 
@@ -109,7 +119,7 @@ Published-history correction, effective dating, and evidence semantics must alig
 
 ### Negative
 
-- Migration must reconcile duplicated Frappe term and calendar-term data before cutover.
+- Migration must reconcile duplicated source term and calendar-term data before cutover.
 - Template comparison and draft rebasing require product design and conflict reporting.
 - The bounded primary-period model will not initially represent every overlapping school cycle.
 - Cross-module consumers must migrate from names and implicit defaults to stable identifiers and explicit dates.
@@ -121,13 +131,29 @@ Every academic-calendar record, query, action, event, job, cache key, projection
 
 Publishing, correction, closure, template adoption, and exception changes require capabilities and record safe actor, tenant, purpose, correlation, revision, and provenance evidence. Optimistic concurrency and idempotency protect state transitions. Side effects are emitted through the transactional outbox after the authoritative transaction commits. Calendar data must not expose restricted learner or staff records; free-text exception descriptions require bounded classification and logging rules.
 
-The Frappe migration will preserve source identifiers in a migration ledger and map Academic Year to the aggregate, academic-type Term records to `AcademicPeriod`, weekly-off rules to `WeekPattern`, and holidays or special days to `CalendarException`. Activity and Other term types require an explicit owning-module disposition and are not forced into the primary instructional sequence. School Calendar Term rows are reconciled against their referenced Term rather than imported as a second authority. Global and ancestor calendar fallbacks become explicit template-revision provenance. Year and term admission visibility move to admissions-owned configuration. Generated period-boundary events are regenerated as projections or downstream events and are not imported as independent truth.
+The migration will preserve source identifiers in a migration ledger and map the source academic
+year to the aggregate, instructional term records to `AcademicPeriod`, weekly-off rules to
+`WeekPattern`, and holidays or special days to `CalendarException`. Non-instructional term types
+require an explicit owning-module disposition and are not forced into the primary instructional
+sequence. Duplicate calendar-period rows are reconciled against their referenced term rather than
+imported as a second authority. Global and ancestor calendar fallbacks become explicit
+template-revision provenance. Year and term admission visibility move to admissions-owned
+configuration. Generated period-boundary events are regenerated as projections or downstream
+events and are not imported as independent truth.
 
 Before cutover, a shadow import must report source counts, reference coverage, duplicate names, date overlaps, hierarchy/default resolution, term/calendar-term discrepancies, orphaned consumers, and unresolved mappings. No conflict may be resolved by silent last-write-wins behaviour.
 
 ## Validation evidence
 
-Current evidence is limited to repository architecture constraints, the 2026-09-24 read-only review of the supplied Frappe school-settings source and reference inventory, the [synthetic calendar scenario review](../architecture/academic-calendar-synthetic-scenario-review.md), the [temporal-records synthetic scenario review](../architecture/temporal-records-synthetic-scenario-review.md), and the [ADR 0018 decision review](../architecture/temporal-records-decision-review.md). The fixtures support the single aggregate, primary periods, explicit weekday set, per-date exceptions, deterministic resolver, concrete template adoption, and an immutable successor publication revision for correction. They do not satisfy ADR 0018's binding executable conditions, provide school-domain stakeholder acceptance, or prove this proposal in production.
+Current evidence is limited to repository architecture constraints, the 2026-09-24 read-only
+review of the supplied legacy school-settings source and reference inventory, the
+[synthetic calendar scenario review](../architecture/academic-calendar-synthetic-scenario-review.md),
+the [temporal-records synthetic scenario review](../architecture/temporal-records-synthetic-scenario-review.md),
+and the [ADR 0018 decision review](../architecture/temporal-records-decision-review.md). The
+fixtures support the single aggregate, primary periods, explicit weekday set, per-date exceptions,
+deterministic resolver, concrete template adoption, and an immutable successor publication revision
+for correction. They do not satisfy ADR 0018's binding executable conditions, provide school-domain
+stakeholder acceptance, or prove this proposal in production.
 
 Acceptance requires, at minimum:
 
@@ -155,7 +181,7 @@ Before production data exists, exit cost is limited to documentation and prototy
 - A downstream module needs to reinterpret durable records after a calendar change.
 - Template adoption creates unacceptable duplication or cannot express legitimate school variation.
 - A proposal introduces implicit hierarchy fallback, generic CRUD, live template inheritance, runtime schema mutation, or a second calendar authority.
-- The first real Frappe shadow import reveals material semantics not covered by this model.
+- The first real source-system shadow import reveals material semantics not covered by this model.
 - ADR 0025 or representative learning-institution scenarios show that one school-scoped primary
   calendar cannot represent the required institutional or programme context.
 

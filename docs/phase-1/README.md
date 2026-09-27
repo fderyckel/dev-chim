@@ -403,7 +403,7 @@ or workflow is considered validated.
   module-consumer qualification, production identity and public interfaces, selected-deployment
   qualification, domain records policy, and independent review remain Phase 2 gates. Slice 2.0-C
   and the 2026-09-27 ADR 0018 acceptance later closed only the neutral local temporal L1 gate;
-  accepted ADR 0027 closes only the identity/session/support architecture gate and leaves Slice
+  accepted provider-neutral ADR 0029 supersedes ADR 0027's provider selection, closes only the identity/session/support architecture gate, and leaves Slice
   2.0-D implementation and L2 evidence open.
 - Phase 0 ADR outcomes and conditional gates are binding; an Accepted ADR is changed only by supersession.
 - `make check` proves repository consistency; it does not by itself approve a new production capability.

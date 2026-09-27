@@ -137,8 +137,8 @@ obligations. It must not mark the threats mitigated at L1 until those tests pass
 
 ## Migration review design
 
-Use synthetic source fixtures patterned after at least two materially different inputs: an
-Odoo/Frappe-style organization tree and a tertiary hierarchy. Preserve source system, snapshot,
+Use synthetic source fixtures patterned after at least two materially different inputs: a generic
+enterprise organization tree and a tertiary hierarchy. Preserve source system, snapshot,
 identifier, parent evidence, source type, site evidence, access/default assumptions, and mapping
 revision in a migration ledger.
 

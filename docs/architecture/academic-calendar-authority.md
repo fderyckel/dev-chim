@@ -8,7 +8,10 @@
 
 ## Purpose and boundary
 
-This contract translates the useful academic-year and academic-term concepts from the supplied Frappe implementation into Chimwemwe without copying its DocType structure. It defines a future business-module boundary and migration target. It does not create a production resource, table, application, public API, scheduler, or user interface.
+This contract translates useful academic-year and academic-term concepts from the supplied legacy
+implementation into Chimwemwe without copying its document structure. It defines a future
+business-module boundary and migration target. It does not create a production resource, table,
+application, public API, scheduler, or user interface.
 
 The current `school_scope_id` examples predate
 [ADR 0025](../adr/0025-learning-institution-operating-system-and-institutional-structure.md). They
@@ -21,7 +24,7 @@ The module owns school-calendar meaning. The platform kernel continues to own tr
 
 ## Source model translation
 
-| Frappe concept or behaviour | Chimwemwe proposal | Reason |
+| Source concept or behaviour | Chimwemwe proposal | Reason |
 | --- | --- | --- |
 | Academic Year | School-scoped `AcademicYear` aggregate | Keeps one stable identity and publication boundary |
 | Academic-type Term | Owned `AcademicPeriod` | Instructional periods cannot drift outside their year or become a parallel calendar |
@@ -36,7 +39,9 @@ The module owns school-calendar meaning. The platform kernel continues to own tr
 | Save callbacks creating start/end events | Disposable projection and transactional outbox facts | Prevents callback-created secondary authority |
 | Fixed school roles in permission hooks | Tenant-defined capabilities | Preserves renameable, composable tenant authority |
 
-The source review is input evidence, not executable instruction. Chimwemwe does not import Frappe permission hooks, callbacks, framework globals, naming assumptions, or hierarchy defaults as production contracts.
+The source review is input evidence, not executable instruction. Chimwemwe does not import source
+permission hooks, callbacks, framework globals, naming assumptions, or hierarchy defaults as
+production contracts.
 
 ## Proposed aggregate
 
@@ -166,7 +171,7 @@ When a new template revision appears, the school sees a comparison. Only an auth
 - External notifications or integrations consume allowlisted outbox facts. Event payloads contain stable references and minimal safe data.
 - Module release, entitlement, activation, and actor authorization are checked independently on every synchronous and asynchronous entry point.
 
-## Frappe migration contract
+## Source-system migration contract
 
 Migration is a reconciliation project, not a table copy.
 
@@ -208,7 +213,9 @@ Add named draft, template, preview, publish, correction, and closure transitions
 
 ### A4 — migration shadow
 
-Build an adapter around frozen, synthetic or properly governed Frappe exports. Run repeatable shadow imports, discrepancy reports, ID mapping, destination read-back, and downstream reference reconciliation. No cutover occurs in this gate.
+Build an adapter around frozen, synthetic, or properly governed source exports. Run repeatable
+shadow imports, discrepancy reports, ID mapping, destination read-back, and downstream reference
+reconciliation. No cutover occurs in this gate.
 
 ### A5 — intentional experience
 
@@ -224,7 +231,7 @@ ADR acceptance and implementation require all evidence named in ADR 0021 plus:
 
 - school-domain representative review of at least two representative calendar patterns; the [synthetic scenario review](academic-calendar-synthetic-scenario-review.md) is design evidence only;
 - an aggregate and action contract review against ADRs 0003, 0005, 0007, 0019, and 0020;
-- migration reconciliation over representative Frappe fixtures;
+- migration reconciliation over representative source-system fixtures;
 - threat review for TM-01, TM-02, TM-09, TM-10, TM-11, TM-13, TM-14, TM-15, and TM-16;
 - measured query and publication behaviour at a representative tenant scale; and
 - recovery rehearsal showing that authoritative state, outbox facts, and disposable projections converge after interruption.
@@ -232,7 +239,7 @@ ADR acceptance and implementation require all evidence named in ADR 0021 plus:
 ## Explicit non-goals
 
 - no implementation authorization from this document;
-- no field-for-field Frappe compatibility API;
+- no field-for-field source-system compatibility API;
 - no generic temporal, workflow, runtime-schema, or universal settings engine;
 - no fixed school role names or client-side authorization;
 - no live template inheritance or silent hierarchy/global fallback;

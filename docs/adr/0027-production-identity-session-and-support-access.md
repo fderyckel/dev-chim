@@ -1,6 +1,6 @@
 # ADR 0027: Production identity, session, and support-access boundary
 
-- Status: Accepted
+- Status: Superseded
 - Date: 2026-09-26
 - Decision date: 2026-09-27
 - Accountable approver: François — Project Owner and interim Security/Privacy Owner
@@ -11,6 +11,12 @@
 - Conditions: no real identity, public route, or L2 claim until Slice 2.0-D implementation evidence,
   selected-deployment controls, contractual/privacy review, and the separate public boundary pass
 - Supersedes: None
+- Superseded by: [ADR 0029](0029-provider-neutral-identity-federation-and-directory-connections.md)
+
+> Historical decision: retained without rewriting the accepted outcome. ADR 0029 supersedes the
+> provider selection and federation topology with a provider-neutral identity-connection boundary.
+> ADR 0027's provider-independent session, account-link, tenant-selection, invitation, and bounded
+> support-access controls remain in force through ADR 0029.
 
 ## Context
 

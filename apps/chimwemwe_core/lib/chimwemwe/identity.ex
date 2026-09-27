@@ -14,5 +14,10 @@ defmodule Chimwemwe.Identity do
     resource Chimwemwe.Identity.Account
     resource Chimwemwe.Identity.Token
     resource Chimwemwe.Identity.SsoConnection
+    resource Chimwemwe.Identity.IdentityConnection
+    resource Chimwemwe.Identity.ExternalIdentityLink
+    resource Chimwemwe.Identity.Invitation
+    resource Chimwemwe.Identity.ApplicationSession
+    resource Chimwemwe.Identity.SupportAccessGrant
   end
 end

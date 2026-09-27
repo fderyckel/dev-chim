@@ -26,9 +26,9 @@ and high-school units. A tenant may operate several independent roots, and the w
 describe a root institution or a nested unit. The Phase 2 candidate based on a flat `School`
 aggregate plus optional relationships cannot represent those cases as a core invariant.
 
-The product needs multi-entity operation comparable in purpose to multi-company structures in
-Odoo or Frappe, without importing their schemas, permission semantics, implicit defaults, or
-hierarchy inheritance. The tenant remains the security, placement, and governed operator boundary;
+The product needs multi-entity operation comparable in purpose to established multi-company
+systems, without importing source schemas, permission semantics, implicit defaults, or hierarchy
+inheritance. The tenant remains the security, placement, and governed operator boundary;
 the institutional hierarchy is tenant-owned domain structure inside that boundary.
 
 This record captures the product direction and proposes the durable institutional-structure
@@ -225,7 +225,7 @@ impacts, records the exact before-and-after parentage, and blocks when a depende
 reconcile safely. Events carry stable identifiers and minimal change facts, not complete trees,
 names, addresses, or translated labels.
 
-Migration from Odoo, Frappe, or another source preserves source identifiers and hierarchy evidence
+Migration from any source system preserves source identifiers and hierarchy evidence
 in a migration ledger. It reports duplicate or missing parents, cycles, cross-tenant links,
 ambiguous roots, invalid types, path-dependent codes, sites represented as organizations,
 implicit access inheritance, and unresolved matrix relationships. Migration never converts a

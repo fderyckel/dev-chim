@@ -69,5 +69,13 @@ if config_env() == :test do
          :identity_token_signing_secret,
          String.duplicate("test-token-secret-", 4)
 
+  config :chimwemwe_core,
+         :identity_invitation_hmac_secret,
+         String.duplicate("test-invitation-secret-", 3)
+
+  config :chimwemwe_core,
+         :identity_session_hmac_secret,
+         String.duplicate("test-session-secret-", 3)
+
   config :bcrypt_elixir, log_rounds: 1
 end

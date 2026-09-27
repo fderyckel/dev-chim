@@ -6,7 +6,7 @@ defmodule Chimwemwe.AuthDemo.Admin do
   alias Chimwemwe.AuthDemo.Config
   alias Chimwemwe.Identity.SsoConnection
 
-  @accepted_fields ~w(name provider issuer_url client_id secret_reference allowed_domains)a
+  @accepted_fields ~w(name protocol issuer_url client_id secret_reference allowed_domains)a
 
   @spec list(SsoConnection.t()) :: {:ok, [SsoConnection.t()]} | {:error, term()}
   def list(account) do

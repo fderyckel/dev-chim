@@ -326,6 +326,19 @@ They do not expose arbitrary visual construction such as `background="#f90"`, `r
 `padding="11px"`. A workflow may use layout primitives and semantic variants; a new product-wide
 visual decision first enters the token or component contract.
 
+### Reusable nested-structure view
+
+Develop one accessible tree-view pattern for every domain that owns approved nested data, including
+corporate/legal structures, educational institutions, organizational units, and any later governed
+hierarchy. Each domain retains its own node types, actions, authorization, history, and relationship
+rules; the shared pattern owns only navigation and presentation behavior.
+
+The pattern must support bounded expansion, direct lookup, keyboard navigation, assistive-technology
+semantics, narrow-screen reflow, current and closed status, explicit loading/error/denied states, and
+stable identity independent of a rendered path. Expanding or selecting a node never grants access,
+implies ownership, or authorizes descendant enumeration. Graph relationships and secondary links
+must appear separately rather than being forced into the primary tree.
+
 ### Third-party policy
 
 - Do not adopt Tailwind, runtime CSS-in-JS, or a pre-styled component suite as the public visual

@@ -75,20 +75,22 @@ expands record scope, selects a database, activates a module, turns a unit into 
 report, or creates live configuration inheritance. Exact-unit and descendant authorization,
 reporting, and configuration semantics require separate explicit contracts.
 
-## Product and standards evidence
+## Reference-derived requirements
 
-This proposal adopts patterns, not vendor schemas or screens.
+This proposal retains product-independent requirements identified through prior external research.
+Commercial product names, links, schemas, and screens are intentionally excluded from the durable
+architecture record.
 
-| Evidence | Useful lesson | Chimwemwe interpretation |
+| Observed pattern | Useful lesson | Chimwemwe interpretation |
 | --- | --- | --- |
-| [ManageBac school settings](https://help.managebac.com/hc/en-us/articles/360019112011-Configuring-School-General-Settings-Languages-Academics-Year-Levels-Terms) | School identity, address, time zone, language, terminology, and programme settings need a coherent administrative home. | Give school operators one clear structure workspace, but keep calendar, programmes, people, and identity in their owning modules. |
-| [PowerSchool school information](https://ps.powerschool-docs.com/pssis-admin/latest/school-information) and [district setup](https://ps.powerschool-docs.com/pssis-admin/latest/academic-and-career-planner-district-setup) | Districts contain multiple schools and sites; institutional records have durable identity and operational status. | Use stable opaque identity, explicit school/site associations, and close/supersede actions instead of destructive deletion. |
-| [Toddle for school groups](https://www.toddleapp.com/toddle-for-school-groups/) | A group needs cross-campus visibility and controlled sharing while schools retain local context. | Make the tenant the governed operator boundary; make school scopes explicit; require deliberate adoption instead of implicit hierarchy inheritance. |
-| [Canva for Schools and Districts](https://www.canva.com/education/schools/) | Central provisioning, SSO, user-type controls, and institution-wide governance are distinct from everyday creation. | Keep identity and central controls in the platform boundary; institutional structure supplies stable references but never credentials or authority. |
-| [SchoolFox communication](https://foxeducation.com/en/schoolfox/simple-school-communication/) | School adoption benefits from simple setup, explicit audiences, multilingual terminology, and clear delivery status. | Keep structure setup concise and translatable; defer messages, recipients, confirmations, and emergency delivery to a later communications module. |
-| [1EdTech OneRoster 1.2](https://www.1edtech.org/standards/oneroster) and the [Ed-Fi education-organization domain](https://docs.ed-fi.org/reference/data-exchange/data-standard/4/model-reference/education-organization-domain/overview/) | Interoperability expects stable organization identifiers and explicit organization types and relationships. | Preserve stable IDs and a mapping seam, but do not copy OneRoster's limited org types or Ed-Fi's fixed US hierarchy into the authoritative model. |
+| Coherent institution settings | School identity, address, time zone, language, terminology, and programme settings need a coherent administrative home. | Give school operators one clear structure workspace, but keep calendar, programmes, people, and identity in their owning modules. |
+| Multi-institution administration | Groups contain multiple schools and sites; institutional records need durable identity and operational status. | Use stable opaque identity, explicit institution/site associations, and close/supersede actions instead of destructive deletion. |
+| Cross-campus operation | A group needs cross-campus visibility and controlled sharing while institutions retain local context. | Keep the tenant as the governed security boundary, make institutional scopes explicit, and require deliberate adoption instead of implicit hierarchy inheritance. |
+| Central provisioning | Central identity and institution-wide governance are distinct from everyday learning operations. | Keep identity and central controls in the platform boundary; institutional structure supplies stable references but never credentials or authority. |
+| Multilingual communication | Adoption benefits from simple setup, explicit audiences, multilingual terminology, and clear delivery status. | Keep structure setup concise and translatable; defer messages, recipients, confirmations, and emergency delivery to a later communications module. |
+| Education interoperability | External exchanges expect stable organization identifiers and explicit organization types and relationships. | Preserve stable IDs and a mapping seam, but do not copy a source standard's limited organization types or jurisdiction-specific hierarchy into the authoritative model. |
 
-These products also show a common failure mode: institution settings tend to accumulate identity,
+These observations also show a common failure mode: institution settings tend to accumulate identity,
 academic, communications, branding, roster, and permission concerns. Chimwemwe should present a
 coherent setup journey while keeping those concerns in distinct domain modules. Product direction
 on 2026-09-26 additionally requires a university-to-department hierarchy and a combined-school
@@ -226,15 +228,17 @@ reject a universal temporal persistence abstraction until two real domains justi
 **Outcome:** every public request and support action receives trusted context from a reviewed
 identity and session chain.
 
-Accepted [ADR 0027](../adr/0027-production-identity-session-and-support-access.md) and its
-[decision review](../phase-2/identity-session-and-support-access-decision-review.md) close the L0
-decision gate by selecting ZITADEL Cloud Europe, the Ash OIDC relying-party seam, application-owned
-sessions, explicit account links, writer-resolved tenant context, and non-impersonating support
-grants. Bounded synthetic implementation may begin; no real provider connection, public route, or
-L2 claim exists yet.
+Accepted [ADR 0029](../adr/0029-provider-neutral-identity-federation-and-directory-connections.md)
+and its [decision review](../phase-2/identity-session-and-support-access-decision-review.md) close
+the L0 decision gate with a provider-neutral qualified OIDC/gateway seam, application-owned
+sessions, protocol-qualified external-identity links, writer-resolved tenant context, separately
+gated directory provisioning, and non-impersonating support grants. Microsoft Entra ID,
+hybrid/on-premises Active Directory, Google Workspace, generic OIDC, and qualified SAML gateway
+paths are supported candidates. Bounded synthetic implementation may begin; no real connection,
+public route, directory sync, or L2 claim exists yet.
 
-1. Select an identity-provider and account-linking boundary without copying the local UI-1A token
-   registry into production.
+1. Implement the provider-neutral identity-connection and account-linking boundary without copying
+   the local UI-1A token registry or provider-specific authority into production.
 2. Define sign-in, callback, session creation, rotation, idle/absolute expiry, logout, revocation,
    credential recovery, tenant selection, step-up assurance, and service-identity behavior.
 3. Resolve actor membership and tenant from trusted server-side state. A cookie, header, route,
@@ -409,8 +413,8 @@ Use at least the eight scenarios required by ADR 0025, including:
 
 Test official and local names, multilingual labels, bounded tree navigation, a closed unit,
 migration from at least one current source, and the distinction between institutions, sites,
-programmes, and access scopes. Compare OneRoster, Ed-Fi, Odoo, and Frappe only as external mappings
-or operational reference patterns, not as internal authority.
+programmes, and access scopes. Compare external interoperability profiles and source-system shapes
+only as mappings or operational reference patterns, not as internal authority.
 
 **Exit evidence:** accepted ADR 0025; agreed unit/profile/parentage/site/affiliation meanings;
 correction and retention disposition; hierarchy-navigation prototype; representative domain-owner
@@ -541,6 +545,253 @@ This proposal does not authorize or include:
 - a generic setup wizard that owns unrelated state;
 - generic CRUD, GraphQL, Kafka, a new search/vector store, or a second policy engine; or
 - production data, a pilot, deployment, or general availability without the matching ladder gate.
+
+## Future workflow propagation requirement
+
+Later domain modules must support governed workflow coordination across approved corporate/legal
+and educational structures without turning parentage into an automatic behavior engine.
+
+- Downward reuse is explicit publication and adoption of a versioned workflow or policy, with
+  visible provenance, local override rules, and deliberate update or withdrawal.
+- Upward movement is an explicit escalation, approval, consolidation, or aggregation step, not
+  reverse inheritance.
+- Cross-branch coordination names the exact participating units and accountable owner rather than
+  relying on a common ancestor.
+- Reparenting never silently changes an active workflow. A move preview must classify affected
+  adoptions, overrides, pending work, approvals, and reporting obligations and block unknown effects.
+- Every workflow action retains tenant, actor, unit, effective-time, authorization, audit, and
+  recovery evidence through its owning domain.
+
+This requirement does not authorize a universal workflow language or executable tenant rules. Each
+business module must define its own bounded states, actions, propagation directions, and acceptance
+evidence when that workflow enters scope.
+
+## Future programme and curriculum authority requirement
+
+The 2026-09-27 product review approves a governed separation between external programme authority
+and local curriculum ownership. An external awarding, curriculum, accreditation, or regulatory
+body owns its authoritative specification. A named school or academic governing body owns the
+local curriculum implementation. This is not blanket school sovereignty: the accountable local
+owner may be a school, an explicitly authorized central academic body, or another reviewed
+education authority, and its freedom remains bounded by applicable external, regulatory, and
+governance obligations.
+
+A later programme/curriculum module must preserve these meanings separately:
+
+- an immutable reference to the exact external specification version and its typed obligations;
+- a separately versioned local curriculum containing the institution's sequence, content,
+  pedagogy, enrichment, and permitted local assessment choices;
+- a versioned alignment map showing how local curriculum elements cover mandatory, constrained,
+  recommended, and locally discretionary requirements; and
+- an exact programme offering that binds the applicable external and local versions to its owning
+  educational context.
+
+The future model must distinguish frameworks, qualifications, subject or course specifications,
+assessment regimes, and accreditation requirements rather than treating every external source as
+one interchangeable framework. Mapping a local element to an external requirement supplies
+traceability; it does not by itself certify compliance or permit an external obligation to be
+edited locally.
+
+External obligations cannot be downgraded, rewritten, or reclassified as local discretion by a
+school. Where the external authority supplies a requirement classification, Chimwemwe preserves
+that classification with the exact source version. A local curriculum authority may add its own
+requirements or stricter expectations, but they remain visibly local and do not alter the external
+source. When an external requirement is ambiguous, an authorized academic reviewer records a
+separate attributable interpretation with its scope, rationale, evidence, and review state. An
+unresolved interpretation does not prevent ordinary drafting, but the affected programme offering
+cannot claim compliance until the ambiguity is resolved. The ordinary interface derives these
+states from context and asks for human review only for exceptions, conflicts, and unresolved
+interpretations.
+
+One local curriculum may align with several external, national, regulatory, or group
+specifications at the same time. Alignment is many-to-many: one local curriculum element may
+address several external requirements, and one external requirement may be addressed through
+several local elements. Each programme offering pins the exact applicable source versions and
+marks each source as required or supplementary. Conflicting requirements have no implicit
+precedence; an authorized academic reviewer records an explicit, attributable disposition.
+Unresolved conflicts block the affected compliance claim, not ordinary drafting. Teachers
+normally work from the resolved local curriculum, while curriculum leaders receive the detailed
+mapping, conflict, gap, and exception views.
+
+Every programme offering has one accountable academic owner, but it may involve several
+participating educational units and sites. The accountable owner need not deliver every course or
+component. Each participating unit has an explicit typed role, such as coordinator, contributor,
+or delivery unit; participation never changes canonical institutional parentage and grants no
+automatic access, reporting scope, configuration, or programme authority. Participation changes
+are effective-dated so they do not reinterpret historical offerings. Cross-unit academic
+programmes use this programme-owned participation model rather than becoming institutional-tree
+nodes or arbitrary affiliations. Sports and extracurricular programmes remain in a separate
+activity domain even when they later reuse the same accountable-owner and typed-participation
+pattern.
+
+Where a course-like structure applies, the future learning model separates five meanings:
+
+1. a stable course identity, such as one enduring catalogued course;
+2. an approved course-specification revision containing formal outcomes, credits, prerequisites,
+   and alignment meaning;
+3. a course-design edition containing the reusable teaching design, such as unit sequence,
+   resources, assessments, and pacing;
+4. a course offering that makes one course available in an exact academic period and educational
+   context while pinning the applicable specification revision and design edition; and
+5. a class or section that records the actual learner group, assigned staff, timetable, and
+   delivery context.
+
+Several offerings or sections may deliberately reuse one published course-design edition, and a
+new edition is required only when the shared teaching design changes. Preparing a later offering
+defaults to one simple rollover action: reuse the current design, copy it into a new editable
+draft, or start a new design. Draft changes autosave as mutable working state; a durable edition is
+created only through a meaningful publication transition. Internal revision identifiers and
+lineage remain available for governance without becoming routine form fields.
+
+A course offering may have several sections. Each section has its own effective-dated teaching
+team and may assign one or more staff members with explicit instructional responsibilities, such
+as teacher of record, co-teacher, assistant, specialist, or substitute. Two sections using the
+same course offering may have entirely different teaching teams and section adaptations, and one
+staff member may participate in several sections. Instructional assignment is not a fixed tenant
+role and grants no implicit programme, institutional-unit, reporting, or cross-section authority;
+the owning module must authorize the exact tasks and effective dates independently.
+
+A published course-design edition is the shared baseline rather than a live document silently
+modified by one section. Assigned teaching staff may collaboratively adapt lessons, resources,
+pacing, and permitted assessments for their section. Section changes remain section-specific by
+default and cannot remove locked programme obligations. A teaching-team member may propose an
+adaptation for the next shared edition, where the accountable curriculum owner accepts, revises,
+or rejects it. An urgent offering-wide amendment is a separate authorized action that identifies
+every affected section. The ordinary interface defaults to `this section only` and asks about
+wider reuse only when relevant.
+
+Co-teachers work in one institution-owned section plan rather than maintaining competing official
+plans. The system attributes material contributions and meaningful transitions to the responsible
+staff member and preserves the shared plan's history. A staff member may keep private working notes,
+but those notes are not part of the official section plan unless explicitly contributed through an
+authorized action. Ending or changing a teaching assignment removes future access according to its
+effective date without deleting or transferring authorship of earlier contributions. Concurrent
+editing must preserve both collaborators' work or require an explicit conflict resolution; it must
+not silently apply last-write-wins behaviour.
+
+Teaching-team labels such as teacher, co-teacher, assistant, specialist, or substitute may provide
+simple institution-configured responsibility presets, but the labels are not tenant roles and do
+not themselves grant authority. Each effective-dated assignment records the permitted section
+tasks, including shared-plan editing, attendance, assessment creation or marking, publication,
+result finalization, and family communication where applicable. The ordinary interface presents a
+concise preset and responsibility summary while retaining explicit adjustment and audit detail.
+Sensitive or final actions must be authorized from the assignment's current responsibilities and
+cannot be inferred from its display label or from another section assignment.
+
+The future enrolment boundary must distinguish programme admission or enrolment, course
+registration, and section placement. Course registration records the learner's approved
+participation in an exact course offering; section placement assigns that registration to a
+delivery group and teaching team. A section move therefore preserves the course registration and
+the learner's attributable work, attendance, results, and prior delivery context. The ordinary
+interface may perform registration and initial placement as one guided action without collapsing
+their meanings.
+
+Request initiation is separate from approval authority. Depending on age, institution policy, and
+context, a learner, verified guardian, authorized staff member, or approved integration may request
+registration or placement. The applicable workflow may approve an eligible request automatically
+or require consent, review, or institutional approval. A guardian acts through an explicit current
+relationship and delegated purpose rather than impersonating the learner, and neither learner nor
+guardian initiation bypasses eligibility, capacity, financial, safeguarding, or academic controls.
+
+Eligibility rules attach to the meaning they govern. Programme-entry requirements govern admission
+or programme enrolment; prerequisites, prior-course results, entry or placement assessments, and
+progression rules ordinarily govern course registration or level placement. Section-specific rules
+govern constraints such as capacity, timetable conflicts, site or modality, linked teaching groups,
+accommodations, and any explicitly required instructor approval. A course-wide requirement must not
+be copied into every section merely to make the workflow function. Every consequential decision
+must identify the evaluated rule version, outcome, explanation, evidence, and any authorized
+override. The later enrolment module owns request, consent, waitlist, add/drop, transfer, and
+approval workflows; this proposal does not authorize a universal workflow engine or enrolment
+implementation.
+
+The future calendar and scheduling boundary must not collapse a shared academic year into one
+tenant-wide teaching schedule. It separates at least four meanings:
+
+1. an academic calendar and its named periods, holidays, closures, and significant dates;
+2. effective-dated operating-day classifications, including learner instructional days, teacher
+   working or professional-development days, examination days, and other locally governed day
+   meanings;
+3. a timetable scheme defining the cycle and bell or teaching periods, such as an eight-period
+   two-week rotation or a six-period three-day rotation; and
+4. the actual section meeting pattern, room or site, assigned resources, and dated exceptions.
+
+These records may be explicitly adopted at the relevant educational context or institutional unit.
+A primary division and a secondary division may share academic-year and holiday boundaries while
+using different learner days, teacher days, timetable cycles, and teaching periods. Parentage may
+offer an authorized default or adoption opportunity, but it never silently imposes or changes a
+calendar or timetable. Course offerings and sections pin the applicable calendar and scheduling
+versions for their effective dates; later changes do not reinterpret historical attendance,
+instruction, workload, or results. Cross-unit programmes coordinate explicitly across participating
+calendars and surface conflicts rather than inventing one inherited schedule. The calendar module
+owns date meaning, while a later timetabling module owns allocation and conflict resolution.
+
+The future assessment boundary separates a reusable assessment definition from its delivery in an
+exact course offering or section, each learner's submission or attempt, attributable evaluation and
+feedback, and any published official result. An assessment may come from the shared course design
+or be created for one section without silently changing the shared design or another section.
+Teaching-team members may create, mark, moderate, or comment only through their current assignment
+responsibilities, and every material contribution remains attributable to its real actor.
+
+Official results are institution-owned learner records rather than property of an individual
+teacher. Publication or finalization requires an explicitly accountable staff member or governed
+workflow; collaboration does not make every contributor a final approver. Formative feedback and
+working marks remain distinguishable from official grades, credits, and transcript outcomes.
+Moving a learner between sections, ending a staff assignment, or replacing a teacher preserves
+prior submissions, attempts, feedback, marks, decision state, and authorship while changing future
+access according to the effective assignment. Detailed grading, moderation, correction, appeal,
+transcript, and qualification rules remain decisions for their owning modules.
+
+A course offering may span one or several academic periods according to its explicit effective
+dates; a term boundary does not close it implicitly. At its planned end, an authorized lifecycle
+action closes the offering and its sections without overwriting or deleting them. Preparing a later
+occurrence creates new offering and section identities with explicit lineage. A guided rollover may
+propose reuse of the applicable course specification and design and may suggest prior learners,
+teaching assignments, rooms, or schedules, but none of those operational assignments carries
+forward silently.
+
+Learner transfers and section moves preserve the original delivery context and history. Late work,
+appeals, result corrections, and other permitted post-closure activity use named authorized actions
+that preserve the original state and attributable change evidence. Closed offerings are excluded
+from ordinary current-work views by default while remaining available to authorized historical,
+records, correction, and audit workflows. The later enrolment, assessment, calendar, timetabling,
+and records modules define their exact closure responsibilities rather than relying on one generic
+cascade.
+
+This five-layer structure is not universal. Early-years, inquiry-based, project-based, or other
+learning contexts may connect programme curriculum, units, and class delivery without inventing a
+catalogued course. Interoperability models remain mappings at the boundary and cannot force their
+course or class shapes into contexts where those meanings do not exist.
+
+For a group operating several schools, an explicitly authorized central academic team may publish
+a versioned curriculum template. Each school explicitly adopts or forks that template into its
+locally owned curriculum version and may retain approved differences. Central updates produce a
+comparison and selective adoption opportunity; they never overwrite a school's published or draft
+curriculum. The system preserves which material was adopted unchanged, overridden, added, retired,
+or left out of alignment, together with the local history.
+
+Traceability must not make ordinary planning bureaucratic. The default lesson-planning path is:
+
+1. derive the applicable programme offering, local curriculum, external specification, and
+   effective versions from the selected class, course, institutional context, and lesson date;
+2. let the teacher begin writing immediately, with relevant outcomes and standards suggested from
+   that context rather than presented as a long mandatory checklist;
+3. autosave mutable working drafts without creating a formal curriculum version for every edit;
+4. create durable versions only at meaningful publication, submission, or explicit checkpoint
+   transitions; and
+5. keep alignment detail, provenance, comparison, and override controls available through
+   progressive disclosure.
+
+When context is ambiguous, Chimwemwe must not silently choose an official curriculum or external
+version. The user may begin an `alignment pending` draft, but that draft cannot be published or
+counted in official curriculum-coverage or compliance reporting until the ambiguity is resolved.
+External or central updates appear as concise review notices; they never interrupt writing or
+silently reinterpret an existing plan.
+
+The governing experience principle is: capture governance from trusted context wherever possible
+rather than demanding form-filling. Drafting starts immediately; formal publication and compliance
+claims require resolved alignment. This section records future product requirements only. It does
+not add curriculum, programme, course, lesson, assessment, compliance, or reporting scope to Phase
+2.1.
 
 ## Recommended implementation order after this proposal
 

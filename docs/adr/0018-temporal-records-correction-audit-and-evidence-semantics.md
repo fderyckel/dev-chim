@@ -15,7 +15,11 @@ School records change for different reasons. A draft may be edited before it has
 
 The platform already requires named actions, optimistic concurrency, idempotency, transactional outbox facts, tenant isolation, retained-data migration discipline, and PostgreSQL authority. Those controls do not by themselves define whether a changed value is an edit, correction, successor revision, reversal, erasure, or historical view.
 
-The supplied Frappe academic-calendar implementation demonstrates the risk: year and term dates are updated in place and callbacks update generated events. ADR 0021 therefore cannot safely publish or correct an academic calendar until Chimwemwe defines stable identity, recorded and effective time, correction provenance, history queries, downstream reconciliation, retention, and erasure boundaries.
+The supplied legacy academic-calendar implementation demonstrates the risk: year and term dates
+are updated in place and callbacks update generated events. ADR 0021 therefore cannot safely
+publish or correct an academic calendar until Chimwemwe defines stable identity, recorded and
+effective time, correction provenance, history queries, downstream reconciliation, retention, and
+erasure boundaries.
 
 This decision establishes a conditionally accepted cross-domain contract. It does not authorize a universal history table, event-sourced platform, Ash extension, production resource, migration, or school business module.
 

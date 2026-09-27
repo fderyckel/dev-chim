@@ -26,8 +26,8 @@ defmodule Chimwemwe.Identity.SsoConnection do
     end
 
     check_constraints do
-      check_constraint(:provider, "identity_sso_connections_provider_allowed",
-        check: "provider IN ('google', 'microsoft', 'oidc', 'saml')"
+      check_constraint(:protocol, "identity_sso_connections_protocol_allowed",
+        check: "protocol IN ('oidc', 'saml')"
       )
 
       check_constraint(:connection_status, "identity_sso_connections_status_allowed",
@@ -51,7 +51,7 @@ defmodule Chimwemwe.Identity.SsoConnection do
 
     create :register_connection do
       description "Registers a draft institutional SSO connection."
-      accept [:name, :provider, :issuer_url, :client_id, :secret_reference, :allowed_domains]
+      accept [:name, :protocol, :issuer_url, :client_id, :secret_reference, :allowed_domains]
     end
 
     update :activate_connection do
@@ -88,10 +88,10 @@ defmodule Chimwemwe.Identity.SsoConnection do
       constraints min_length: 3, max_length: 120, trim?: true
     end
 
-    attribute :provider, :atom do
+    attribute :protocol, :atom do
       allow_nil? false
       public? true
-      constraints one_of: [:google, :microsoft, :oidc, :saml]
+      constraints one_of: [:oidc, :saml]
     end
 
     attribute :issuer_url, :string do

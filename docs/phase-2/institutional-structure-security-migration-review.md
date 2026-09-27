@@ -38,7 +38,7 @@ the named action. A positive test does not close its corresponding negative.
 The following compare-only rows model two materially different source shapes. `snapshot` is source
 evidence, not an effective date. No row authorizes a write.
 
-### Fixture A — Odoo/Frappe-style organization tree
+### Fixture A — generic enterprise organization tree
 
 | Source evidence | Proposed target | Finding | Fail-closed disposition |
 | --- | --- | --- | --- |

@@ -16,7 +16,8 @@ The examples are synthetic design fixtures. They are not claims about a particul
 
 ## Method and source evidence
 
-The walkthrough applies the proposed rules manually to fixed dates and compares the result with the supplied Frappe source model:
+The walkthrough applies the proposed rules manually to fixed dates and compares the result with
+the supplied legacy source model:
 
 - Academic Year and Term date containment;
 - School Calendar holiday rows and weekly-off generation;
@@ -25,7 +26,8 @@ The walkthrough applies the proposed rules manually to fixed dates and compares 
 - School Calendar cloning across schools; and
 - generated year and term boundary events.
 
-The Frappe implementation is reference evidence, not an instruction to preserve its callbacks, duplicate child data, fixed roles, or hierarchy fallback.
+The supplied implementation is reference evidence, not an instruction to preserve its callbacks,
+duplicate child data, fixed roles, or hierarchy fallback.
 
 ## Evaluation rules
 
@@ -138,7 +140,8 @@ This review does not satisfy the complete acceptance package. The following rema
 
 - review and sign-off by a school-domain representative using representative operating calendars;
 - satisfaction of the relevant binding conditions and calendar-domain executable proof of [ADR 0018](../adr/0018-temporal-records-correction-audit-and-evidence-semantics.md);
-- representative Frappe migration fixtures and reconciliation, including stored instructional totals;
+- representative source-system migration fixtures and reconciliation, including stored
+  instructional totals;
 - tenant, school-scope, authorization, concurrency, idempotency, outbox, and recovery tests;
 - evidence for or against simultaneous programme calendars; and
 - browser and phone workflow research and prototypes.
