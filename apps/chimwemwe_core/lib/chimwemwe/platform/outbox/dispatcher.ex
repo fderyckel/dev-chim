@@ -15,7 +15,8 @@ defmodule Chimwemwe.Platform.Outbox.Dispatcher do
     Outbox,
     OutboxError,
     PersistenceRuntime,
-    PlacementRegistry
+    PlacementRegistry,
+    TrustedActor
   }
 
   alias Chimwemwe.Platform.Outbox.{ConsumerRegistry, ConsumptionResult, DispatcherStatus}
@@ -36,7 +37,11 @@ defmodule Chimwemwe.Platform.Outbox.Dispatcher do
   def start_link(options) when is_list(options), do: GenServer.start_link(__MODULE__, options)
 
   @spec dispatch_now(GenServer.server()) :: {:ok, DispatcherStatus.t()} | {:error, term()}
-  def dispatch_now(dispatcher), do: GenServer.call(dispatcher, :dispatch_now, 30_000)
+  def dispatch_now(dispatcher), do: GenServer.call(dispatcher, {:dispatch_now, :normal}, 30_000)
+
+  @spec reconcile_now(GenServer.server()) :: {:ok, DispatcherStatus.t()} | {:error, term()}
+  def reconcile_now(dispatcher),
+    do: GenServer.call(dispatcher, {:dispatch_now, :reconciliation}, 30_000)
 
   @spec status(GenServer.server()) :: DispatcherStatus.t()
   def status(dispatcher), do: GenServer.call(dispatcher, :status)
@@ -74,42 +79,110 @@ defmodule Chimwemwe.Platform.Outbox.Dispatcher do
   @impl true
   def handle_call(:status, _from, state), do: {:reply, state.status, state}
 
-  def handle_call(:dispatch_now, _from, state) do
-    {reply, next_state} = dispatch(state)
+  def handle_call({:dispatch_now, mode}, _from, state) do
+    {reply, next_state} = dispatch(state, mode)
     {:reply, reply, next_state}
   end
 
   @impl true
   def handle_info(:poll, state) do
-    {_reply, next_state} = dispatch(state)
+    {_reply, next_state} = dispatch(state, :normal)
     schedule_poll(state.poll_interval_ms)
     {:noreply, next_state}
   end
 
   def handle_info(_message, state), do: {:noreply, state}
 
-  defp dispatch(state) do
+  defp dispatch(state, mode) do
     polled_at = DateTime.utc_now()
+    started_at = System.monotonic_time()
 
-    case Outbox.claim(state.runtime, state.registry, state.context, state.consumer_key) do
-      {:ok, envelopes} ->
-        next_status =
-          Enum.reduce(envelopes, %{state.status | last_polled_at: polled_at}, fn envelope,
-                                                                                 status ->
-            dispatch_envelope(state, envelope, status)
-          end)
+    result =
+      case claim(state, mode) do
+        {:ok, envelopes} ->
+          next_status =
+            Enum.reduce(envelopes, %{state.status | last_polled_at: polled_at}, fn envelope,
+                                                                                   status ->
+              dispatch_envelope(state, envelope, status)
+            end)
 
-        {{:ok, next_status}, %{state | status: next_status}}
+          {{:ok, next_status}, %{state | status: next_status}}
 
-      {:error, error} ->
-        next_status = %{
-          state.status
-          | failed_count: state.status.failed_count + 1,
-            last_polled_at: polled_at
-        }
+        {:error, error} ->
+          next_status = %{
+            state.status
+            | failed_count: state.status.failed_count + 1,
+              last_polled_at: polled_at
+          }
 
-        {{:error, error}, %{state | status: next_status}}
+          {{:error, error}, %{state | status: next_status}}
+      end
+
+    emit_telemetry(state, mode, result, started_at)
+    result
+  end
+
+  defp claim(state, :normal),
+    do: Outbox.claim(state.runtime, state.registry, state.context, state.consumer_key)
+
+  defp claim(state, :reconciliation),
+    do:
+      Outbox.claim_reconciliation(
+        state.runtime,
+        state.registry,
+        state.context,
+        state.consumer_key
+      )
+
+  defp emit_telemetry(state, mode, {{outcome, _value}, %{status: status}}, started_at) do
+    {operational_measurements, status_available} = operational_measurements(state)
+
+    :telemetry.execute(
+      [:chimwemwe, :outbox, :dispatch],
+      Map.merge(
+        %{
+          duration: System.monotonic_time() - started_at,
+          acknowledged_count: status.acknowledged_count,
+          failed_count: status.failed_count,
+          processed_count: status.processed_count,
+          skipped_count: status.skipped_count
+        },
+        operational_measurements
+      ),
+      %{
+        tenant_id: TrustedActor.tenant_id(state.context.actor),
+        routing_version: state.context.placement.routing_version,
+        consumer_key: state.consumer_key,
+        mode: mode,
+        outcome: outcome,
+        status_available: status_available
+      }
+    )
+  end
+
+  defp operational_measurements(state) do
+    case Outbox.status(state.runtime, state.registry, state.context, state.consumer_key) do
+      {:ok, status} ->
+        pending_count = status.unclaimed + status.available + status.expired_lease
+
+        {%{
+           dead_letter_count: status.dead_letter,
+           expired_lease_count: status.expired_lease,
+           oldest_pending_age_ms: oldest_pending_age_ms(status.oldest_pending_at),
+           pending_count: pending_count,
+           retry_ready_count: status.available,
+           stale_route_count: status.stale_route
+         }, true}
+
+      {:error, _error} ->
+        {%{}, false}
     end
+  end
+
+  defp oldest_pending_age_ms(nil), do: 0
+
+  defp oldest_pending_age_ms(oldest_pending_at) do
+    max(DateTime.diff(DateTime.utc_now(), oldest_pending_at, :millisecond), 0)
   end
 
   defp dispatch_envelope(state, envelope, status) do

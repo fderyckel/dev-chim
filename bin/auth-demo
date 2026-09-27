@@ -1,0 +1,78 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(cd "$(dirname "$0")/.." && pwd -P)
+auth_port=${CHIMWEMWE_AUTH_PORT:-4012}
+auth_database=${CHIMWEMWE_AUTH_DATABASE:-chimwemwe_auth_demo}
+
+require_command() {
+  if ! command -v "$1" >/dev/null 2>&1; then
+    echo "Missing required command: $1" >&2
+    exit 1
+  fi
+}
+
+require_command curl
+require_command mise
+require_command openssl
+
+cd "$repo_root"
+
+CHIMWEMWE_AUTH_SETUP=true CHIMWEMWE_AUTH_DATABASE="$auth_database" \
+  mise exec -- mix ecto.create --quiet
+CHIMWEMWE_AUTH_SETUP=true CHIMWEMWE_AUTH_DATABASE="$auth_database" \
+  mise exec -- mix run --no-start -e 'Chimwemwe.AuthDemo.Setup.migrate()'
+
+demo_password=$(openssl rand -base64 36 | tr -d '\n')
+token_secret=$(openssl rand -base64 48 | tr -d '\n')
+
+export CHIMWEMWE_AUTH_DATABASE="$auth_database"
+export CHIMWEMWE_AUTH_DEMO=true
+export CHIMWEMWE_AUTH_DEMO_PASSWORD="$demo_password"
+export CHIMWEMWE_AUTH_PORT="$auth_port"
+export CHIMWEMWE_AUTH_TOKEN_SIGNING_SECRET="$token_secret"
+
+(
+  trap '' INT
+  exec mise exec -- mix run --no-halt
+) &
+auth_pid=$!
+
+cleanup() {
+  if kill -0 "$auth_pid" 2>/dev/null; then
+    kill "$auth_pid" 2>/dev/null || true
+    wait "$auth_pid" 2>/dev/null || true
+  fi
+}
+
+trap cleanup EXIT HUP INT TERM
+
+attempt=0
+until [ "$attempt" -ge 50 ]; do
+  if ! kill -0 "$auth_pid" 2>/dev/null; then
+    echo "The local authentication demonstration stopped before it became ready." >&2
+    wait "$auth_pid"
+  fi
+
+  status=$(curl --silent --output /dev/null --write-out '%{http_code}' \
+    "http://127.0.0.1:$auth_port/sign-in" || true)
+
+  if [ "$status" = "200" ]; then
+    break
+  fi
+
+  attempt=$((attempt + 1))
+  sleep 0.2
+done
+
+if [ "$status" != "200" ]; then
+  echo "The local authentication demonstration did not become ready on port $auth_port." >&2
+  exit 1
+fi
+
+echo "Chimwemwe authentication administration is ready at http://127.0.0.1:$auth_port/sign-in"
+echo "Local demonstration account: identity-admin@northstar-school.test"
+echo "Local demonstration password: $demo_password"
+echo "The password and token signing secret are generated for this local run only."
+
+wait "$auth_pid"

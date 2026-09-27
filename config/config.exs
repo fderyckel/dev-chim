@@ -3,15 +3,22 @@ import Config
 config :ash, default_string_length_count: :codepoints
 
 config :chimwemwe_core,
-  ash_domains: [Chimwemwe.Platform],
+  ash_domains: [Chimwemwe.Platform, Chimwemwe.Identity],
   base_resources: [Chimwemwe.Platform.Resource],
   ecto_repos: [Chimwemwe.Repo]
 
 config :chimwemwe_core, Chimwemwe.LocalBridge.Endpoint, adapter: Bandit.PhoenixAdapter
 
+config :chimwemwe_core, Chimwemwe.AuthDemo.Endpoint,
+  adapter: Bandit.PhoenixAdapter,
+  live_view: [signing_salt: "auth-demo-live-view-signing-salt"],
+  render_errors: [formats: [html: Chimwemwe.AuthDemo.ErrorHTML], layout: false]
+
 if config_env() == :dev and
      (System.get_env("CHIMWEMWE_UI1_LOCAL") == "true" or
-        System.get_env("CHIMWEMWE_UI1_SETUP") == "true") do
+        System.get_env("CHIMWEMWE_UI1_SETUP") == "true" or
+        System.get_env("CHIMWEMWE_AUTH_DEMO") == "true" or
+        System.get_env("CHIMWEMWE_AUTH_SETUP") == "true") do
   database_connection =
     case System.get_env("PGHOST") do
       nil -> [socket_dir: "/tmp"]
@@ -20,7 +27,11 @@ if config_env() == :dev and
     end
 
   repo_config = [
-    database: System.get_env("CHIMWEMWE_UI1_DATABASE", "chimwemwe_ui1_local"),
+    database:
+      System.get_env(
+        "CHIMWEMWE_AUTH_DATABASE",
+        System.get_env("CHIMWEMWE_UI1_DATABASE", "chimwemwe_ui1_local")
+      ),
     password: System.get_env("PGPASSWORD"),
     pool: DBConnection.ConnectionPool,
     pool_size: 4,
@@ -53,4 +64,10 @@ if config_env() == :test do
   ]
 
   config :chimwemwe_core, Chimwemwe.Repo, Keyword.merge(repo_config, database_connection)
+
+  config :chimwemwe_core,
+         :identity_token_signing_secret,
+         String.duplicate("test-token-secret-", 4)
+
+  config :bcrypt_elixir, log_rounds: 1
 end

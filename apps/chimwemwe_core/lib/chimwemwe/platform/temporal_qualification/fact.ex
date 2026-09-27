@@ -64,8 +64,13 @@ defmodule Chimwemwe.Platform.TemporalQualification.Fact do
         """
       )
 
-      check_constraint(:quantity, "platform_temporal_fact_quantity_nonzero",
-        check: "quantity <> 0"
+      check_constraint(
+        [:quantity, :redacted_at, :redaction_receipt_id],
+        "platform_temporal_fact_redaction_shape",
+        check: """
+        (redacted_at IS NULL AND redaction_receipt_id IS NULL AND quantity <> 0) OR
+        (redacted_at IS NOT NULL AND redaction_receipt_id IS NOT NULL AND quantity = 0)
+        """
       )
     end
 
@@ -90,82 +95,99 @@ defmodule Chimwemwe.Platform.TemporalQualification.Fact do
               MESSAGE = 'temporal qualification fact deletion is forbidden';
           END IF;
 
-          IF TG_OP = 'UPDATE' THEN
+          IF TG_OP = 'UPDATE' AND NOT (
+            OLD.redacted_at IS NULL
+            AND NEW.redacted_at IS NOT NULL
+            AND NEW.redaction_receipt_id IS NOT NULL
+            AND NEW.quantity = 0
+            AND NEW.id = OLD.id
+            AND NEW.tenant_id = OLD.tenant_id
+            AND NEW.scope_id = OLD.scope_id
+            AND NEW.operation_id = OLD.operation_id
+            AND NEW.kind = OLD.kind
+            AND NEW.reverses_fact_id IS NOT DISTINCT FROM OLD.reverses_fact_id
+            AND NEW.effective_on = OLD.effective_on
+            AND NEW.recorded_at = OLD.recorded_at
+          ) THEN
             RAISE EXCEPTION USING
               ERRCODE = '23514',
               CONSTRAINT = 'platform_temporal_qualification_fact_immutable',
               MESSAGE = 'temporal qualification facts are immutable';
           END IF;
 
-          NEW.recorded_at := transaction_timestamp() AT TIME ZONE 'UTC';
-
-          SELECT kind, target_fact_id
-          INTO operation_kind, operation_target
-          FROM platform_temporal_qualification_fact_operations
-          WHERE id = NEW.operation_id
-            AND tenant_id = NEW.tenant_id
-            AND scope_id = NEW.scope_id;
-
-          IF operation_kind IS NULL THEN
-            RAISE EXCEPTION USING
-              ERRCODE = '23514',
-              CONSTRAINT = 'platform_temporal_fact_operation_missing',
-              MESSAGE = 'temporal qualification fact operation is missing';
+          IF TG_OP = 'INSERT' THEN
+            NEW.recorded_at := transaction_timestamp() AT TIME ZONE 'UTC';
           END IF;
 
-          IF operation_kind = 'record' AND (
-            NEW.kind <> 'entry'
-            OR EXISTS (
-              SELECT 1
-              FROM platform_temporal_qualification_facts
-              WHERE tenant_id = NEW.tenant_id
-                AND operation_id = NEW.operation_id
-            )
-          ) THEN
-            RAISE EXCEPTION USING
-              ERRCODE = '23514',
-              CONSTRAINT = 'platform_temporal_fact_record_shape',
-              MESSAGE = 'record operation must create exactly one entry';
-          END IF;
+          IF TG_OP = 'INSERT' THEN
+            SELECT kind, target_fact_id
+            INTO operation_kind, operation_target
+            FROM platform_temporal_qualification_fact_operations
+            WHERE id = NEW.operation_id
+              AND tenant_id = NEW.tenant_id
+              AND scope_id = NEW.scope_id;
 
-          IF operation_kind = 'reverse_and_replace' AND (
-            (NEW.kind = 'reversal' AND (
-              NEW.reverses_fact_id IS DISTINCT FROM operation_target
+            IF operation_kind IS NULL THEN
+              RAISE EXCEPTION USING
+                ERRCODE = '23514',
+                CONSTRAINT = 'platform_temporal_fact_operation_missing',
+                MESSAGE = 'temporal qualification fact operation is missing';
+            END IF;
+
+            IF operation_kind = 'record' AND (
+              NEW.kind <> 'entry'
               OR EXISTS (
                 SELECT 1
                 FROM platform_temporal_qualification_facts
                 WHERE tenant_id = NEW.tenant_id
                   AND operation_id = NEW.operation_id
-                  AND kind = 'reversal'
               )
-            ))
-            OR
-            (NEW.kind = 'entry' AND EXISTS (
+            ) THEN
+              RAISE EXCEPTION USING
+                ERRCODE = '23514',
+                CONSTRAINT = 'platform_temporal_fact_record_shape',
+                MESSAGE = 'record operation must create exactly one entry';
+            END IF;
+
+            IF operation_kind = 'reverse_and_replace' AND (
+              (NEW.kind = 'reversal' AND (
+                NEW.reverses_fact_id IS DISTINCT FROM operation_target
+                OR EXISTS (
+                  SELECT 1
+                  FROM platform_temporal_qualification_facts
+                  WHERE tenant_id = NEW.tenant_id
+                    AND operation_id = NEW.operation_id
+                    AND kind = 'reversal'
+                )
+              ))
+              OR
+              (NEW.kind = 'entry' AND EXISTS (
+                SELECT 1
+                FROM platform_temporal_qualification_facts
+                WHERE tenant_id = NEW.tenant_id
+                  AND operation_id = NEW.operation_id
+                  AND kind = 'entry'
+              ))
+            ) THEN
+              RAISE EXCEPTION USING
+                ERRCODE = '23514',
+                CONSTRAINT = 'platform_temporal_fact_correction_shape',
+                MESSAGE = 'correction operation fact shape is invalid';
+            END IF;
+
+            IF NEW.kind = 'reversal' AND NOT EXISTS (
               SELECT 1
               FROM platform_temporal_qualification_facts
-              WHERE tenant_id = NEW.tenant_id
-                AND operation_id = NEW.operation_id
+              WHERE id = NEW.reverses_fact_id
+                AND tenant_id = NEW.tenant_id
+                AND scope_id = NEW.scope_id
                 AND kind = 'entry'
-            ))
-          ) THEN
-            RAISE EXCEPTION USING
-              ERRCODE = '23514',
-              CONSTRAINT = 'platform_temporal_fact_correction_shape',
-              MESSAGE = 'correction operation fact shape is invalid';
-          END IF;
-
-          IF NEW.kind = 'reversal' AND NOT EXISTS (
-            SELECT 1
-            FROM platform_temporal_qualification_facts
-            WHERE id = NEW.reverses_fact_id
-              AND tenant_id = NEW.tenant_id
-              AND scope_id = NEW.scope_id
-              AND kind = 'entry'
-          ) THEN
-            RAISE EXCEPTION USING
-              ERRCODE = '23514',
-              CONSTRAINT = 'platform_temporal_qualification_fact_reversal_target',
-              MESSAGE = 'temporal qualification reversal target is invalid';
+            ) THEN
+              RAISE EXCEPTION USING
+                ERRCODE = '23514',
+                CONSTRAINT = 'platform_temporal_qualification_fact_reversal_target',
+                MESSAGE = 'temporal qualification reversal target is invalid';
+            END IF;
           END IF;
 
           RETURN NEW;
@@ -310,6 +332,16 @@ defmodule Chimwemwe.Platform.TemporalQualification.Fact do
 
     attribute :recorded_at, :utc_datetime_usec do
       allow_nil? false
+      public? false
+    end
+
+    attribute :redacted_at, :utc_datetime_usec do
+      allow_nil? true
+      public? false
+    end
+
+    attribute :redaction_receipt_id, :uuid do
+      allow_nil? true
       public? false
     end
   end

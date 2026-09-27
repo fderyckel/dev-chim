@@ -1,0 +1,277 @@
+{
+  "attributes": [
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"gen_random_uuid()\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": true,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "tenant_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "control_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "aggregate_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "scope_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "operation",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "version",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "reason_code",
+      "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "hold_reference_digest",
+      "type": "binary"
+    },
+    {
+      "allow_nil?": false,
+      "default": "0",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "redacted_segment_count",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": false,
+      "default": "0",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "redacted_fact_count",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": false,
+      "default": "0",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "purged_projection_count",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "recorded_at",
+      "type": "utc_datetime_usec"
+    }
+  ],
+  "base_filter": null,
+  "check_constraints": [
+    {
+      "attribute": [
+        "reason_code"
+      ],
+      "base_filter": null,
+      "check": "char_length(reason_code) BETWEEN 1 AND 80 AND reason_code ~ '^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)*$'",
+      "name": "platform_temporal_retention_receipt_reason_shape"
+    },
+    {
+      "attribute": [
+        "operation",
+        "hold_reference_digest"
+      ],
+      "base_filter": null,
+      "check": "(operation IN ('declared', 'erased') AND hold_reference_digest IS NULL) OR\n(operation IN ('hold_placed', 'hold_released') AND octet_length(hold_reference_digest) = 32)\n",
+      "name": "platform_temporal_retention_receipt_operation_shape"
+    }
+  ],
+  "create_table_options": null,
+  "custom_indexes": [
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "id",
+        "tenant_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_retention_receipts_id_tenant_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "tenant_id",
+        "control_id",
+        "version"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "control_id"
+        },
+        {
+          "type": "atom",
+          "value": "version"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_retention_receipts_version_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    }
+  ],
+  "custom_statements": [
+    {
+      "after_tables": [
+        "platform_temporal_qualification_retention_receipts"
+      ],
+      "code?": false,
+      "down": "DROP FUNCTION guard_platform_temporal_retention_receipt();",
+      "global?": true,
+      "name": "platform_temporal_retention_receipt_guard_function",
+      "up": "CREATE FUNCTION guard_platform_temporal_retention_receipt()\nRETURNS trigger LANGUAGE plpgsql AS $$\nBEGIN\n  IF TG_OP IN ('UPDATE', 'DELETE') THEN\n    RAISE EXCEPTION USING ERRCODE = '23514',\n      CONSTRAINT = 'platform_temporal_retention_receipt_immutable',\n      MESSAGE = 'temporal retention receipts are immutable';\n  END IF;\n  NEW.recorded_at := transaction_timestamp() AT TIME ZONE 'UTC';\n  RETURN NEW;\nEND;\n$$;\n"
+    },
+    {
+      "after_tables": [
+        "platform_temporal_qualification_retention_receipts"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER platform_temporal_retention_receipt_guard ON platform_temporal_qualification_retention_receipts;",
+      "global?": true,
+      "name": "platform_temporal_retention_receipt_guard_trigger",
+      "up": "CREATE TRIGGER platform_temporal_retention_receipt_guard\nBEFORE INSERT OR UPDATE OR DELETE ON platform_temporal_qualification_retention_receipts\nFOR EACH ROW EXECUTE FUNCTION guard_platform_temporal_retention_receipt();\n"
+    }
+  ],
+  "has_create_action": false,
+  "hash": "F100D2CA011A1B031E9D6A404ED4F1C799618531720B1E2DC1FB45144E0DD676",
+  "identities": [],
+  "multitenancy": {
+    "attribute": "tenant_id",
+    "global": false,
+    "strategy": "attribute"
+  },
+  "repo": "Elixir.Chimwemwe.Repo",
+  "schema": null,
+  "table": "platform_temporal_qualification_retention_receipts"
+}

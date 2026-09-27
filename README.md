@@ -8,13 +8,16 @@ institution may operate through its own nested structure, terminology, programme
 This repository is establishing that governed modular foundation. Phase 0 completed its
 architecture, security-baseline, pressure-test, and accountable decision package on 2026-09-16.
 Ash is conditionally accepted as the default production-core framework, with eight binding
-production gates. Phase 1 slices 1A through 1J-A, ADR 0018 T1-A/T1-B/T1-C, and the local synthetic
-UI-0 browser experience are implemented. Slices 1H-A and 1H-B add neutral module lifecycle; Slices
-1I-A and 1I-B add typed tenant-owned presentation-definition publication and exact internal
-compatibility resolution; Slice 1J-A adds only an internal outbox delivery lease and status
-boundary. Phase 2 has started with the L0 entry decision register only. None of this adds a
-learning-institution business module, production identity, public interface, or real-data
-authority.
+production gates. Phase 1 is complete at its bounded repository boundary: Slices 1A through 1J-B,
+ADR 0018 T1-A/T1-B/T1-C, UI-0, and UI-1A are implemented and verified. Slices 1H-A and 1H-B add
+neutral module lifecycle; Slices 1I-A and 1I-B add governed presentation definitions and exact
+internal resolution; Slices 1J-A and 1J-B add internal delivery leases, supervised database-local
+consumption, durable receipts, and exact governed dead-letter replay. Phase 2 has started with the
+L0 entry decision register. Slice 2.0-B completes the local operational-outbox foundation, and
+Slice 2.0-C completes the neutral temporal retention/recovery engineering boundary. Accountable
+ADR 0018 acceptance, production identity and interfaces, selected-deployment qualification, and
+independent review remain explicit Phase 2 gates. None of this adds a learning-institution business module,
+production identity, public interface, or real-data authority.
 
 ## Start here
 
@@ -79,5 +82,6 @@ and a server-owned ephemeral session. It is read-only and is not production auth
   harness to the existing core. It uses synthetic server-owned context, checked OpenAPI and
   generated TypeScript types, and exposes no assignment write or production identity path.
 - Phase 2's bounded implementation sequence is authorized. Slice 2.0-A is in progress, and its
-  entry register leaves L1 through L4 blocked until their evidence gates pass; no institutional
+  entry register records Slice 2.0-B and the Slice 2.0-C engineering boundary as complete while
+  L1 through L4 remain blocked until their accountable evidence gates pass; no institutional
   resource, production identity, public route, deployment, or real data is eligible yet.

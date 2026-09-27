@@ -187,11 +187,12 @@ drain/reactivation evidence, restore/replay drill, negative tenant/routing tests
 **Not included:** Kafka, a second event authority, arbitrary operator payload editing, or a public
 event browser.
 
-The implemented [Slice 1J-B increment](../phase-1/evidence/outbox-supervised-consumption-and-replay.md)
-adds supervised database-local consumption, durable exact-delivery receipts, and separately
-authorized exact dead-letter replay. It is executable progress toward this slice, not its
-completion: replay ranges/cursors, module drain/reactivation integration, selected-environment
-recovery/convergence, production telemetry and runbooks remain open.
+[Slice 2.0-B evidence](../phase-2/operational-outbox-and-module-drain-evidence.md) closes this
+provider-neutral local L1 foundation contract with immutable stream positions, cursor paging and
+bounded exact range replay, module-aware drain/reconciliation/reactivation, sanitized telemetry,
+recovery drills, and runbooks. Selected-deployment thresholds and restore, external effects,
+movement, retention, and real-data review remain later deployment gates rather than being
+mislabelled as local completion evidence.
 
 ### Slice 2.0-C — temporal completion and recovery
 
@@ -212,6 +213,13 @@ pretending that one generic temporal engine fits every module.
 
 **Exit evidence:** TR-01 through TR-07 disposition, retention/recovery runbooks, restore and
 convergence artifacts, migration rehearsal, accountable review, and `make check`.
+
+[Slice 2.0-C evidence](../phase-2/temporal-completion-and-recovery-evidence.md) completes the
+authorized neutral engineering: TR-01 through TR-07 are executable, the runbook and local
+dump/restore/convergence artifacts are recorded, retained rollback fails closed, and local limits
+are explicit. The accountable post-evidence residual-risk review remains the final ADR 0018
+acceptance step; implementation authorization is not confused with that review. TR-08 continues to
+reject a universal temporal persistence abstraction until two real domains justify one.
 
 ### Slice 2.0-D — production identity, session, and support access
 
@@ -400,6 +408,11 @@ or operational reference patterns, not as internal authority.
 **Exit evidence:** accepted ADR 0025; agreed unit/profile/parentage/site/affiliation meanings;
 correction and retention disposition; hierarchy-navigation prototype; representative domain-owner
 review; threat-model evidence; and a recorded entry-gate disposition for Slice 2.1-B.
+
+The [institutional-structure decision evidence plan](../phase-2/institutional-structure-decision-evidence.md)
+defines the six approval gates, required scenario fields, representative contexts, TM-17/AC-18
+review, migration and lifecycle disposition, experience checks, and accountable decision record.
+Creating that plan does not satisfy its gates or accept ADR 0025.
 
 ### Slice 2.1-B — first vertical institutional-unit aggregate
 

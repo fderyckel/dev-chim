@@ -1,6 +1,7 @@
 # Temporal records, correction, and evidence contract
 
-- Status: Conditionally Accepted; TR-01 through TR-08 remain binding and no production-domain implementation is authorized
+- Status: Conditionally Accepted; neutral TR-01 through TR-07 engineering is complete, accountable
+  acceptance review and TR-08 remain binding, and no production-domain implementation is authorized
 - Owner: Platform engineering with domain records and security/privacy owners
 - Governing record: [ADR 0018](../adr/0018-temporal-records-correction-audit-and-evidence-semantics.md)
 - Review trigger: first durable correction action, first effective-dated resource, first ledger reversal, or retention/legal-hold implementation
@@ -219,9 +220,20 @@ not mutate a pinned decision and that only a separately authorized action may re
 exact current source revision. An event is causation evidence, never authority.
 
 T1-C closes the executable append-only branches of TR-01 through TR-05 and supplies one deliberate
-reconciliation mode. T1 remains incomplete: TR-06 retention/hold/erasure and deactivation access,
+reconciliation mode. At that increment T1 remained incomplete: TR-06 retention/hold/erasure and
+deactivation access,
 TR-07 import provenance plus backup/restore/convergence, performance and recovery limits, and
 accountable residual-risk review remain open.
+
+The authorized
+[Slice 2.0-C completion](../phase-2/temporal-completion-and-recovery-evidence.md) adds the remaining
+neutral retention, legal-hold, erasure-receipt, import-provenance, conflict-reconciliation, and
+projection-convergence actions and database constraints. Empty migration rollback/reapply,
+retained rollback refusal, PostgreSQL backup/restore, post-restore governed projection rebuild, and
+bounded local performance/storage evidence close the engineering work for TR-01 through TR-07.
+The accountable post-evidence review is still pending, and TR-08 still blocks any universal
+temporal persistence library. No learning-institution domain or real retention policy is inferred
+from the neutral proof.
 
 ### T2 — first domain adoption
 

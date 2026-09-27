@@ -10,6 +10,8 @@ defmodule Chimwemwe.Platform.ModuleLifecycle.Transition do
     TransitionResult
   }
 
+  alias Chimwemwe.Platform.Outbox.ConsumerRegistry
+
   alias Chimwemwe.Repo
   alias Ecto.UUID
 
@@ -92,6 +94,7 @@ defmodule Chimwemwe.Platform.ModuleLifecycle.Transition do
              chimwemwe: %{
                correlation_id: correlation_id,
                module_release_manifest: manifest,
+               outbox_consumer_declaration: outbox_declaration,
                routing_version: routing_version
              }
            }
@@ -112,7 +115,8 @@ defmodule Chimwemwe.Platform.ModuleLifecycle.Transition do
          correlation_id: correlation_id,
          routing_version: routing_version,
          manifest: validated_manifest,
-         declaration: declaration
+         declaration: declaration,
+         outbox_declaration: outbox_declaration
        }}
     else
       {:error, :invalid_manifest} -> lifecycle_error(:invalid_manifest)
@@ -408,6 +412,7 @@ defmodule Chimwemwe.Platform.ModuleLifecycle.Transition do
          :ok <- require_version(activation, arguments.expected_version),
          :ok <- require_compatibility(activation, context.declaration),
          :ok <- require_dependencies(context),
+         :ok <- require_outbox_reconciled(context, activation),
          {:ok, requeued_work_count} <- requeue_ordinary_work(context, activation),
          {:ok, next_version, projection_version} <- mark_active(context, activation),
          result <-
@@ -647,7 +652,7 @@ defmodule Chimwemwe.Platform.ModuleLifecycle.Transition do
            SET state = 'active',
                module_version = $3,
                lock_version = $4,
-               last_reconciled_cursor = replay_from_cursor,
+               last_reconciled_cursor = consumer_cursor,
                replay_from_cursor = NULL,
                projection_version = $5,
                projection_ready = true,
@@ -668,6 +673,50 @@ defmodule Chimwemwe.Platform.ModuleLifecycle.Transition do
       {:ok, %{num_rows: 1}} -> {:ok, next_version, projection_version}
       {:ok, _unexpected} -> lifecycle_error(:lifecycle_conflict)
       {:error, _error} -> lifecycle_error(:retryable_dependency)
+    end
+  end
+
+  defp require_outbox_reconciled(%{outbox_declaration: nil}, _activation), do: :ok
+
+  defp require_outbox_reconciled(context, activation) do
+    declaration = context.outbox_declaration
+
+    if declaration.module_key == context.declaration.key and declaration.work_kind == :ordinary do
+      {event_types, schema_versions} =
+        ConsumerRegistry.event_pairs(declaration)
+
+      case Repo.query(
+             """
+             SELECT count(*)
+               FROM platform_outbox_events AS event
+               JOIN unnest($5::text[], $6::bigint[]) AS allowed(event_type, schema_version)
+                 ON allowed.event_type = event.event_type
+                AND allowed.schema_version = event.schema_version
+             LEFT JOIN platform_outbox_deliveries AS delivery
+                 ON delivery.tenant_id = event.tenant_id
+                AND delivery.event_id = event.id
+                AND delivery.consumer_key = $2
+              WHERE event.tenant_id = $1
+                AND event.routing_version = $3
+                AND event.stream_position > $4
+                AND event.classification = 'internal'
+                AND (delivery.id IS NULL OR delivery.status <> 'completed')
+             """,
+             [
+               dump_uuid(context.tenant_id),
+               declaration.key,
+               context.routing_version,
+               activation.replay_from_cursor,
+               event_types,
+               schema_versions
+             ]
+           ) do
+        {:ok, %{rows: [[0]]}} -> :ok
+        {:ok, %{rows: [[_pending]]}} -> lifecycle_error(:reconciliation_required)
+        {:error, _error} -> lifecycle_error(:retryable_dependency)
+      end
+    else
+      lifecycle_error(:invalid_input)
     end
   end
 

@@ -124,6 +124,19 @@ consumer. It closes those executable portions of TR-01 through TR-05 only. TR-06
 performance/migration/recovery limits, and final accountable review remain open, so this ADR stays
 Conditionally Accepted.
 
+The 2026-09-26
+[Slice 2.0-C evidence](../phase-2/temporal-completion-and-recovery-evidence.md) completes the
+neutral engineering branches of TR-01 through TR-07. It adds separately authorized retention,
+legal-hold, eligible redaction, immutable receipt, baseline-import, conflict-reconciliation, and
+disposable-projection actions; tenant-qualified alternate-writer guards; retained-data rollback
+refusal; a real PostgreSQL dump/restore and post-restore convergence rehearsal; and explicit local
+measurement and limits. The result remains synthetic and provider-neutral. It does not define a
+domain retention policy, qualify a selected deployment, or promote a common temporal library.
+
+The Full Acceptance gate is not silently rewritten. Project-owner authorization for the
+implementation sequence is recorded, but the accountable post-evidence residual-risk review is
+still pending. This ADR therefore remains Conditionally Accepted until that review is recorded.
+
 The executable proof for the first authorized implementation must include positive and negative capability tests, missing-context and cross-tenant denial, direct alternate-write constraints, stale and concurrent revision conflicts, exact idempotent replay, changed-request rejection, effective-interval overlap rejection, transaction rollback across state/audit/outbox/idempotency, revision-specific and current reads, downstream reconciliation, retention/legal-hold behaviour, erasure receipt behaviour, and backup/restore of the correction chain.
 
 Planned tests and this documentation do not satisfy the binding conditions or authorize a production domain implementation.
@@ -149,6 +162,8 @@ Before production data exists, exit cost is documentation and prototypes. After 
 - [Temporal records decision review](../architecture/temporal-records-decision-review.md)
 - [Temporal records synthetic scenario review](../architecture/temporal-records-synthetic-scenario-review.md)
 - [T1-C fact-and-reconciliation evidence](../phase-1/evidence/temporal-qualification-fact-and-reconciliation.md)
+- [Slice 2.0-C temporal completion and recovery evidence](../phase-2/temporal-completion-and-recovery-evidence.md)
+- [Temporal retention and recovery runbook](../operations/temporal-retention-and-recovery.md)
 - [ADR 0003](0003-tenant-model-and-optional-postgresql-rls.md)
 - [ADR 0005](0005-domain-action-and-state-transition-convention.md)
 - [ADR 0007](0007-transactional-outbox-and-event-envelope.md)

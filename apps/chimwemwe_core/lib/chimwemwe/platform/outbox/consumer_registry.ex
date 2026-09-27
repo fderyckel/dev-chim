@@ -12,7 +12,7 @@ defmodule Chimwemwe.Platform.Outbox.ConsumerRegistry do
   @maximum_lease_ms 300_000
   @maximum_attempts 25
   @maximum_retry_ms 86_400_000
-  @declaration_keys [
+  @required_declaration_keys [
     :batch_size,
     :events,
     :handler,
@@ -22,6 +22,7 @@ defmodule Chimwemwe.Platform.Outbox.ConsumerRegistry do
     :max_attempts,
     :retry_ms
   ]
+  @optional_declaration_keys [:module_key, :work_kind]
   @event_keys [:schema_versions, :type]
 
   @enforce_keys [:declarations]
@@ -36,7 +37,9 @@ defmodule Chimwemwe.Platform.Outbox.ConsumerRegistry do
           batch_size: pos_integer(),
           lease_ms: pos_integer(),
           max_attempts: pos_integer(),
-          retry_ms: pos_integer()
+          retry_ms: pos_integer(),
+          module_key: String.t() | nil,
+          work_kind: :platform | :ordinary | :mandatory
         }
   @opaque t :: %__MODULE__{declarations: %{String.t() => declaration()}}
 
@@ -52,8 +55,15 @@ defmodule Chimwemwe.Platform.Outbox.ConsumerRegistry do
       end
     end)
     |> case do
-      {:ok, normalized} -> {:ok, %__MODULE__{declarations: normalized}}
-      error -> error
+      {:ok, normalized} ->
+        if unique_ordinary_module_consumers?(normalized) do
+          {:ok, %__MODULE__{declarations: normalized}}
+        else
+          {:error, :invalid_registry}
+        end
+
+      error ->
+        error
     end
   end
 
@@ -84,6 +94,24 @@ defmodule Chimwemwe.Platform.Outbox.ConsumerRegistry do
   def fetch(_registry, _key), do: {:error, :consumer_not_available}
 
   @doc false
+  @spec ordinary_for_module(t(), String.t()) ::
+          {:ok, declaration()} | {:error, :consumer_not_available}
+  def ordinary_for_module(%__MODULE__{declarations: declarations}, module_key)
+      when is_binary(module_key) do
+    matches =
+      declarations
+      |> Map.values()
+      |> Enum.filter(&(&1.module_key == module_key and &1.work_kind == :ordinary))
+
+    case matches do
+      [declaration] -> {:ok, declaration}
+      _none_or_ambiguous -> {:error, :consumer_not_available}
+    end
+  end
+
+  def ordinary_for_module(_registry, _module_key), do: {:error, :consumer_not_available}
+
+  @doc false
   @spec event_pairs(declaration()) :: {[String.t()], [pos_integer()]}
   def event_pairs(%{events: events}) do
     events
@@ -96,7 +124,7 @@ defmodule Chimwemwe.Platform.Outbox.ConsumerRegistry do
 
   defp normalize_declaration(declaration)
        when is_map(declaration) and not is_struct(declaration) do
-    with true <- Enum.sort(Map.keys(declaration)) == @declaration_keys,
+    with true <- valid_declaration_keys?(Map.keys(declaration)),
          {:ok, key} <- normalize_key(Map.fetch!(declaration, :key)),
          {:ok, events} <- normalize_events(Map.fetch!(declaration, :events)),
          {:ok, handler} <- normalize_handler(Map.fetch!(declaration, :handler)),
@@ -109,7 +137,13 @@ defmodule Chimwemwe.Platform.Outbox.ConsumerRegistry do
          {:ok, max_attempts} <-
            bounded_integer(Map.fetch!(declaration, :max_attempts), 1, @maximum_attempts),
          {:ok, retry_ms} <-
-           bounded_integer(Map.fetch!(declaration, :retry_ms), 1, @maximum_retry_ms) do
+           bounded_integer(Map.fetch!(declaration, :retry_ms), 1, @maximum_retry_ms),
+         {:ok, module_key, work_kind} <-
+           normalize_module_binding(
+             Map.get(declaration, :module_key),
+             Map.get(declaration, :work_kind, :platform),
+             batch_size
+           ) do
       {:ok,
        %{
          key: key,
@@ -119,7 +153,9 @@ defmodule Chimwemwe.Platform.Outbox.ConsumerRegistry do
          batch_size: batch_size,
          lease_ms: lease_ms,
          max_attempts: max_attempts,
-         retry_ms: retry_ms
+         retry_ms: retry_ms,
+         module_key: module_key,
+         work_kind: work_kind
        }}
     else
       _invalid -> {:error, :invalid_registry}
@@ -127,6 +163,38 @@ defmodule Chimwemwe.Platform.Outbox.ConsumerRegistry do
   end
 
   defp normalize_declaration(_declaration), do: {:error, :invalid_registry}
+
+  defp valid_declaration_keys?(keys) do
+    allowed = @required_declaration_keys ++ @optional_declaration_keys
+
+    Enum.all?(@required_declaration_keys, &(&1 in keys)) and
+      Enum.all?(keys, &(&1 in allowed))
+  end
+
+  defp unique_ordinary_module_consumers?(declarations) do
+    ordinary_modules =
+      declarations
+      |> Map.values()
+      |> Enum.filter(&(&1.work_kind == :ordinary))
+      |> Enum.map(& &1.module_key)
+
+    Enum.uniq(ordinary_modules) == ordinary_modules
+  end
+
+  defp normalize_module_binding(nil, :platform, _batch_size), do: {:ok, nil, :platform}
+
+  defp normalize_module_binding(module_key, work_kind, batch_size)
+       when work_kind in [:ordinary, :mandatory] do
+    with {:ok, module_key} <- normalize_key(module_key),
+         true <- work_kind == :mandatory or batch_size == 1 do
+      {:ok, module_key, work_kind}
+    else
+      _invalid -> {:error, :invalid_registry}
+    end
+  end
+
+  defp normalize_module_binding(_module_key, _work_kind, _batch_size),
+    do: {:error, :invalid_registry}
 
   defp normalize_events(events) when is_list(events) and events != [] do
     events

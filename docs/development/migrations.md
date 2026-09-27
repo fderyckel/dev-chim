@@ -36,5 +36,18 @@ Generated artifacts are reviewed for non-null tenant keys, tenant-qualified uniq
 - Slice 1H-A adds entitlement before activation so the tenant-qualified destination index exists before the compound foreign key. Module-key, version, active-state, and positive-version constraints protect alternate writers. Its down path refuses to run while any entitlement, activation, activation audit, module outbox, or module idempotency fact remains; only the explicitly empty synthetic state may roll back and reapply.
 - Slice 1J-A adds closed outbox-delivery state as a compatible expansion. The compound event reference preserves tenant scope, one unique event/tenant/consumer key prevents duplicate delivery state, and checks constrain lease, retry, completion, dead-letter, attempts, and optimistic versions. Empty synthetic rollback/reapply is allowed; the down path refuses to drop the table once any delivery attempt is retained. Production lock budgets, mixed-version deployment, retained-row validation, and selected-environment recovery rehearsal remain later 1J gates.
 - Slice 1J-B adds a closed receipt table and replay-cycle counter. The receipt has both a tenant-qualified event reference and a manually reviewed compound `(event_id, tenant_id, consumer_key)` reference to the exact delivery. Checks pin positive handler/schema/routing versions and a 32-byte result digest; replay permits attempt zero only between governed release and the next claim. The down path refuses to remove receipts or replay state after any receipt, replay cycle, replay audit, or replay idempotency evidence is retained. Production lock budgets, mixed-version deployment, restore/convergence, and selected-environment qualification remain open.
+- Slice 2.0-B adds a sequence-backed immutable outbox stream position. The compatible expansion adds a nullable column with an old-writer database default, backfills retained rows in deterministic `occurred_at, id` order, then validates non-null, positive, tenant-qualified uniqueness. Empty rollback/reapply is allowed; any retained event makes rollback refuse rather than erase cursor evidence. Selected-deployment lock/WAL budgets and restore remain separate L3 qualification.
+- Slice 2.0-C adds current projections, immutable baseline/conflict import provenance, retention
+  controls and immutable receipts, plus nullable one-way redaction references on existing segments
+  and facts. Compound tenant-qualified indexes precede foreign keys; circular current-receipt and
+  receipt-control links are deferrable; new references are added `NOT VALID` and validated in
+  separate statements. Existing fact and segment guards are replaced through individually
+  prepared drop/function/trigger statements. A second migration installs the receipt-backed
+  retention-control transition guard after both tables exist. Empty rollback of both migrations
+  and reapply passed in a fresh database. Retained controls or receipts make even guard removal
+  fail closed, while the primary down path also refuses import, redaction, temporal action audit,
+  outbox, or idempotency evidence. A PostgreSQL custom-format dump/restore and governed projection
+  rebuild passed with synthetic correction, provenance, retention, and erasure state; see the
+  [Slice 2.0-C evidence](../phase-2/temporal-completion-and-recovery-evidence.md).
 
 No migration may contain real school data, credentials, tenant-specific code, an implicit default placement, or an irreversible contract step without the documented owner, window, drain, recovery point, and repair or restore path.

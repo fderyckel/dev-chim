@@ -34,7 +34,7 @@
       }
     },
     "foundation_lab_lock_sha256": "c3b62f00284f31948bf0717d2f8c083b0fa4e3b706ddfae4c233edb033b04eb7",
-    "production_core_lock_sha256": "f9f70395bd250c982e36c9899487fe437026cc5dc19dac50b99a8ad30672d3dc",
+    "production_core_lock_sha256": "ba8882a3a83797cfe1ee4a82e5f39d7c6b3e7542e65fc1a9fbf5e0f20bddd079",
     "locks_aligned": true
   },
   "regression": {
@@ -75,7 +75,7 @@
     "repository_tool_tests": 25,
     "phase0_elixir_postgresql_tests": 106,
     "typescript_client_tests": 6,
-    "production_core_tests": 97,
+    "production_core_tests": 149,
     "web_unit_tests": 20,
     "phase0_hex_audit": "pass",
     "production_core_hex_audit": "pass",

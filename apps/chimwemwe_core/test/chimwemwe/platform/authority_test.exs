@@ -185,7 +185,7 @@ defmodule Chimwemwe.Platform.AuthorityTest do
   test "authority resources are tenant-owned and expose only governed private actions" do
     assert :ok = ResourceContract.validate_domain(Platform)
 
-    assert 21 == length(Ash.Domain.Info.resources(Platform))
+    assert 25 == length(Ash.Domain.Info.resources(Platform))
 
     for resource <- Ash.Domain.Info.resources(Platform) do
       assert :tenant_owned == resource.__chimwemwe_resource_ownership__()
@@ -248,6 +248,9 @@ defmodule Chimwemwe.Platform.AuthorityTest do
               Chimwemwe.Platform.TemporalQualification.Aggregate,
               Chimwemwe.Platform.TemporalQualification.Fact,
               Chimwemwe.Platform.TemporalQualification.ConsumerBasis,
+              Chimwemwe.Platform.TemporalQualification.RetentionControl,
+              Chimwemwe.Platform.TemporalQualification.ImportRecord,
+              Chimwemwe.Platform.TemporalQualification.CurrentProjection,
               Chimwemwe.Platform.ModuleLifecycle.ModuleActivation,
               Chimwemwe.Platform.GovernedExtension.ExtensionDefinition
             ] do

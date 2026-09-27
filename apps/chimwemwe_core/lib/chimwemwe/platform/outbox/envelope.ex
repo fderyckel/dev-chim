@@ -20,6 +20,7 @@ defmodule Chimwemwe.Platform.Outbox.Envelope do
     :payload,
     :routing_version,
     :schema_version,
+    :stream_position,
     :tenant_id
   ]
   defstruct @enforce_keys
@@ -38,6 +39,7 @@ defmodule Chimwemwe.Platform.Outbox.Envelope do
           payload: map(),
           routing_version: pos_integer(),
           schema_version: pos_integer(),
+          stream_position: pos_integer(),
           tenant_id: String.t()
         }
 end

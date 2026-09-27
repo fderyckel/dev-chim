@@ -12,7 +12,9 @@ defmodule Chimwemwe.Platform.TemporalQualificationError do
           | :idempotency_conflict
           | :internal
           | :invalid_input
+          | :legal_hold_conflict
           | :not_found
+          | :retention_conflict
           | :retryable_dependency
           | :unsupported_query
   @type t :: %__MODULE__{code: code()}

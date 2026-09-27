@@ -49,6 +49,10 @@ defmodule Chimwemwe.Platform.TemporalQualificationActionTest do
   @consumer_read_capability "platform.temporal_qualification.consumers.read_history"
 
   @tables [
+    "platform_temporal_qualification_current_projections",
+    "platform_temporal_qualification_retention_receipts",
+    "platform_temporal_qualification_retention_controls",
+    "platform_temporal_qualification_import_records",
     "platform_temporal_qualification_consumer_bases",
     "platform_temporal_qualification_segments",
     "platform_temporal_qualification_revisions",
@@ -71,14 +75,28 @@ defmodule Chimwemwe.Platform.TemporalQualificationActionTest do
   setup do
     runtime = start_supervised!({PersistenceRuntime, runtime_options()})
 
-    assert {:ok, :cleared} =
-             Persistence.with_writer(runtime, context_a(), fn ->
-               Repo.query!("TRUNCATE " <> Enum.join(@tables, ", "))
-               :cleared
-             end)
+    assert {:ok, :cleared} = truncate_tables(runtime)
+    on_exit(&truncate_tables_after_test/0)
 
     seed_authority(runtime)
     {:ok, runtime: runtime}
+  end
+
+  defp truncate_tables(runtime) do
+    Persistence.with_writer(runtime, context_a(), fn ->
+      Repo.query!("TRUNCATE " <> Enum.join(@tables, ", "))
+      :cleared
+    end)
+  end
+
+  defp truncate_tables_after_test do
+    {:ok, runtime} = PersistenceRuntime.start_link(runtime_options())
+
+    try do
+      assert {:ok, :cleared} = truncate_tables(runtime)
+    after
+      Supervisor.stop(runtime)
+    end
   end
 
   test "keeps both revision actions private and exposes no generic mutation", %{runtime: runtime} do

@@ -6,6 +6,7 @@ defmodule Chimwemwe.Platform.ModuleLifecycleTest do
     ExecutionContext,
     ModuleLifecycle,
     ModuleLifecycleError,
+    Outbox,
     Persistence,
     PersistenceRuntime,
     TrustedActor,
@@ -17,6 +18,8 @@ defmodule Chimwemwe.Platform.ModuleLifecycleTest do
     ReleaseManifest,
     TransitionResult
   }
+
+  alias Chimwemwe.Platform.Outbox.{ConsumerRegistry, Dispatcher, DispatcherStatus}
 
   alias Chimwemwe.Repo
   alias Ecto.UUID
@@ -33,6 +36,7 @@ defmodule Chimwemwe.Platform.ModuleLifecycleTest do
   @mandatory_work_capability "platform.modules.mandatory_work.complete"
   @reactivate_capability "platform.modules.reactivate"
   @use_capability "platform.qualification.use"
+  @dispatch_capability "platform.outbox.dispatch"
   @base_module "platform.qualification.base"
   @dependent_module "platform.qualification.feature"
   @action_name "platform.module_lifecycle.activate"
@@ -734,6 +738,86 @@ defmodule Chimwemwe.Platform.ModuleLifecycleTest do
              )
   end
 
+  test "ordinary outbox reconciliation is required before registered reactivation", fixture do
+    manifest = release_manifest([declaration(@base_module)])
+    add_entitlement(fixture.runtime, context_admin_a(), @base_module)
+
+    assert {:ok, %ActivateModuleResult{}} =
+             ModuleLifecycle.activate(
+               fixture.runtime,
+               manifest,
+               context_admin_a(),
+               activate_input(@base_module)
+             )
+
+    assert {:ok, %TransitionResult{state: :inactive, lock_version: 2}} =
+             ModuleLifecycle.deactivate(
+               fixture.runtime,
+               manifest,
+               context_admin_a(),
+               transition_input(@base_module, 1)
+             )
+
+    assert {:ok, registry} =
+             ConsumerRegistry.new([
+               %{
+                 key: "platform.qualification.projection",
+                 events: [
+                   %{type: "platform.module.deactivated", schema_versions: [1]}
+                 ],
+                 handler: Chimwemwe.Test.OutboxConsumer,
+                 handler_revision: 1,
+                 batch_size: 1,
+                 lease_ms: 60_000,
+                 max_attempts: 3,
+                 retry_ms: 10,
+                 module_key: @base_module,
+                 work_kind: :ordinary
+               }
+             ])
+
+    reactivation_input = transition_input(@base_module, 2)
+
+    assert {:error, %ModuleLifecycleError{code: :reconciliation_required}} =
+             ModuleLifecycle.reactivate(
+               fixture.runtime,
+               manifest,
+               registry,
+               context_admin_a(),
+               reactivation_input
+             )
+
+    dispatcher =
+      start_supervised!(
+        {Dispatcher,
+         runtime: fixture.runtime,
+         registry: registry,
+         context: context_admin_a(),
+         consumer_key: "platform.qualification.projection",
+         poll_interval_ms: 300_000}
+      )
+
+    assert {:ok, %DispatcherStatus{acknowledged_count: 1}} =
+             Dispatcher.reconcile_now(dispatcher)
+
+    assert {:ok, %TransitionResult{state: :active, lock_version: 3}} =
+             ModuleLifecycle.reactivate(
+               fixture.runtime,
+               manifest,
+               registry,
+               context_admin_a(),
+               reactivation_input
+             )
+
+    assert {:ok, %Outbox.Status{completed: 1}} =
+             Outbox.status(
+               fixture.runtime,
+               registry,
+               context_admin_a(),
+               "platform.qualification.projection"
+             )
+  end
+
   test "an ordinary transaction that owns the lifecycle lock finishes before deactivation",
        fixture do
     manifest = release_manifest([declaration(@base_module)])
@@ -1076,6 +1160,8 @@ defmodule Chimwemwe.Platform.ModuleLifecycleTest do
       reactivate_capability_a: UUID.generate(),
       reactivate_capability_b: UUID.generate(),
       use_capability_a: UUID.generate(),
+      dispatch_capability_a: UUID.generate(),
+      observe_capability_a: UUID.generate(),
       admin_membership_a: UUID.generate(),
       admin_peer_membership_a: UUID.generate(),
       denied_membership_a: UUID.generate(),
@@ -1099,12 +1185,16 @@ defmodule Chimwemwe.Platform.ModuleLifecycleTest do
 
                insert_capability(ids.reactivate_capability_a, @tenant_a, @reactivate_capability)
                insert_capability(ids.use_capability_a, @tenant_a, @use_capability)
+               insert_capability(ids.dispatch_capability_a, @tenant_a, @dispatch_capability)
+               insert_capability(ids.observe_capability_a, @tenant_a, "platform.outbox.observe")
                insert_assignment(@tenant_a, ids.admin_membership_a, ids.admin_role_a)
                insert_assignment(@tenant_a, ids.admin_peer_membership_a, ids.admin_role_a)
                insert_grant(@tenant_a, ids.admin_role_a, ids.activate_capability_a)
                insert_grant(@tenant_a, ids.admin_role_a, ids.deactivate_capability_a)
                insert_grant(@tenant_a, ids.admin_role_a, ids.mandatory_work_capability_a)
                insert_grant(@tenant_a, ids.admin_role_a, ids.reactivate_capability_a)
+               insert_grant(@tenant_a, ids.admin_role_a, ids.dispatch_capability_a)
+               insert_grant(@tenant_a, ids.admin_role_a, ids.observe_capability_a)
                :seeded
              end)
 

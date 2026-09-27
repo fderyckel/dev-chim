@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help bootstrap fix format lint check-staged test-fast test docs-check web-dev web-core-dev web-check web-e2e web-core-e2e check
+.PHONY: help bootstrap fix format lint check-staged test-fast test docs-check auth-demo web-dev web-core-dev web-check web-e2e web-core-e2e check
 
 help:
 	@echo "bootstrap  Install and prepare local workspace dependencies"
@@ -11,6 +11,7 @@ help:
 	@echo "test-fast  Run the provisional production-core tests only"
 	@echo "test       Run Python and Elixir tests"
 	@echo "docs-check Validate repository and ADR documentation"
+	@echo "auth-demo  Start the local database-backed authentication administration proof"
 	@echo "web-dev    Start the local synthetic UI-0 browser workspace"
 	@echo "web-core-dev Start the local read-only UI-1A core connection"
 	@echo "web-check  Verify UI-0 formatting, styles, types, tests, and build"
@@ -34,7 +35,7 @@ format:
 lint:
 	mise exec -- uv run ruff format --check tools tests/tools
 	mise exec -- uv run ruff check tools tests/tools
-	shellcheck .githooks/pre-commit .githooks/pre-push bin/bootstrap bin/core-check bin/format-staged-elixir bin/phase0-check bin/ui1-local bin/ui1-test-backend
+	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/bootstrap bin/core-check bin/format-staged-elixir bin/phase0-check bin/ui1-local bin/ui1-test-backend
 	cd spikes/ash-foundation-lab && mise exec -- mix format --check-formatted
 	cd spikes/ash-foundation-lab && mise exec -- mix ash_postgres.generate_migrations --check --migration-path priv/generated_migration_review/migrations --snapshot-path priv/generated_migration_review/resource_snapshots
 	cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix openapi.spec.json --spec AshFoundationLab.JsonApiRouter --check --pretty=true --filename priv/openapi/phase0-v1.json
@@ -83,6 +84,9 @@ test:
 
 docs-check:
 	mise exec -- uv run python tools/check_phase0.py
+
+auth-demo:
+	./bin/auth-demo
 
 web-dev:
 	cd clients/web && CHIMWEMWE_UI0_SYNTHETIC=true mise exec -- npm run dev

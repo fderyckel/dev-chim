@@ -23,6 +23,7 @@ defmodule Chimwemwe.Platform.Outbox.DeliveryBoundary do
            event.actor_id,
            event.event_type,
            event.schema_version,
+           event.stream_position,
            event.routing_version,
            event.correlation_id,
            event.causation_id,
@@ -42,11 +43,25 @@ defmodule Chimwemwe.Platform.Outbox.DeliveryBoundary do
        AND event.routing_version = $2
        AND event.classification = 'internal'
        AND (
+         NOT $8::boolean OR
+         NOT EXISTS (
+           SELECT 1
+             FROM platform_outbox_deliveries AS blocker
+             JOIN platform_outbox_events AS blocked_event
+               ON blocked_event.id = blocker.event_id
+              AND blocked_event.tenant_id = blocker.tenant_id
+            WHERE blocker.tenant_id = event.tenant_id
+              AND blocker.consumer_key = $6
+              AND blocker.status = 'dead_letter'
+              AND blocked_event.stream_position < event.stream_position
+         )
+       )
+       AND (
          delivery.id IS NULL OR
          (delivery.status = 'available' AND delivery.available_at <= transaction_timestamp()) OR
          (delivery.status = 'leased' AND delivery.lease_expires_at <= transaction_timestamp())
        )
-  ORDER BY event.occurred_at, event.id
+  ORDER BY event.stream_position
   FOR UPDATE OF event SKIP LOCKED
      LIMIT $5
   ), claimed AS (
@@ -110,6 +125,7 @@ defmodule Chimwemwe.Platform.Outbox.DeliveryBoundary do
          candidate.actor_id,
          candidate.event_type,
          candidate.schema_version,
+         candidate.stream_position,
          candidate.routing_version,
          candidate.correlation_id,
          candidate.causation_id,
@@ -121,7 +137,7 @@ defmodule Chimwemwe.Platform.Outbox.DeliveryBoundary do
          claimed.lease_expires_at
     FROM claimed
     JOIN candidates AS candidate ON candidate.event_id = claimed.event_id
-  ORDER BY candidate.occurred_at, candidate.event_id
+  ORDER BY candidate.stream_position
   """
 
   @delivery_sql """
@@ -137,7 +153,8 @@ defmodule Chimwemwe.Platform.Outbox.DeliveryBoundary do
          event.event_type,
          event.schema_version,
          event.routing_version,
-         event.classification
+         event.classification,
+         event.stream_position
     FROM platform_outbox_deliveries AS delivery
     JOIN platform_outbox_events AS event
       ON event.id = delivery.event_id
@@ -235,8 +252,8 @@ defmodule Chimwemwe.Platform.Outbox.DeliveryBoundary do
 
   @spec claim(Supervisor.supervisor(), term(), ConsumerRegistry.declaration()) ::
           {:ok, [Envelope.t()]} | {:error, term()}
-  def claim(runtime, context, declaration) do
-    run_writer(runtime, context, fn -> claim_transaction(context, declaration) end)
+  def claim(runtime, context, declaration, mode \\ :normal) do
+    run_writer(runtime, context, fn -> claim_transaction(context, declaration, mode) end)
   end
 
   @spec acknowledge(
@@ -283,12 +300,13 @@ defmodule Chimwemwe.Platform.Outbox.DeliveryBoundary do
     end)
   end
 
-  defp claim_transaction(context, declaration) do
-    transaction(fn -> claim_or_rollback(context, declaration) end)
+  defp claim_transaction(context, declaration, mode) do
+    transaction(fn -> claim_or_rollback(context, declaration, mode) end)
   end
 
-  defp claim_or_rollback(context, declaration) do
+  defp claim_or_rollback(context, declaration, mode) do
     with :ok <- require_capability(context, @dispatch_capability),
+         :ok <- require_delivery_mode(context, declaration, mode),
          {:ok, envelopes} <- claim_batch(context, declaration) do
       envelopes
     else
@@ -328,7 +346,8 @@ defmodule Chimwemwe.Platform.Outbox.DeliveryBoundary do
       schema_versions,
       declaration.batch_size,
       declaration.key,
-      declaration.lease_ms
+      declaration.lease_ms,
+      declaration.work_kind == :ordinary
     ]
 
     case Repo.query(@claim_sql, params) do
@@ -343,6 +362,7 @@ defmodule Chimwemwe.Platform.Outbox.DeliveryBoundary do
          actor_id,
          event_type,
          schema_version,
+         stream_position,
          routing_version,
          correlation_id,
          causation_id,
@@ -359,6 +379,7 @@ defmodule Chimwemwe.Platform.Outbox.DeliveryBoundary do
       actor_id: load_uuid(actor_id),
       event_type: event_type,
       schema_version: schema_version,
+      stream_position: stream_position,
       routing_version: routing_version,
       correlation_id: load_uuid(correlation_id),
       causation_id: load_uuid(causation_id),
@@ -404,7 +425,8 @@ defmodule Chimwemwe.Platform.Outbox.DeliveryBoundary do
       event_type,
       schema_version,
       routing_version,
-      classification
+      classification,
+      _stream_position
     ] = row
 
     if subscribed?(declaration, event_type, schema_version) and
@@ -441,14 +463,14 @@ defmodule Chimwemwe.Platform.Outbox.DeliveryBoundary do
 
       ["leased", _attempts, _version, ^lease_token, ^lease_token, expires | _rest]
       when not is_nil(expires) ->
-        complete(context, declaration, event_id, lease_token)
+        complete(context, declaration, event_id, lease_token, List.last(row))
 
       _other ->
         outbox_error(:conflict)
     end
   end
 
-  defp complete(context, declaration, event_id, lease_token) do
+  defp complete(context, declaration, event_id, lease_token, stream_position) do
     tenant_id = TrustedActor.tenant_id(context.actor)
 
     case Repo.query(@complete_sql, [
@@ -458,22 +480,104 @@ defmodule Chimwemwe.Platform.Outbox.DeliveryBoundary do
            dump_uuid(lease_token)
          ]) do
       {:ok, %{rows: [[attempts, available_at, completed_at, version, status]]}} ->
-        {:ok,
-         delivery_result(
-           declaration,
-           event_id,
-           status,
-           attempts,
-           version,
-           available_at,
-           completed_at
-         )}
+        with :ok <- advance_module_cursor(context, declaration, stream_position) do
+          {:ok,
+           delivery_result(
+             declaration,
+             event_id,
+             status,
+             attempts,
+             version,
+             available_at,
+             completed_at
+           )}
+        end
 
       {:ok, %{rows: []}} ->
         outbox_error(:conflict)
 
       {:error, _reason} ->
         outbox_error(:retryable_dependency)
+    end
+  end
+
+  defp require_delivery_mode(_context, %{work_kind: :platform}, :normal), do: :ok
+
+  defp require_delivery_mode(context, %{work_kind: :ordinary} = declaration, :normal),
+    do: require_module_state(context, declaration, &match?({"active", _required}, &1))
+
+  defp require_delivery_mode(
+         context,
+         %{work_kind: :ordinary} = declaration,
+         :reconciliation
+       ),
+       do: require_module_state(context, declaration, &(&1 == {"inactive", true}))
+
+  defp require_delivery_mode(context, %{work_kind: :mandatory} = declaration, :normal),
+    do:
+      require_module_state(context, declaration, fn {state, _required} ->
+        state in ["active", "inactive"]
+      end)
+
+  defp require_delivery_mode(_context, _declaration, _mode),
+    do: outbox_error(:invalid_input)
+
+  defp require_module_state(context, declaration, allowed?) do
+    tenant_id = TrustedActor.tenant_id(context.actor)
+
+    case Repo.query(
+           """
+           SELECT activation.state, activation.reconciliation_required
+             FROM platform_module_activations AS activation
+             JOIN platform_module_entitlements AS entitlement
+               ON entitlement.id = activation.entitlement_id
+              AND entitlement.tenant_id = activation.tenant_id
+            WHERE activation.tenant_id = $1
+              AND entitlement.module_key = $2
+            FOR KEY SHARE OF activation
+           """,
+           [dump_uuid(tenant_id), declaration.module_key]
+         ) do
+      {:ok, %{rows: [[state, required]]}} ->
+        if allowed?.({state, required}) do
+          :ok
+        else
+          outbox_error(:consumer_not_available)
+        end
+
+      {:ok, _result} ->
+        outbox_error(:consumer_not_available)
+
+      {:error, _error} ->
+        outbox_error(:retryable_dependency)
+    end
+  end
+
+  defp advance_module_cursor(_context, %{work_kind: work_kind}, _stream_position)
+       when work_kind in [:platform, :mandatory],
+       do: :ok
+
+  defp advance_module_cursor(context, declaration, stream_position) do
+    case Repo.query(
+           """
+           UPDATE platform_module_activations AS activation
+              SET consumer_cursor = GREATEST(activation.consumer_cursor, $3),
+                  updated_at = transaction_timestamp()
+             FROM platform_module_entitlements AS entitlement
+            WHERE activation.tenant_id = $1
+              AND activation.entitlement_id = entitlement.id
+              AND entitlement.tenant_id = activation.tenant_id
+              AND entitlement.module_key = $2
+           """,
+           [
+             dump_uuid(TrustedActor.tenant_id(context.actor)),
+             declaration.module_key,
+             stream_position
+           ]
+         ) do
+      {:ok, %{num_rows: 1}} -> :ok
+      {:ok, _result} -> outbox_error(:conflict)
+      {:error, _error} -> outbox_error(:retryable_dependency)
     end
   end
 

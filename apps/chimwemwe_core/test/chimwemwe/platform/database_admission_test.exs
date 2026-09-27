@@ -132,7 +132,7 @@ defmodule Chimwemwe.Platform.DatabaseAdmissionTest do
         end)
       end)
 
-    assert_receive :permit_acquired
+    assert_receive :permit_acquired, 1_000
     Process.exit(caller, :kill)
     assert_receive {:DOWN, ^monitor, :process, ^caller, :killed}
 

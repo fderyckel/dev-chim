@@ -23,6 +23,8 @@ defmodule Chimwemwe.Platform.ModuleLifecycle do
     TransitionResult
   }
 
+  alias Chimwemwe.Platform.Outbox.ConsumerRegistry
+
   alias Chimwemwe.Repo
   alias Ecto.UUID
 
@@ -77,7 +79,32 @@ defmodule Chimwemwe.Platform.ModuleLifecycle do
   @spec reactivate(Supervisor.supervisor(), ReleaseManifest.t(), term(), map()) ::
           {:ok, TransitionResult.t()} | {:error, term()}
   def reactivate(runtime, manifest, context, input) do
-    run_transition(runtime, manifest, context, input, :reactivate_module, :reactivate)
+    run_transition(runtime, manifest, context, input, :reactivate_module, :reactivate, nil)
+  end
+
+  @doc "Reactivates only after the code-owned ordinary consumer backlog is reconciled."
+  def reactivate(runtime, manifest, registry, context, input) do
+    ExecutionContext.with_validated(context, fn validated_context ->
+      with {:ok, validated_manifest} <- validate_manifest(manifest),
+           {:ok, normalized_input} <- normalize_transition_input(input, :reactivate),
+           {:ok, _release} <- fetch_release(validated_manifest, normalized_input.module_key),
+           {:ok, validated_registry} <- validate_consumer_registry(registry),
+           {:ok, declaration} <-
+             ConsumerRegistry.ordinary_for_module(
+               validated_registry,
+               normalized_input.module_key
+             ),
+           {:ok, action_input} <-
+             transition_action_input(
+               validated_context,
+               validated_manifest,
+               normalized_input,
+               :reactivate_module,
+               declaration
+             ) do
+        run_transition_action(runtime, validated_context, action_input)
+      end
+    end)
   end
 
   @doc "Requires release, entitlement, activation, dependencies, and actor capability independently."
@@ -128,7 +155,7 @@ defmodule Chimwemwe.Platform.ModuleLifecycle do
     :exit, _reason -> lifecycle_error(:retryable_dependency)
   end
 
-  defp run_transition(runtime, manifest, context, input, action, operation) do
+  defp run_transition(runtime, manifest, context, input, action, operation, declaration \\ nil) do
     ExecutionContext.with_validated(context, fn validated_context ->
       with {:ok, validated_manifest} <- validate_manifest(manifest),
            {:ok, normalized_input} <- normalize_transition_input(input, operation),
@@ -138,19 +165,20 @@ defmodule Chimwemwe.Platform.ModuleLifecycle do
                validated_context,
                validated_manifest,
                normalized_input,
-               action
+               action,
+               declaration
              ) do
         run_transition_action(runtime, validated_context, action_input)
       end
     end)
   end
 
-  defp transition_action_input(context, manifest, input, action) do
+  defp transition_action_input(context, manifest, input, action, outbox_declaration) do
     action_input =
       Ash.ActionInput.for_action(ModuleActivation, action, input,
         actor: context.actor,
         authorize?: true,
-        context: action_context(context, manifest),
+        context: action_context(context, manifest, outbox_declaration),
         domain: Chimwemwe.Platform,
         tenant: TrustedActor.tenant_id(context.actor)
       )
@@ -454,16 +482,24 @@ defmodule Chimwemwe.Platform.ModuleLifecycle do
     end
   end
 
-  defp action_context(context, manifest) do
+  defp action_context(context, manifest, outbox_declaration \\ nil) do
     %{
       chimwemwe: %{
         correlation_id: context.correlation_id,
         locale: context.locale,
         module_release_manifest: manifest,
+        outbox_consumer_declaration: outbox_declaration,
         purpose: context.purpose,
         routing_version: context.placement.routing_version
       }
     }
+  end
+
+  defp validate_consumer_registry(registry) do
+    case ConsumerRegistry.revalidate(registry) do
+      {:ok, validated} -> {:ok, validated}
+      {:error, :invalid_registry} -> lifecycle_error(:invalid_input)
+    end
   end
 
   defp map_action_error(error) do

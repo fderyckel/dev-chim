@@ -54,6 +54,15 @@ defmodule Chimwemwe.Platform.TemporalQualification.Segment do
       check_constraint(:value, "platform_temporal_segment_value_not_empty",
         check: "char_length(value) BETWEEN 1 AND 80"
       )
+
+      check_constraint(
+        [:value, :redacted_at, :redaction_receipt_id],
+        "platform_temporal_segment_redaction_shape",
+        check: """
+        (redacted_at IS NULL AND redaction_receipt_id IS NULL AND value <> '[redacted]') OR
+        (redacted_at IS NOT NULL AND redaction_receipt_id IS NOT NULL AND value = '[redacted]')
+        """
+      )
     end
 
     custom_statements do
@@ -74,7 +83,18 @@ defmodule Chimwemwe.Platform.TemporalQualification.Segment do
               MESSAGE = 'temporal qualification segment deletion is forbidden';
           END IF;
 
-          IF TG_OP = 'UPDATE' THEN
+          IF TG_OP = 'UPDATE' AND NOT (
+            OLD.redacted_at IS NULL
+            AND NEW.redacted_at IS NOT NULL
+            AND NEW.redaction_receipt_id IS NOT NULL
+            AND NEW.value = '[redacted]'
+            AND NEW.id = OLD.id
+            AND NEW.tenant_id = OLD.tenant_id
+            AND NEW.aggregate_id = OLD.aggregate_id
+            AND NEW.revision_id = OLD.revision_id
+            AND NEW.effective_from = OLD.effective_from
+            AND NEW.effective_until = OLD.effective_until
+          ) THEN
             RAISE EXCEPTION USING
               ERRCODE = '23514',
               CONSTRAINT = 'platform_temporal_qualification_segment_immutable',
@@ -94,6 +114,7 @@ defmodule Chimwemwe.Platform.TemporalQualification.Segment do
             FROM platform_temporal_qualification_segments AS segment
             WHERE segment.tenant_id = NEW.tenant_id
               AND segment.revision_id = NEW.revision_id
+              AND segment.id <> NEW.id
               AND NEW.effective_from < segment.effective_until
               AND segment.effective_from < NEW.effective_until
           ) THEN
@@ -194,6 +215,16 @@ defmodule Chimwemwe.Platform.TemporalQualification.Segment do
       allow_nil? false
       public? false
       constraints min_length: 1, max_length: 80
+    end
+
+    attribute :redacted_at, :utc_datetime_usec do
+      allow_nil? true
+      public? false
+    end
+
+    attribute :redaction_receipt_id, :uuid do
+      allow_nil? true
+      public? false
     end
   end
 end

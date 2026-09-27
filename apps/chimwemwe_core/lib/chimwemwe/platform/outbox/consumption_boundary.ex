@@ -33,7 +33,8 @@ defmodule Chimwemwe.Platform.Outbox.ConsumptionBoundary do
          event.causation_id,
          event.occurred_at,
          event.classification,
-         event.payload
+         event.payload,
+         event.stream_position
     FROM platform_outbox_deliveries AS delivery
     JOIN platform_outbox_events AS event
       ON event.id = delivery.event_id
@@ -136,7 +137,8 @@ defmodule Chimwemwe.Platform.Outbox.ConsumptionBoundary do
            causation_id,
            occurred_at,
            "internal",
-           payload
+           payload,
+           stream_position
          ],
          context,
          declaration,
@@ -155,6 +157,7 @@ defmodule Chimwemwe.Platform.Outbox.ConsumptionBoundary do
          actor_id: load_uuid(actor_id),
          event_type: event_type,
          schema_version: schema_version,
+         stream_position: stream_position,
          routing_version: routing_version,
          correlation_id: load_uuid(correlation_id),
          causation_id: load_uuid(causation_id),

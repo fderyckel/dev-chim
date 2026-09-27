@@ -119,6 +119,21 @@ TR-05. It does not close TR-06 or TR-07, record production performance/migration
 or supply the final accountable residual-risk review. ADR 0018 therefore remains Conditionally
 Accepted rather than moving to Accepted.
 
+The 2026-09-26
+[Slice 2.0-C evidence](../phase-2/temporal-completion-and-recovery-evidence.md) closes the neutral
+engineering branches of TR-06 and TR-07 and confirms the accumulated TR-01 through TR-07 proof.
+It covers separately authorized retention/hold/erasure, minimized immutable receipts, mandatory
+access while inactive, immutable baseline-import and conflict-reconciliation provenance, direct
+database-write rejection, retained rollback refusal, PostgreSQL dump/restore, governed projection
+convergence, and bounded local performance/storage measurement.
+
+The implementation is not a school records policy, selected-deployment qualification, or second
+domain. TR-08 therefore continues to prohibit a universal persistence abstraction. The remaining
+Full Acceptance step is the accountable owner's review of the completed evidence and its stated
+residual risks. Implementation authorization has already been supplied; that earlier direction is
+not relabelled as a post-evidence review. Until the latter is recorded, ADR 0018 remains
+Conditionally Accepted.
+
 ## Full Acceptance gate
 
 ADR 0018 may move from Conditionally Accepted to Accepted only after:
@@ -152,6 +167,8 @@ Reopen this decision when:
 - [ADR 0017](../adr/0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md)
 - [Slice 1G role-rename evidence](../phase-1/evidence/authority-role-rename.md)
 - [ADR 0018 T1-C evidence](../phase-1/evidence/temporal-qualification-fact-and-reconciliation.md)
+- [Slice 2.0-C temporal completion and recovery evidence](../phase-2/temporal-completion-and-recovery-evidence.md)
+- [Temporal retention and recovery runbook](../operations/temporal-retention-and-recovery.md)
 - [Production-core migration discipline](../development/migrations.md)
 - [Module activation and lifecycle](module-activation-and-lifecycle.md)
 - [Threat model](../security/threat-model.md)

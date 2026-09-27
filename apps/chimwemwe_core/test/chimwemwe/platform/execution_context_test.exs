@@ -25,8 +25,12 @@ defmodule Chimwemwe.Platform.ExecutionContextTest do
   alias Chimwemwe.Platform.TemporalQualification.{
     Aggregate,
     ConsumerBasis,
+    CurrentProjection,
     Fact,
     FactOperation,
+    ImportRecord,
+    RetentionControl,
+    RetentionReceipt,
     Revision,
     Segment
   }
@@ -128,7 +132,10 @@ defmodule Chimwemwe.Platform.ExecutionContextTest do
   end
 
   test "the production Ash domain always runs authorization" do
-    assert Application.fetch_env!(:chimwemwe_core, :ash_domains) == [Chimwemwe.Platform]
+    assert Application.fetch_env!(:chimwemwe_core, :ash_domains) == [
+             Chimwemwe.Platform,
+             Chimwemwe.Identity
+           ]
 
     assert Application.fetch_env!(:chimwemwe_core, :base_resources) == [
              Chimwemwe.Platform.Resource
@@ -156,6 +163,10 @@ defmodule Chimwemwe.Platform.ExecutionContextTest do
                FactOperation,
                Fact,
                ConsumerBasis,
+               CurrentProjection,
+               ImportRecord,
+               RetentionControl,
+               RetentionReceipt,
                ModuleEntitlement,
                ModuleActivation,
                ModuleWorkItem,

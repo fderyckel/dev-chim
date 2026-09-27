@@ -1,6 +1,6 @@
 # Phase 1 core-foundation implementation plan
 
-- Status: Slices 1A through 1J-B, ADR 0018 T1-A/T1-B/T1-C, and local UI-1A implemented; Slice 1J-B supervised database-local consumption and exact replay verification passing while wider operational-readiness gates remain open; Phase 0 decisions completed
+- Status: Complete at the bounded repository boundary as of 2026-09-26: Slices 1A through 1J-B, ADR 0018 T1-A/T1-B/T1-C, UI-0, and UI-1A are implemented and verified; wider production-entry work is governed by Phase 2
 - Owner: Platform engineering
 - Decision posture: Ash conditionally accepted; applicable ADR outcomes and production gates are binding
 - Review trigger: another authority mutation, a callable temporal action or read boundary, generic or public write invocation, a metadata consumer, a public interface, another app, or a school domain
@@ -711,14 +711,21 @@ capability grant, composition, revoke, public write invocation, entitlement expi
 retained-data deletion, provisioning, a real queue/consumer/projection adapter, or a school
 module. Slice 1J-A authorizes internal outbox lease state and transition/status boundaries, while
 Slice 1J-B authorizes only supervised database-local consumption and exact audited dead-letter
-replay. The next operational work remains separately bounded: module drain integration, replay
-ranges/cursors, external adapters, operational telemetry/runbooks, restore/convergence, and
-selected-environment qualification.
-The Phase 0
-descriptor artifact, report registry, and governed experience-metadata implementation remain
+replay. At Phase 1 closure, the next operational work transferred as separately bounded Phase 2
+gates: module drain integration, replay ranges/cursors, external adapters, operational
+telemetry/runbooks, restore/convergence, and selected-environment qualification. Later Phase 2
+completion of one of those gates does not reopen or expand the Phase 1 boundary.
+The Phase 0 descriptor artifact, report registry, and governed experience-metadata implementation remain
 disposable evidence and are not production APIs. Slices 1I-A and 1I-B promote only the reviewed
 registry, validator, durable definition boundary, and exact internal compatibility resolver; they
-do not promote the spike report executor or renderer. Slice 1J remains open until multi-node
-admission, selected-deployment capacity/recovery/movement, migration rehearsal, and independent
-security/privacy review pass for the actual environment. Do not add a school business module
-until an explicit module slice is authorized.
+do not promote the spike report executor or renderer.
+
+The project-owner direction on 2026-09-26 closes Phase 1 at the fully implemented and verified
+1J-B repository boundary. This is a sequencing decision, not a waiver of an ADR or production
+gate. Replay ranges/cursors and real module-consumer drain integration move to Phase 2.0-B;
+temporal retention, migration, restore, and convergence move to Phase 2.0-C; identity and public
+interfaces remain Phase 2.0-D/E; and multi-node admission, selected-deployment
+capacity/recovery/movement, migration rehearsal, and independent security/privacy review remain
+blocking gates for the release levels named in the Phase 2 entry register. See the
+[Phase 1 closure record](../phase-1/evidence/phase-1-closure.md). Do not add a school business
+module until the applicable Phase 2 entry gates and explicit module slice are satisfied.

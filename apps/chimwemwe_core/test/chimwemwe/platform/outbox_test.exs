@@ -20,7 +20,10 @@ defmodule Chimwemwe.Platform.OutboxTest do
     Dispatcher,
     DispatcherStatus,
     Envelope,
+    ReplayCursor,
     ReplayInput,
+    ReplayRangeInput,
+    ReplayRangeResult,
     ReplayResult,
     Status
   }
@@ -97,6 +100,24 @@ defmodule Chimwemwe.Platform.OutboxTest do
 
     assert {:error, :invalid_registry} =
              ConsumerRegistry.new([consumer_declaration(%{handler_revision: 0})])
+
+    second_ordinary =
+      consumer_declaration(%{
+        key: "platform.operations.second_sink",
+        module_key: "education.structure",
+        work_kind: :ordinary,
+        batch_size: 1
+      })
+
+    first_ordinary =
+      consumer_declaration(%{
+        module_key: "education.structure",
+        work_kind: :ordinary,
+        batch_size: 1
+      })
+
+    assert {:error, :invalid_registry} =
+             ConsumerRegistry.new([first_ordinary, second_ordinary])
   end
 
   test "claims only the current tenant, route, subscription, schema, and bounded batch", %{
@@ -455,6 +476,62 @@ defmodule Chimwemwe.Platform.OutboxTest do
              )
   end
 
+  test "dispatcher telemetry is tenant-qualified and excludes event and payload data", %{
+    runtime: runtime
+  } do
+    parent = self()
+    handler_id = {__MODULE__, make_ref()}
+
+    :ok =
+      :telemetry.attach(
+        handler_id,
+        [:chimwemwe, :outbox, :dispatch],
+        &__MODULE__.handle_dispatch_telemetry/4,
+        parent
+      )
+
+    on_exit(fn -> :telemetry.detach(handler_id) end)
+    _event_id = insert_event(runtime, context_dispatcher_a())
+
+    dispatcher =
+      start_supervised!(
+        {Dispatcher,
+         runtime: runtime,
+         registry: registry(),
+         context: context_dispatcher_a(),
+         consumer_key: @consumer_key,
+         poll_interval_ms: 300_000}
+      )
+
+    assert {:ok, %DispatcherStatus{acknowledged_count: 1}} =
+             Dispatcher.dispatch_now(dispatcher)
+
+    assert_receive {:dispatch_telemetry, [:chimwemwe, :outbox, :dispatch], measurements, metadata}
+
+    assert metadata.tenant_id == @tenant_a
+    assert metadata.consumer_key == @consumer_key
+    assert metadata.routing_version == 7
+    assert metadata.mode == :normal
+    assert metadata.outcome == :ok
+    assert metadata.status_available
+    assert measurements.acknowledged_count == 1
+    assert measurements.pending_count == 0
+    assert measurements.dead_letter_count == 0
+    assert measurements.retry_ready_count == 0
+    assert measurements.expired_lease_count == 0
+    assert measurements.stale_route_count == 0
+    assert measurements.oldest_pending_age_ms == 0
+    refute Map.has_key?(metadata, :event_id)
+    refute Map.has_key?(metadata, :actor_id)
+    refute Map.has_key?(metadata, :payload)
+    refute Map.has_key?(metadata, :lease_token)
+  end
+
+  @doc false
+  def handle_dispatch_telemetry(event, measurements, metadata, parent) do
+    send(parent, {:dispatch_telemetry, event, measurements, metadata})
+  end
+
   test "malformed consumer results roll back receipts and enter the bounded dead letter flow", %{
     runtime: runtime
   } do
@@ -635,6 +712,150 @@ defmodule Chimwemwe.Platform.OutboxTest do
     assert first == second
     assert first.replay_count == 1
     assert replay_evidence_counts(runtime, context_dispatcher_a(), event_id) == {1, 1}
+  end
+
+  test "cursor page and bounded range replay retain exact per-event idempotency", %{
+    runtime: runtime
+  } do
+    replay_registry = registry(%{max_attempts: 1})
+
+    event_ids =
+      for _index <- 1..2 do
+        event_id = insert_event(runtime, context_dispatcher_a())
+        assert {:ok, [%Envelope{lease_token: token}]} = claim(runtime, replay_registry)
+
+        assert {:ok, %DeliveryResult{status: :dead_letter}} =
+                 Outbox.fail(
+                   runtime,
+                   replay_registry,
+                   context_dispatcher_a(),
+                   @consumer_key,
+                   event_id,
+                   token,
+                   :consumer_rejected
+                 )
+
+        event_id
+      end
+
+    through_cursor = maximum_stream_position(runtime, context_dispatcher_a())
+
+    assert {:ok, page} =
+             Outbox.replay_page(
+               runtime,
+               replay_registry,
+               context_replay_only_a(),
+               @consumer_key,
+               %ReplayCursor{after_cursor: 0, through_cursor: through_cursor, limit: 10}
+             )
+
+    assert Enum.map(page.items, & &1.event_id) == event_ids
+    assert page.next_cursor == through_cursor
+
+    inputs =
+      Enum.map(page.items, fn candidate ->
+        %ReplayInput{
+          event_id: candidate.event_id,
+          expected_lock_version: candidate.expected_lock_version,
+          idempotency_key: UUID.generate(),
+          causation_id: UUID.generate(),
+          reason_code: "operator.range_recovery"
+        }
+      end)
+
+    range = %ReplayRangeInput{items: inputs}
+
+    assert {:ok, %ReplayRangeResult{results: first_results}} =
+             Outbox.replay_range(
+               runtime,
+               replay_registry,
+               context_replay_only_a(),
+               @consumer_key,
+               range
+             )
+
+    assert {:ok, %ReplayRangeResult{results: ^first_results}} =
+             Outbox.replay_range(
+               runtime,
+               replay_registry,
+               context_replay_only_a(),
+               @consumer_key,
+               range
+             )
+  end
+
+  test "module ordinary delivery parks while inactive and reconciliation advances its cursor", %{
+    runtime: runtime
+  } do
+    module_key = "education.structure"
+    activation_id = seed_module_activation(runtime, context_dispatcher_a(), module_key)
+    module_registry = registry(%{module_key: module_key, work_kind: :ordinary, batch_size: 1})
+    event_id = insert_event(runtime, context_dispatcher_a())
+
+    assert {:ok, [%Envelope{} = envelope]} = claim(runtime, module_registry)
+
+    assert {:ok, %ConsumptionResult{state: :processed}} =
+             Outbox.consume(
+               runtime,
+               module_registry,
+               context_dispatcher_a(),
+               @consumer_key,
+               envelope
+             )
+
+    assert {:ok, %DeliveryResult{status: :completed}} =
+             Outbox.acknowledge(
+               runtime,
+               module_registry,
+               context_dispatcher_a(),
+               @consumer_key,
+               event_id,
+               envelope.lease_token
+             )
+
+    assert module_cursor(runtime, context_dispatcher_a(), activation_id) ==
+             envelope.stream_position
+
+    set_module_inactive(runtime, context_dispatcher_a(), activation_id, envelope.stream_position)
+    second_id = insert_event(runtime, context_dispatcher_a())
+
+    assert {:error, %OutboxError{code: :consumer_not_available}} =
+             Outbox.claim(
+               runtime,
+               module_registry,
+               context_dispatcher_a(),
+               @consumer_key
+             )
+
+    assert {:ok, [%Envelope{event_id: ^second_id} = second]} =
+             Outbox.claim_reconciliation(
+               runtime,
+               module_registry,
+               context_dispatcher_a(),
+               @consumer_key
+             )
+
+    assert {:ok, %ConsumptionResult{}} =
+             Outbox.consume(
+               runtime,
+               module_registry,
+               context_dispatcher_a(),
+               @consumer_key,
+               second
+             )
+
+    assert {:ok, %DeliveryResult{}} =
+             Outbox.acknowledge(
+               runtime,
+               module_registry,
+               context_dispatcher_a(),
+               @consumer_key,
+               second_id,
+               second.lease_token
+             )
+
+    assert module_cursor(runtime, context_dispatcher_a(), activation_id) ==
+             second.stream_position
   end
 
   test "unavailable persistence and alternate tenant/state writes fail closed", %{
@@ -1003,6 +1224,95 @@ defmodule Chimwemwe.Platform.OutboxTest do
              end)
 
     count
+  end
+
+  defp maximum_stream_position(runtime, context) do
+    assert {:ok, position} =
+             Persistence.with_writer(runtime, context, fn ->
+               %{rows: [[position]]} =
+                 Repo.query!(
+                   "SELECT max(stream_position) FROM platform_outbox_events WHERE tenant_id = $1",
+                   [dump(TrustedActor.tenant_id(context.actor))]
+                 )
+
+               position
+             end)
+
+    position
+  end
+
+  defp seed_module_activation(runtime, context, module_key) do
+    assert {:ok, activation_id} =
+             Persistence.with_writer(runtime, context, fn ->
+               tenant_id = dump(TrustedActor.tenant_id(context.actor))
+               entitlement_id = UUID.generate()
+               activation_id = UUID.generate()
+
+               Repo.query!(
+                 """
+                 INSERT INTO platform_module_entitlements
+                   (id, tenant_id, module_key, inserted_at)
+                 VALUES ($1, $2, $3, NOW())
+                 """,
+                 [dump(entitlement_id), tenant_id, module_key]
+               )
+
+               Repo.query!(
+                 """
+                 INSERT INTO platform_module_activations
+                   (id, tenant_id, entitlement_id, module_version, state, lock_version,
+                    activated_at, consumer_cursor, last_reconciled_cursor, projection_version,
+                    projection_ready, reconciliation_required, retained_data_state,
+                    inserted_at, updated_at)
+                 VALUES ($1, $2, $3, '1.0.0', 'active', 1, NOW(), 0, 0, 1,
+                         true, false, 'retained', NOW(), NOW())
+                 """,
+                 [dump(activation_id), tenant_id, dump(entitlement_id)]
+               )
+
+               activation_id
+             end)
+
+    activation_id
+  end
+
+  defp set_module_inactive(runtime, context, activation_id, cursor) do
+    assert {:ok, :updated} =
+             Persistence.with_writer(runtime, context, fn ->
+               Repo.query!(
+                 """
+                 UPDATE platform_module_activations
+                    SET state = 'inactive', replay_from_cursor = $3, projection_ready = false,
+                        reconciliation_required = true, deactivated_at = NOW(), lock_version = 2
+                  WHERE id = $1 AND tenant_id = $2
+                 """,
+                 [
+                   dump(activation_id),
+                   dump(TrustedActor.tenant_id(context.actor)),
+                   cursor
+                 ]
+               )
+
+               :updated
+             end)
+  end
+
+  defp module_cursor(runtime, context, activation_id) do
+    assert {:ok, cursor} =
+             Persistence.with_writer(runtime, context, fn ->
+               %{rows: [[cursor]]} =
+                 Repo.query!(
+                   """
+                   SELECT consumer_cursor FROM platform_module_activations
+                    WHERE id = $1 AND tenant_id = $2
+                   """,
+                   [dump(activation_id), dump(TrustedActor.tenant_id(context.actor))]
+                 )
+
+               cursor
+             end)
+
+    cursor
   end
 
   defp update_delivery_time(runtime, context, event_id, expression) do

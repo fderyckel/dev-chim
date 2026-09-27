@@ -16,7 +16,11 @@ defmodule Chimwemwe.Platform.Outbox do
     ConsumptionBoundary,
     DeliveryBoundary,
     ReplayBoundary,
-    ReplayInput
+    ReplayCursor,
+    ReplayCursorBoundary,
+    ReplayInput,
+    ReplayRangeInput,
+    ReplayRangeResult
   }
 
   alias Chimwemwe.Platform.OutboxError
@@ -27,10 +31,21 @@ defmodule Chimwemwe.Platform.Outbox do
   @spec claim(Supervisor.supervisor(), term(), term(), term()) ::
           {:ok, [Chimwemwe.Platform.Outbox.Envelope.t()]} | {:error, term()}
   def claim(runtime, registry, context, consumer_key) do
+    claim_with_mode(runtime, registry, context, consumer_key, :normal)
+  end
+
+  @doc "Claims one bounded module backlog batch while ordinary authority remains inactive."
+  @spec claim_reconciliation(Supervisor.supervisor(), term(), term(), term()) ::
+          {:ok, [Chimwemwe.Platform.Outbox.Envelope.t()]} | {:error, term()}
+  def claim_reconciliation(runtime, registry, context, consumer_key) do
+    claim_with_mode(runtime, registry, context, consumer_key, :reconciliation)
+  end
+
+  defp claim_with_mode(runtime, registry, context, consumer_key, mode) do
     ExecutionContext.with_validated(context, fn validated_context ->
       with {:ok, registry} <- revalidate_registry(registry),
            {:ok, declaration} <- fetch_consumer(registry, consumer_key) do
-        DeliveryBoundary.claim(runtime, validated_context, declaration)
+        DeliveryBoundary.claim(runtime, validated_context, declaration, mode)
       end
     end)
   end
@@ -109,6 +124,44 @@ defmodule Chimwemwe.Platform.Outbox do
     end)
   end
 
+  @doc "Returns a bounded cursor page of exact dead-letter references."
+  def replay_page(runtime, registry, context, consumer_key, cursor) do
+    ExecutionContext.with_validated(context, fn validated_context ->
+      with {:ok, registry} <- revalidate_registry(registry),
+           {:ok, declaration} <- fetch_consumer(registry, consumer_key),
+           {:ok, cursor} <- validate_replay_cursor(cursor) do
+        ReplayCursorBoundary.page(runtime, validated_context, declaration, cursor)
+      end
+    end)
+  end
+
+  @doc "Replays a bounded ordered list of exact dead letters."
+  def replay_range(runtime, registry, context, consumer_key, %ReplayRangeInput{items: items})
+      when is_list(items) and items != [] and length(items) <= 100 do
+    if Enum.uniq_by(items, & &1.event_id) == items do
+      items
+      |> replay_items(runtime, registry, context, consumer_key)
+      |> case do
+        {:ok, results} -> {:ok, %ReplayRangeResult{results: Enum.reverse(results)}}
+        error -> error
+      end
+    else
+      outbox_error(:invalid_input)
+    end
+  end
+
+  def replay_range(_runtime, _registry, _context, _consumer_key, _input),
+    do: outbox_error(:invalid_input)
+
+  defp replay_items(items, runtime, registry, context, consumer_key) do
+    Enum.reduce_while(items, {:ok, []}, fn input, {:ok, results} ->
+      case replay(runtime, registry, context, consumer_key, input) do
+        {:ok, result} -> {:cont, {:ok, [result | results]}}
+        {:error, error} -> {:halt, {:error, error}}
+      end
+    end)
+  end
+
   @doc "Returns sanitized count-only status for one code-owned consumer."
   @spec status(Supervisor.supervisor(), term(), term(), term()) ::
           {:ok, Chimwemwe.Platform.Outbox.Status.t()} | {:error, term()}
@@ -174,6 +227,15 @@ defmodule Chimwemwe.Platform.Outbox do
   end
 
   defp validate_replay_input(_input), do: outbox_error(:invalid_input)
+
+  defp validate_replay_cursor(%ReplayCursor{} = cursor)
+       when is_integer(cursor.after_cursor) and cursor.after_cursor >= 0 and
+              is_integer(cursor.through_cursor) and
+              cursor.through_cursor > cursor.after_cursor and is_integer(cursor.limit) and
+              cursor.limit in 1..100,
+       do: {:ok, cursor}
+
+  defp validate_replay_cursor(_cursor), do: outbox_error(:invalid_input)
 
   defp validate_reason_code(value) when is_binary(value) do
     normalized = String.trim(value)

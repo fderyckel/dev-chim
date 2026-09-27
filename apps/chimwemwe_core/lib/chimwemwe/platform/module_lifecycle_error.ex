@@ -21,6 +21,7 @@ defmodule Chimwemwe.Platform.ModuleLifecycleError do
           | :module_not_released
           | :module_version_incompatible
           | :required_dependency_inactive
+          | :reconciliation_required
           | :retryable_dependency
   @type t :: %__MODULE__{code: code()}
 

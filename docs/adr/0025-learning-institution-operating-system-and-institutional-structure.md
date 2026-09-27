@@ -235,7 +235,11 @@ source parent link into an access grant or invents history that the source canno
 
 Current evidence is the project owner's product direction, the existing tenant and authority
 contracts, and the Phase 2 candidate review. It establishes the need to replace the flat school
-boundary but does not prove a physical model or authorize persistence.
+boundary but does not prove a physical model or authorize persistence. The
+[institutional-structure decision evidence plan](../phase-2/institutional-structure-decision-evidence.md)
+now defines the decision questions, six approval gates, eight-scenario pack, representative-review
+coverage, TM-17/AC-18 matrix, migration review, experience prototype, temporal disposition, and
+accountable decision record required for acceptance. It is a plan, not completed evidence.
 
 Acceptance requires at least these synthetic scenarios:
 
@@ -287,6 +291,7 @@ downstream reference reconciliation, access/report impact review, and retained-h
 
 - [Phase 2 entry and institutional-structure proposal](../plans/phase-2-entry-and-school-structure-proposal.md)
 - [Phase 2 entry decision register](../phase-2/entry-decision-register.md)
+- [Institutional-structure decision evidence plan](../phase-2/institutional-structure-decision-evidence.md)
 - [System context](../architecture/system-context.md)
 - [ADR 0001](0001-modular-monolith-and-service-boundaries.md)
 - [ADR 0003](0003-tenant-model-and-optional-postgresql-rls.md)

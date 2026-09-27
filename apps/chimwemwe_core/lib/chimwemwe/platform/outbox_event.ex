@@ -4,9 +4,9 @@ defmodule Chimwemwe.Platform.OutboxEvent do
 
   This resource defines the accepted ADR 0007 envelope for production-core writes.
   Slice 1J-A may lease the immutable fact to a code-declared internal consumer.
-  Slice 1J-B adds database-local execution with durable receipts and exact
-  governed dead-letter replay. Retention, replay ranges/cursors, external
-  publication, and wider operational qualification remain deferred.
+  Slice 2.0-B adds an immutable database-assigned stream position for ordered
+  module drain, cursor paging, and reconciliation. Retention and external
+  publication remain deferred.
   """
 
   use Chimwemwe.Platform.Resource,
@@ -33,6 +33,12 @@ defmodule Chimwemwe.Platform.OutboxEvent do
 
       index([:tenant_id, :occurred_at, :id],
         name: "platform_outbox_events_dispatch_index",
+        all_tenants?: true
+      )
+
+      index([:tenant_id, :stream_position],
+        name: "platform_outbox_events_stream_position_index",
+        unique: true,
         all_tenants?: true
       )
 
@@ -133,6 +139,12 @@ defmodule Chimwemwe.Platform.OutboxEvent do
     end
 
     attribute :schema_version, :integer do
+      allow_nil? false
+      public? false
+      constraints min: 1
+    end
+
+    attribute :stream_position, :integer do
       allow_nil? false
       public? false
       constraints min: 1

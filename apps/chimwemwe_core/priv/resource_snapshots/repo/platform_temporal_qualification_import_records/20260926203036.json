@@ -1,0 +1,369 @@
+{
+  "attributes": [
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"gen_random_uuid()\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": true,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "tenant_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "import_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "version",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "predecessor_record_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "module_key",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "state",
+      "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "conflict_code",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "source_snapshot_digest",
+      "type": "binary"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "source_identifier_digest",
+      "type": "binary"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "mapping_revision",
+      "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "aggregate_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "revision_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "recorded_at",
+      "type": "utc_datetime_usec"
+    }
+  ],
+  "base_filter": null,
+  "check_constraints": [
+    {
+      "attribute": [
+        "source_snapshot_digest",
+        "source_identifier_digest"
+      ],
+      "base_filter": null,
+      "check": "octet_length(source_snapshot_digest) = 32 AND octet_length(source_identifier_digest) = 32",
+      "name": "platform_temporal_import_digest_shape"
+    },
+    {
+      "attribute": [
+        "mapping_revision"
+      ],
+      "base_filter": null,
+      "check": "char_length(mapping_revision) BETWEEN 1 AND 80 AND mapping_revision ~ '^[A-Za-z0-9][A-Za-z0-9._-]*$'",
+      "name": "platform_temporal_import_mapping_revision_shape"
+    },
+    {
+      "attribute": [
+        "state",
+        "conflict_code",
+        "aggregate_id",
+        "revision_id",
+        "predecessor_record_id",
+        "version"
+      ],
+      "base_filter": null,
+      "check": "(state = 'baseline' AND conflict_code IS NULL AND aggregate_id IS NOT NULL AND revision_id IS NOT NULL AND predecessor_record_id IS NULL AND version = 1) OR\n(state = 'reconciliation_required' AND conflict_code IS NOT NULL AND aggregate_id IS NULL AND revision_id IS NULL AND predecessor_record_id IS NULL AND version = 1) OR\n(state = 'reconciled' AND conflict_code IS NULL AND aggregate_id IS NOT NULL AND revision_id IS NOT NULL AND predecessor_record_id IS NOT NULL AND version = 2)\n",
+      "name": "platform_temporal_import_state_shape"
+    }
+  ],
+  "create_table_options": null,
+  "custom_indexes": [
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "id",
+        "tenant_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_import_records_id_tenant_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "tenant_id",
+        "import_id",
+        "version"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "import_id"
+        },
+        {
+          "type": "atom",
+          "value": "version"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_import_records_version_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "tenant_id",
+        "source_snapshot_digest",
+        "source_identifier_digest",
+        "mapping_revision"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "source_snapshot_digest"
+        },
+        {
+          "type": "atom",
+          "value": "source_identifier_digest"
+        },
+        {
+          "type": "atom",
+          "value": "mapping_revision"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_import_records_source_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": "version = 1"
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "tenant_id",
+        "predecessor_record_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "predecessor_record_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "platform_temporal_import_records_successor_index",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": "predecessor_record_id IS NOT NULL"
+    }
+  ],
+  "custom_statements": [
+    {
+      "after_tables": [
+        "platform_temporal_qualification_import_records",
+        "platform_temporal_qualification_revisions"
+      ],
+      "code?": false,
+      "down": "DROP FUNCTION guard_platform_temporal_import_record();",
+      "global?": true,
+      "name": "platform_temporal_import_record_guard_function",
+      "up": "CREATE FUNCTION guard_platform_temporal_import_record()\nRETURNS trigger LANGUAGE plpgsql AS $$\nDECLARE\n  predecessor_state text;\n  predecessor_import uuid;\nBEGIN\n  IF TG_OP IN ('UPDATE', 'DELETE') THEN\n    RAISE EXCEPTION USING ERRCODE = '23514',\n      CONSTRAINT = 'platform_temporal_import_record_immutable',\n      MESSAGE = 'temporal import provenance is immutable';\n  END IF;\n\n  NEW.recorded_at := transaction_timestamp() AT TIME ZONE 'UTC';\n\n  IF NEW.aggregate_id IS NOT NULL AND NOT EXISTS (\n    SELECT 1 FROM platform_temporal_qualification_revisions\n    WHERE tenant_id = NEW.tenant_id AND aggregate_id = NEW.aggregate_id AND id = NEW.revision_id\n  ) THEN\n    RAISE EXCEPTION USING ERRCODE = '23503',\n      CONSTRAINT = 'platform_temporal_import_target_missing',\n      MESSAGE = 'temporal import target revision is missing';\n  END IF;\n\n  IF NEW.predecessor_record_id IS NOT NULL THEN\n    SELECT state, import_id INTO predecessor_state, predecessor_import\n    FROM platform_temporal_qualification_import_records\n    WHERE tenant_id = NEW.tenant_id AND id = NEW.predecessor_record_id;\n\n    IF predecessor_state IS DISTINCT FROM 'reconciliation_required'\n       OR predecessor_import IS DISTINCT FROM NEW.import_id THEN\n      RAISE EXCEPTION USING ERRCODE = '23514',\n        CONSTRAINT = 'platform_temporal_import_predecessor_invalid',\n        MESSAGE = 'temporal import reconciliation predecessor is invalid';\n    END IF;\n  END IF;\n\n  RETURN NEW;\nEND;\n$$;\n"
+    },
+    {
+      "after_tables": [
+        "platform_temporal_qualification_import_records"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER platform_temporal_import_record_guard ON platform_temporal_qualification_import_records;",
+      "global?": true,
+      "name": "platform_temporal_import_record_guard_trigger",
+      "up": "CREATE TRIGGER platform_temporal_import_record_guard\nBEFORE INSERT OR UPDATE OR DELETE ON platform_temporal_qualification_import_records\nFOR EACH ROW EXECUTE FUNCTION guard_platform_temporal_import_record();\n"
+    }
+  ],
+  "has_create_action": false,
+  "hash": "4613DB7F3139E42748FE83BD0B1927B184DE9756296C24ABE7A4183A65160BBB",
+  "identities": [],
+  "multitenancy": {
+    "attribute": "tenant_id",
+    "global": false,
+    "strategy": "attribute"
+  },
+  "repo": "Elixir.Chimwemwe.Repo",
+  "schema": null,
+  "table": "platform_temporal_qualification_import_records"
+}

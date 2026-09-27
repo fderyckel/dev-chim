@@ -45,6 +45,10 @@ defmodule Chimwemwe.Platform do
     resource Chimwemwe.Platform.TemporalQualification.FactOperation
     resource Chimwemwe.Platform.TemporalQualification.Fact
     resource Chimwemwe.Platform.TemporalQualification.ConsumerBasis
+    resource Chimwemwe.Platform.TemporalQualification.RetentionControl
+    resource Chimwemwe.Platform.TemporalQualification.RetentionReceipt
+    resource Chimwemwe.Platform.TemporalQualification.ImportRecord
+    resource Chimwemwe.Platform.TemporalQualification.CurrentProjection
     resource Chimwemwe.Platform.ModuleLifecycle.ModuleEntitlement
     resource Chimwemwe.Platform.ModuleLifecycle.ModuleActivation
     resource Chimwemwe.Platform.ModuleLifecycle.ModuleWorkItem

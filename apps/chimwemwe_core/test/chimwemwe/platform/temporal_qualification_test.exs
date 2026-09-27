@@ -15,8 +15,12 @@ defmodule Chimwemwe.Platform.TemporalQualificationTest do
   alias Chimwemwe.Platform.TemporalQualification.{
     Aggregate,
     ConsumerBasis,
+    CurrentProjection,
     Fact,
     FactOperation,
+    ImportRecord,
+    RetentionControl,
+    RetentionReceipt,
     Revision,
     Segment
   }
@@ -30,6 +34,10 @@ defmodule Chimwemwe.Platform.TemporalQualificationTest do
   @actor_b "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb"
 
   @tables [
+    "platform_temporal_qualification_current_projections",
+    "platform_temporal_qualification_retention_receipts",
+    "platform_temporal_qualification_retention_controls",
+    "platform_temporal_qualification_import_records",
     "platform_temporal_qualification_consumer_bases",
     "platform_temporal_qualification_segments",
     "platform_temporal_qualification_revisions",
@@ -41,19 +49,44 @@ defmodule Chimwemwe.Platform.TemporalQualificationTest do
   setup do
     runtime = start_supervised!({PersistenceRuntime, runtime_options()})
 
-    assert {:ok, :cleared} =
-             Persistence.with_writer(runtime, context_a(), fn ->
-               Repo.query!("TRUNCATE " <> Enum.join(@tables, ", "))
-               :cleared
-             end)
+    assert {:ok, :cleared} = truncate_tables(runtime)
+    on_exit(&truncate_tables_after_test/0)
 
     {:ok, runtime: runtime}
+  end
+
+  defp truncate_tables(runtime) do
+    Persistence.with_writer(runtime, context_a(), fn ->
+      Repo.query!("TRUNCATE " <> Enum.join(@tables, ", "))
+      :cleared
+    end)
+  end
+
+  defp truncate_tables_after_test do
+    {:ok, runtime} = PersistenceRuntime.start_link(runtime_options())
+
+    try do
+      assert {:ok, :cleared} = truncate_tables(runtime)
+    after
+      Supervisor.stop(runtime)
+    end
   end
 
   test "qualification resources are tenant-owned, contract-valid, and action-bounded" do
     assert :ok = ResourceContract.validate_domain(Chimwemwe.Platform)
 
-    for resource <- [Aggregate, Revision, Segment, FactOperation, Fact, ConsumerBasis] do
+    for resource <- [
+          Aggregate,
+          Revision,
+          Segment,
+          FactOperation,
+          Fact,
+          ConsumerBasis,
+          RetentionControl,
+          RetentionReceipt,
+          ImportRecord,
+          CurrentProjection
+        ] do
       assert :tenant_owned == resource.__chimwemwe_resource_ownership__()
       assert false == ResourceInfo.multitenancy_global?(resource)
     end
@@ -76,6 +109,25 @@ defmodule Chimwemwe.Platform.TemporalQualificationTest do
            ]
 
     for resource <- [Fact, ConsumerBasis] do
+      for action <- ResourceInfo.actions(resource), do: refute(action.public?)
+    end
+
+    assert Enum.map(ResourceInfo.actions(RetentionControl), & &1.name) == [
+             :declare_retention,
+             :place_legal_hold,
+             :release_legal_hold,
+             :erase_retained_content
+           ]
+
+    assert Enum.map(ResourceInfo.actions(ImportRecord), & &1.name) == [
+             :register_baseline,
+             :register_conflict,
+             :reconcile_conflict
+           ]
+
+    assert Enum.map(ResourceInfo.actions(CurrentProjection), & &1.name) == [:rebuild_current]
+
+    for resource <- [RetentionControl, ImportRecord, CurrentProjection] do
       for action <- ResourceInfo.actions(resource), do: refute(action.public?)
     end
 

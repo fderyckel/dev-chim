@@ -28,6 +28,12 @@ defmodule Chimwemwe.Platform.TemporalQualification do
     FactOperationView,
     FactView,
     HistoryView,
+    ImportBoundary,
+    ImportResult,
+    ProjectionBoundary,
+    ProjectionResult,
+    RetentionBoundary,
+    RetentionResult,
     RevisionRead,
     RevisionResult,
     RevisionView
@@ -54,6 +60,54 @@ defmodule Chimwemwe.Platform.TemporalQualification do
   @reason_pattern ~r/^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*$/
   @current_read_capability "platform.temporal_qualification.revisions.read_current"
   @history_read_capability "platform.temporal_qualification.revisions.read_history"
+
+  @doc "Declares the synthetic retention contract for one exact aggregate scope."
+  @spec declare_retention(Supervisor.supervisor(), term(), map()) ::
+          {:ok, RetentionResult.t()} | {:error, term()}
+  def declare_retention(runtime, context, input),
+    do: RetentionBoundary.declare(runtime, context, input)
+
+  @doc "Places one separately authorized legal hold on retained temporal content."
+  @spec place_legal_hold(Supervisor.supervisor(), term(), map()) ::
+          {:ok, RetentionResult.t()} | {:error, term()}
+  def place_legal_hold(runtime, context, input),
+    do: RetentionBoundary.place_hold(runtime, context, input)
+
+  @doc "Releases the exact active legal hold without making content immediately disappear."
+  @spec release_legal_hold(Supervisor.supervisor(), term(), map()) ::
+          {:ok, RetentionResult.t()} | {:error, term()}
+  def release_legal_hold(runtime, context, input),
+    do: RetentionBoundary.release_hold(runtime, context, input)
+
+  @doc "Redacts eligible content, purges the projection, and returns a minimal receipt."
+  @spec erase_retained_content(Supervisor.supervisor(), term(), map()) ::
+          {:ok, RetentionResult.t()} | {:error, term()}
+  def erase_retained_content(runtime, context, input),
+    do: RetentionBoundary.erase(runtime, context, input)
+
+  @doc "Registers source-stamped provenance for one trusted imported baseline."
+  @spec register_baseline_import(Supervisor.supervisor(), term(), map()) ::
+          {:ok, ImportResult.t()} | {:error, term()}
+  def register_baseline_import(runtime, context, input),
+    do: ImportBoundary.register_baseline(runtime, context, input)
+
+  @doc "Records an import conflict without inventing target history."
+  @spec register_import_conflict(Supervisor.supervisor(), term(), map()) ::
+          {:ok, ImportResult.t()} | {:error, term()}
+  def register_import_conflict(runtime, context, input),
+    do: ImportBoundary.register_conflict(runtime, context, input)
+
+  @doc "Appends a reviewed resolution to one exact import conflict."
+  @spec reconcile_import_conflict(Supervisor.supervisor(), term(), map()) ::
+          {:ok, ImportResult.t()} | {:error, term()}
+  def reconcile_import_conflict(runtime, context, input),
+    do: ImportBoundary.reconcile_conflict(runtime, context, input)
+
+  @doc "Rebuilds the disposable current-revision projection from authoritative state."
+  @spec rebuild_current_projection(Supervisor.supervisor(), term(), map()) ::
+          {:ok, ProjectionResult.t()} | {:error, term()}
+  def rebuild_current_projection(runtime, context, input),
+    do: ProjectionBoundary.rebuild(runtime, context, input)
 
   @doc "Records one immutable neutral append-only entry."
   @spec record_fact_entry(Supervisor.supervisor(), term(), map()) ::
