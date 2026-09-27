@@ -1,13 +1,14 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help bootstrap fix format lint check-staged check-staged-unlocked test-fast test docs-check auth-demo web-dev web-core-dev web-check web-e2e web-core-e2e check check-unlocked
+.PHONY: help bootstrap fix format lint check-changed check-staged test-fast test docs-check check-docs check-phase0 check-repository-tools check-core check-web check-tooling check-clean-rehearsal auth-demo web-dev web-core-dev web-check web-e2e web-core-e2e check
 
 help:
 	@echo "bootstrap  Install and prepare local workspace dependencies"
 	@echo "fix        Apply safe formatter and linter fixes"
 	@echo "format     Format maintained source files"
 	@echo "lint       Run non-mutating static checks"
-	@echo "check-staged Run fast checks for staged Elixir changes"
+	@echo "check-changed Run only the suites selected by changes since upstream"
+	@echo "check-staged Run only the suites selected by staged changes"
 	@echo "test-fast  Run the provisional production-core tests only"
 	@echo "test       Run Python and Elixir tests"
 	@echo "docs-check Validate repository and ADR documentation"
@@ -17,7 +18,7 @@ help:
 	@echo "web-check  Verify UI-0 formatting, styles, types, tests, and build"
 	@echo "web-e2e    Exercise the built UI-0 workspace in a real browser"
 	@echo "web-core-e2e Exercise the local UI-1A browser-to-core connection"
-	@echo "check      Run the complete local verification suite"
+	@echo "check      Run every boundary suite (explicit integration use only)"
 
 bootstrap:
 	./bin/bootstrap
@@ -60,16 +61,11 @@ lint:
 	cd clients/web && mise exec -- npm run typecheck
 	cd clients/web/openapi-client-generator && mise exec -- npm run generate:check
 
-check-staged:
-	./bin/with-verification-lock -- $(MAKE) check-staged-unlocked
+check-changed:
+	./bin/check-changed --upstream
 
-check-staged-unlocked:
-	./bin/format-staged-elixir --check
-	mise exec -- env MIX_ENV=test mix compile --warnings-as-errors
-	cd apps/chimwemwe_core && mise exec -- mix credo --strict
-	mise exec -- mix dialyzer
-	$(MAKE) test-fast
-	git diff --cached --check
+check-staged:
+	./bin/check-changed --staged
 
 test-fast:
 	mise exec -- env MIX_ENV=test mix ecto.create --quiet
@@ -87,6 +83,29 @@ test:
 
 docs-check:
 	mise exec -- uv run python tools/check_phase0.py
+
+check-docs: docs-check
+
+check-phase0:
+	./bin/with-verification-lock --resource phase0 -- ./bin/phase0-check
+
+check-repository-tools:
+	mise exec -- uv run ruff format --check tools tests/tools
+	mise exec -- uv run ruff check tools tests/tools
+	mise exec -- uv run pytest tests/tools
+
+check-core:
+	./bin/with-verification-lock --resource core-test -- ./bin/core-check
+
+check-web:
+	./bin/with-verification-lock --resource web-qualification -- $(MAKE) web-e2e web-core-e2e
+
+check-tooling:
+	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/bootstrap bin/check-changed bin/core-check bin/format-staged-elixir bin/phase0-check bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
+	$(MAKE) -n check-changed check-staged
+
+check-clean-rehearsal:
+	./bin/with-verification-lock --resource clean-checkout -- mise exec -- uv run python tools/rehearse_phase0_clean_checkout.py --output spikes/ash-foundation-lab/priv/maintenance/clean-checkout-rehearsal.json
 
 auth-demo:
 	./bin/auth-demo
@@ -111,9 +130,9 @@ web-core-e2e: web-check
 	cd clients/web && mise exec -- npm run test:e2e:ui1-unavailable
 
 check:
-	./bin/with-verification-lock -- $(MAKE) check-unlocked
-
-check-unlocked:
-	./bin/phase0-check
-	./bin/core-check
-	$(MAKE) web-e2e web-core-e2e
+	$(MAKE) check-docs
+	$(MAKE) check-phase0
+	$(MAKE) check-repository-tools
+	$(MAKE) check-core
+	$(MAKE) check-web
+	$(MAKE) check-tooling

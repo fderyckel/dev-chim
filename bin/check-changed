@@ -1,0 +1,164 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+usage() {
+  echo "usage: $0 [--staged|--upstream] [--plan]" >&2
+  exit 64
+}
+
+mode=upstream
+plan_only=false
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --staged)
+      mode=staged
+      ;;
+    --upstream)
+      mode=upstream
+      ;;
+    --plan)
+      plan_only=true
+      ;;
+    *)
+      usage
+      ;;
+  esac
+  shift
+done
+
+repo_root=$(cd "$(dirname "$0")/.." && pwd -P)
+cd "$repo_root"
+
+changed_paths() {
+  case $mode in
+    staged)
+      git diff --cached --name-only --diff-filter=ACMR
+      ;;
+    upstream)
+      upstream=$(git rev-parse --verify '@{upstream}' 2>/dev/null || true)
+
+      if [[ -n $upstream ]]; then
+        base=$(git merge-base "$upstream" HEAD)
+      else
+        base=$(git rev-list --max-parents=0 HEAD | tail -n 1)
+      fi
+
+      git diff --name-only --diff-filter=ACMR "$base" HEAD
+      ;;
+  esac
+}
+
+check_whitespace() {
+  case $mode in
+    staged)
+      git diff --cached --check
+      ;;
+    upstream)
+      upstream=$(git rev-parse --verify '@{upstream}' 2>/dev/null || true)
+
+      if [[ -n $upstream ]]; then
+        base=$(git merge-base "$upstream" HEAD)
+      else
+        base=$(git rev-list --max-parents=0 HEAD | tail -n 1)
+      fi
+
+      git diff --check "$base" HEAD
+      ;;
+  esac
+}
+
+needs_docs=false
+needs_phase0=false
+needs_core=false
+needs_web=false
+needs_repository_tools=false
+needs_tooling=false
+unknown_paths=()
+
+while IFS= read -r path; do
+  [[ -n $path ]] || continue
+
+  case $path in
+    docs/*|README.md)
+      needs_docs=true
+      ;;
+    spikes/ash-foundation-lab/priv/maintenance/clean-checkout-rehearsal.json)
+      needs_docs=true
+      ;;
+    spikes/ash-foundation-lab/*)
+      needs_phase0=true
+      ;;
+    tools/*|tests/tools/*|pyproject.toml|uv.lock)
+      needs_repository_tools=true
+      ;;
+    apps/chimwemwe_core/*|config/*|lib/*|test/*)
+      needs_core=true
+      ;;
+    clients/web/*)
+      needs_web=true
+      ;;
+    mix.exs|mix.lock)
+      needs_phase0=true
+      needs_core=true
+      ;;
+    .githooks/*|bin/*|Makefile|.gitignore)
+      needs_tooling=true
+      ;;
+    *)
+      unknown_paths+=("$path")
+      ;;
+  esac
+done < <(changed_paths)
+
+if [[ ${#unknown_paths[@]} -gt 0 ]]; then
+  echo "Cannot select a verification boundary for:" >&2
+  printf '  %s\n' "${unknown_paths[@]}" >&2
+  echo "Classify these paths before sharing the change." >&2
+  exit 64
+fi
+
+boundaries=()
+$needs_docs && boundaries+=(docs)
+$needs_phase0 && boundaries+=(phase0)
+$needs_repository_tools && boundaries+=(repository-tools)
+$needs_core && boundaries+=(core)
+$needs_web && boundaries+=(web)
+$needs_tooling && boundaries+=(tooling)
+
+if [[ ${#boundaries[@]} -eq 0 ]]; then
+  echo "No changed paths require a boundary suite."
+  exit 0
+fi
+
+if $plan_only; then
+  printf 'Boundaries: %s\n' "${boundaries[*]}"
+  exit 0
+fi
+
+check_whitespace
+
+for boundary in "${boundaries[@]}"; do
+  echo "Running changed boundary: $boundary"
+
+  case $boundary in
+    docs)
+      make check-docs
+      ;;
+    phase0)
+      make check-phase0
+      ;;
+    repository-tools)
+      make check-repository-tools
+      ;;
+    core)
+      make check-core
+      ;;
+    web)
+      make check-web
+      ;;
+    tooling)
+      make check-tooling
+      ;;
+  esac
+done

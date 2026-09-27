@@ -8,9 +8,12 @@
 
 ## Result
 
-The complete current candidate was materialized in a temporary clone as a local-only commit. The clone was clean before bootstrap, remained clean after `./bin/bootstrap`, and remained clean after `make check`. Bootstrap and the full Phase 0, production-core, and UI-0 verification all exited successfully.
+The current candidate is materialized in a temporary clone as a local-only commit. The clone must be
+clean before bootstrap, remain clean after `./bin/bootstrap`, and remain clean after
+`make check-changed`. The rehearsal proves that declared inputs reproduce bootstrap and the suites
+selected by that candidate's changed boundaries; it is not an automatic repository-wide test run.
 
-The rehearsal copies the current tracked patch and every non-ignored untracked source file, commits them only inside the disposable clone, and deletes that clone after the run. It does not commit, clean, or rewrite the source working tree.
+The rehearsal copies the staged candidate into the disposable clone, commits it only there, and deletes that clone after the run. It does not include unrelated unstaged work or commit, clean, or rewrite the source working tree.
 
 ## Reproduction
 

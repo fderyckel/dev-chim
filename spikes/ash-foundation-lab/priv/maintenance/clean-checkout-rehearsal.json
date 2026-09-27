@@ -2,19 +2,18 @@
   "bootstrap": {
     "clean_after": true,
     "command": "./bin/bootstrap",
-    "elapsed_ms": 242371.629,
+    "elapsed_ms": 216181.064,
     "exit_code": 0
   },
   "candidate": {
-    "base_revision": "aea63c0456dcaef24839bf23d17d793fdc9309f2",
-    "candidate_commit": "70ad3afb8e06877b62f82bd9f35134771731ec18",
-    "candidate_tree": "9dc42f2e1a2c58cc29dc5f29e1dd6051f558c0de",
+    "base_revision": "69af8552c85b9a15afaeff973d030effb6c62df6",
+    "candidate_commit": "fcebe86fd9f2b74aa91cdd3e29cf59abfd49a187",
+    "candidate_tree": "7e4f7b30569340d894f46085070fe6d78445d797",
     "clean_before_bootstrap": true,
-    "tracked_patch_applied": true,
-    "untracked_paths_copied": 0
+    "staged_patch_applied": true
   },
   "command": "mise exec -- uv run python tools/rehearse_phase0_clean_checkout.py --output spikes/ash-foundation-lab/priv/maintenance/clean-checkout-rehearsal.json",
-  "elapsed_ms": 973332.589,
+  "elapsed_ms": 223173.997,
   "limits": [
     "The candidate commit exists only inside the deleted temporary clone; the source working tree and history were not changed.",
     "Ignored dependency and build directories may be created by bootstrap and checks; Git source status remained clean.",
@@ -24,22 +23,24 @@
   "rehearsed_on": "2026-09-27",
   "schema_version": 1,
   "source_sha256": {
-    "Makefile": "ba4675cc025b96363b0c6109d4c7b85b5caed45074bf77d5104f62f13e85a6e2",
+    ".githooks/pre-commit": "814c249296a9ca5761438df238374087acd67bc5198f548b69603c26445e049c",
+    ".githooks/pre-push": "d98e077fa4424cde11d4cb821103954785583056114bab2a60e9fa0dc461c6aa",
+    "Makefile": "e06dfedc7294193a16dfa672e6e5150f3ae6b284a99433035607adeb257d6940",
     "bin/bootstrap": "c0cdd41b0e3c08c033cd7aff92bdf63fdec29201021914abf3674cd0fa129bf3",
-    "bin/core-check": "ccbab277fb867658788f6021197e9ff00147567a527bc058ff23ce38e7d68aa3",
-    "bin/phase0-check": "86bee05dea2fac35020e647f556a9769eb152c5fbdf31624450a8ca3fb67a6f6",
-    "tools/rehearse_phase0_clean_checkout.py": "7ee5f8afd710fafc5d0c67861eac4a33f507136173ab01b0dd29956a54d2afe2"
+    "bin/check-changed": "1ba94ffc7e23ee6ee61df01e77209fb7ddb44bcab456bc313d40196f630d78af",
+    "bin/core-check": "166a74f83736dda62b1e89e513761a541ab590861ae0c2ec245685f3a76687eb",
+    "bin/phase0-check": "d5b6de5d67908ce5a8dc5dce4c56d88c8c8b30d81828b046a6deb549df6a555d",
+    "bin/with-verification-lock": "e78f6c8476419a9133bf003f60484f798f784362b03ab3c22dedd97ad687488f",
+    "tools/rehearse_phase0_clean_checkout.py": "d5b10f27751dcfcd6aa766d7816c244f2db48b640d9c6422f60e8e14dd033fae"
   },
   "status": "phase0_clean_checkout_rehearsal_passed",
   "verification": {
     "clean_after": true,
-    "command": "make check",
-    "elapsed_ms": 730195.636,
+    "command": "make check-changed",
+    "elapsed_ms": 5345.69,
     "exit_code": 0,
     "extracted_test_counts": {
-      "elixir_test_results": 255,
-      "repository_tool_tests": 25,
-      "typescript_tests": 6
+      "repository_tool_tests": 25
     }
   }
 }

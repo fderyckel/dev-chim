@@ -17,21 +17,22 @@ git push -u origin main
 
 Do not store tokens in remotes, `.env` files, scripts, or documentation. Prefer the GitHub CLI credential helper when GitHub is selected. For another host, use its supported credential manager or SSH setup.
 
-`make bootstrap` configures the versioned Git hooks. When a commit contains staged Elixir files,
-the pre-commit hook formats and restages them, then runs `make check-staged`. Commits without staged
-Elixir skip that gate. The pre-push hook runs `make check` before Git sends commits. Do not bypass
-either hook to publish a failing change.
+`make bootstrap` configures the versioned Git hooks. The pre-commit hook formats staged Elixir files,
+then runs `make check-staged`; the pre-push hook runs `make check-changed`. Both select only the
+affected boundary suites and always check the relevant diff for whitespace. Do not bypass either
+hook to publish a failing change.
 
 For a short feedback loop before committing, run:
 
 ```sh
-make check-staged
+make check-changed
 ```
 
-It checks formatting of staged Elixir files, compiles with warnings as errors, runs core Credo and
-Dialyzer, runs the fast core test suite, and checks staged whitespace. Dialyzer findings require a
-deliberate code or contract correction; they are not rewritten automatically. This gate
-complements, but never replaces, `make check` before a push.
+It maps changed paths to their owned suites: documentation, Phase 0 Foundation Lab,
+repository tools, production core, browser workspace, or shell tooling. A dependency lock change
+selects both Phase 0 and core because both consume it. An unknown path fails closed until its
+boundary is classified. Dialyzer findings require a deliberate code or contract correction; they
+are not rewritten automatically.
 
 ## Shared-checkout coordination
 
@@ -39,17 +40,21 @@ Use one Git worktree per concurrent coding task. Multiple tasks in one checkout 
 while a check is running and contend for the same Elixir build directory, synthetic test database,
 or browser-test port.
 
-When workers share a checkout or linked worktrees, name one **verification owner** for each final
-candidate. Workers may run focused checks while editing, then report their changed paths and exact
-results to that owner. Only the owner may run `make check`, `make check-staged`, stage, commit, or
-push the candidate. Before the final gate, the owner announces a short write freeze; workers do not
-start migrations, tests, formatting, staging, or writes until that result is reported.
+Workers run focused tests while editing and the one boundary suite selected by their changed paths
+before handoff. They do not run every repository suite by default. A verification owner collects
+the changed-path report and may run an explicit cross-boundary or integration check only when the
+candidate actually spans those boundaries.
 
-`make check` and `make check-staged` acquire the repository's common verification lease. A second
-full gate exits with the current owner's PID, start time, owner label, and command instead of
-contending for shared resources. If the recorded PID has exited, the next gate safely recovers that
-stale lease; malformed lease metadata is left in place for human investigation. The lease does not
-weaken the checks or permit a hook bypass.
+The verification lease is resource-specific: Phase 0, the core synthetic database, the browser
+qualification workspace, and the clean-checkout rehearsal each have independent leases. A second
+user of the same resource exits with the current owner's PID, start time, owner label, and command.
+Unrelated documentation, core, and browser checks may proceed independently. If the recorded PID
+has exited, the next user safely recovers that stale lease; malformed metadata is left in place for
+human investigation. The lease does not weaken a selected check or permit a hook bypass.
+
+Run `make check-clean-rehearsal` only when changing bootstrap, toolchain, Phase 0 verification, or
+clean-checkout inputs. It materializes the candidate and runs `make check-changed` there; it is not
+a routine pre-push or repository-wide check for core, web, or documentation work.
 
 Before making a public repository, select an explicit license and confirm that no architecture document or evidence has incompatible distribution terms.
 
@@ -58,8 +63,8 @@ Before every push:
 ```sh
 git status --short
 git diff --check
-make check
+make check-changed
 git diff --stat
 ```
 
-Do not force-push shared branches, bypass required checks, or rewrite another contributor's work. Configure branch protection and required `make check` status after the remote exists.
+Do not force-push shared branches, bypass required checks, or rewrite another contributor's work. Configure branch protection for the changed-boundary gate after the remote exists.

@@ -29,7 +29,7 @@ learning-institution business module, production identity, public interface, or 
    module or production boundary.
 4. Read [the architecture index](docs/architecture/README.md) and [ADR index](docs/adr/README.md).
 5. Follow [local setup](docs/development/getting-started.md).
-6. Run `make check` before sharing changes.
+6. Run the suite selected by `make check-changed` before sharing changes; reserve `make check` for an explicit integration check.
 
 The execution sequences are in the [Phase 0 implementation plan](docs/plans/phase-0-implementation-plan.md),
 the [Phase 1 core-foundation plan](docs/plans/phase-1-core-foundation-plan.md), and the accepted
@@ -42,6 +42,7 @@ make bootstrap
 make fix
 make format
 make lint
+make check-changed
 make check-staged
 make test-fast
 make test
@@ -56,8 +57,8 @@ make check
 
 These commands are the project contract. Editor tasks and future CI jobs must call them rather than recreating different check sequences.
 `make fix` applies Ruff's safe fixes, then runs the repository-owned Python, Elixir, and web formatters.
-`make check-staged` is the pre-commit Elixir gate: formatting, warnings-as-errors compilation, strict Credo, Dialyzer, core tests, and staged whitespace.
-`make test-fast` is the short production-core feedback loop during development; it does not replace `make check` before sharing a change.
+`make check-changed` selects documentation, Phase 0, repository-tool, core, web, and shell-tooling suites from changed paths. `make check-staged` applies the same policy to staged paths for the pre-commit hook.
+`make test-fast` is the short production-core feedback loop during development; it does not replace the selected core boundary suite before sharing a core change.
 `make web-dev` starts the explicitly synthetic, local-only UI-0 experience at `http://127.0.0.1:3000`.
 `make web-core-dev` starts the guarded UI-1A qualification at
 `http://127.0.0.1:3000/authority/assignments`, backed by a dedicated local synthetic database

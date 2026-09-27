@@ -23,6 +23,7 @@
 
 ```sh
 make fix
+make check-changed
 make check-staged
 make test-fast
 make test
@@ -40,9 +41,11 @@ make check
 Prettier. It intentionally does not rewrite Credo or Dialyzer findings because those tools report
 design, maintainability, and inferred-type questions that require developer intent.
 
-`make check-staged` validates a staged Elixir candidate with formatting, warnings-as-errors
-compilation, strict Credo, Dialyzer, the production-core test suite, and staged whitespace. The
-pre-commit hook invokes it automatically whenever an Elixir file is staged.
+`make check-changed` selects only the suites owned by changed paths since the upstream commit;
+`make check-staged` uses the same selection for staged paths. The pre-commit hook invokes the
+latter after formatting staged Elixir files. A documentation-only change runs documentation checks,
+a core change runs the core suite, and a web change runs the web suite; a lockfile change selects
+both Phase 0 and core.
 
 `make test-fast` creates and migrates the synthetic production-core test database, then runs only the bounded production-core test suite. It is the default short loop for core resource, action, policy, execution-context, descriptor, trusted read-invocation, admission, persistence-routing, and tenant-authority work. It does not run the disposable Ash lab, Python repository checks, generated-artifact drift checks, TypeScript contracts, lint, dependency audit, or static analysis.
 
@@ -61,7 +64,10 @@ three viewports and separately proves the browser's unavailable recovery state. 
 cover denied, retryable, and malformed-contract adapter responses. `make web-core-dev` is the
 supported human-test command for this bounded read-only connection.
 
-Use a focused `mix test path/to/test.exs` command when one file is sufficient during diagnosis. Before sharing any change, run the relevant focused checks and the complete `make check` contract; a passing fast loop is never Phase 0 or architecture evidence by itself.
+Use a focused `mix test path/to/test.exs` command when one file is sufficient during diagnosis.
+Before sharing, run the relevant focused checks and the boundary suite selected by
+`make check-changed`. Run `make check` only for an explicitly requested integration candidate; a
+passing fast loop is never Phase 0 or architecture evidence by itself.
 
 Focused commands:
 
@@ -128,4 +134,7 @@ make web-core-e2e
 - Do not weaken an assertion to make an unsafe implementation pass.
 - Record an intentionally skipped test with its owner and unblock condition.
 
-`make check` is the required pre-push proof. A clean exit means the current Phase 0 working checks and provisional Phase 1 core checks passed; it does not close Phase 0, accept an ADR, or certify later foundation gates that have not been implemented.
+`make check-changed` is the required pre-push proof. A clean exit means the changed boundaries and
+their selected verification passed; it does not close Phase 0, accept an ADR, or certify later
+foundation gates that have not been implemented. `make check` remains an explicit full-integration
+command.

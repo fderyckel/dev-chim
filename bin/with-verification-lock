@@ -2,11 +2,22 @@
 set -euo pipefail
 
 usage() {
-  echo "usage: $0 -- command [argument ...]" >&2
+  echo "usage: $0 [--resource name] -- command [argument ...]" >&2
   exit 64
 }
 
-if [[ $# -lt 2 || $1 != "--" ]]; then
+resource=verification
+
+if [[ ${1:-} == "--resource" ]]; then
+  if [[ $# -lt 4 ]]; then
+    usage
+  fi
+
+  resource=$2
+  shift 2
+fi
+
+if [[ $# -lt 2 || $1 != "--" || ! $resource =~ ^[A-Za-z0-9_-]+$ ]]; then
   usage
 fi
 
@@ -19,7 +30,7 @@ if [[ $git_common_dir != /* ]]; then
   git_common_dir=$(cd "$repo_root/$git_common_dir" && pwd -P)
 fi
 
-lock_dir="$git_common_dir/chimwemwe-verification.lock"
+lock_dir="$git_common_dir/chimwemwe-${resource}.lock"
 owner_file="$lock_dir/owner"
 owner=${CHIMWEMWE_VERIFICATION_OWNER:-${CODEX_THREAD_ID:-unknown}}
 command_description="$*"
@@ -38,7 +49,7 @@ report_live_owner() {
   owner_name=$(read_owner_value owner)
   owner_command=$(read_owner_value command)
 
-  echo "Verification gate already running; refusing a competing run." >&2
+  echo "Verification resource '$resource' is already in use; refusing a competing run." >&2
   echo "Lock: $lock_dir" >&2
   echo "PID: ${owner_pid:-unknown}" >&2
   echo "Started: ${owner_started_at:-unknown}" >&2
@@ -62,7 +73,7 @@ recover_stale_lock() {
     report_live_owner
   fi
 
-  echo "Recovering stale verification lock left by exited PID $owner_pid." >&2
+  echo "Recovering stale '$resource' lock left by exited PID $owner_pid." >&2
   rm -f "$owner_file"
 
   if ! rmdir "$lock_dir"; then
@@ -96,5 +107,5 @@ release_lock() {
 
 trap release_lock EXIT HUP INT TERM
 
-echo "Verification gate lease acquired (owner: $owner)." >&2
+echo "Verification resource '$resource' acquired (owner: $owner)." >&2
 "$@"

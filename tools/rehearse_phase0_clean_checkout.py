@@ -1,4 +1,4 @@
-"""Rehearse bootstrap and the complete check from an isolated clean Git checkout."""
+"""Rehearse bootstrap and selected changed-boundary checks from a clean checkout."""
 
 from __future__ import annotations
 
@@ -6,7 +6,6 @@ import argparse
 import hashlib
 import json
 import os
-import shutil
 import subprocess
 import tempfile
 import time
@@ -84,7 +83,7 @@ def file_sha256(path: Path) -> str:
 
 
 def materialize_candidate(checkout: Path) -> dict[str, Any]:
-    """Create a local-only candidate commit from HEAD plus every current change."""
+    """Create a local-only candidate commit from HEAD plus the staged candidate."""
     run(
         [
             "git",
@@ -96,25 +95,9 @@ def materialize_candidate(checkout: Path) -> dict[str, Any]:
             str(checkout),
         ]
     )
-    patch = run(["git", "diff", "--binary", "HEAD"], cwd=ROOT).stdout
+    patch = run(["git", "diff", "--cached", "--binary"], cwd=ROOT).stdout
     if patch:
         run(["git", "apply", "--binary"], cwd=checkout, input_text=patch)
-
-    raw_untracked = subprocess.run(
-        ["git", "ls-files", "--others", "--exclude-standard", "-z"],
-        check=True,
-        capture_output=True,
-        cwd=ROOT,
-    ).stdout
-    untracked = [Path(item.decode()) for item in raw_untracked.split(b"\0") if item]
-    for relative in untracked:
-        source = ROOT / relative
-        destination = checkout / relative
-        destination.parent.mkdir(parents=True, exist_ok=True)
-        if source.is_symlink():
-            destination.symlink_to(os.readlink(source))
-        else:
-            shutil.copy2(source, destination)
 
     run(["git", "add", "--all"], cwd=checkout)
     staged_tree = run(["git", "write-tree"], cwd=checkout).stdout.strip()
@@ -140,8 +123,7 @@ def materialize_candidate(checkout: Path) -> dict[str, Any]:
         "base_revision": run(["git", "rev-parse", "HEAD"], cwd=ROOT).stdout.strip(),
         "candidate_tree": staged_tree,
         "candidate_commit": candidate_commit,
-        "tracked_patch_applied": bool(patch),
-        "untracked_paths_copied": len(untracked),
+        "staged_patch_applied": bool(patch),
         "clean_before_bootstrap": True,
     }
 
@@ -181,26 +163,33 @@ def rehearse() -> dict[str, Any]:
         if not clean_after_bootstrap:
             raise RehearsalError("bootstrap modified tracked or untracked source files")
 
-        print("clean-checkout: running complete make check", flush=True)
+        print("clean-checkout: running selected changed-boundary checks", flush=True)
         check_environment = os.environ.copy()
         check_environment["CHIMWEMWE_CLEAN_CHECKOUT_REHEARSAL"] = "1"
         check_code, check_output, check_seconds = run_streamed(
-            ["make", "check"], cwd=checkout, env=check_environment
+            ["make", "check-changed"], cwd=checkout, env=check_environment
         )
         clean_after_check = not run(["git", "status", "--porcelain"], cwd=checkout).stdout
         if check_code != 0:
             raise RehearsalError(
-                "clean-checkout make check failed\n" + "\n".join(check_output.splitlines()[-40:])
+                "clean-checkout changed-boundary check failed\n"
+                + "\n".join(check_output.splitlines()[-40:])
             )
         if not clean_after_check:
-            raise RehearsalError("make check modified tracked or untracked source files")
+            raise RehearsalError(
+                "changed-boundary checks modified tracked or untracked source files"
+            )
 
         source_paths = [
             ROOT / "tools/rehearse_phase0_clean_checkout.py",
             ROOT / "Makefile",
             ROOT / "bin/bootstrap",
+            ROOT / "bin/check-changed",
             ROOT / "bin/phase0-check",
             ROOT / "bin/core-check",
+            ROOT / "bin/with-verification-lock",
+            ROOT / ".githooks/pre-commit",
+            ROOT / ".githooks/pre-push",
         ]
         return {
             "schema_version": 1,
@@ -222,7 +211,7 @@ def rehearse() -> dict[str, Any]:
                 "clean_after": clean_after_bootstrap,
             },
             "verification": {
-                "command": "make check",
+                "command": "make check-changed",
                 "exit_code": check_code,
                 "elapsed_ms": round(check_seconds * 1000, 3),
                 "clean_after": clean_after_check,

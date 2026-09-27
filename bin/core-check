@@ -7,7 +7,7 @@ core_dir="$repo_root/apps/chimwemwe_core"
 cd "$repo_root"
 
 echo "[1/9] Phase 1 core shell and formatting"
-shellcheck bin/auth-demo bin/core-check bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
+shellcheck bin/auth-demo bin/check-changed bin/core-check bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
 mise exec -- mix format --check-formatted
 
 echo "[2/9] Phase 1 core compilation"
