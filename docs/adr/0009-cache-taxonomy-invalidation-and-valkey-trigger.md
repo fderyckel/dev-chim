@@ -27,6 +27,40 @@ Caching can improve latency but can also leak restricted data or preserve revoke
 
 Adopt explicit cache classes, ownership, tenant-aware/versioned keys, TTL, invalidation event, bypass, and observability. Placement and module-lifecycle versions participate in keys or namespaces where movement or deactivation could otherwise serve stale data. Begin with public/browser caching where safe and ETS behind an adapter. Do not deploy Valkey until cross-node reuse or coordination has a measured requirement.
 
+## Plain-English summary
+
+### What this means
+
+A cache is a short-lived copy used to make a screen or service faster. Chimwemwe may use those
+copies only under written rules that keep one school's information separate, respect changed
+permissions, and allow the product to fall back safely to the authoritative record.
+
+### What was agreed
+
+- Every cache needs an owner, a data classification, a safe time limit, a way to clear it, and
+  monitoring.
+- Cache keys must keep organisations separate and account for changes such as a tenant move or a
+  module being switched off.
+- Restricted information is not placed in a shared cache by default.
+- If the cache is unavailable, the product reads the authoritative source instead; it must not
+  weaken permission checks to remain fast.
+- The product starts with safe browser caching and a simple in-application cache. A shared cache
+  service such as Valkey is deferred until measurements show it is needed.
+
+### Context
+
+Temporary copies can make frequently used information appear quickly, but an old or wrongly shared
+copy could expose restricted learner information or continue to show access after it has been
+removed. The decision treats correctness and privacy as more important than a speed improvement.
+
+### Examples
+
+- A public, non-sensitive page could be stored briefly so it opens faster for many visitors.
+- If a staff member's access is revoked, a protected view must not keep showing a previously
+  cached result as though the permission still existed.
+- If a school moves to another approved technical placement, affected temporary copies are cleared
+  or separated so an old location cannot serve stale information.
+
 ## Consequences
 
 ### Positive

@@ -29,6 +29,44 @@ Adopt a transactional outbox written with domain state. A versioned envelope inc
 
 Each outbox belongs to a trusted database placement. Dispatchers validate the tenant and current routing version rather than treating an event-supplied destination as authority. Tenant movement must quiesce, drain, or reconcile outbox cursors explicitly so events are neither lost nor processed in two placements.
 
+## Plain-English summary
+
+### What this means
+
+When the product makes an important change, it records the change and the instruction for any
+follow-up work together. This prevents a learner or school record from changing while a needed
+notification, search update, or other follow-up is silently lost—or from sending that follow-up
+when the original change never happened.
+
+### What was agreed
+
+- A committed change creates a durable, minimal event record at the same time as the change.
+- Follow-up workers must be able to retry safely, so receiving the same event more than once does
+  not create duplicate effects.
+- Events carry only the information needed for the follow-up; they do not grant permission or
+  choose where a tenant's data is processed.
+- Staff can observe delayed or failed follow-up work and, under controlled rules, replay it.
+- Moving a tenant between approved technical placements must explicitly protect the event queue
+  against loss or double processing.
+
+### Context
+
+Many useful outcomes happen after a record changes: a notification may be sent, a report view may
+refresh, or an approved integration may be updated. If these are attempted only after the change,
+a failure at exactly the wrong moment can leave the school with an incomplete or misleading
+result. The agreement makes the original change and the durable instruction for follow-up one
+reliable commitment.
+
+### Examples
+
+- If a future approved action changes a learner record and needs to notify an authorised family
+  contact, the record change and the notification instruction are saved together. If the record
+  change fails, no notification instruction is left behind.
+- If a delivery worker crashes after receiving an instruction, it can retry. Its duplicate-safe
+  design prevents the same approved notification from being sent repeatedly.
+- When a school's data is moved to a new approved location, the product reconciles outstanding
+  follow-up work so it is not processed from both the old and new locations.
+
 ## Consequences
 
 ### Positive

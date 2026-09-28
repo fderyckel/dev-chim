@@ -16,14 +16,18 @@ explicit time-bounded access, service actors, external integrations, and governe
 
 ## Institutional context
 
-A tenant is the governed operator, security, and placement boundary. It may own several root
-institutional units. Units form a recursive tenant-local hierarchy with no fixed depth: a
-university may contain schools, faculties, and departments, while a combined school may contain
-kindergarten, middle-school, and high-school units.
+A tenant is the governed security, placement, lifecycle, and data boundary. It may contain several
+legal entities and corporate units as well as several root institutional units. The legal entity,
+not the tenant, carries accountable legal operation. Educational units form a recursive
+tenant-local hierarchy with no fixed depth: a university may contain schools, faculties, and
+departments, while a combined school may contain kindergarten, middle-school, and high-school
+units.
 
-Hierarchy records organizational containment only. Sites, academic affiliations, authorization
-scope, reporting roll-up, configuration adoption, module lifecycle, and physical placement remain
-separate explicit contracts. See [ADR 0025](../adr/0025-learning-institution-operating-system-and-institutional-structure.md).
+Legal relationships, consolidation, corporate and educational hierarchy, and primary legal
+operation remain distinct domain meanings. Sites, academic affiliations, authorization scope,
+reporting and finance roll-up, workflow/configuration adoption, module lifecycle, and physical
+placement remain separate explicit contracts. See
+[ADR 0025](../adr/0025-learning-institution-operating-system-and-institutional-structure.md).
 
 ## System boundary
 

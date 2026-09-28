@@ -1,5 +1,26 @@
+defmodule Chimwemwe.Identity.TestCallbackVerifier do
+  @behaviour Chimwemwe.Identity.CallbackVerifier
+
+  alias Chimwemwe.Identity.Error
+
+  @impl true
+  def verify_code(code, expected_connection_id) do
+    key = {__MODULE__, code}
+
+    case Process.delete(key) do
+      %{connection_id: ^expected_connection_id} = proof -> {:ok, proof}
+      _missing_mismatch_or_replayed -> {:error, %Error{code: :forbidden}}
+    end
+  end
+
+  def allow_once(code, proof), do: Process.put({__MODULE__, code}, proof)
+end
+
 defmodule Chimwemwe.Identity.FoundationTest do
   use ExUnit.Case, async: false
+
+  import Plug.Conn
+  import Plug.Test
 
   alias Ash.Resource.Info
 
@@ -13,6 +34,9 @@ defmodule Chimwemwe.Identity.FoundationTest do
     Invitation,
     InvitationResult,
     LinkResult,
+    PublicCallbackResult,
+    PublicRequestSession,
+    PublicSessionAdapter,
     SessionFoundation,
     SessionResult,
     SessionView,
@@ -22,6 +46,7 @@ defmodule Chimwemwe.Identity.FoundationTest do
     SupportUseResult
   }
 
+  alias Chimwemwe.Identity.TestCallbackVerifier
   alias Chimwemwe.Identity.VerifiedExternalIdentity
 
   alias Chimwemwe.Platform.{
@@ -34,6 +59,7 @@ defmodule Chimwemwe.Identity.FoundationTest do
     TrustedPlacement
   }
 
+  alias Chimwemwe.PublicApi.Router, as: PublicRouter
   alias Chimwemwe.Repo
   alias Ecto.UUID
 
@@ -49,11 +75,45 @@ defmodule Chimwemwe.Identity.FoundationTest do
   @support_use_capability "support.identity.connection.inspect"
 
   setup do
+    previous_cookie_keys =
+      Application.get_env(:chimwemwe_core, :public_session_cookie_keys)
+
+    previous_public_api = Application.get_env(:chimwemwe_core, :public_api)
+
+    Application.put_env(
+      :chimwemwe_core,
+      :public_session_cookie_keys,
+      [String.duplicate("primary-public-cookie-key-", 2)]
+    )
+
     runtime = start_supervised!({PersistenceRuntime, runtime_options()})
+
+    Application.put_env(:chimwemwe_core, :public_api,
+      runtime: runtime,
+      verifier: TestCallbackVerifier,
+      origin: "https://app.example.test"
+    )
+
     clear(runtime)
     fixture = seed(runtime)
 
     on_exit(fn ->
+      if previous_cookie_keys do
+        Application.put_env(
+          :chimwemwe_core,
+          :public_session_cookie_keys,
+          previous_cookie_keys
+        )
+      else
+        Application.delete_env(:chimwemwe_core, :public_session_cookie_keys)
+      end
+
+      if previous_public_api do
+        Application.put_env(:chimwemwe_core, :public_api, previous_public_api)
+      else
+        Application.delete_env(:chimwemwe_core, :public_api)
+      end
+
       {:ok, cleanup_runtime} = PersistenceRuntime.start_link(runtime_options())
       clear(cleanup_runtime)
       Supervisor.stop(cleanup_runtime)
@@ -614,6 +674,391 @@ defmodule Chimwemwe.Identity.FoundationTest do
     assert first == second
   end
 
+  test "completes one provider-neutral callback and revalidates the opaque browser cookie",
+       fixture do
+    %{link: link, proof: verified_proof} = linked_identity(fixture, "public-session-subject")
+    callback_code = "single-use-code-#{UUID.generate()}"
+    TestCallbackVerifier.allow_once(callback_code, verified_proof)
+
+    {:ok, state} =
+      PublicSessionAdapter.issue_sign_in_intent(
+        public_sign_in_intent(fixture, link.id, verified_proof.connection_id)
+      )
+
+    assert {:ok,
+            %PublicCallbackResult{
+              cookie_value: cookie,
+              redirect_to: "/institutional-structure"
+            } = callback} =
+             PublicSessionAdapter.complete_callback(
+               fixture.runtime,
+               TestCallbackVerifier,
+               %{code: callback_code, state: state}
+             )
+
+    refute inspect(callback) =~ cookie
+    refute inspect(callback) =~ verified_proof.subject
+
+    assert {:ok,
+            %PublicRequestSession{
+              session: %SessionView{
+                actor_id: @target_a,
+                membership_id: membership_id,
+                tenant_id: @tenant_a
+              },
+              support: nil
+            } = request} =
+             PublicSessionAdapter.authenticate(
+               fixture.runtime,
+               cookie,
+               :session_read,
+               "en",
+               UUID.generate()
+             )
+
+    assert membership_id == fixture.target_membership_a
+    refute inspect(request) =~ request.session_token
+    refute inspect(request) =~ request.csrf_token
+
+    assert {:error, %Error{code: :forbidden}} =
+             PublicSessionAdapter.complete_callback(
+               fixture.runtime,
+               TestCallbackVerifier,
+               %{code: callback_code, state: state}
+             )
+
+    assert {:error, %Error{code: :forbidden}} =
+             PublicSessionAdapter.authenticate(
+               fixture.runtime,
+               cookie <> "tampered",
+               :session_read,
+               "en",
+               UUID.generate()
+             )
+
+    assert {:ok, :logged_out} = PublicSessionAdapter.logout(fixture.runtime, request)
+
+    assert {:error, %Error{code: :forbidden}} =
+             PublicSessionAdapter.authenticate(
+               fixture.runtime,
+               cookie,
+               :session_read,
+               "en",
+               UUID.generate()
+             )
+  end
+
+  test "rejects changed callback authority, unsafe redirects, and stale membership", fixture do
+    %{link: link, proof: verified_proof} = linked_identity(fixture, "public-negative-subject")
+
+    assert {:error, %Error{code: :invalid_input}} =
+             fixture
+             |> public_sign_in_intent(link.id, verified_proof.connection_id)
+             |> Map.replace!(:redirect_to, "https://attacker.example.test/")
+             |> PublicSessionAdapter.issue_sign_in_intent()
+
+    callback_code = "changed-proof-code-#{UUID.generate()}"
+    changed_proof = %{verified_proof | connection_id: UUID.generate()}
+    TestCallbackVerifier.allow_once(callback_code, changed_proof)
+
+    {:ok, changed_state} =
+      PublicSessionAdapter.issue_sign_in_intent(
+        public_sign_in_intent(fixture, link.id, verified_proof.connection_id)
+      )
+
+    assert {:error, %Error{code: :forbidden}} =
+             PublicSessionAdapter.complete_callback(
+               fixture.runtime,
+               TestCallbackVerifier,
+               %{code: callback_code, state: changed_state}
+             )
+
+    valid_code = "stale-membership-code-#{UUID.generate()}"
+    TestCallbackVerifier.allow_once(valid_code, verified_proof)
+
+    {:ok, state} =
+      PublicSessionAdapter.issue_sign_in_intent(
+        public_sign_in_intent(fixture, link.id, verified_proof.connection_id)
+      )
+
+    {:ok, callback} =
+      PublicSessionAdapter.complete_callback(
+        fixture.runtime,
+        TestCallbackVerifier,
+        %{code: valid_code, state: state}
+      )
+
+    remove_membership(fixture.runtime, fixture.target_membership_a)
+
+    assert {:error, %Error{code: :forbidden}} =
+             PublicSessionAdapter.authenticate(
+               fixture.runtime,
+               callback.cookie_value,
+               :session_read,
+               "en",
+               UUID.generate()
+             )
+  end
+
+  test "accepts the bounded previous cookie key and fails after its removal", fixture do
+    old_key = String.duplicate("old-public-cookie-key-", 2)
+    new_key = String.duplicate("new-public-cookie-key-", 2)
+    Application.put_env(:chimwemwe_core, :public_session_cookie_keys, [old_key])
+
+    %{link: link, proof: verified_proof} = linked_identity(fixture, "rotated-cookie-subject")
+    code = "old-key-code-#{UUID.generate()}"
+    TestCallbackVerifier.allow_once(code, verified_proof)
+
+    {:ok, state} =
+      PublicSessionAdapter.issue_sign_in_intent(
+        public_sign_in_intent(fixture, link.id, verified_proof.connection_id)
+      )
+
+    {:ok, callback} =
+      PublicSessionAdapter.complete_callback(
+        fixture.runtime,
+        TestCallbackVerifier,
+        %{code: code, state: state}
+      )
+
+    Application.put_env(:chimwemwe_core, :public_session_cookie_keys, [new_key, old_key])
+
+    assert {:ok, %PublicRequestSession{}} =
+             PublicSessionAdapter.authenticate(
+               fixture.runtime,
+               callback.cookie_value,
+               :session_read,
+               "en-MW",
+               UUID.generate()
+             )
+
+    Application.put_env(:chimwemwe_core, :public_session_cookie_keys, [new_key])
+
+    assert {:error, %Error{code: :forbidden}} =
+             PublicSessionAdapter.authenticate(
+               fixture.runtime,
+               callback.cookie_value,
+               :session_read,
+               "en-MW",
+               UUID.generate()
+             )
+  end
+
+  test "rejects forged cookie locators and an expired authoritative session", fixture do
+    %{link: link, proof: verified_proof} = linked_identity(fixture, "forged-cookie-subject")
+    code = "forged-cookie-code-#{UUID.generate()}"
+    TestCallbackVerifier.allow_once(code, verified_proof)
+
+    {:ok, state} =
+      PublicSessionAdapter.issue_sign_in_intent(
+        public_sign_in_intent(fixture, link.id, verified_proof.connection_id)
+      )
+
+    {:ok, callback} =
+      PublicSessionAdapter.complete_callback(
+        fixture.runtime,
+        TestCallbackVerifier,
+        %{code: code, state: state}
+      )
+
+    [cookie_key] = Application.fetch_env!(:chimwemwe_core, :public_session_cookie_keys)
+
+    {:ok, envelope} =
+      Phoenix.Token.decrypt(
+        cookie_key,
+        "chimwemwe-public-session-v1",
+        callback.cookie_value,
+        max_age: 12 * 60 * 60
+      )
+
+    forged_cookie =
+      Phoenix.Token.encrypt(
+        cookie_key,
+        "chimwemwe-public-session-v1",
+        %{envelope | actor_id: @target_a_peer},
+        max_age: 12 * 60 * 60
+      )
+
+    assert {:error, %Error{code: :forbidden}} =
+             PublicSessionAdapter.authenticate(
+               fixture.runtime,
+               forged_cookie,
+               :session_read,
+               "en",
+               UUID.generate()
+             )
+
+    expire_session(fixture.runtime, callback.session.id)
+
+    assert {:error, %Error{code: :expired}} =
+             PublicSessionAdapter.authenticate(
+               fixture.runtime,
+               callback.cookie_value,
+               :session_read,
+               "en",
+               UUID.generate()
+             )
+  end
+
+  test "connects callback, current-session, CSRF, and authoritative logout HTTP routes",
+       fixture do
+    %{link: link, proof: verified_proof} = linked_identity(fixture, "public-http-subject")
+    code = "http-code-#{UUID.generate()}"
+    TestCallbackVerifier.allow_once(code, verified_proof)
+
+    {:ok, state} =
+      PublicSessionAdapter.issue_sign_in_intent(
+        public_sign_in_intent(fixture, link.id, verified_proof.connection_id)
+      )
+
+    callback_conn =
+      :get
+      |> conn(
+        "/auth/callback?code=#{URI.encode_www_form(code)}&state=#{URI.encode_www_form(state)}"
+      )
+      |> fetch_query_params()
+      |> put_req_header("accept", "application/json")
+      |> PublicRouter.call(PublicRouter.init([]))
+
+    assert callback_conn.status == 303
+    assert get_resp_header(callback_conn, "location") == ["/institutional-structure"]
+    assert get_resp_header(callback_conn, "cache-control") == ["no-store"]
+    assert get_resp_header(callback_conn, "x-frame-options") == ["DENY"]
+
+    [set_cookie] = get_resp_header(callback_conn, "set-cookie")
+    assert set_cookie =~ "#{PublicSessionAdapter.cookie_name()}="
+    assert set_cookie =~ "; path=/"
+    assert set_cookie =~ "; secure"
+    assert set_cookie =~ "; HttpOnly"
+    assert set_cookie =~ "; SameSite=Lax"
+    refute set_cookie =~ "; domain="
+
+    cookie_header = set_cookie |> String.split(";", parts: 2) |> hd()
+
+    session_conn =
+      :get
+      |> conn("/api/v1/session")
+      |> put_req_header("accept", "application/json")
+      |> put_req_header("cookie", cookie_header)
+      |> PublicRouter.call(PublicRouter.init([]))
+
+    assert session_conn.status == 200
+
+    assert %{
+             "data" => %{
+               "actor_id" => @target_a,
+               "assurance" => "mfa",
+               "csrf_token" => csrf_token,
+               "support" => nil
+             }
+           } = Jason.decode!(session_conn.resp_body)
+
+    denied_logout =
+      :post
+      |> conn("/api/v1/session/logout")
+      |> put_req_header("accept", "application/json")
+      |> put_req_header("cookie", cookie_header)
+      |> PublicRouter.call(PublicRouter.init([]))
+
+    assert denied_logout.status == 403
+
+    logged_out =
+      :post
+      |> conn("/api/v1/session/logout")
+      |> put_req_header("accept", "application/json")
+      |> put_req_header("cookie", cookie_header)
+      |> put_req_header("origin", "https://app.example.test")
+      |> put_req_header("x-csrf-token", csrf_token)
+      |> PublicRouter.call(PublicRouter.init([]))
+
+    assert logged_out.status == 204
+    assert Enum.any?(get_resp_header(logged_out, "set-cookie"), &(&1 =~ "max-age=0"))
+
+    expired_conn =
+      :get
+      |> conn("/api/v1/session")
+      |> put_req_header("accept", "application/json")
+      |> put_req_header("cookie", cookie_header)
+      |> PublicRouter.call(PublicRouter.init([]))
+
+    assert expired_conn.status == 401
+  end
+
+  test "keeps elevated support visible and rechecks the grant on every request", fixture do
+    grantor_session = actor_session(fixture, :admin, "public-support-grantor")
+
+    {:ok, approved} =
+      SupportFoundation.grant(
+        fixture.runtime,
+        context_admin_a(),
+        support_grant_input(grantor_session.token)
+      )
+
+    %{link: link, proof: verified_proof} = linked_identity(fixture, "public-support-actor")
+    code = "support-code-#{UUID.generate()}"
+    TestCallbackVerifier.allow_once(code, verified_proof)
+
+    {:ok, state} =
+      PublicSessionAdapter.issue_sign_in_intent(
+        public_sign_in_intent(fixture, link.id, verified_proof.connection_id)
+      )
+
+    {:ok, callback} =
+      PublicSessionAdapter.complete_callback(
+        fixture.runtime,
+        TestCallbackVerifier,
+        %{code: code, state: state}
+      )
+
+    {:ok, request} =
+      PublicSessionAdapter.authenticate(
+        fixture.runtime,
+        callback.cookie_value,
+        :support_elevate,
+        "en",
+        UUID.generate()
+      )
+
+    assert {:ok, elevated_cookie, %SupportGrantResult{status: :active}} =
+             PublicSessionAdapter.elevate_support(fixture.runtime, request, approved.id)
+
+    assert {:ok,
+            %PublicRequestSession{
+              support: %{
+                grant_id: grant_id,
+                support_actor_id: @target_a,
+                purpose: "Investigate synthetic sign-in failure"
+              }
+            } = elevated} =
+             PublicSessionAdapter.authenticate(
+               fixture.runtime,
+               elevated_cookie,
+               :support_use,
+               "en",
+               UUID.generate()
+             )
+
+    assert grant_id == approved.id
+
+    assert {:ok, %SupportUseResult{grant_id: ^grant_id}} =
+             PublicSessionAdapter.use_support(
+               fixture.runtime,
+               elevated,
+               @support_use_capability
+             )
+
+    expire_support_grant(fixture.runtime, approved.id)
+
+    assert {:error, %Error{code: :expired}} =
+             PublicSessionAdapter.authenticate(
+               fixture.runtime,
+               elevated_cookie,
+               :support_use,
+               "en",
+               UUID.generate()
+             )
+  end
+
   test "approves, activates, uses, replays, and ends one bounded support grant", fixture do
     grantor_session = actor_session(fixture, :admin, "grantor-support-subject")
     support_session = actor_session(fixture, :target, "support-actor-subject")
@@ -1081,6 +1526,20 @@ defmodule Chimwemwe.Identity.FoundationTest do
       capability: Keyword.get(overrides, :capability, @support_use_capability),
       purpose: Keyword.get(overrides, :purpose, "Investigate synthetic sign-in failure"),
       mode: Keyword.get(overrides, :mode, :interactive),
+      idempotency_key: UUID.generate(),
+      causation_id: UUID.generate()
+    }
+  end
+
+  defp public_sign_in_intent(fixture, link_id, connection_id) do
+    %{
+      actor_id: @target_a,
+      tenant_id: @tenant_a,
+      membership_id: fixture.target_membership_a,
+      external_identity_link_id: link_id,
+      connection_id: connection_id,
+      locale: "en",
+      redirect_to: "/institutional-structure",
       idempotency_key: UUID.generate(),
       causation_id: UUID.generate()
     }

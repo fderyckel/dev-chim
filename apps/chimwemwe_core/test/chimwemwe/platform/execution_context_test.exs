@@ -131,10 +131,11 @@ defmodule Chimwemwe.Platform.ExecutionContextTest do
              )
   end
 
-  test "the production Ash domain always runs authorization" do
+  test "the production Ash domains always run authorization" do
     assert Application.fetch_env!(:chimwemwe_core, :ash_domains) == [
              Chimwemwe.Platform,
-             Chimwemwe.Identity
+             Chimwemwe.Identity,
+             Chimwemwe.OrganizationLegal
            ]
 
     assert Application.fetch_env!(:chimwemwe_core, :base_resources) == [
@@ -143,6 +144,8 @@ defmodule Chimwemwe.Platform.ExecutionContextTest do
 
     assert Info.authorize(Chimwemwe.Platform) == :always
     assert Info.require_actor?(Chimwemwe.Platform)
+    assert Info.authorize(Chimwemwe.OrganizationLegal) == :always
+    assert Info.require_actor?(Chimwemwe.OrganizationLegal)
 
     assert MapSet.new(Info.resources(Chimwemwe.Platform)) ==
              MapSet.new([
@@ -171,6 +174,12 @@ defmodule Chimwemwe.Platform.ExecutionContextTest do
                ModuleActivation,
                ModuleWorkItem,
                ExtensionDefinition
+             ])
+
+    assert MapSet.new(Info.resources(Chimwemwe.OrganizationLegal)) ==
+             MapSet.new([
+               Chimwemwe.OrganizationLegal.LegalEntity,
+               Chimwemwe.OrganizationLegal.LegalEntityProfileRevision
              ])
   end
 

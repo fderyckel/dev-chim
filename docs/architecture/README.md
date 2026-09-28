@@ -7,7 +7,7 @@ The platform is a security-first modular monolith around Phoenix, Ash under eval
 
 - [System context](system-context.md)
 - [Identity, session, and support-access decision review](../phase-2/identity-session-and-support-access-decision-review.md)
-- [Learning-institution operating system and recursive institutional structure](../adr/0025-learning-institution-operating-system-and-institutional-structure.md)
+- [Learning-institution operating system with separated corporate/legal and educational structure](../adr/0025-learning-institution-operating-system-and-institutional-structure.md)
 - [Institutional-structure scenario and vocabulary review](../phase-2/institutional-structure-scenario-review.md)
 - [Institutional-structure security, migration, and temporal review](../phase-2/institutional-structure-security-migration-review.md)
 - [Institutional-structure experience evidence](../phase-2/institutional-structure-experience-evidence.md)

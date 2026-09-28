@@ -79,14 +79,75 @@ export type StructureRelationship = Readonly<{
   detail: string;
 }>;
 
+export type ReviewStructureNode = Readonly<{
+  id: string;
+  name: string;
+  meaning: string;
+  reference: string;
+  status: "current" | "closed";
+  children: ReadonlyArray<ReviewStructureNode>;
+}>;
+
 export type MoveImpact = Readonly<{
   meaning: string;
-  outcome: "unchanged" | "requires_reconciliation" | "blocks_move";
+  outcome: "unchanged" | "requires_reconciliation" | "ready" | "blocks_move";
+  detail: string;
+}>;
+
+export type OperatorTransferPreview = Readonly<{
+  id: string;
+  institution: string;
+  from: string;
+  to: string;
+  effectiveOn: string;
+  state: "blocked" | "ready_for_boundary_check";
+  impacts: ReadonlyArray<MoveImpact>;
+}>;
+
+export type OperatorGovernanceStep = Readonly<{
+  label: string;
+  state: "complete" | "current" | "pending";
+  detail: string;
+}>;
+
+export type AccountabilityAction = Readonly<{
+  label: string;
+  outcome: "continues" | "fails_closed";
   detail: string;
 }>;
 
 export type InstitutionalStructureViewData = Readonly<{
   context: PrototypeContext;
+  linkedStructure: Readonly<{
+    legalEntities: ReadonlyArray<ReviewStructureNode>;
+    legalRelationships: ReadonlyArray<StructureRelationship>;
+    corporateUnits: ReadonlyArray<ReviewStructureNode>;
+    corporateOwner: string;
+    responsibility: Readonly<{
+      institution: string;
+      primaryOperator: string;
+      otherRelationships: ReadonlyArray<StructureRelationship>;
+    }>;
+    operatorTransferPreviews: ReadonlyArray<OperatorTransferPreview>;
+    operatorGovernance: Readonly<{
+      workflow: ReadonlyArray<OperatorGovernanceStep>;
+      approvalPaths: ReadonlyArray<StructureRelationship>;
+      evidence: Readonly<{
+        type: string;
+        source: string;
+        reference: string;
+        classification: string;
+        verifiedOn: string;
+      }>;
+      accountabilityReview: Readonly<{
+        institution: string;
+        trigger: string;
+        status: string;
+        actions: ReadonlyArray<AccountabilityAction>;
+        resolutionPaths: ReadonlyArray<string>;
+      }>;
+    }>;
+  }>;
   roots: ReadonlyArray<InstitutionalUnitNode>;
   selectedUnit: Readonly<{
     id: string;

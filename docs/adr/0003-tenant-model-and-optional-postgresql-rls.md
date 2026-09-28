@@ -51,6 +51,44 @@ Decide RLS only after the pressure-test and threat analysis prove connection, jo
 
 Roles, scopes, and capabilities are tenant-defined hierarchical data. School job-title constants are prohibited as the production authorization model.
 
+## Plain-English summary
+
+### What this means
+
+Each school or governed organisation has a protected boundary in Chimwemwe. Its information,
+permissions, and supporting services must stay separate from other organisations' information,
+whether several organisations share technical infrastructure or receive more dedicated isolation.
+
+### What was agreed
+
+- Every organisation's records carry its own required tenant identity, and the system must reject
+  work when that identity or its trusted placement is missing, wrong, or stale.
+- The product can use shared databases, a dedicated database, or a fully dedicated technical
+  environment, while keeping the same separation rules in every case.
+- The system—not a request from a browser or integration—chooses the approved place where an
+  organisation's data is handled.
+- The choice of shared or dedicated infrastructure is based on measured workload, recovery,
+  legal, isolation, and cost needs, not simply on the number of students.
+- PostgreSQL row-level security is an optional additional safeguard to be adopted only when its
+  operating safety has been proven; it does not replace normal permission checks.
+- Roles are defined by each organisation's needs rather than hard-coded job titles.
+
+### Context
+
+Learner and school information must never spill from one organisation into another through a
+screen, background task, report, file, integration, or support tool. At the same time, a small
+school should not automatically need the cost and complexity of a separate full technical stack,
+while a larger or more regulated organisation may need stronger isolation.
+
+### Examples
+
+- Several smaller schools may share a database while every query still carries and checks the
+  school's identity, so one school's staff cannot retrieve another school's records.
+- A school with demanding reporting, recovery, or contractual-isolation needs could be moved to
+  its own approved database without changing how staff use the product.
+- A browser request cannot ask to use another school's database. If the trusted routing record is
+  unavailable or out of date, the action is refused instead of guessing.
+
 ## Consequences
 
 ### Positive

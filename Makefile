@@ -51,6 +51,7 @@ lint:
 	mise exec -- mix format --check-formatted
 	mise exec -- env MIX_ENV=test mix compile --warnings-as-errors
 	mise exec -- env MIX_ENV=test mix run tools/check_ui1_openapi.exs
+	mise exec -- env MIX_ENV=test mix run tools/check_public_openapi.exs
 	cd apps/chimwemwe_core && mise exec -- mix ash_postgres.generate_migrations --check --migration-path priv/repo/migrations --snapshot-path priv/resource_snapshots
 	cd apps/chimwemwe_core && mise exec -- mix credo --strict
 	cd apps/chimwemwe_core && mise exec -- mix hex.audit

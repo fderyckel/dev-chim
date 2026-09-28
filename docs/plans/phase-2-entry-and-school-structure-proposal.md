@@ -15,21 +15,22 @@
 ## Purpose
 
 Phase 2 should cross one deliberate threshold: Chimwemwe moves from a qualified platform core to
-its first real learning-institution domain module without weakening the tenant, authority,
-evidence, recovery, or client contracts established in Phases 0 and 1.
+its first linked corporate/legal and learning-institution domain modules without weakening the
+tenant, authority, evidence, recovery, or client contracts established in Phases 0 and 1.
 
 The proposed sequence is:
 
 1. **Phase 2.0 — close the entry gates.** Finish the operational, identity, support-access, temporal,
    and public-interface contracts required to run a learning-institution module safely.
-2. **Phase 2.1 — introduce recursive institutional structure.** Let a tenant describe one or more
-   root learning institutions, their nested institutional units, sites, stable codes, operating
-   time zones, local terminology, and explicit cross-cutting affiliations.
+2. **Phase 2.1 — introduce separated corporate/legal and educational structure.** First let a
+   tenant describe legal entities, corporate units, and their reviewed relationships; then add
+   root learning institutions, nested educational units, exact primary legal operation, sites,
+   stable codes, operating time zones, local terminology, and explicit affiliations.
 
-Institutional structure is intentionally first. It gives later calendar, admissions, enrolment,
-programmes, classes, attendance, communication, and reporting modules a stable
-`institutional_unit_id` without prematurely introducing learner, guardian, staff, curriculum, or
-academic-calendar records.
+Corporate/legal structure is intentionally the first business module, followed by educational
+structure. Together they give later finance, calendar, admissions, enrolment, programmes, classes,
+attendance, communication, and reporting modules stable, exact references without prematurely
+introducing learner, guardian, staff, curriculum, or academic-calendar records.
 
 This is not a proposal for a generic `setup` module. Provisioning, identity, authority, module
 lifecycle, institutional structure, and later learning workflows keep separate owners and
@@ -65,15 +66,18 @@ The platform can safely host its first learning-institution module. In practical
 
 ### Phase 2.1 outcome
 
-An authorized tenant operator can establish and maintain one or more root institutional units,
-nested units at any reviewed depth, and the sites at which they operate. A permitted staff member
-can inspect that structure through an intentional browser workflow. Every unit remains
-tenant-qualified, historically explainable, and usable as a stable reference by later modules.
+Authorized actors can establish and maintain legal entities, nested corporate units, one or more
+root educational institutions, nested educational units at any reviewed depth, exact primary
+legal-operation relationships, and the sites at which institutions operate. A permitted staff
+member can inspect the linked structures through an intentional browser workflow. Every identity
+remains tenant-qualified, historically explainable, and usable as a stable reference by later
+modules.
 
-Organizational hierarchy has **no authorization effect**. Parentage never grants a capability,
-expands record scope, selects a database, activates a module, turns a unit into a site, widens a
-report, or creates live configuration inheritance. Exact-unit and descendant authorization,
-reporting, and configuration semantics require separate explicit contracts.
+Legal ownership/control, consolidation, legal responsibility, and corporate or educational
+hierarchy have **no authorization effect**. They never grant a capability, expand record scope,
+select a database, activate a module, turn a unit into a site, widen a report, or create live
+configuration inheritance. Exact-identity and descendant authorization, reporting, finance, and
+configuration semantics require separate explicit contracts.
 
 ## Reference-derived requirements
 
@@ -276,34 +280,59 @@ session and public action contract.
 negative tests, representative user review, accessibility evidence, deployment rehearsal, and
 `make check`.
 
-## Phase 2.1 — recursive institutional structure
+## Phase 2.1 — separated corporate/legal and educational structure
 
 ### Proposed module declaration
 
-| Property | Proposal |
-| --- | --- |
-| Stable module key | Candidate `institution.structure`; the accepted ADR owns the final key |
-| Owner | Learning-institution operations domain owner with product and platform engineering |
-| Initial version | `1.0.0`, declared in the immutable release manifest |
-| Declared module dependencies | None in v1; lifecycle, authority, trusted persistence, temporal/evidence contracts, and outbox are kernel prerequisites rather than business-module dependencies |
-| Entitlement | Independent tenant entitlement; commercial policy remains outside authorization |
-| Activation | Explicit, typed prerequisites; activation grants no actor capability |
-| Deactivation | Close ordinary writes, retain structure and required reads/history, drain consumers, retain cursors and ownership, and support compatible reactivation |
-| Data class | Confidential by default for real institutional operating data; purely synthetic metadata may remain Internal, and any personal contact field requires separate minimization review |
-| Downstream contract | Stable tenant-qualified `institutional_unit_id` and exact, versioned reads; no raw-table, hierarchy-derived authority, or path-based identity |
+| Property | Corporate/legal structure proposal | Educational-structure proposal |
+| --- | --- | --- |
+| Stable module key | Candidate `organization.legal`; the accepted ADR owns the final key | Candidate `institution.structure`; the accepted ADR owns the final key |
+| Owner | Corporate governance and finance domain ownership with product and platform engineering | Learning-institution operations domain ownership with product and platform engineering |
+| Initial version | `1.0.0`, declared in the immutable release manifest | `1.0.0`, declared in the immutable release manifest |
+| Declared module dependencies | No business-module dependency; platform lifecycle, authority, trusted persistence, temporal/evidence contracts, and outbox remain kernel prerequisites | Depends on the compatible active corporate/legal module and the same kernel prerequisites |
+| Entitlement | Independent tenant entitlement; commercial policy remains outside authorization | Independent tenant entitlement; legal-module entitlement or activation grants no institutional capability |
+| Activation | Explicit typed prerequisites; activation grants no actor capability | Requires a compatible legal module and still grants no actor capability |
+| Deactivation | Close ordinary writes, retain legal structure and required reads/history, drain consumers, retain cursors and ownership, and support compatible reactivation | Close ordinary writes, retain educational structure and required reads/history, drain consumers, retain cursors and ownership, and support compatible reactivation |
+| Data class | Confidential by default for real registration, control, ownership, and operating data; contact or beneficial-owner data requires separate minimization and classification | Confidential by default for real institutional operating data; purely synthetic metadata may remain Internal, and any personal contact field requires separate minimization review |
+| Downstream contract | Stable tenant-qualified legal-entity and corporate-unit identifiers plus exact versioned reads; no relationship-derived authority | Stable tenant-qualified institutional-unit identifier plus exact classification and versioned reads; no raw-table, hierarchy-derived authority, or path-based identity |
 
-The exact module key and declaration become stable only through acceptance of [ADR 0025](../adr/0025-learning-institution-operating-system-and-institutional-structure.md). The module
-must not be placed in the mandatory kernel merely because most tenants will use it.
+The exact module keys and declarations become stable only through acceptance of
+[ADR 0025](../adr/0025-learning-institution-operating-system-and-institutional-structure.md).
+Neither module belongs in the mandatory kernel merely because most tenants will use it.
 
 ### Candidate authoritative model
 
-ADR 0025 should pressure-test this bounded recursive candidate rather than either a flat school
-table or a universal organization graph:
+ADR 0025 should pressure-test two linked but independently governed structures rather than either
+a flat school table or a universal organization graph.
 
-- **`InstitutionalUnit`** — the stable identity for a root learning institution or a nested
-  institutional unit. It owns an opaque UUID, current code, operating status, default IANA time
-  zone, terminology-profile reference, and optimistic version. Later modules reference its UUID,
-  not its name or hierarchy path.
+The corporate/legal model contains:
+
+- **`LegalEntity`** — the stable identity for a registered company, trust, foundation, public body,
+  or other legally accountable organization. Registration, jurisdiction, status, and official
+  profile change without replacing its UUID.
+- **`LegalEntityRelationship`** — an effective-dated, code-owned typed relationship such as
+  ownership, control, or consolidation. Legal ownership is not forced into one tree: joint or
+  multiple ownership may coexist with one optional primary consolidation parent used for bounded
+  navigation and financial reporting.
+- **`CorporateUnit`** — an internal organizational structure, such as a regional office, finance
+  department, shared-service centre, or operating division. Corporate units may nest, but every
+  published corporate unit belongs to one exact legal entity and cannot be a legal operator.
+- **`EducationalInstitutionLegalResponsibility`** — the effective-dated relationship assigning one
+  exact primary accountable legal operator to an educational institution. Other typed legal
+  relationships, including governance, employment, property, funding, contracting, and data-control
+  responsibility, remain separate and may name different legal entities.
+
+The educational-structure model contains:
+
+- **`InstitutionalUnit`** — the stable physical-model candidate for either an educational
+  institution or an educational unit. The code-owned classification is behaviorally meaningful:
+  an educational institution is a recognized learning establishment with an effective primary
+  legal operator; an educational unit is a contained division, faculty, school, or department
+  covered through its containing institution. A contained establishment with distinct legal
+  accountability is classified as an educational institution, not merely relabelled as a unit.
+  The record owns an opaque UUID, current code, operating status, default IANA time zone,
+  terminology-profile reference, and optimistic version. Later modules reference its UUID and
+  exact classification, never its name or hierarchy path.
 - **`InstitutionalUnitProfileRevision`** — attributable, immutable revisions of durable unit
   meaning where history matters, including official and display names and the accepted structural
   classification. A code, label, or type change does not replace the unit identity. Current-only
@@ -325,11 +354,20 @@ table or a universal organization graph:
   Labels may change what people see, never resource identity, action names, capability keys, event
   types, API fields, or policy behavior.
 
-The tenant itself is the operating boundary, so a synthetic global "all organizations" root is
-unnecessary. Schools, colleges, faculties, departments, and age-phase divisions may be nested
-units when they are structurally meaningful. Programmes, cohorts, courses, sites, legal entities,
-external partners, reporting groups, and access scopes are not smuggled in as untyped tree nodes;
-each requires its owning domain meaning.
+The tenant is the security, placement, lifecycle, and data boundary; a legal entity is the
+accountable operator. A synthetic global "all organizations" node is unnecessary in either
+structure. Schools, colleges, faculties, departments, and age-phase divisions may be nested when
+they are educationally meaningful. Programmes, cohorts, courses, sites, legal entities, corporate
+units, external partners, reporting groups, and access scopes are never smuggled into the
+educational tree as untyped nodes.
+
+Every published educational institution has exactly one active primary legal operator for any
+given date. An educational unit resolves legal accountability through its containing educational
+institution. A move that might change that resolution must show the before-and-after operator and
+block until every legal, records, workflow, finance, and safeguarding effect is classified. A
+draft or migration candidate may remain unresolved, but it cannot be published or receive real
+operational records. Changing legal operator, ownership, consolidation, corporate parentage, or
+educational parentage never changes the affected stable identities or rewrites history.
 
 The unit time zone is a default for presenting and preparing local work. A later published academic
 calendar records its own explicit IANA zone and never follows a unit-profile or parent change
@@ -339,6 +377,13 @@ silently.
 
 The ADR should confirm a small code-owned vocabulary, expected to be equivalent to:
 
+- `organization.legal.entities.read` — read exact permitted legal-entity context;
+- `organization.legal.entities.manage` — register and revise legal entities;
+- `organization.legal.relationships.manage` — manage accepted ownership, control, and
+  consolidation relationships;
+- `organization.legal.corporate_units.manage` — manage internal corporate units and parentage;
+- `organization.legal.responsibility.manage` — manage primary-operator and other accepted legal
+  responsibility relationships;
 - `institution.structure.read` — read current permitted structure;
 - `institution.structure.history.read` — read bounded revisions and ended parentage or
   associations;
@@ -355,6 +400,13 @@ learner, guardian, or support role constant appears in production policy.
 
 The initial public/domain surface should contain named outcomes, expected to be equivalent to:
 
+- `register_legal_entity`, `revise_legal_entity_profile`, and `close_legal_entity`;
+- `establish_legal_entity_relationship`, `end_legal_entity_relationship`, and
+  `set_primary_consolidation_parent` for accepted types;
+- `register_corporate_unit`, `revise_corporate_unit`, `place_corporate_unit`, and
+  `move_corporate_unit`;
+- `assign_primary_legal_operator`, `change_primary_legal_operator`, and named actions for other
+  accepted legal responsibilities;
 - `register_institutional_unit`, `revise_institutional_unit_profile`,
   `publish_institutional_unit`, and `close_institutional_unit`;
 - `place_institutional_unit`, `preview_institutional_unit_move`, and
@@ -373,33 +425,44 @@ unbounded organization listing, or hierarchy-derived authority lookup.
 
 1. Every row, action, query, relationship, event, job, cache key, projection, import mapping, and
    telemetry record is tenant-qualified.
-2. Compound database constraints reject cross-tenant profile, parentage, site, association,
+2. Compound database constraints reject cross-tenant legal-entity, corporate-unit, legal
+   relationship, legal-responsibility, institutional profile, parentage, site, association,
    affiliation, activation, and evidence references even through alternate writes.
-3. Institutional-unit identity is an immutable UUID. Human codes are normalized under the
-   accepted uniqueness scope; a code change is named, versioned, collision-checked, and preserves
-   mapping history.
-4. Time zones are valid IANA identifiers. The server never substitutes its own zone or accepts a
+3. Legal-entity, corporate-unit, and institutional-unit identities are immutable UUIDs. Human
+   codes are normalized under their accepted scopes. A code or registration change is named,
+   versioned, collision-checked, and preserves mapping history.
+4. Every published corporate unit belongs to one exact legal entity. Every published educational
+   institution has one active primary legal operator for its effective dates. An educational unit
+   resolves through an exact containing institution; ambiguous or missing resolution fails closed.
+5. Legal-entity ownership/control is a typed relationship graph. An optional primary consolidation
+   parent is only a bounded navigation and reporting choice; it does not erase other relationships,
+   create legal ownership, or grant authority. Corporate and educational canonical parentage remain
+   separate acyclic structures.
+6. Time zones are valid IANA identifiers. The server never substitutes its own zone or accepts a
    request-supplied zone as authority for an already published downstream record.
-5. Canonical parentage has at most one active parent, stays inside one tenant, has no fixed depth,
-   and rejects direct, indirect, and concurrent cycles. Effective associations do not overlap
+7. Canonical corporate and educational parentage each have at most one active parent, stay inside
+   one tenant, have no fixed depth, and reject direct, indirect, and concurrent cycles. Effective
+   associations do not overlap
    where their declared cardinality forbids it.
-6. Hierarchy, site membership, shared branding, terminology, reporting roll-up, configuration
-   inheritance, and authorization scope are separate semantics. None is inferred from another.
-7. A hierarchy move cannot silently widen exact-unit or descendant authorization, reporting,
-   configuration, integration, or retained-data scope. Every registered effect is previewed and
-   reconciled or the move is blocked.
-8. Closing or deactivating a unit does not erase its stable identity, history, mappings, audit,
-   outbox facts, or references from later retained records.
-9. Events contain stable identifiers and minimal change facts, not names, addresses, relationship
+8. Legal, corporate, and educational hierarchy, legal responsibility, site membership, shared
+   branding, terminology, reporting roll-up, configuration inheritance, and authorization scope
+   are separate semantics. None is inferred from another.
+9. A legal, corporate, or educational hierarchy move, legal-operator change, or consolidation
+   change cannot silently widen exact-unit or descendant authorization, reporting, configuration,
+   workflow, integration, finance, or retained-data scope. Every registered effect is previewed
+   and reconciled or the change is blocked.
+10. Closing or deactivating a legal entity, corporate unit, or educational unit does not erase its
+   stable identity, history, mappings, audit, outbox facts, or references from retained records.
+11. Events contain stable identifiers and minimal change facts, not names, addresses, relationship
    graphs, or translated labels unless a specific classified consumer contract requires them.
 
 ## Phase 2.1 implementation sequence
 
-### Slice 2.1-A — scenarios, vocabulary, and ADR
+### Slice 2.1-A — linked-structure scenarios, vocabulary, and ADR
 
 **Release level:** L0.
 
-Use at least the eight scenarios required by ADR 0025, including:
+Use the educational scenarios required by ADR 0025 plus a corporate/legal scenario, including:
 
 1. one independent kindergarten operating at one site;
 2. one combined school containing kindergarten, middle-school, and high-school units;
@@ -409,66 +472,84 @@ Use at least the eight scenarios required by ADR 0025, including:
 6. one cross-cutting programme or service without a second canonical parent;
 7. cross-tenant, direct-cycle, indirect-cycle, and concurrent-cycle attempts; and
 8. proof that parentage and moves do not grant access, activate modules, change placement, widen
-   reports, or apply configuration implicitly.
+   reports, or apply configuration implicitly; and
+9. nested legal entities, multiple ownership, an optional consolidation parent, nested corporate
+   units, two institutions sharing one operator, a contained institution with its own operator,
+   distinct property/employment relationships, and an effective operator transfer.
 
-Test official and local names, multilingual labels, bounded tree navigation, a closed unit,
-migration from at least one current source, and the distinction between institutions, sites,
-programmes, and access scopes. Compare external interoperability profiles and source-system shapes
-only as mappings or operational reference patterns, not as internal authority.
+Test official and local names, multilingual labels, bounded tree navigation, closed entities and
+units, migration from at least one current source, and the distinction between legal entities,
+corporate units, educational institutions, educational units, sites, programmes, and access
+scopes. Compare external interoperability profiles and source-system shapes only as mappings or
+operational reference patterns, not as internal authority.
 
-**Exit evidence:** accepted ADR 0025; agreed unit/profile/parentage/site/affiliation meanings;
-correction and retention disposition; hierarchy-navigation prototype; representative domain-owner
-review; threat-model evidence; and a recorded entry-gate disposition for Slice 2.1-B.
+**Exit evidence:** accepted ADR 0025; agreed legal-entity, corporate-unit, educational-unit,
+operator-responsibility, parentage, site, and affiliation meanings; correction and retention
+disposition; linked-structure navigation prototype; representative domain-owner review;
+threat-model evidence; and a recorded entry-gate disposition for Slice 2.1-B.
 
 The [institutional-structure decision evidence plan](../phase-2/institutional-structure-decision-evidence.md)
 defines the six approval gates, required scenario fields, representative contexts, TM-17/AC-18
 review, migration and lifecycle disposition, experience checks, and accountable decision record.
 Creating that plan does not satisfy its gates or accept ADR 0025.
 
-### Slice 2.1-B — first vertical institutional-unit aggregate
+### Slice 2.1-B — first vertical legal-entity aggregate
 
 **Release level:** L1 after the required Phase 2.0 foundation gates are named as satisfied.
 
-Implement the module declaration, `InstitutionalUnit`, the smallest justified profile/history
-representation, one `register_institutional_unit` action, one
-`revise_institutional_unit_profile` action, and one exact current read. Route all operations through
-trusted context, current writer admission, module gates, capability checks, optimistic concurrency,
-exact idempotency, minimized audit, and transactional outbox.
+Implement the corporate/legal module declaration, `LegalEntity`, the smallest justified
+profile/history representation, one `register_legal_entity` action, one
+`revise_legal_entity_profile` action, and one exact current read. Route all operations through
+trusted context, current writer admission, module gates, capability checks, optimistic
+concurrency, exact idempotency, minimized audit, and transactional outbox.
 
 **Exit evidence:** generated migration/snapshot review; positive, denied, missing-context,
 cross-tenant, alternate-write, stale/concurrent, exact-replay, changed-replay, rollback, and
 deactivated-module tests; checked descriptor evidence if exposed; and `make check`.
 
-### Slice 2.1-C — canonical parentage
+The [Slice 2.1-B evidence](../phase-2/legal-entity-foundation-evidence.md) records the bounded L1
+entry and completed proof. It intentionally stops before Slice 2.1-C and before any connected
+public workflow.
 
-Add `InstitutionalUnitParentage` with the accepted current and historical rules. Prove several
-roots, arbitrary reviewed depth, stable identity through a move, one active parent, same-tenant
-containment, direct/indirect/concurrent cycle rejection, bounded traversal, and absence of implicit
-authorization, reporting, configuration, module, or placement effects.
+### Slice 2.1-C — legal relationships and corporate units
 
-### Slice 2.1-D — sites and associations
+Add only the accepted `LegalEntityRelationship` types, the optional primary consolidation parent,
+and `CorporateUnit` with its legal-entity membership and canonical parentage. Prove joint or
+multiple ownership without pretending it is a tree, bounded consolidation navigation, several
+roots, stable identities through reorganization, same-tenant relationships, direct/indirect/
+concurrent cycle treatment where a relationship type requires acyclicity, and no implicit
+authorization, reporting, configuration, module, or placement effect.
 
-Add `Site` and `InstitutionalUnitSiteAssociation` with the accepted cardinality and effective-time
-rules. Prove multiple sites, a shared site if the ADR accepts it, primary-site succession, overlap
-rejection, closure behavior, history access, and deterministic current resolution.
+### Slice 2.1-D — educational institutions, units, and legal responsibility
 
+Implement the educational-structure module declaration and the smallest accepted
+`InstitutionalUnit` representation with distinct educational-institution and educational-unit
+semantics. Add the exact effective primary-operator relationship for institutions and resolution
+through the containing institution for units. Prove that publication fails closed without one
+unambiguous operator, an operator transfer preserves both identities and history, and activation or
+legal-module access grants no educational capability.
+
+### Slice 2.1-E — educational parentage, sites, terminology, and affiliations
+
+Add `InstitutionalUnitParentage`, `Site`, `InstitutionalUnitSiteAssociation`, the bounded
+terminology profile, and only the affiliation types accepted by Slice 2.1-A. Prove several roots,
+arbitrary reviewed depth, a contained institution, stable identity and legal-impact preview through
+a move, one active canonical parent, same-tenant containment, cycle rejection, multiple and shared
+sites, locale fallback, allowed affiliation endpoints, and the absence of implicit legal,
+canonical-parent, authority, reporting, workflow, or configuration effects.
+
+A new relationship type is code-reviewed schema/behavior, not arbitrary tenant executable logic.
 Do not add buildings, rooms, facilities maintenance, transport, geofencing, maps, or attendance
 location rules.
 
-### Slice 2.1-E — terminology and institutional affiliations
-
-Add the bounded terminology profile and only the affiliation types accepted by Slice 2.1-A. Prove
-locale fallback, label/version compatibility, allowed endpoints, cardinality, cycle rules, and the
-absence of canonical-parent, authority, reporting, or implicit configuration effects.
-
-A new relationship type is code-reviewed schema/behavior, not arbitrary tenant executable logic.
-
 ### Slice 2.1-F — lifecycle, consumers, correction, and recovery
 
-Exercise the real module through entitlement, activation, ordinary use, controlled drain,
+Exercise both real modules through entitlement, dependency-aware activation, ordinary use,
+controlled drain,
 mandatory work, compatible reactivation, outbox dispatch, consumer replay, and reconciliation.
-Rehearse backup/restore and rebuild any disposable structure projection. Apply the domain-specific
-retention and correction rules accepted in Slice 2.1-A.
+Rehearse backup/restore and rebuild every disposable structure projection. Apply the
+domain-specific retention and correction rules accepted in Slice 2.1-A and prove that deactivating
+either module neither erases history nor silently leaves the dependent module operational.
 
 This is the point at which Phase 2.0's neutral contracts prove that they work for a real business
 module; failures reopen the applicable entry gate rather than being waived for the module.
@@ -479,10 +560,13 @@ module; failures reopen the applicable entry gate rather than being waived for t
 
 Create a browser structure workspace optimized for learning-institution operations:
 
-- an overview of permitted institutional roots, nested units, and status;
-- an exact unit detail with bounded parent/child context, sites, time zone, codes, terminology, and
-  affiliations;
+- separate but linked views of permitted legal entities, corporate units, educational
+  institutions, educational units, and status;
+- an exact legal or educational detail with bounded parent/child context and the applicable typed
+  relationships, primary operator, sites, time zone, codes, terminology, and affiliations;
 - safe hierarchy move preview with written downstream-impact and conflict status;
+- safe legal-operator and consolidation-change previews that do not present either structure as
+  authority;
 - guided named-action forms with review, conflict, retry, and recovery states; and
 - written lifecycle and connection status in addition to colour.
 
@@ -495,11 +579,12 @@ or JSON editor is prohibited.
 **Release level:** L3, only after deployment, reviewer, support, recovery, and data-class gates pass.
 
 Build a source-specific shadow importer behind a migration ledger. It reports counts, stable-ID and
-code mappings, duplicate codes, invalid time zones, missing or ambiguous parents, roots, depth,
-unresolved sites, relationship cycles, source hierarchy/default assumptions, and conflicts. It
-never resolves conflicts by last-write-wins, turns a source parent relation into an access grant,
-or treats a site, programme, or reporting group as an institutional unit without an explicit
-mapping disposition.
+code mappings, duplicate registrations or codes, invalid time zones, missing or ambiguous legal
+operators and parents, roots, depth, unresolved sites, relationship cycles, source hierarchy/default
+assumptions, and conflicts. It never resolves conflicts by last-write-wins, treats a source company
+as both legal entity and educational institution without explicit evidence, turns a source parent
+relation into an access grant, or treats a site, programme, or reporting group as an institutional
+unit without an explicit mapping disposition.
 
 Run compare-only, then repeatable import, then authoritative read-back and reconciliation. A pilot
 names its tenant, data classes, support model, rollback point, success measures, expiry, and
@@ -509,15 +594,17 @@ decision owner. General availability requires a later explicit decision.
 
 Before Phase 2.1 is called complete, the evidence set includes:
 
-- one accepted ADR 0025 and institutional-structure module declaration;
-- representative domain-owner approval of the unit/parentage/site/affiliation meanings and user
-  journey across materially different learning institutions;
+- one accepted ADR 0025 and separate corporate/legal and educational-structure module declarations;
+- representative domain-owner approval of legal-entity, corporate-unit, educational-unit,
+  operator-responsibility, parentage, site, and affiliation meanings and the linked user journey
+  across materially different learning institutions;
 - tenant/capability negatives for every action and read, including non-disclosing cross-tenant and
   cross-unit cases;
-- database-enforced tenant, identity, code, time-zone, parentage, cycle, association, affiliation,
-  and lifecycle invariants;
-- proof that parentage and moves do not silently widen authorization, reporting, configuration,
-  module, placement, site, or retained-data meaning;
+- database-enforced tenant, identity, registration, code, time-zone, legal responsibility,
+  parentage, cycle, association, affiliation, and lifecycle invariants;
+- proof that legal relationships, consolidation, corporate or educational parentage, operator
+  changes, and moves do not silently widen authorization, reporting, configuration, workflow,
+  module, placement, site, finance, or retained-data meaning;
 - concurrency, idempotency, state/audit/outbox atomicity, dispatch, retry, replay, drain,
   reactivation, restore, and reconciliation proof;
 - migration provenance and unresolved-conflict reporting;
@@ -792,6 +879,15 @@ rather than demanding form-filling. Drafting starts immediately; formal publicat
 claims require resolved alignment. This section records future product requirements only. It does
 not add curriculum, programme, course, lesson, assessment, compliance, or reporting scope to Phase
 2.1.
+
+**Consolidated product disposition — approved.** On 2026-09-27, François, as Project Owner,
+approved the future programme, curriculum, course, offering, section, teaching-team, enrolment
+boundary, calendar/scheduling, assessment-ownership, and closure/rollover direction recorded in
+this section. The approval fixes the product meanings and usability principles for later module
+design; it does not authorize those modules, accept their detailed workflows, expand Slice 2.1, or
+substitute for ADR 0025's representative and accountable review gates. Each owning module must
+still define and validate its named actions, authorization, temporal semantics, data policy,
+interfaces, and executable evidence before implementation or production use.
 
 ## Recommended implementation order after this proposal
 

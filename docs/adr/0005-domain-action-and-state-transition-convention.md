@@ -29,6 +29,40 @@ Adopt versioned named actions with typed inputs, actor and tenant requirements, 
 
 Slice 1C implements a read-only production-core invocation seam that derives actor and tenant from validated execution context, admits only public named Ash reads in a governed domain, and exposes no caller-controlled Ash options. This accepted ADR still does not authorize a state-changing invocation API by itself. The first write path requires resource-specific persistence, migration, authorization, concurrency, idempotency, outbox, and recovery evidence.
 
+## Plain-English summary
+
+### What this means
+
+Important changes are expressed as clear, named actions—such as “record attendance” or “approve
+a correction”—rather than as a generic instruction to edit a record. Each action has its own
+rules about who may do it, what must be true first, and what evidence is kept.
+
+### What was agreed
+
+- Every state-changing action has a defined purpose, inputs, permissions, checks, handling for
+  simultaneous changes, record of what happened, and follow-up effects.
+- The same rules apply whichever approved screen, integration, or interface starts the action;
+  hiding a button is not treated as permission control.
+- A general-purpose public “change any record” route is not authorised by this decision.
+- The current read-only connection does not itself allow data changes. Each future write action
+  still needs its own persistence, authorization, retry, audit, notification, and recovery proof.
+
+### Context
+
+Generic edit functions can make it easy to bypass the real rules around sensitive school records:
+who may act, whether the change is valid, what happens if two people act together, and how the
+organisation can later understand what changed. Named actions make that intent and protection
+visible before a change is allowed.
+
+### Examples
+
+- “Record attendance” could require an authorised staff member, the correct school context, a
+  valid attendance date, and an audit entry. A generic edit form could not bypass those checks.
+- If two staff members try to correct the same item, the action can identify the conflict instead
+  of silently overwriting one person's work.
+- If someone repeats the same approved request because their connection dropped, the action can
+  return the original committed result rather than creating duplicate records or notifications.
+
 ## Consequences
 
 ### Positive

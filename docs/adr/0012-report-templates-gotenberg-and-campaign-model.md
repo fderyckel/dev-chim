@@ -31,6 +31,44 @@ Every report definition selects a versioned, policy-protected dataset or read ac
 
 This is a reporting implementation seam, not a second domain model or a general CQRS subsystem. PostgreSQL state and the transactional outbox remain authoritative, projections never authorize state changes, and a report template cannot choose its repository or bypass the named dataset contract.
 
+## Plain-English summary
+
+### What this means
+
+The product has not yet chosen the software that will create large batches of school reports. It
+has agreed the safeguards that any future reporting solution must provide: reports must be
+repeatable, protected, trackable, and able to run in manageable batches without disrupting daily
+school work.
+
+### What was agreed
+
+- This decision is deferred: Gotenberg/Chromium is a candidate, not an approved or implemented
+  report-rendering service.
+- Future reports need versioned templates and definitions, so the organisation can identify
+  exactly how a past report was produced.
+- Large report campaigns must run as bounded background work with progress, cancellation, retry,
+  checksums, quotas, fair scheduling, and a durable output manifest.
+- A report may use only an approved, permission-protected dataset or read action. It cannot use
+  arbitrary database tables or user-supplied SQL.
+- Report copies and projections may help with heavy historical reporting, but they never become
+  the source of truth or grant access to change records.
+
+### Context
+
+Schools may need to create many sensitive reports at once. Producing them synchronously could
+slow down ordinary work, while an unversioned template would make it impossible to explain or
+reproduce a report later. The team needs a representative report and workload evidence before
+choosing the rendering technology responsibly.
+
+### Examples
+
+- A future end-of-term campaign could create one report per eligible learner in controlled
+  batches, showing progress and retrying only the items that failed.
+- If a parent asks how a historical report was produced, the retained template version and output
+  manifest could show which approved definition created it.
+- A report template could request an approved “attendance summary” dataset, but it could not
+  freely query every learner table in the system.
+
 ## Consequences
 
 ### Positive

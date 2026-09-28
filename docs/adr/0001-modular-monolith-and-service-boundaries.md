@@ -36,6 +36,42 @@ Activation and deactivation are named, auditable, idempotent actions. Dependenci
 
 Tenant variation uses tenant-defined roles and access domains, typed configuration, governed profiles, localization, and approved integrations. Customer-specific branches, copied modules, arbitrary tenant code, and tenant-selected deployment units are prohibited.
 
+## Plain-English summary
+
+### What this means
+
+Chimwemwe will be built as one well-organized product, rather than many separately run products.
+It can have distinct capabilities, such as attendance or reporting, but they share the same
+security, records, and operating rules.
+
+### What was agreed
+
+- The core product is one common release with clearly separated modules, not a collection of
+  independent services from the start.
+- A school may use only the modules it is entitled to and has activated, but activation does not
+  give any person permission to use them.
+- A module can be stopped safely without silently deleting the school's retained records or
+  audit history.
+- A specialised tool, such as a scheduling or analytics service, may be added later only with a
+  controlled connection to the core; it cannot become an independent source of school truth.
+- The product will not create one custom code branch or copied module for each customer.
+
+### Context
+
+Schools need different combinations of capabilities, while learners' records and access rules
+must remain dependable. Running a separate custom system for every school, or splitting an early
+product into many independently operated systems, would make that harder to govern, secure, and
+maintain.
+
+### Examples
+
+- A school could activate an approved attendance module when it is entitled to it. Staff would
+  still need the right role or capability before they could record or view attendance.
+- If that school later deactivates the module, new routine work would stop in a controlled way,
+  while the retained records needed for audit, legal duties, or recovery would remain protected.
+- A future reporting service could receive approved information through a defined connection, but
+  it would not be allowed to decide who may change the original learner record.
+
 ## Consequences
 
 ### Positive

@@ -1,17 +1,21 @@
 # Institutional-structure scenario and vocabulary review
 
-- Status: Engineering walkthrough complete; accountable G1 review remains open
+- Status: Product Owner review and technical linked scenario addendum recorded; named
+  domain/platform G1 reviews remain open
 - Date: 2026-09-27
 - Gate: ADR 0025 G1
 - Scope: Logical contract only; no persistence, production route, module, or real data
-- Accountable reviewers still required: Product owner, named institutional-structure domain owner,
-  and platform engineering
+- Accountable reviewers still required: Named corporate governance/finance and institutional-
+  structure domain owners, plus platform engineering
 
 ## Outcome
 
-The eight required synthetic contexts can be represented by ADR 0025 without weakening tenant
-isolation, stable identity, single-parent canonical containment, or the separation of hierarchy
-from authority. The walkthrough narrows two previously open vocabulary questions:
+The original eight educational contexts, the approved standalone primary and secondary contexts,
+and [LS-01 through LS-10](linked-structure-scenario-addendum.md) can be represented by amended ADR
+0025 without weakening
+tenant isolation, stable identity, legal responsibility, single-parent canonical educational
+containment, or the separation of any structure from authority. The walkthrough narrows two
+previously open educational-vocabulary questions:
 
 - the initial code-owned structural classifications are `institution` and
   `organizational_unit`; tenant-controlled localized labels such as university, faculty, school,
@@ -22,9 +26,11 @@ from authority. The walkthrough narrows two previously open vocabulary questions
   key. Historical and imported aliases retain source system, source identifier, snapshot, and
   mapping revision.
 
-These are proposed G1 dispositions until the accountable reviewers named above record approval.
-An objection that changes tenant ownership, UUID identity, canonical parentage, or hierarchy's
-non-authority rule returns ADR 0025 to design work.
+On 2026-09-27, François, as Product Owner, approved these dispositions and the linked corporate/
+legal refinements recorded below. G1 remains open until the other accountable reviewers named
+above record approval. An objection that changes tenant ownership, UUID identity, legal
+responsibility, canonical parentage, or either hierarchy's non-authority rule returns ADR 0025 to
+design work.
 
 ## Fixed synthetic identity and language fixture
 
@@ -37,6 +43,8 @@ alias, name, code, label, or rendered path.
 | `T-A` | `a0000000-0000-4000-8000-000000000001` | Tenant containing the reviewed scenarios |
 | `T-B` | `b0000000-0000-4000-8000-000000000001` | Foreign tenant used only for denial tests |
 | `U-EARLY` | `11000000-0000-4000-8000-000000000001` | Independent early-childhood institution |
+| `U-PRIMARY` | `11100000-0000-4000-8000-000000000001` | Standalone primary institution |
+| `U-SECONDARY` | `11200000-0000-4000-8000-000000000001` | Standalone secondary institution |
 | `U-COMBINED` | `12000000-0000-4000-8000-000000000001` | Combined-school root |
 | `U-KG` | `12000000-0000-4000-8000-000000000011` | Kindergarten division |
 | `U-MIDDLE` | `12000000-0000-4000-8000-000000000012` | Middle-school division |
@@ -52,6 +60,10 @@ alias, name, code, label, or rendered path.
 | `SITE-CITY` | `54000000-0000-4000-8000-000000000001` | Site shared by college roots |
 | `AFF-01` | `61000000-0000-4000-8000-000000000001` | Shared-service affiliation |
 | `AFF-JOINT` | `62000000-0000-4000-8000-000000000001` | Joint-programme affiliation candidate |
+| `LE-GROUP` | `71000000-0000-4000-8000-000000000001` | Legal entity used as optional consolidation parent |
+| `LE-OPS` | `71000000-0000-4000-8000-000000000002` | Primary legal operator for several institutions |
+| `LE-PROPERTY` | `71000000-0000-4000-8000-000000000003` | Separate property-owning legal entity |
+| `CU-SHARED` | `72000000-0000-4000-8000-000000000001` | Corporate shared-services unit belonging to `LE-OPS` |
 
 The fixture includes tenant-controlled localized presentation values `en: School` and
 `fr: École` for one `organizational_unit`. Both renderings resolve the same UUID and code-owned
@@ -63,6 +75,8 @@ parent rule.
 | Scenario | Fixed synthetic shape | Expected outcome | Security, history, and migration disposition |
 | --- | --- | --- | --- |
 | S1 — independent early-childhood institution | Tenant `T-A`; root `U-EARLY`; site `SITE-RIVER`; local label “Early Learning Centre” | `U-EARLY` is an `institution` root with no fabricated global parent. The site is linked separately. | Existing creates no authority or module activation. Source type and site evidence remain separate migration fields. |
+| S1P — standalone primary/early-years institution | Root `U-PRIMARY` with early-years and primary educational units and one primary legal operator | The institution stands alone without a combined-school parent; its educational units resolve legal accountability through it. | Age-phase labels create no new structural classes or fixed role; operator and educational parentage remain separate. |
+| S2S — standalone secondary institution | Root `U-SECONDARY` with subject departments, examination context, and one primary legal operator | The institution stands alone without a primary division; departments remain educational units rather than programmes or courses. | Academic calendar, timetable, assessment, reporting, and access remain separately owned meanings. |
 | S2 — combined school | Root `U-COMBINED`; child units `U-KG`, `U-MIDDLE`, and `U-HIGH`; shared site `SITE-CENTRAL` | All divisions are `organizational_unit` records under one root. A rename keeps the UUID; a move is a governed parentage change. | Branding, reporting, calendars, access, and site use require explicit owning contracts. No value follows parentage implicitly. |
 | S3 — university | Root `U-UNIV`; schools `U-LS` and `U-CE`; nested department `U-IE` | Arbitrary reviewed depth and local labels are represented without a fixed type ladder. Repeated codes are valid under different parents. | Moving `U-IE` preflights every registered consumer. Multiple calendars remain explicit adoptions, not inherited structure. |
 | S4 — college/community-college group | Roots `U-COLLEGE-A` and `U-COLLEGE-B`; shared site `SITE-CITY`; shared-service affiliation `AFF-01` | Several roots coexist without an `All Organizations` node. The site is many-to-many and the service is a typed affiliation. | Neither link creates a second canonical parent, access scope, reporting roll-up, or tenant placement. |
@@ -70,12 +84,15 @@ parent rule.
 | S6 — matrix relationship | Joint programme `AFF-JOINT` connects `U-IE` and `U-COLLEGE-A` | A code-owned `joint_programme` affiliation connects exact endpoints without adding a parent. | The edge has its own direction, lifecycle, authorization, and cycle rules. It grants no access or enrolment meaning. |
 | S7 — invalid structure | Cross-tenant parent, self-parent, indirect cycle, and two racing reciprocal moves | Every write path rejects the same invalid outcome without disclosing the foreign unit. | Compound tenant constraints and writer-side tenant-scoped serialization are mandatory L1 proof; application validation alone is insufficient. |
 | S8 — no implicit effects | Create or move `U-IE` below a visible or privileged parent | The preview classifies authorization, reporting, configuration/calendar, module/placement, and unknown consumers independently. | No implicit effect is allowed. `unknown` blocks the move; explicit descendant scopes are revalidated on the writer before commit. |
+| S9 — linked corporate/legal and educational structures | `LE-GROUP` consolidates `LE-OPS` and `LE-PROPERTY`; `LE-OPS` has another joint owner not in the consolidation tree; `CU-SHARED` belongs to `LE-OPS`; `LE-OPS` operates `U-COMBINED` and `U-COLLEGE-A`; a contained institution has its own operator; `LE-PROPERTY` owns a site; one institution later transfers operator | Legal entities, corporate units, educational institutions/units, and sites retain separate identities. Every published institution resolves one primary operator; other legal relationships coexist. | Consolidation is not ownership evidence or authority. Operator transfer and moves are effective-dated, preserve history, and block on unknown finance, workflow, records, safeguarding, report, or access effects. |
 
 ## Action, read, and navigation outcomes
 
 | Scenario | Proposed actions | Expected current and historical reads | User-navigation outcome | Engineering disposition |
 | --- | --- | --- | --- | --- |
 | S1 | Register `U-EARLY`; associate `SITE-RIVER` | Current unit and site association resolve independently; the unit has no parentage history beyond its root observation | Shows one root without presenting tenant or site as its parent | Representable; early-childhood review open |
+| S1P | Register `U-PRIMARY`; register its educational units; assign primary operator | Current institution, contained units, and exact operator resolve through separate reads | Shows a standalone primary context without fabricating a combined-school ancestor | Representable; primary/early-years review open |
+| S2S | Register `U-SECONDARY`; register departments; assign primary operator | Current institution, departments, and exact operator resolve independently of future academic records | Shows a standalone secondary context and distinguishes departments from courses/programmes | Representable; secondary review open |
 | S2 | Register three divisions; rename and preview moving `U-MIDDLE` | Current read shows revised profile and active parent; exact profile revision and effective parentage reads preserve earlier meaning | Nested units and the shared site remain visibly separate | Representable; combined-school review open |
 | S3 | Register schools and department; recode or move `U-IE` | Current read resolves by UUID; exact revision and effective parentage reads preserve the prior code and parent | Bounded university/school/department context shows arbitrary reviewed depth | Representable; university review open |
 | S4 | Register two roots; associate `SITE-CITY`; establish `AFF-01` | Current root summary, site association, and affiliation are separate named reads; no fabricated parent history exists | Several roots appear without an `All Organizations` node | Representable; college/community-college review open |
@@ -83,11 +100,21 @@ parent rule.
 | S6 | Preview and establish `AFF-JOINT`; later end it | Current and effective affiliation reads identify exact endpoints and lifecycle; containment reads are unchanged | Affiliation appears outside the canonical tree | Representable subject to affiliation-type domain review |
 | S7 | Attempt cross-tenant parentage, direct/indirect cycles, and racing reciprocal moves | Rejected attempts create no parentage interval or successful outbox fact; authorized current reads remain unchanged | Denied/conflict states disclose no foreign or hidden unit | Fail-closed design specified; executable L1 proof required |
 | S8 | Create or move beneath a visible parent while registered impacts are evaluated | Current access, report, adoption, lifecycle, placement, site, and records meanings remain unchanged unless their owner records explicit reconciliation | Move preview names `unchanged`, `requires reconciliation`, and `blocks move`; it exposes no commit control | Fail-closed design specified; executable consumer proof required |
+| S9 | Register legal entities and corporate unit; establish ownership/control; select consolidation parent; assign and later change primary operator | Exact legal, corporate, operator, and educational histories resolve independently; no relationship is reconstructed from a rendered tree | Separate linked trees show primary operator and secondary legal relationships without implying access or ownership from consolidation | Product direction and technical prototype prepared; finance/domain review and executable proof required |
 
 ## Cross-scenario vocabulary
 
-The two initial structural classifications answer only how the unit participates in canonical
-containment:
+The linked model first distinguishes four domain meanings:
+
+| Concept | Meaning | Explicit non-meaning |
+| --- | --- | --- |
+| `LegalEntity` | A registered legally accountable organization with stable identity | Not a tenant, educational institution, corporate unit, access scope, or automatic consolidation parent |
+| `CorporateUnit` | An internal business structure belonging to one legal entity and optionally nested beneath another corporate unit | Not a legal person or eligible primary legal operator |
+| educational institution | A recognized learning establishment with one effective primary legal operator | Not necessarily a root; not the legal entity itself |
+| educational unit | A contained learning structure whose legal accountability resolves through its containing institution | Not independently legally accountable; distinct accountability requires institution classification |
+
+The two `InstitutionalUnit` classifications answer how the educational identity participates in
+canonical educational containment:
 
 | Classification | Meaning | Explicit non-meaning |
 | --- | --- | --- |
@@ -96,7 +123,8 @@ containment:
 
 The code-owned set is deliberately small. A later need for behaviorally distinct classifications
 requires evidence and an ADR update; adding a display label does not extend the set. Legal entities,
-sites, programmes, cohorts, courses, reporting groups, and access scopes remain separate identities.
+corporate units, sites, programmes, cohorts, courses, reporting groups, and access scopes remain
+separate identities.
 
 Current sibling-code uniqueness is a usability constraint, not an identity guarantee. Root codes
 use the tenant's root set as their sibling scope. Closed or superseded codes and source aliases may
@@ -104,7 +132,7 @@ overlap; all external references use the UUID. A move that would create a curren
 is refused until the operator chooses a new code or resolves the existing one through a named
 action.
 
-## IS-01 through IS-12 disposition
+## IS-01 through IS-16 disposition
 
 | Position | Engineering disposition | Evidence in this walkthrough | Approval state |
 | --- | --- | --- | --- |
@@ -120,17 +148,23 @@ action.
 | IS-10 | Retain | S5 and the separate assurance/migration review classify profile, parentage, site, affiliation, closure, and evidence layers. | Awaiting domain and records review |
 | IS-11 | Narrow | Current codes are sibling-scoped, mutable, non-identifying; source aliases are qualified and retained. | Awaiting accountable review |
 | IS-12 | Retain | No storage optimization is selected at L0; PostgreSQL remains authoritative and projections disposable. | Awaiting platform review and later measurement |
+| IS-13 | Add | S9 and the vocabulary table separate legal entities, corporate units, educational institutions, and educational units without a universal organization type. | Product Owner approved; awaiting domain/platform review |
+| IS-14 | Add | S9 requires one effective primary operator per published institution; units resolve through a containing institution and distinct accountability requires institution classification. | Product Owner approved; awaiting corporate/institutional review |
+| IS-15 | Add | S9 permits multiple ownership plus one optional consolidation parent and nests corporate units beneath an exact legal entity. | Product Owner approved; awaiting finance/domain review |
+| IS-16 | Add | S9 treats ownership, consolidation, operator responsibility, corporate and educational parentage, and authority as separate effective-dated meanings with impact checks. | Product Owner approved; awaiting security/platform review |
 
 ## G1 disposition
 
-The engineering walkthrough and recommended decisions are complete. G1 is **not passed** until the
-product owner, a named institutional-structure domain owner, and platform engineering record their
-review. Representative-context validation remains a separate G2 gate and may require this record
-to change.
+The educational walkthrough, Product Owner review, and technical linked scenario addendum are
+prepared. Corporate governance/finance, institutional-domain, and platform-engineering reviews
+remain open, so G1 is **not passed**. Representative-context validation remains a separate G2 gate
+and may require this record or the addendum to change.
 
 ## Related records
 
 - [ADR 0025](../adr/0025-learning-institution-operating-system-and-institutional-structure.md)
 - [Decision evidence plan](institutional-structure-decision-evidence.md)
+- [Linked-structure scenario addendum](linked-structure-scenario-addendum.md)
 - [Security, migration, and temporal review](institutional-structure-security-migration-review.md)
+- [Representative and accountable review packet](institutional-structure-review-packet.md)
 - [Experience and representative-review evidence](institutional-structure-experience-evidence.md)

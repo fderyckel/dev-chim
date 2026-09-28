@@ -12,6 +12,7 @@ defmodule Chimwemwe.Identity.SupportFoundation do
     Evidence,
     InternalWriter,
     SupportGrantResult,
+    SupportSessionView,
     SupportUseResult
   }
 
@@ -54,6 +55,7 @@ defmodule Chimwemwe.Identity.SupportFoundation do
     :grantor_session_token,
     :idempotency_key
   ]
+  @validate_keys [:grant_id, :purpose, :session_token]
 
   @doc "Approves one bounded support grant through an independently authenticated grantor."
   @spec grant(Supervisor.supervisor(), term(), map()) ::
@@ -77,6 +79,15 @@ defmodule Chimwemwe.Identity.SupportFoundation do
   def use_grant(runtime, context, input) do
     with {:ok, input} <- normalize_use(input) do
       write(runtime, context, &use_write(&1, input))
+    end
+  end
+
+  @doc "Rechecks the active grant bound to one current support session."
+  @spec validate_active(Supervisor.supervisor(), term(), map()) ::
+          {:ok, SupportSessionView.t()} | {:error, term()}
+  def validate_active(runtime, context, input) do
+    with {:ok, input} <- normalize_validate(input) do
+      write(runtime, context, &validate_active_write(&1, input))
     end
   end
 
@@ -121,6 +132,27 @@ defmodule Chimwemwe.Identity.SupportFoundation do
   defp use_write(context, input) do
     with :ok <- lock_writes(context.tenant_id) do
       use_transaction(context, input)
+    end
+  end
+
+  defp validate_active_write(context, input) do
+    with :ok <- lock_writes(context.tenant_id),
+         {:ok, grant} <- lock_grant(context.tenant_id, input.grant_id),
+         :ok <- ensure(grant.status == "active", :forbidden),
+         :ok <- ensure(grant.support_actor_id == context.actor_id, :forbidden),
+         :ok <- ensure(not_expired?(grant.expires_at), :expired),
+         :ok <- ensure(grant.purpose == input.purpose, :forbidden),
+         {:ok, session} <-
+           validate_session(context, token_digest(input.session_token), context.actor_id),
+         :ok <- ensure(session.id == grant.session_id, :forbidden) do
+      {:ok,
+       %SupportSessionView{
+         grant_id: grant.id,
+         support_actor_id: grant.support_actor_id,
+         purpose: grant.purpose,
+         expires_at: utc(grant.expires_at),
+         capability_scope: grant.capability_scope
+       }}
     end
   end
 
@@ -791,6 +823,15 @@ defmodule Chimwemwe.Identity.SupportFoundation do
          idempotency_key: idempotency_key,
          causation_id: causation_id
        }}
+    end
+  end
+
+  defp normalize_validate(input) do
+    with {:ok, input} <- exact_input(input, @validate_keys),
+         {:ok, grant_id} <- uuid(input.grant_id),
+         {:ok, purpose} <- bounded(input.purpose, 3, 240),
+         {:ok, session_token} <- token(input.session_token) do
+      {:ok, %{grant_id: grant_id, purpose: purpose, session_token: session_token}}
     end
   end
 

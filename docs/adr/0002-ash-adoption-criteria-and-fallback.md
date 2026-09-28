@@ -30,6 +30,43 @@ Conditionally adopt Ash as the default framework for the authoritative applicati
 
 Apply the base-resource convention and automated resource-contract audit described by [ADR 0019](0019-domain-model-authoring-and-governed-metadata.md) before adding a persistent resource. Thin Phoenix/Ecto or SQL adapters remain permitted only at inventoried boundaries that preserve trusted context, Ash authorization, transaction, tenant, and recovery contracts. A condition failure blocks the affected capability; pervasive failure requires this ADR to be superseded with the explicit Phoenix/Ecto domain-service fallback.
 
+## Plain-English summary
+
+### What this means
+
+Ash is the main technical framework chosen to help build the product's rules, permissions, and
+interfaces consistently. It is a conditional choice: it may be used only while the agreed safety
+and operability checks continue to pass.
+
+### What was agreed
+
+- Ash is the default framework for the authoritative core, following the recorded pressure tests.
+- Eight named production conditions remain binding. If a condition for a capability is not met,
+  that capability must stay closed rather than being released with a known gap.
+- The project will not maintain two competing production frameworks at the same time.
+- Small adapters around the framework are allowed only when they keep the same tenant,
+  authorization, transaction, and recovery protections.
+- If Ash proves unsuitable in a broad or critical way, the project must make a new formal
+  decision to move to the documented Phoenix/Ecto fallback before dependent school features are
+  built.
+
+### Context
+
+A framework can make it easier to build consistent, secure features, but choosing one too early
+can make future change expensive. The team therefore tested Ash against the risks that matter
+most here—such as keeping schools' data separate, enforcing permissions, handling changes safely,
+and supporting upgrades—before conditionally accepting it.
+
+### Examples
+
+- Before a future learner-record feature depends on Ash, its relevant production conditions must
+  have evidence. If the evidence is missing, the feature is blocked rather than rushed out.
+- A developer adding a new kind of record would use the agreed framework conventions and checks,
+  so the same protection rules apply through different screens or integrations.
+- If a serious limitation meant these protections could not be maintained without widespread
+  workarounds, the project would formally switch to the documented fallback instead of quietly
+  mixing two incompatible approaches.
+
 ## Consequences
 
 ### Positive

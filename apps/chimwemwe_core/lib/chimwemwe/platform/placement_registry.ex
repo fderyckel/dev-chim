@@ -9,6 +9,7 @@ defmodule Chimwemwe.Platform.PlacementRegistry do
 
   use GenServer
 
+  alias Ash.Type.UUID
   alias Chimwemwe.Platform.{ExecutionContext, PersistenceError, TrustedActor, TrustedPlacement}
 
   @placement_keys [:placement_ref, :profile, :repository, :routing_version, :tenant_id]
@@ -40,6 +41,22 @@ defmodule Chimwemwe.Platform.PlacementRegistry do
     end)
   end
 
+  @doc false
+  @spec current_placement(GenServer.server(), term()) ::
+          {:ok, TrustedPlacement.t()} | {:error, PersistenceError.t()}
+  def current_placement(server, tenant_id) do
+    case UUID.cast_input(tenant_id, []) do
+      {:ok, tenant_id} -> fetch_current_placement(server, tenant_id)
+      _invalid -> persistence_error(:route_not_available)
+    end
+  end
+
+  defp fetch_current_placement(server, tenant_id) do
+    GenServer.call(server, {:current_placement, tenant_id})
+  catch
+    :exit, _reason -> persistence_error(:retryable_dependency)
+  end
+
   @impl true
   def init(options) do
     with :ok <- validate_option_keys(options),
@@ -61,6 +78,17 @@ defmodule Chimwemwe.Platform.PlacementRegistry do
 
         _missing_stale_or_forged ->
           persistence_error(:route_not_available)
+      end
+
+    {:reply, reply, placements}
+  end
+
+  @impl true
+  def handle_call({:current_placement, tenant_id}, _from, placements) do
+    reply =
+      case Map.fetch(placements, tenant_id) do
+        {:ok, %{placement: placement}} -> {:ok, placement}
+        :error -> persistence_error(:route_not_available)
       end
 
     {:reply, reply, placements}

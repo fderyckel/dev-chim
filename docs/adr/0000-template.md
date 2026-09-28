@@ -24,6 +24,28 @@ What problem, constraint, or costly uncertainty requires a durable decision?
 
 State the selected option and its boundaries. Use Proposed language until review accepts it.
 
+## Plain-English summary
+
+### What this means
+
+Explain the decision in everyday language for a non-technical reader. State the practical effect,
+not the implementation detail.
+
+### What was agreed
+
+List the commitments, limits, and important things this decision does not authorize. Keep the
+status accurate: a Proposed or Conditionally Accepted decision is not a completed implementation.
+
+### Context
+
+Explain the real-world problem, risk, or choice that made the decision necessary.
+
+### Examples
+
+Give two or three short, concrete examples of how the decision changes a school, staff member,
+learner, family, or platform team's experience. Mark illustrative examples as examples; do not
+present them as implemented features unless they are implemented.
+
 ## Consequences
 
 ### Positive
@@ -53,4 +75,3 @@ State the fallback, switch trigger, data/code migration, and exit cost.
 ## Related records
 
 - Related ADR, threat, requirement, or plan.
-

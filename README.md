@@ -13,14 +13,16 @@ ADR 0018 T1-A/T1-B/T1-C, UI-0, and UI-1A are implemented and verified. Slices 1H
 neutral module lifecycle; Slices 1I-A and 1I-B add governed presentation definitions and exact
 internal resolution; Slices 1J-A and 1J-B add internal delivery leases, supervised database-local
 consumption, durable receipts, and exact governed dead-letter replay. Phase 2 has started with the
-L0 entry decision register. Slice 2.0-B completes the local operational-outbox foundation, and
+L1 foundation now closed. Slice 2.0-B completes the local operational-outbox foundation, and
 Slice 2.0-C completes the neutral temporal retention/recovery engineering boundary. ADR 0018 is
 Accepted at the platform level after its 2026-09-27 accountable post-evidence review. Production
 identity architecture is accepted in provider-neutral ADR 0029, including Microsoft Entra ID,
 hybrid/on-premises Active Directory, Google Workspace, generic OIDC, and qualified SAML gateway
-paths, but its implementation, public interfaces, selected-connection/deployment qualification, domain
-records policy, and independent review remain explicit later Phase 2 gates. None of this adds a
-learning-institution business module, production identity, public interface, or real-data authority.
+paths. The internal provider-neutral identity/session/support foundations and bounded public
+session adapter are implemented but not enabled as an L2 release. Conditionally Accepted ADR 0025
+now governs a minimal synthetic `organization.legal` Slice 2.1-B proof with stable legal-entity
+identity, immutable name-profile history, two named actions, and one exact read. It adds no public
+business route, educational structure, real-data authority, or production deployment.
 
 ## Start here
 
@@ -72,10 +74,12 @@ and a server-owned ephemeral session. It is read-only and is not production auth
 - The production core and Foundation Lab use the reviewed Ash 3.33.11 security-patch baseline.
 - The accepted authoring model keeps Ash resources, actions, policies, and migrations authoritative while derived metadata may configure views and reports; it does not add a second runtime ORM.
 - Roles and access scopes are tenant-defined data, never a fixed list of institutional job titles.
-- A tenant may own several root institutional units. Institutional units may nest to any reviewed
-  depth, so a university can contain schools and departments and a combined school can contain
-  kindergarten, middle-school, and high-school units. Hierarchy never grants access or silently
-  supplies configuration, reporting, site, module, or placement semantics. See
+- Conditionally Accepted ADR 0025 separates tenant-owned legal entities and corporate units from educational
+  institutions and units. Legal ownership/control may be a typed graph with an optional
+  consolidation tree; educational units may nest to any reviewed depth. Every published
+  educational institution requires one effective primary legal operator. No relationship or
+  hierarchy grants access or silently supplies finance/reporting, workflow/configuration, site,
+  module, or placement semantics. See
   [ADR 0025](docs/adr/0025-learning-institution-operating-system-and-institutional-structure.md).
 - Logical tenant controls remain mandatory in pooled databases, dedicated databases, and dedicated cells; physical placement is evidence-driven.
 - Module release availability, entitlement, tenant activation, and actor authorization are separate server-side gates.
@@ -85,8 +89,9 @@ and a server-owned ephemeral session. It is read-only and is not production auth
 - UI-1A adds one guarded, loopback-only, read-only assignment-options connection from that
   harness to the existing core. It uses synthetic server-owned context, checked OpenAPI and
   generated TypeScript types, and exposes no assignment write or production identity path.
-- Phase 2's bounded implementation sequence is authorized. Slice 2.0-A is in progress, and its
-  entry register records Slice 2.0-B and Slice 2.0-C engineering as complete and ADR 0029 as
-  Accepted. Bounded provider-neutral synthetic Slice 2.0-D engineering is eligible while L1 through L4 remain
-  blocked until their accountable evidence gates pass; no institutional resource, production
-  identity, public route, deployment, or real data is eligible yet.
+- Phase 2's bounded implementation sequence is authorized. The entry register closes the
+  foundation at L1: Slices 2.0-B/2.0-C, bounded provider-neutral 2.0-D engineering, and the minimal
+  Slice 2.1-B legal-entity proof pass their synthetic gates. Slice 2.0-E/L2 remains blocked by ADR
+  0025 C25-05's named representative-comprehension and accountable product-experience reviews;
+  no connected public business workflow, later Phase 2.1 slice, deployment, or real data is
+  authorized yet.

@@ -30,6 +30,45 @@ Conditionally adopt Ash JSON:API with a checked OpenAPI contract and generated T
 
 ADR 0020 owns the proposed client-experience direction. Its browser and native clients consume the same versioned public contract, but their layouts, navigation, components, and device interactions remain product decisions. Generated declarations and request helpers may remove duplicated wire-format knowledge; they do not generate a generic school interface or make authorization decisions.
 
+## Plain-English summary
+
+### What this means
+
+The product will expose a carefully defined, versioned way for approved browser, mobile, and
+integration clients to ask for information or start approved actions. The same core rules decide
+what is allowed everywhere; a screen or generated client helper cannot make its own permission
+decisions.
+
+### What was agreed
+
+- Ash JSON:API is conditionally the first public-interface approach, supported by a checked
+  machine-readable contract and generated TypeScript client helpers.
+- The public interface must preserve named actions, permissions, tenant separation, stable errors,
+  safe pagination, compatibility, and duplicate-request protection.
+- Small owned adapters are required where the generated interface needs additional protections,
+  including the agreed page-limit and failure-response rules.
+- A thin REST/OpenAPI interface is the fallback if the generated boundary cannot preserve those
+  protections.
+- GraphQL is not selected; it remains deferred until a real use case proves the existing approach
+  cannot serve it safely and efficiently.
+
+### Context
+
+Browser, phone, integration, and tool clients need a dependable common language with the product.
+Without one, each client could interpret data, errors, and permissions differently. At the same
+time, a common technical contract must not force all devices into the same user experience or let
+a client bypass the product's central security rules.
+
+### Examples
+
+- A future browser screen and phone screen could present an approved action differently for their
+  users while relying on the same server-side permission and error rules.
+- If a connection drops after an approved request is sent, the client can use the agreed
+  duplicate-request protection to find out whether the original action completed, rather than
+  creating a second change.
+- An integration cannot select another school's database or decide that a staff member is allowed
+  to act; the server establishes that trusted context and applies the rules.
+
 ## Consequences
 
 ### Positive

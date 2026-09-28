@@ -1,28 +1,30 @@
 # Identity, session, and support-access operating runbook
 
-- Status: Accepted L0 operating runbook with synthetic D.2a through D.2c implementation; no
-  production provider or public route exists
+- Status: Accepted operating runbook with synthetic D.2a through D.2c and bounded D.3 adapter
+  implementation; no production provider or enabled public endpoint exists
 - Owner: Platform engineering with security architecture
 - Escalation owner: François — interim Security/Privacy Owner until an independent owner is named
 - Review trigger: first Slice 2.0-D implementation, connection/dependency change, deployment
   selection, incident, or production-readiness review
-- Governing decision: [ADR 0029](../adr/0029-provider-neutral-identity-federation-and-directory-connections.md)
+- Governing decisions: [ADR 0029](../adr/0029-provider-neutral-identity-federation-and-directory-connections.md)
+  and [ADR 0030](../adr/0030-same-origin-public-session-and-named-action-boundary.md)
 - Superseded decision: [ADR 0027](../adr/0027-production-identity-session-and-support-access.md)
 
 ## Purpose and safety boundary
 
-This runbook defines the provider-neutral, fail-closed procedure accepted in ADR 0029. The closed
-internal connection/link/invitation, opaque-session, and bounded support-grant boundaries are now
-implemented and rehearsed at L0 with synthetic data. The runbook contains no credential, secret,
-real tenant identifier, real email address, callback secret, raw token, directory credential, or
-production endpoint.
+This runbook defines the provider-neutral, fail-closed procedure accepted in ADRs 0029 and 0030.
+The internal connection/link/invitation, opaque-session, bounded support-grant, and disabled-by-
+default public callback/session adapter are implemented and rehearsed with synthetic data. The
+runbook contains no credential, secret, real tenant identifier, real email address, callback
+secret, raw token, directory credential, or production endpoint.
 
 Until deployment and selected-connection qualification explicitly replace this statement:
 
 - no real identity provider, broker, gateway, Active Directory/Entra connection, Google Workspace
   connection, or provisioning client is connected;
 - no public callback, login, tenant selector, support grant, service credential, direct SAML
-  parser, LDAP bind, or SCIM endpoint is enabled;
+  parser, LDAP bind, or SCIM endpoint is enabled; the candidate Phoenix endpoint has no default
+  application child and is not an availability claim;
 - the local UI-1A token and auth demo remain removable synthetic tools, not recovery paths; and
 - provider/gateway outage, stale directory synchronization, uncertain validation, stale assurance,
   missing ownership, or incomplete audit closes the affected path.
@@ -106,6 +108,37 @@ Until deployment and selected-connection qualification explicitly replace this s
 4. Activate each institution connection independently. Qualification of one provider, gateway,
    region, or hosting model does not qualify another.
 
+## Public callback and application-session operation
+
+1. Route `/auth/*` and `/api/v1/*` to the reviewed Phoenix endpoint on the same HTTPS origin as the
+   Next.js experience. Reject an unreviewed host, forwarded-header chain, cross-origin API, or
+   callback path. Next.js receives no provider token, application-session bearer, placement, or
+   policy authority.
+2. Configure an active cookie encryption/signing key and no more than two explicitly time-bounded
+   previous keys through the deployment secret manager. Keep `__Host-chimwemwe-session` secure,
+   host-only, `HttpOnly`, path-root, and `SameSite=Lax`. New cookies use only the active key.
+3. Begin sign-in with one five-minute encrypted server-issued intent naming the pre-approved
+   connection, actor, membership, identity link, locale, idempotency, correlation, and relative
+   return path. Browser input cannot replace those values. Do not place the intent, callback code,
+   PKCE verifier, nonce, assertion, or cookie in a log or ticket.
+4. Let only a qualified connection adapter verify the provider response. The common boundary
+   accepts normalized `VerifiedExternalIdentity` evidence, then the writer rechecks the exact
+   connection, link, actor, and membership before creating an application session. Replay,
+   mismatch, stale assurance, unsafe redirect, or missing current route denies sign-in.
+5. On every request, decrypt the cookie, resolve placement from the startup-owned registry, and
+   recheck the exact session token digest, actor, tenant, membership, assurance, idle/absolute
+   expiry, and revocation on the authoritative writer. Decoded cookie fields are locators, not
+   authority.
+6. Require the exact configured Origin and session-bound CSRF proof on logout and support
+   elevation. Return `no-store`, restrictive CSP/frame/MIME/referrer/permissions headers, stable
+   non-disclosing errors, and retry guidance only for classified temporary dependency failures.
+7. Logout first invalidates the writer-owned application session and then clears the cookie. When
+   writer invalidation is uncertain, return a retryable failure and do not claim logout merely
+   because a client cookie was cleared.
+8. The checked session OpenAPI and generated TypeScript declarations are build artifacts. Drift,
+   an added generic mutation, a caller-selected tenant or route, or an undeclared collection closes
+   the endpoint. Any collection requires its own ADR 0023 review.
+
 ## Directory provisioning, if separately authorized
 
 1. Create a separate provisioning connection and secret with least scope. Enabling sign-in never
@@ -132,6 +165,10 @@ Until deployment and selected-connection qualification explicitly replace this s
 5. For Ash Authentication upgrades, pin the dependency pair, review OIDC/session changes, run the
    complete negative suite and `make check`, and retain tested rollback. Remove the route if the
    maintained API cannot satisfy the contract.
+6. For application-cookie key rotation, place the new key first and keep the old key only for the
+   bounded overlap. Prove that old cookies validate during overlap, all newly issued cookies use
+   the new key, and removal invalidates old envelopes. Revoke authoritative sessions as well when
+   compromise rather than routine rotation is suspected.
 
 ## Provider, gateway, or directory uncertainty
 

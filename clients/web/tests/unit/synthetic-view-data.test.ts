@@ -44,19 +44,62 @@ describe("the synthetic view-data adapter", () => {
       "conflict",
       "unexpected",
     ]);
-    expect(structure.roots).toHaveLength(3);
+    expect(structure.roots).toHaveLength(5);
     expect(structure.roots.map((root) => root.localLabel)).toEqual([
+      "Primary / early years",
+      "Secondary school",
+      "Combined formal education",
+      "College / community college",
       "University",
-      "Community college",
-      "Early Learning Centre",
     ]);
     expect(structure.roots.every((root) => root.classification === "institution")).toBe(
       true,
     );
-    const selectedInTree = structure.roots[0]?.children[0]?.children[0];
+    const selectedInTree = structure.roots
+      .flatMap((root) => root.children)
+      .flatMap((unit) => unit.children)
+      .find((unit) => unit.id === structure.selectedUnit.id);
     expect(selectedInTree?.id).toBe(structure.selectedUnit.id);
     expect(selectedInTree?.classification).toBe(structure.selectedUnit.classification);
     expect(selectedInTree?.localLabel).toBe(structure.selectedUnit.localLabel);
+    expect(structure.linkedStructure.legalEntities).toHaveLength(2);
+    expect(structure.linkedStructure.corporateOwner).toBe(
+      "Mphamvu Education Operations",
+    );
+    expect(structure.linkedStructure.responsibility.primaryOperator).toBe(
+      "Mphamvu Education Operations",
+    );
+    expect(
+      structure.linkedStructure.operatorTransferPreviews.some(
+        (transfer) =>
+          transfer.state === "blocked" &&
+          transfer.impacts.some((impact) => impact.outcome === "blocks_move"),
+      ),
+    ).toBe(true);
+    expect(
+      structure.linkedStructure.operatorTransferPreviews.some(
+        (transfer) => transfer.state === "ready_for_boundary_check",
+      ),
+    ).toBe(true);
+    expect(
+      structure.linkedStructure.operatorGovernance.workflow.map((step) => step.label),
+    ).toEqual([
+      "Proposed",
+      "Evidence verified",
+      "Approved",
+      "Effective-boundary revalidation",
+      "Active",
+    ]);
+    expect(
+      structure.linkedStructure.operatorGovernance.approvalPaths.map(
+        (path) => path.label,
+      ),
+    ).toContain("Governed single-controller exception");
+    expect(
+      structure.linkedStructure.operatorGovernance.accountabilityReview.actions.map(
+        (action) => action.outcome,
+      ),
+    ).toContain("fails_closed");
     expect(
       structure.movePreview.impacts.some((impact) => impact.outcome === "blocks_move"),
     ).toBe(true);

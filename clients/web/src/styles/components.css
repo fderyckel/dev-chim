@@ -449,6 +449,23 @@
     font-size: var(--font-size-xs);
   }
 
+  .c-structure-introduction {
+    max-width: var(--copy-width);
+  }
+
+  .c-structure-introduction h2 {
+    margin-top: var(--space-1);
+    font-size: var(--font-size-xl);
+    letter-spacing: -0.03em;
+    line-height: var(--line-height-tight);
+  }
+
+  .c-structure-introduction > p:last-child {
+    margin-top: var(--space-2);
+    color: var(--color-text-soft);
+    font-size: var(--font-size-sm);
+  }
+
   .c-structure-tree {
     padding: var(--space-3) var(--space-4) var(--space-5);
   }
@@ -529,6 +546,64 @@
     font-size: var(--font-size-sm);
   }
 
+  .c-fact-list--separated {
+    border-top: var(--border-width) solid var(--color-border);
+  }
+
+  .c-governance-steps {
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-2) var(--space-6) var(--space-5);
+    list-style: none;
+  }
+
+  .c-governance-steps li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: var(--space-3);
+    padding-block: var(--space-4);
+    border-bottom: var(--border-width) solid var(--color-border);
+  }
+
+  .c-governance-steps__number {
+    display: grid;
+    width: 1.75rem;
+    height: 1.75rem;
+    place-items: center;
+    border-radius: var(--radius-round);
+    background: var(--color-action-soft);
+    color: var(--color-action-strong);
+    font-size: var(--font-size-xs);
+    font-weight: 850;
+  }
+
+  .c-governance-steps strong,
+  .c-resolution-paths strong,
+  .c-review-summary strong {
+    display: block;
+    font-size: var(--font-size-sm);
+  }
+
+  .c-governance-steps__detail,
+  .c-review-summary__status,
+  .c-review-summary__trigger {
+    display: block;
+    margin-top: var(--space-1);
+    color: var(--color-text-soft);
+    font-size: var(--font-size-xs);
+  }
+
+  .c-status--governance-complete {
+    background: var(--color-positive-surface);
+    color: var(--color-positive-text);
+  }
+
+  .c-status--governance-current {
+    background: var(--color-attention-surface);
+    color: var(--color-attention-text);
+  }
+
   .c-relationship-list,
   .c-impact-list {
     display: flex;
@@ -543,6 +618,11 @@
     justify-content: space-between;
     gap: var(--space-4);
     padding: var(--space-4) var(--space-6);
+  }
+
+  .c-structure-tree + .c-relationship-list,
+  .c-fact-list + .c-relationship-list {
+    border-top: var(--border-width) solid var(--color-border);
   }
 
   .c-relationship-list li,
@@ -583,6 +663,30 @@
     background: var(--color-surface-subtle);
   }
 
+  .c-move-summary--operator {
+    grid-template-columns: minmax(0, 1fr) repeat(3, minmax(10rem, 0.75fr));
+  }
+
+  .c-review-summary {
+    padding: var(--space-5) var(--space-6);
+    border-bottom: var(--border-width) solid var(--color-border);
+    background: var(--color-attention-surface);
+  }
+
+  .c-resolution-paths {
+    padding: var(--space-5) var(--space-6);
+    border-top: var(--border-width) solid var(--color-border);
+  }
+
+  .c-resolution-paths__list {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    padding-left: var(--space-5);
+    color: var(--color-text-soft);
+    font-size: var(--font-size-xs);
+  }
+
   .c-impact-outcome {
     flex: 0 0 auto;
     padding: var(--space-1) var(--space-2);
@@ -596,12 +700,19 @@
     color: var(--color-positive-text);
   }
 
+  .c-impact-outcome.is-ready,
+  .c-impact-outcome.is-continues {
+    background: var(--color-positive-surface);
+    color: var(--color-positive-text);
+  }
+
   .c-impact-outcome.is-requires-reconciliation {
     background: var(--color-attention-surface);
     color: var(--color-attention-text);
   }
 
-  .c-impact-outcome.is-blocks-move {
+  .c-impact-outcome.is-blocks-move,
+  .c-impact-outcome.is-fails-closed {
     background: var(--color-critical-surface);
     color: var(--color-critical-text);
   }
@@ -1079,6 +1190,15 @@
       align-items: flex-start;
       grid-template-columns: 1fr;
       flex-direction: column;
+    }
+
+    .c-governance-steps li {
+      grid-template-columns: auto minmax(0, 1fr);
+    }
+
+    .c-governance-steps__state {
+      grid-column: 2;
+      justify-self: start;
     }
 
     .c-structure-tree li > ul {

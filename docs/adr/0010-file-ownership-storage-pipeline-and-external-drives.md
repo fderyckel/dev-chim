@@ -27,6 +27,43 @@ School files contain sensitive data, while parsers and renderers create a large 
 
 Conditionally adopt PostgreSQL/Ash ownership, relationships, classification, version, retention, checksum, and lifecycle metadata with a provider-neutral object-storage adapter. New uploads remain quarantined through type validation, scanning, extraction, and safe derivative generation. External drives are connectors, not the platform policy engine. Storage namespaces come from trusted tenant placement and routing version, never a request path or module-supplied bucket. The storage provider and external connectors remain later implementation choices.
 
+## Plain-English summary
+
+### What this means
+
+Chimwemwe will keep a governed record of who owns each school file, who may access it, how long it
+must be kept, and what checks it has passed. The file itself can live in a replaceable storage
+service, but it cannot bypass the product's security and retention rules.
+
+### What was agreed
+
+- The core product remains the source of truth for file ownership, classification, access,
+  version, retention, and lifecycle information.
+- New files stay in a protected quarantine while their type is checked, they are scanned, and any
+  safe preview or derivative is prepared.
+- External drives can be connected, but their folder permissions do not become Chimwemwe's
+  permission system.
+- File locations are assigned from trusted tenant routing, never chosen by a browser request or
+  module input.
+- The storage provider and individual external-drive connections are later choices, so this
+  conditionally accepted decision does not itself implement a file service.
+
+### Context
+
+School files may include sensitive learner records, photos, reports, or uploaded documents. Files
+can also be malicious or unsafe to parse. A school needs usable file sharing without allowing a
+storage provider, folder setting, or unsafe upload to override the product's records and safety
+controls.
+
+### Examples
+
+- A future uploaded support document would be held in quarantine and scanned before ordinary
+  staff could open it through the product.
+- Linking a folder from an external drive would not let someone with only that drive permission
+  bypass Chimwemwe's own school, role, and retention rules.
+- If a school moves to a different approved storage placement, the product would reconcile the
+  governed file records with the stored objects before treating the move as complete.
+
 ## Consequences
 
 ### Positive

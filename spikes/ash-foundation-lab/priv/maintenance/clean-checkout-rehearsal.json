@@ -2,18 +2,18 @@
   "bootstrap": {
     "clean_after": true,
     "command": "./bin/bootstrap",
-    "elapsed_ms": 216181.064,
+    "elapsed_ms": 97449.898,
     "exit_code": 0
   },
   "candidate": {
-    "base_revision": "69af8552c85b9a15afaeff973d030effb6c62df6",
-    "candidate_commit": "fcebe86fd9f2b74aa91cdd3e29cf59abfd49a187",
-    "candidate_tree": "7e4f7b30569340d894f46085070fe6d78445d797",
+    "base_revision": "4f61b0e9014ec27dc8b84d80b92eebfd274d6369",
+    "candidate_commit": "1f68c3734b53749c0e2a8247d09022643a77a3b0",
+    "candidate_tree": "71336e74e1bc713bab7f6895e580165d5bcf0c61",
     "clean_before_bootstrap": true,
     "staged_patch_applied": true
   },
   "command": "mise exec -- uv run python tools/rehearse_phase0_clean_checkout.py --output spikes/ash-foundation-lab/priv/maintenance/clean-checkout-rehearsal.json",
-  "elapsed_ms": 223173.997,
+  "elapsed_ms": 98322.639,
   "limits": [
     "The candidate commit exists only inside the deleted temporary clone; the source working tree and history were not changed.",
     "Ignored dependency and build directories may be created by bootstrap and checks; Git source status remained clean.",
@@ -25,7 +25,7 @@
   "source_sha256": {
     ".githooks/pre-commit": "814c249296a9ca5761438df238374087acd67bc5198f548b69603c26445e049c",
     ".githooks/pre-push": "d98e077fa4424cde11d4cb821103954785583056114bab2a60e9fa0dc461c6aa",
-    "Makefile": "e06dfedc7294193a16dfa672e6e5150f3ae6b284a99433035607adeb257d6940",
+    "Makefile": "1b38fb9d2dd0ea2d038787e54c1a8ff8c8cdcaceaf38bff28eba4705710061d3",
     "bin/bootstrap": "c0cdd41b0e3c08c033cd7aff92bdf63fdec29201021914abf3674cd0fa129bf3",
     "bin/check-changed": "1ba94ffc7e23ee6ee61df01e77209fb7ddb44bcab456bc313d40196f630d78af",
     "bin/core-check": "166a74f83736dda62b1e89e513761a541ab590861ae0c2ec245685f3a76687eb",
@@ -37,10 +37,8 @@
   "verification": {
     "clean_after": true,
     "command": "make check-changed",
-    "elapsed_ms": 5345.69,
+    "elapsed_ms": 632.161,
     "exit_code": 0,
-    "extracted_test_counts": {
-      "repository_tool_tests": 25
-    }
+    "extracted_test_counts": {}
   }
 }

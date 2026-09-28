@@ -149,7 +149,324 @@ const preview: PreviewViewData = {
 
 const institutionalStructure: InstitutionalStructureViewData = {
   context,
+  linkedStructure: {
+    legalEntities: [
+      {
+        id: "71000000-0000-4000-8000-000000000001",
+        name: "Mphamvu Learning Holdings",
+        meaning: "Legal entity · consolidation parent",
+        reference: "Synthetic registration GRP-001",
+        status: "current",
+        children: [
+          {
+            id: "71000000-0000-4000-8000-000000000002",
+            name: "Mphamvu Education Operations",
+            meaning: "Legal entity · education operator",
+            reference: "Synthetic registration OPS-002",
+            status: "current",
+            children: [],
+          },
+          {
+            id: "71000000-0000-4000-8000-000000000003",
+            name: "Mphamvu Property Foundation",
+            meaning: "Legal entity · property owner",
+            reference: "Synthetic registration PROP-003",
+            status: "current",
+            children: [],
+          },
+        ],
+      },
+      {
+        id: "71000000-0000-4000-8000-000000000004",
+        name: "Community Education Trust",
+        meaning: "Legal entity · outside consolidation tree",
+        reference: "Synthetic registration CET-004",
+        status: "current",
+        children: [],
+      },
+    ],
+    legalRelationships: [
+      {
+        label: "Joint control of Mphamvu Education Operations",
+        detail:
+          "Mphamvu Learning Holdings and Community Education Trust have separate typed control relationships. Only the holdings entity is the consolidation parent.",
+      },
+    ],
+    corporateUnits: [
+      {
+        id: "72000000-0000-4000-8000-000000000001",
+        name: "Shared Services Centre",
+        meaning: "Corporate unit",
+        reference: "SSC",
+        status: "current",
+        children: [
+          {
+            id: "72000000-0000-4000-8000-000000000002",
+            name: "Finance Operations",
+            meaning: "Corporate unit",
+            reference: "SSC-FIN",
+            status: "current",
+            children: [],
+          },
+          {
+            id: "72000000-0000-4000-8000-000000000003",
+            name: "People and Safeguarding",
+            meaning: "Corporate unit",
+            reference: "SSC-PS",
+            status: "current",
+            children: [],
+          },
+        ],
+      },
+    ],
+    corporateOwner: "Mphamvu Education Operations",
+    responsibility: {
+      institution: "Mphamvu University",
+      primaryOperator: "Mphamvu Education Operations",
+      otherRelationships: [
+        {
+          label: "Property owner · City Learning Centre",
+          detail:
+            "Mphamvu Property Foundation owns the site. Site ownership is not educational parentage or operating authority.",
+        },
+        {
+          label: "Additional joint-control evidence",
+          detail:
+            "Community Education Trust is recorded through a separate legal relationship; it is not a second primary operator.",
+        },
+      ],
+    },
+    operatorTransferPreviews: [
+      {
+        id: "operator-transfer-blocked",
+        institution: "Lusungu Community College",
+        from: "Mphamvu Education Operations",
+        to: "Community Education Trust",
+        effectiveOn: "1 January 2027 · Africa/Blantyre",
+        state: "blocked",
+        impacts: [
+          {
+            meaning: "Educational identity and containment",
+            outcome: "unchanged",
+            detail:
+              "The institution keeps its stable identity and educational parentage.",
+          },
+          {
+            meaning: "Finance, contracts, and employment",
+            outcome: "requires_reconciliation",
+            detail:
+              "Each owning contract must reconcile its records; nothing is inherited from the operator link.",
+          },
+          {
+            meaning: "Authorization and placement",
+            outcome: "unchanged",
+            detail:
+              "Capabilities, data access, modules, and tenant placement remain independent.",
+          },
+          {
+            meaning: "Unclassified safeguarding integration",
+            outcome: "blocks_move",
+            detail:
+              "The transfer remains unavailable until the integration owner classifies the effect.",
+          },
+        ],
+      },
+      {
+        id: "operator-transfer-ready",
+        institution: "Mwayi Combined School",
+        from: "Mphamvu Education Operations",
+        to: "Community Education Trust",
+        effectiveOn: "1 January 2027 · Africa/Blantyre",
+        state: "ready_for_boundary_check",
+        impacts: [
+          {
+            meaning: "Approval and verified evidence",
+            outcome: "ready",
+            detail:
+              "A distinct eligible approver accepted the proposal after the evidence reference was verified.",
+          },
+          {
+            meaning: "Finance, contracts, and employment",
+            outcome: "ready",
+            detail:
+              "The owning domains recorded their reconciliation outcomes without rewriting historical records.",
+          },
+          {
+            meaning: "Authorization and placement",
+            outcome: "unchanged",
+            detail:
+              "Capabilities, data access, modules, and tenant placement remain independent.",
+          },
+          {
+            meaning: "Effective-boundary check",
+            outcome: "requires_reconciliation",
+            detail:
+              "The named activation action must revalidate evidence and conflicts on the effective date before it can activate.",
+          },
+        ],
+      },
+    ],
+    operatorGovernance: {
+      workflow: [
+        {
+          label: "Proposed",
+          state: "complete",
+          detail:
+            "The proposed operator, effective date, institution-local time zone, reason, and evidence reference are recorded.",
+        },
+        {
+          label: "Evidence verified",
+          state: "complete",
+          detail:
+            "An eligible reviewer verified the protected source; the prototype stores metadata, not a duplicate document.",
+        },
+        {
+          label: "Approved",
+          state: "complete",
+          detail:
+            "A distinct eligible approver accepted the transfer under the normal control path.",
+        },
+        {
+          label: "Effective-boundary revalidation",
+          state: "current",
+          detail:
+            "The future-effective transfer waits for a named action to recheck evidence, conflicts, and operator continuity.",
+        },
+        {
+          label: "Active",
+          state: "pending",
+          detail:
+            "Activation records both the intended institution-local effective date and the actual recorded time.",
+        },
+      ],
+      approvalPaths: [
+        {
+          label: "Normal path · distinct approver",
+          detail:
+            "The proposer and final approver are different eligible people. Approval alone does not activate a future transfer.",
+        },
+        {
+          label: "Governed single-controller exception",
+          detail:
+            "Only an explicit policy may allow one controller to propose and approve. It requires stronger assurance, a reason and verified evidence, a visible exception marker, and retrospective review.",
+        },
+      ],
+      evidence: {
+        type: "Operator appointment instrument",
+        source: "Protected governance record",
+        reference: "Synthetic evidence GOV-2026-014",
+        classification: "Restricted governance evidence",
+        verifiedOn: "18 September 2026",
+      },
+      accountabilityReview: {
+        institution: "Chisomo Secondary School",
+        trigger:
+          "Previously verified operator evidence was later invalidated after the assignment became effective.",
+        status: "Legal accountability under review",
+        actions: [
+          {
+            label: "Attendance, safeguarding, and teaching continuity",
+            outcome: "continues",
+            detail:
+              "Essential learner-facing work continues unless a separate policy explicitly requires suspension.",
+          },
+          {
+            label: "Operator-dependent finance or legal action",
+            outcome: "fails_closed",
+            detail:
+              "Actions whose validity depends on the operator are unavailable while accountability is unresolved.",
+          },
+          {
+            label: "Unknown dependency",
+            outcome: "fails_closed",
+            detail:
+              "An action with no declared dependency classification cannot proceed by default.",
+          },
+        ],
+        resolutionPaths: [
+          "Reverify the existing evidence",
+          "Complete an approved operator transfer",
+          "Apply a governed temporal correction under ADR 0018",
+          "Use a separately governed suspension or closure action",
+        ],
+      },
+    },
+  },
   roots: [
+    {
+      id: "30000000-0000-4000-8000-000000000001",
+      name: "Nthambi Primary and Early Years School",
+      classification: "institution",
+      localLabel: "Primary / early years",
+      code: "NPES",
+      status: "current",
+      children: [
+        {
+          id: "30000000-0000-4000-8000-000000000011",
+          name: "Early Years",
+          classification: "organizational_unit",
+          localLabel: "Early years",
+          code: "NPES-EY",
+          status: "current",
+          children: [],
+        },
+        {
+          id: "30000000-0000-4000-8000-000000000012",
+          name: "Primary School",
+          classification: "organizational_unit",
+          localLabel: "Primary section",
+          code: "NPES-PRI",
+          status: "current",
+          children: [],
+        },
+      ],
+    },
+    {
+      id: "40000000-0000-4000-8000-000000000001",
+      name: "Chisomo Secondary School",
+      classification: "institution",
+      localLabel: "Secondary school",
+      code: "CSS",
+      status: "current",
+      children: [],
+    },
+    {
+      id: "50000000-0000-4000-8000-000000000001",
+      name: "Mwayi Combined School",
+      classification: "institution",
+      localLabel: "Combined formal education",
+      code: "MCS",
+      status: "current",
+      children: [
+        {
+          id: "50000000-0000-4000-8000-000000000011",
+          name: "Primary Section",
+          classification: "organizational_unit",
+          localLabel: "Primary section",
+          code: "MCS-PRI",
+          status: "current",
+          children: [],
+        },
+        {
+          id: "50000000-0000-4000-8000-000000000012",
+          name: "Secondary Section",
+          classification: "organizational_unit",
+          localLabel: "Secondary section",
+          code: "MCS-SEC",
+          status: "current",
+          children: [],
+        },
+      ],
+    },
+    {
+      id: "20000000-0000-4000-8000-000000000001",
+      name: "Lusungu Community College",
+      classification: "institution",
+      localLabel: "College / community college",
+      code: "LCC",
+      status: "current",
+      children: [],
+    },
     {
       id: "10000000-0000-4000-8000-000000000001",
       name: "Mphamvu University",
@@ -173,7 +490,17 @@ const institutionalStructure: InstitutionalStructureViewData = {
               localLabel: "Department",
               code: "MU-LS-IE",
               status: "current",
-              children: [],
+              children: [
+                {
+                  id: "10000000-0000-4000-8000-000000001111",
+                  name: "Inclusive Education Practice Centre",
+                  classification: "organizational_unit",
+                  localLabel: "Centre",
+                  code: "MU-LS-IE-PC",
+                  status: "current",
+                  children: [],
+                },
+              ],
             },
           ],
         },
@@ -197,24 +524,6 @@ const institutionalStructure: InstitutionalStructureViewData = {
         },
       ],
     },
-    {
-      id: "20000000-0000-4000-8000-000000000001",
-      name: "Lusungu Community College",
-      classification: "institution",
-      localLabel: "Community college",
-      code: "LCC",
-      status: "current",
-      children: [],
-    },
-    {
-      id: "30000000-0000-4000-8000-000000000001",
-      name: "Nthambi Early Learning Centre",
-      classification: "institution",
-      localLabel: "Early Learning Centre",
-      code: "NELC",
-      status: "current",
-      children: [],
-    },
   ],
   selectedUnit: {
     id: "10000000-0000-4000-8000-000000000111",
@@ -236,7 +545,7 @@ const institutionalStructure: InstitutionalStructureViewData = {
     {
       label: "Riverside Early Learning Site",
       detail:
-        "Associated with Nthambi Early Learning Centre through a separate site relationship.",
+        "Associated with Nthambi Primary and Early Years School through a separate site relationship.",
     },
   ],
   affiliations: [

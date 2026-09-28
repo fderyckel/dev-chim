@@ -71,6 +71,155 @@ const states: ReadonlyArray<InterfaceState> = [
 
 const structure: InstitutionalStructureViewData = {
   context,
+  linkedStructure: {
+    legalEntities: [
+      {
+        id: "legal-parent",
+        name: "Example Learning Holdings",
+        meaning: "Legal entity · consolidation parent",
+        reference: "REG-1",
+        status: "current",
+        children: [
+          {
+            id: "legal-operator",
+            name: "Example Education Operations",
+            meaning: "Legal entity · operator",
+            reference: "REG-2",
+            status: "current",
+            children: [],
+          },
+        ],
+      },
+    ],
+    legalRelationships: [
+      {
+        label: "Joint control",
+        detail: "Recorded outside the consolidation tree.",
+      },
+    ],
+    corporateUnits: [
+      {
+        id: "corporate-unit",
+        name: "Example Shared Services",
+        meaning: "Corporate unit",
+        reference: "ESS",
+        status: "current",
+        children: [],
+      },
+    ],
+    corporateOwner: "Example Education Operations",
+    responsibility: {
+      institution: "Example University",
+      primaryOperator: "Example Education Operations",
+      otherRelationships: [
+        {
+          label: "Property owner · Example site",
+          detail: "Separate from operation and educational containment.",
+        },
+      ],
+    },
+    operatorTransferPreviews: [
+      {
+        id: "blocked-transfer",
+        institution: "Example Early Learning Centre",
+        from: "Example Education Operations",
+        to: "Example Community Trust",
+        effectiveOn: "1 January 2027 · Africa/Blantyre",
+        state: "blocked",
+        impacts: [
+          {
+            meaning: "Authorization",
+            outcome: "unchanged",
+            detail: "The operator link grants no access.",
+          },
+          {
+            meaning: "Unknown integration",
+            outcome: "blocks_move",
+            detail: "The transfer remains unavailable.",
+          },
+        ],
+      },
+      {
+        id: "ready-transfer",
+        institution: "Example Combined School",
+        from: "Example Education Operations",
+        to: "Example Community Trust",
+        effectiveOn: "1 January 2027 · Africa/Blantyre",
+        state: "ready_for_boundary_check",
+        impacts: [
+          {
+            meaning: "Verified prerequisites",
+            outcome: "ready",
+            detail: "Known prerequisites are satisfied.",
+          },
+        ],
+      },
+    ],
+    operatorGovernance: {
+      workflow: [
+        {
+          label: "Proposed",
+          state: "complete",
+          detail: "The intended transfer is recorded.",
+        },
+        {
+          label: "Evidence verified",
+          state: "complete",
+          detail: "The protected source was verified.",
+        },
+        {
+          label: "Approved",
+          state: "complete",
+          detail: "A distinct eligible approver accepted the transfer.",
+        },
+        {
+          label: "Effective-boundary revalidation",
+          state: "current",
+          detail: "Facts must be rechecked at the effective boundary.",
+        },
+        {
+          label: "Active",
+          state: "pending",
+          detail: "Activation has not happened.",
+        },
+      ],
+      approvalPaths: [
+        {
+          label: "Normal path · distinct approver",
+          detail: "The proposer and approver are different people.",
+        },
+        {
+          label: "Governed single-controller exception",
+          detail: "An explicit policy and retrospective review are required.",
+        },
+      ],
+      evidence: {
+        type: "Appointment instrument",
+        source: "Protected record",
+        reference: "GOV-1",
+        classification: "Restricted",
+        verifiedOn: "18 September 2026",
+      },
+      accountabilityReview: {
+        institution: "Example Secondary School",
+        trigger: "Previously verified evidence was invalidated.",
+        status: "Legal accountability under review",
+        actions: [
+          {
+            label: "Teaching continuity",
+            outcome: "continues",
+            detail: "Essential learner-facing work continues.",
+          },
+          {
+            label: "Operator-dependent action",
+            outcome: "fails_closed",
+            detail: "The action is unavailable.",
+          },
+        ],
+        resolutionPaths: ["Reverify evidence", "Complete an approved transfer"],
+      },
+    },
+  },
   roots: [
     {
       id: "root-a",
@@ -97,6 +246,33 @@ const structure: InstitutionalStructureViewData = {
       classification: "institution",
       localLabel: "Early Learning Centre",
       code: "EELC",
+      status: "current",
+      children: [],
+    },
+    {
+      id: "root-c",
+      name: "Example Secondary School",
+      classification: "institution",
+      localLabel: "Secondary school",
+      code: "ESS",
+      status: "current",
+      children: [],
+    },
+    {
+      id: "root-d",
+      name: "Example Combined School",
+      classification: "institution",
+      localLabel: "Combined formal education",
+      code: "ECS",
+      status: "current",
+      children: [],
+    },
+    {
+      id: "root-e",
+      name: "Example Community College",
+      classification: "institution",
+      localLabel: "College / community college",
+      code: "ECC",
       status: "current",
       children: [],
     },
@@ -191,7 +367,7 @@ describe("the UI-0 experience components", () => {
     expect(screen.getByRole("status")).toHaveTextContent("This view is up to date");
   });
 
-  it("separates containment from sites, affiliations, and authority", async () => {
+  it("separates legal, corporate, educational, site, and authority meanings", async () => {
     render(
       <AppShell activePage="structure" context={context}>
         <InstitutionalStructurePrototype viewData={structure} />
@@ -204,10 +380,26 @@ describe("the UI-0 experience components", () => {
     expect(
       screen.getByRole("list", { name: "Institutional containment" }),
     ).toBeVisible();
-    expect(screen.getByText("Containment only")).toBeVisible();
+    expect(screen.getByText("Separate structures")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Legal entities" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Corporate units" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Legal responsibility" })).toBeVisible();
+    expect(screen.getByText("Primary legal operator")).toBeVisible();
+    expect(screen.getByText(/Consolidation is not ownership/)).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Transfer review path" })).toBeVisible();
+    expect(screen.getByText("Governed single-controller exception")).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "Five representative contexts" }),
+    ).toBeVisible();
     expect(screen.getByRole("heading", { name: "Sites" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Affiliations" })).toBeVisible();
     expect(screen.getByText("Blocks move")).toBeVisible();
+    expect(screen.getByText("Blocks transfer")).toBeVisible();
+    expect(screen.getByText("Ready for boundary check")).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "Legal accountability under review" }),
+    ).toBeVisible();
+    expect(screen.getByText("Unavailable")).toBeVisible();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
 
     const accessibility = await runAccessibilityScan(document.body, {

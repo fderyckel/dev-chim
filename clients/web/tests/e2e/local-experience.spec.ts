@@ -45,7 +45,7 @@ test("keyboard navigation reaches the preview and its recovery language", async 
   await expect(page.getByRole("status").last()).toContainText("What to do:");
 });
 
-test("the structure prototype separates containment and blocks unknown move impacts", async ({
+test("the structure prototype separates linked meanings and blocks unknown impacts", async ({
   page,
 }) => {
   await page.goto("/institutional-structure");
@@ -56,10 +56,49 @@ test("the structure prototype separates containment and blocks unknown move impa
   await expect(
     page.getByRole("list", { name: "Institutional containment" }),
   ).toBeVisible();
-  await expect(page.getByText("Containment only")).toBeVisible();
+  await expect(page.getByText("Separate structures")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Legal entities" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Corporate units" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Legal responsibility" }),
+  ).toBeVisible();
+  await expect(page.getByText("Primary legal operator")).toBeVisible();
+  await expect(page.getByText(/Consolidation is not ownership/)).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Transfer review path" }),
+  ).toBeVisible();
+  await expect(page.getByText("Governed single-controller exception")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Five representative contexts" }),
+  ).toBeVisible();
+  const institutionalTree = page.getByRole("list", {
+    name: "Institutional containment",
+  });
+  for (const contextLabel of [
+    "Primary / early years · NPES",
+    "Secondary school · CSS",
+    "Combined formal education · MCS",
+    "College / community college · LCC",
+    "University · MU",
+  ]) {
+    await expect(
+      institutionalTree.getByText(contextLabel, { exact: true }),
+    ).toBeVisible();
+  }
   await expect(page.getByRole("heading", { name: "Sites" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Affiliations" })).toBeVisible();
   await expect(page.getByText("Blocks move")).toBeVisible();
+  await expect(page.getByText("Blocks transfer")).toBeVisible();
+  await expect(page.getByText("Ready for boundary check")).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Legal accountability under review" }),
+  ).toBeVisible();
+  const accountabilityReview = page.getByRole("region", {
+    name: "Legal accountability under review",
+  });
+  await expect(
+    accountabilityReview.getByText("Unavailable", { exact: true }),
+  ).toHaveCount(2);
   await expect(page.getByRole("button")).toHaveCount(0);
 });
 
