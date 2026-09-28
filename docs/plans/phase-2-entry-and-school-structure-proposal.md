@@ -1,8 +1,9 @@
 # Phase 2 entry and institutional-structure implementation proposal
 
-- Status: Phase 2 implementation sequence authorized on 2026-09-26; the former flat-school Phase
-  2.1 candidate is withdrawn and replaced by this recursive institutional-structure proposal;
-  Slice 2.0-A is in progress
+- Status: Phase 2 implementation sequence authorized on 2026-09-26; Phase 2.0 conditionally
+  approved and closed at L1 on 2026-09-28 with Slice 2.0-E carried as a dated residual condition;
+  the former flat-school Phase 2.1 candidate is withdrawn and replaced by this recursive
+  institutional-structure proposal
 - Owner: Product and platform engineering, with learning-institution domain and security/privacy
   review
 - Decision authority: François — Project Owner and interim Security/Privacy Owner
@@ -260,6 +261,11 @@ cross-tenant, fixation, CSRF, and recovery tests; support-access negative suite;
 runbooks; and `make check`.
 
 ### Slice 2.0-E — production browser/API candidate
+
+**Current disposition:** Conditionally deferred under ADR 0025 C25-05. Expert/representative
+comprehension and accountable product-experience review is due by 2026-12-15 or before this
+connected/public workflow begins, whichever is earlier. Phase 2.0 is closed for planning at L1;
+this deferral does not authorize the workflow or an L2 release.
 
 **Outcome:** one intentional staff workflow reaches the core through the production-candidate
 session and public action contract.

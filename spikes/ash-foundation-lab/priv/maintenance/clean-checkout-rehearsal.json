@@ -2,25 +2,25 @@
   "bootstrap": {
     "clean_after": true,
     "command": "./bin/bootstrap",
-    "elapsed_ms": 97449.898,
+    "elapsed_ms": 121228.229,
     "exit_code": 0
   },
   "candidate": {
     "base_revision": "4f61b0e9014ec27dc8b84d80b92eebfd274d6369",
-    "candidate_commit": "1f68c3734b53749c0e2a8247d09022643a77a3b0",
-    "candidate_tree": "71336e74e1bc713bab7f6895e580165d5bcf0c61",
+    "candidate_commit": "9438a15f18e65ba3cb102aa44e9ab78f5041ca9b",
+    "candidate_tree": "f932931df9052568b4a75b48e25f0313e3b2f9c6",
     "clean_before_bootstrap": true,
     "staged_patch_applied": true
   },
   "command": "mise exec -- uv run python tools/rehearse_phase0_clean_checkout.py --output spikes/ash-foundation-lab/priv/maintenance/clean-checkout-rehearsal.json",
-  "elapsed_ms": 98322.639,
+  "elapsed_ms": 472841.292,
   "limits": [
     "The candidate commit exists only inside the deleted temporary clone; the source working tree and history were not changed.",
     "Ignored dependency and build directories may be created by bootstrap and checks; Git source status remained clean.",
     "This local rehearsal does not establish remote CI, branch protection, or managed-service availability.",
     "The result artifact itself is written only after the isolated run and is therefore validated by the subsequent source-tree make check, not by its own candidate commit."
   ],
-  "rehearsed_on": "2026-09-27",
+  "rehearsed_on": "2026-09-28",
   "schema_version": 1,
   "source_sha256": {
     ".githooks/pre-commit": "814c249296a9ca5761438df238374087acd67bc5198f548b69603c26445e049c",
@@ -37,8 +37,12 @@
   "verification": {
     "clean_after": true,
     "command": "make check-changed",
-    "elapsed_ms": 632.161,
+    "elapsed_ms": 350926.91,
     "exit_code": 0,
-    "extracted_test_counts": {}
+    "extracted_test_counts": {
+      "elixir_test_results": 287,
+      "repository_tool_tests": 25,
+      "typescript_tests": 6
+    }
   }
 }

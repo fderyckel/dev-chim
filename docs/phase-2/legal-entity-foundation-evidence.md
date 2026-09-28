@@ -1,7 +1,7 @@
 # Slice 2.1-B minimal legal-entity foundation evidence
 
 - Status: Complete at L1 with synthetic local data; no public route or L2 claim
-- Date: 2026-09-27
+- Date: 2026-09-28
 - Governing decision: Conditionally Accepted ADR 0025, condition C25-01
 - Module: `organization.legal` version `1.0.0`
 - Boundary: private production-core candidate using synthetic test data only
@@ -102,14 +102,15 @@ The focused suite proves:
 - alternate-write rejection for cross-tenant profile references, profile mutation, and identity
   reassignment.
 
-Verification on 2026-09-27:
+Verification on 2026-09-28:
 
 | Check | Result |
 | --- | --- |
 | Focused legal-entity suite | Passed: 9 tests |
 | `make test-fast` | Passed: 181 tests |
 | Ash migration/snapshot drift check | Passed |
-| Complete repository `make check` | Pending final integration run |
+| Isolated clean-checkout rehearsal | Passed for the exact current candidate |
+| Complete repository `make check` | Passed: 25 repository-tool, 106 Phase 0, 6 Phase 0 TypeScript, 181 production-core, 21 web-unit, 15 synthetic browser, 6 connected UI-1A browser, and 1 unavailable-core recovery tests |
 
 ## Phase 2 effect
 

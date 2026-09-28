@@ -3,6 +3,8 @@
 - Status: Current-contract and five-context prototype implemented and technically verified; G2
   representative findings and accountable human G5 review remain conditions C25-03/C25-05
 - Date: 2026-09-27
+- Conditional review deadline: 2026-12-15, or before the first connected/public
+  institutional-structure workflow, whichever is earlier
 - Gates: ADR 0025 G2 and G5
 - Prototype: `/institutional-structure` in the local UI-0 workspace
 - Boundary: Local, synthetic, read-only, removable; no core connection, authentication, mutation,
@@ -90,6 +92,10 @@ representative comprehension or assistive-technology acceptance. Those named fin
 C25-03/C25-05 and must be recorded before their first affected educational or connected/public
 slice.
 
+The Project Owner's 2026-09-28 Phase 2.0 conditional approval carries the human C25-05 finding as
+a dated residual condition through 2026-12-15 or the first affected gate. It does not relabel the
+open rows below, authorize a connected workflow, or allow deadline expiry to count as approval.
+
 ## Representative review packet
 
 The reusable [representative and accountable review packet](institutional-structure-review-packet.md)
@@ -137,8 +143,9 @@ representative institutional review.
 G2 is **open as C25-03** because no named representative review is recorded. Technical G5 is
 **ready** for the conditionally accepted logical decision because the refreshed prototype and
 focused evidence pass. Accountable product-experience and representative comprehension remain
-**open as C25-05** before a connected/public structure workflow. Any review finding that changes identity,
-tenant ownership, legal responsibility, parentage, consolidation meaning, or either hierarchy's
+**open as C25-05** before a connected/public structure workflow and are due for condition review
+by 2026-12-15 or that earlier affected gate. Any review finding that changes identity, tenant
+ownership, legal responsibility, parentage, consolidation meaning, or either hierarchy's
 non-authority boundary returns to G1/G3 rather than becoming an informal UI exception.
 
 ## Related records

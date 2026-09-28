@@ -1,10 +1,10 @@
 # Phase 2 entry decision register
 
-- Status: Phase 2.0 foundation closed at L1; Slices 2.0-B, 2.0-C, internal D.2a through D.2c,
-  the bounded D.3 public-session adapter, and the minimal Slice 2.1-B legal-entity proof have
-  synthetic evidence; 2.0-E/L2 remains blocked by ADR 0025 C25-05
+- Status: Phase 2.0 conditionally approved and closed at L1; Slices 2.0-B, 2.0-C, internal D.2a
+  through D.2c, the bounded D.3 public-session adapter, and the minimal Slice 2.1-B legal-entity
+  proof have synthetic evidence; 2.0-E is deferred under dated C25-05 and L2 remains gated
 - Prepared on: 2026-09-26
-- Last reviewed: 2026-09-27
+- Last reviewed: 2026-09-28
 - Accountable owner: François — Project Owner and interim Security/Privacy Owner
 - Delivery owners: Product and platform engineering
 - Review trigger: any gate closure, owner assignment, accepted or superseding ADR, deployment
@@ -12,11 +12,11 @@
 
 ## Decision effect
 
-This register closes the Phase 2.0 foundation at the L1 synthetic-entry boundary. It reconciles the
-current Phase 0 and Phase 1 conditions against the first learning-institution-module candidate and
-makes every later blocking effect explicit. Phase 2.0-E, selected-deployment qualification, real
-data, pilot, and production release remain later L2 through L4 gates; this closure does not claim
-that they are complete.
+This register conditionally approves and closes Phase 2.0 at the L1 synthetic-entry boundary. It
+reconciles the current Phase 0 and Phase 1 conditions against the first
+learning-institution-module candidate and makes every later blocking effect explicit. Phase 2.0-E
+is a dated deferred condition; selected-deployment qualification, real data, pilot, and production
+release remain later L2 through L4 gates. This closure does not claim that they are complete.
 
 `Satisfied` means the cited evidence closes the gate for the exact candidate and level named.
 `Partial` means useful evidence exists but a binding condition remains. `Open` means the dependent
@@ -29,6 +29,13 @@ its stated entry conditions are satisfied. ADR 0025's 2026-09-27 conditional acc
 the minimal synthetic Slice 2.1-B corporate/legal aggregate eligible for a separately recorded
 entry disposition. That disposition is now recorded and the bounded proof passes; no
 educational-structure persistence or Slice 2.1-C work is authorized yet.
+
+The Project Owner's 2026-09-28 decision conditionally approves Phase 2.0 for planning and carries
+2.0-E as a residual condition through 2026-12-15 or the first connected/public
+institutional-structure gate, whichever is earlier. The condition requires expert/representative
+comprehension and accountable product-experience disposition. It does not authorize implementation
+or release of the connected workflow. If the review is not complete by the deadline, the condition
+must be explicitly renewed, amended, or withdrawn.
 
 ## Release gate matrix
 
@@ -95,11 +102,12 @@ stated gate. They are not being reported as complete, but they no longer prevent
 synthetic 2.1-B proof, whose entry and L1 exit disposition are now recorded.
 
 Slices **2.0-D.2a through D.2c and the bounded D.3 public-session adapter are implemented with
-synthetic evidence**. D.3 is not released at L2 and the endpoint is not enabled. Slice 2.0-E still
-needs an implemented, qualified linked-structure workflow. Its minimal persistence dependency is
-now complete, but C25-05 still prohibits the connected/public workflow until the named
-representative-comprehension and accountable product-experience dispositions are recorded. This
-does not reopen the L1 foundation closure or weaken the completed identity and session foundation.
+synthetic evidence**. D.3 is not released at L2 and the endpoint is not enabled. Phase 2.0 is
+conditionally approved at L1; Slice 2.0-E is its dated deferred condition. Its minimal persistence
+dependency is complete, but C25-05 still prohibits the connected/public workflow until the named
+expert/representative-comprehension and accountable product-experience dispositions are recorded,
+no later than 2026-12-15 or the first affected gate. This does not reopen the L1 foundation closure
+or weaken the completed identity and session foundation.
 
 ## Slice 2.1-B L1 entry and exit disposition
 

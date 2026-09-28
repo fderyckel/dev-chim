@@ -5,6 +5,8 @@
 - Product direction: Approved by François — Project Owner on 2026-09-26, refined through the
   linked-structure review, and conditionally accepted for bounded synthetic implementation on
   2026-09-27
+- Next condition review: 2026-12-15, or before the first connected/public institutional-structure
+  workflow, whichever is earlier
 - Accountable owner: Product, corporate/legal-structure, and educational-structure domain ownership
 - Deciders: Product owner, architecture review group, platform engineering, security/privacy,
   corporate governance/finance domain ownership, and representative learning-institution domain
@@ -401,6 +403,14 @@ revisions, the two named actions, one exact read, and executable lifecycle, auth
 concurrency, idempotency, audit, outbox, rollback, and alternate-write checks. That proof does not
 close any named review or authorize C25-02 through C25-06 work.
 
+On 2026-09-28, François, as Project Owner, conditionally approved Phase 2.0 at its completed L1
+foundation boundary and accepted Slice 2.0-E as a time-bounded deferred condition. The outstanding
+expert/representative comprehension and accountable product-experience disposition must be
+reviewed by 2026-12-15 or before the first connected/public institutional-structure workflow,
+whichever is earlier. This decision closes Phase 2.0 for planning purposes; it does not satisfy
+C25-05, authorize the connected workflow, or turn the absence of a review into approval. A missed
+date requires an explicit condition review and renewal, amendment, or withdrawal.
+
 Acceptance requires at least these synthetic scenarios:
 
 1. one independent kindergarten at one site;
@@ -430,6 +440,10 @@ The conditional acceptance settles the stable logical direction and makes only t
 authorized, minimal Slice 2.1-B synthetic `LegalEntity` aggregate eligible for a recorded entry
 decision. It does not authorize real institutional data, migration, a public interface, connected
 identity, a pilot, deployment, or production release.
+
+Phase 2.0 is conditionally approved at L1 with C25-05 carried as a dated residual condition through
+2026-12-15 or the first affected connected/public gate, whichever is earlier. Conditional approval
+does not waive any condition below.
 
 The following conditions are binding:
 

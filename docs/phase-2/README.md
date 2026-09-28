@@ -1,8 +1,8 @@
 # Phase 2: entry closure and separated corporate/legal and educational structure
 
-- Status: Phase 2.0 foundation closed at L1; Slices 2.0-B, 2.0-C, internal D.2a through D.2c,
-  the bounded D.3 public-session adapter, and the minimal Slice 2.1-B legal-entity aggregate have
-  synthetic evidence; 2.0-E/L2 and all later release levels remain gated
+- Status: Phase 2.0 conditionally approved and closed at L1; Slices 2.0-B, 2.0-C, internal D.2a
+  through D.2c, the bounded D.3 public-session adapter, and the minimal Slice 2.1-B legal-entity
+  aggregate have synthetic evidence; 2.0-E is a dated deferred condition and L2 remains gated
 - Owner: Product and platform engineering, with learning-institution domain and security/privacy
   review
 - Start basis: explicit project-owner direction on 2026-09-26
@@ -57,9 +57,13 @@ named actions, one exact read, lifecycle/capability gates, concurrency, replay, 
 rollback. This small Phase 2.1 dependency was implemented only to apply the Phase 2.0 foundation
 to a business aggregate. No 2.1-C or educational persistence has started.
 
-Phase 2.0 is therefore closed at the L1 foundation boundary. Phase 2.0-E and L2 remain blocked by
-C25-05's named representative-comprehension and accountable product-experience dispositions;
-selected deployment, real data, pilot, and production release remain later gates.
+On 2026-09-28, the Project Owner conditionally approved Phase 2.0 at the completed L1 foundation
+boundary. Slice 2.0-E is carried as a dated deferred condition: C25-05's expert/representative
+comprehension and accountable product-experience disposition is due by 2026-12-15 or before the
+first connected/public institutional-structure workflow, whichever is earlier. The deferral closes
+Phase 2.0 for planning but does not authorize that workflow or an L2 release. A missed review date
+requires explicit renewal, amendment, or withdrawal; it never becomes automatic approval.
+Selected deployment, real data, pilot, and production release remain later gates.
 
 ## Release-level status
 
@@ -67,7 +71,7 @@ selected deployment, real data, pilot, and production release remain later gates
 | --- | --- | --- | --- |
 | L0 — paper and prototype | Closed for current entry scope | Slices 2.0-D.2a through D.2c and bounded D.3 engineering are complete; ADR 0025's technical evidence, refreshed prototype, and conditional G6 decision are recorded | Named reviews remain conditions on their first affected later slices, not claims of completed evidence |
 | L1 — synthetic module proof | Closed for the minimal candidate | Slice 2.0-B outbox/drain, Accepted ADR 0018 temporal evidence, internal Slice 2.0-D foundations, and the Slice 2.1-B `LegalEntity` proof pass | C25-02 blocks 2.1-C; this closure does not authorize educational persistence |
-| L2 — connected synthetic workflow | Blocked | ADRs 0029/0030, D.2a–D.2c, bounded D.3 adapter evidence, and the minimal business aggregate are complete; UI-0/UI-1A remain qualification-only | C25-05 named comprehension/product-experience disposition, the first complete accessible 2.0-E browser workflow, and deployment-specific D.3 qualification |
+| L2 — connected synthetic workflow | Conditionally deferred; not released | ADRs 0029/0030, D.2a–D.2c, bounded D.3 adapter evidence, and the minimal business aggregate are complete; UI-0/UI-1A remain qualification-only | C25-05 expert/representative comprehension and product-experience disposition by 2026-12-15 or the first affected gate, the first complete accessible 2.0-E browser workflow, and deployment-specific D.3 qualification |
 | L3 — controlled real-data pilot | Blocked | No real institutional or Restricted data | Selected-deployment qualification, independent security/privacy review, learning-institution records ownership, and all lower-level gates |
 | L4 — production release | Blocked | No general availability | Accepted operating envelope, production release decision, and all lower-level gates |
 

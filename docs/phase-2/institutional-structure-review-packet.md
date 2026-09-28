@@ -3,6 +3,8 @@
 - Status: ADR 0025 conditionally accepted for bounded synthetic implementation; named reviews
   remain open as slice/release conditions
 - Date: 2026-09-27
+- Condition review due: 2026-12-15, or before the first connected/public
+  institutional-structure workflow, whichever is earlier
 - Gates: ADR 0025 G1 through G6
 - Boundary: Review of the logical linked-structure contract only; approval does not authorize
   persistence, real data, a public interface, module activation, or production release
@@ -240,7 +242,7 @@ revised.
 | G2 — five representative contexts | Review instructions prepared | Five perspective records open | Educational persistence blocked by C25-03 | Deferred to first affected slice |
 | G3 — security/privacy | Technical control and negative-test contract prepared | Named and executable per-slice review open | C25-01/C25-05/C25-06 remain binding | Accepted as bounded design evidence |
 | G4 — migration/correction | Synthetic mappings and temporal contract prepared | Named records/migration review open | Migration and real data blocked by C25-06 | Accepted as synthetic design evidence |
-| G5 — experience/accessibility | Current-contract prototype and focused checks pass | Accountable/representative comprehension review open | Connected/public structure workflow blocked by C25-05 | Technical evidence ready; human finding deferred to first affected slice |
+| G5 — experience/accessibility | Current-contract prototype and focused checks pass | Accountable/representative comprehension review open | Connected/public structure workflow remains prohibited by C25-05 | Technical evidence ready; condition review due 2026-12-15 or the first affected gate |
 | G6 — accountable decision | Product-owner decision and conditions recorded | François recorded; specialist/representative findings remain conditions | C25-01 through C25-06 | **Conditionally accepted 2026-09-27** |
 
 ## G6 decision form
@@ -262,6 +264,18 @@ Conditional acceptance settles the logical direction only. It makes the separate
 minimal first synthetic corporate/legal persistence slice eligible; it does not approve a
 migration, public interface, deployment, real data, pilot, relationship catalogue, corporate-unit
 model, operator workflow, or educational-structure persistence.
+
+## Phase 2.0 conditional-approval addendum
+
+On 2026-09-28, François, as Project Owner, conditionally approved Phase 2.0 at its completed L1
+foundation boundary. The uncompleted G5 expert/representative comprehension and accountable
+product-experience finding is carried as a dated residual condition until 2026-12-15 or the first
+connected/public institutional-structure gate, whichever is earlier.
+
+This addendum closes Phase 2.0 for planning purposes only. It does not complete a blank review row,
+satisfy C25-05, authorize Slice 2.0-E's connected workflow, or approve L2. If no valid review is
+recorded by the deadline, the Project Owner must explicitly renew, amend, or withdraw the
+conditional disposition; expiry never converts the condition into approval.
 
 ## Related records
 

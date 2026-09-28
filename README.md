@@ -89,9 +89,10 @@ and a server-owned ephemeral session. It is read-only and is not production auth
 - UI-1A adds one guarded, loopback-only, read-only assignment-options connection from that
   harness to the existing core. It uses synthetic server-owned context, checked OpenAPI and
   generated TypeScript types, and exposes no assignment write or production identity path.
-- Phase 2's bounded implementation sequence is authorized. The entry register closes the
-  foundation at L1: Slices 2.0-B/2.0-C, bounded provider-neutral 2.0-D engineering, and the minimal
-  Slice 2.1-B legal-entity proof pass their synthetic gates. Slice 2.0-E/L2 remains blocked by ADR
-  0025 C25-05's named representative-comprehension and accountable product-experience reviews;
-  no connected public business workflow, later Phase 2.1 slice, deployment, or real data is
-  authorized yet.
+- Phase 2's bounded implementation sequence is authorized. Phase 2.0 is conditionally approved and
+  closed at L1: Slices 2.0-B/2.0-C, bounded provider-neutral 2.0-D engineering, and the minimal
+  Slice 2.1-B legal-entity proof pass their synthetic gates. Slice 2.0-E is a dated C25-05 residual
+  condition: expert/representative comprehension and accountable product-experience review is due
+  by 2026-12-15 or before the first connected/public institutional-structure workflow, whichever
+  is earlier. The deferral does not authorize that workflow, a later Phase 2.1 slice, deployment,
+  or real data.
