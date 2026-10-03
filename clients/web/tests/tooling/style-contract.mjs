@@ -25,8 +25,8 @@ const layerFiles = new Map([
   ["layout", [path.join(styleDirectory, "layout.css")]],
   [
     "components",
-    ["shell", "primitives", "home", "structure", "preview", "bridge"].map((family) =>
-      path.join(styleDirectory, "components", `${family}.css`),
+    ["shell", "primitives", "home", "structure", "preview", "bridge", "calendar"].map(
+      (family) => path.join(styleDirectory, "components", `${family}.css`),
     ),
   ],
   ["utilities", [path.join(styleDirectory, "utilities.css")]],
@@ -41,7 +41,7 @@ const layerImports = new Map([
   ["layout", ["./layout.css"]],
   [
     "components",
-    ["shell", "primitives", "home", "structure", "preview", "bridge"].map(
+    ["shell", "primitives", "home", "structure", "preview", "bridge", "calendar"].map(
       (family) => `./components/${family}.css`,
     ),
   ],

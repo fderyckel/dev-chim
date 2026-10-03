@@ -1,4 +1,5 @@
-export type NavigationKey = "home" | "assignments" | "structure" | "preview";
+export type NavigationKey =
+  "home" | "assignments" | "calendar" | "structure" | "preview";
 
 export type PrototypeContext = Readonly<{
   experience: "ui0" | "ui1";
@@ -60,6 +61,42 @@ export type InterfaceState = Readonly<{
 export type PreviewViewData = Readonly<{
   context: PrototypeContext;
   states: ReadonlyArray<InterfaceState>;
+}>;
+
+export type AcademicCalendarPeriod = Readonly<{
+  id: string;
+  label: string;
+  sequence: number;
+  startOn: string;
+  endOn: string;
+}>;
+
+export type AcademicCalendarClosure = Readonly<{
+  id: string;
+  label: string;
+  date: string;
+  reasonKey: string;
+}>;
+
+export type AcademicCalendarDraft = Readonly<{
+  label: string;
+  code: string;
+  startOn: string;
+  endOn: string;
+  timeZone: string;
+  instructionalWeekdays: ReadonlyArray<number>;
+  periods: ReadonlyArray<AcademicCalendarPeriod>;
+  closures: ReadonlyArray<AcademicCalendarClosure>;
+}>;
+
+export type AcademicCalendarPreparationViewData = Readonly<{
+  context: PrototypeContext;
+  institution: Readonly<{
+    id: string;
+    label: string;
+  }>;
+  calendar: AcademicCalendarDraft;
+  initialResolutionDate: string;
 }>;
 
 export type InstitutionalUnitClassification = "institution" | "organizational_unit";
@@ -175,6 +212,7 @@ export type InstitutionalStructureViewData = Readonly<{
  * accepts no actor, tenant, capability, repository, placement, or routing input.
  */
 export interface ViewDataPort {
+  getAcademicCalendarPreparation(): Promise<AcademicCalendarPreparationViewData>;
   getHome(): Promise<HomeViewData>;
   getInstitutionalStructure(): Promise<InstitutionalStructureViewData>;
   getPreview(): Promise<PreviewViewData>;

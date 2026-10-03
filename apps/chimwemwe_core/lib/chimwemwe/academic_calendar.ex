@@ -13,7 +13,21 @@ defmodule Chimwemwe.AcademicCalendar do
   with audit, outbox, idempotency, and optimistic-concurrency evidence.
   """
 
+  use Ash.Domain, otp_app: :chimwemwe_core
+
   alias Chimwemwe.AcademicCalendar.{Contract, Error, Preview, Resolution}
+
+  authorization do
+    authorize :always
+    require_actor? true
+  end
+
+  resources do
+    resource Chimwemwe.AcademicCalendar.Calendar
+    resource Chimwemwe.AcademicCalendar.AcademicYear
+    resource Chimwemwe.AcademicCalendar.AcademicPeriod
+    resource Chimwemwe.AcademicCalendar.CalendarClosure
+  end
 
   @doc "Validates and canonicalizes one publication candidate without mutation."
   @spec preview_publication(map()) :: {:ok, Preview.t()} | {:error, Error.t()}
