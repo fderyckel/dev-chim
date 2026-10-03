@@ -1,6 +1,11 @@
 # Experience design system and governed personalization proposal
 
-- Status: Proposed; documentation only
+- Status: DS-1 and DS-2 implemented; the DS-3 technical proof is implemented with focused local
+  verification, and its revised profiles were approved by the product owner on 2026-10-03 to
+  advance to representative testing, but DS-3 remains open for representative human evidence; the
+  repository-wide check is blocked by stale clean-checkout rehearsal evidence, the all-dependency
+  browser audit retains a development-tool advisory, ADR 0028 remains Proposed, and DS-4 through
+  DS-5 remain unauthorized
 - Proposed boundary: a governed visual-language and personalization foundation for the browser,
   with portable semantics for a future native client
 - Owner: Product experience and client engineering
@@ -28,8 +33,14 @@ makes interface development faster: product teams assemble tested components and
 than deciding title sizes, box styles, colors, spacing, focus, and error presentation on every
 screen.
 
-This proposal does not authorize implementation. UI-0 remains local and synthetic, and no
-production preference resource, identity path, public interface, or school workflow is added.
+The explicit 2026-10-03 authorizations cover DS-1, the token compiler and default-parity
+migration; DS-2, the shared component foundation and reviewed default refinement; and DS-3's
+local, non-persistent governed-choice proof. UI-0 remains local and synthetic, and no production
+preference resource, identity path, public interface, school workflow, or durable preference UI
+is added. See the
+[DS-1 implementation evidence](../phase-1/evidence/design-system-token-foundation.md) and
+[DS-2 implementation evidence](../phase-1/evidence/design-system-component-foundation.md), plus
+the [DS-3 technical evidence](../phase-1/evidence/design-system-governed-choice-proof.md).
 
 ## Why the current foundation should evolve
 
@@ -42,19 +53,24 @@ The current UI-0 direction is sound:
 - written state language rather than color-only state; and
 - keyboard, reflow, reduced-motion, forced-colour, and automated accessibility checks.
 
-It was intentionally a small experience harness. It is not yet the framework required for a
-growing product:
+At the proposal baseline it was intentionally a small experience harness rather than the framework
+required for a growing product:
 
-- `tokens.css` is the source and runtime output at once;
+- `tokens.css` was the source and runtime output at once;
 - the current token set expresses only one light appearance;
 - the component layer is one large stylesheet rather than independently owned components;
 - screens can still invent combinations of classes without a component API;
-- there is no theme-completeness or cross-theme visual-regression gate;
+- there was no theme-completeness or generated-output drift gate;
 - no typography, density, dark-mode, or high-contrast choice exists; and
 - there is no governed persistence or first-paint contract.
 
-The next step should preserve the current contract and strengthen its ownership rather than
-replace it with a utility framework.
+DS-1 replaced that combined source/output file with typed source documents and generated assets
+while preserving the rendered default exactly. DS-2 then split the component layer into six owned
+families and introduced constrained React APIs for headings, panels, statuses, and actions. The
+Home, UI preview, and dense institutional-structure reference page now share those APIs. DS-3 adds
+three complete local profiles—Quiet Light, Calm Dark, and Clear Reading—with an in-memory preview
+and reset on the living specimen. Durable preferences and a production connection remain later
+slices, while representative human evaluation remains open before DS-3's outcome exit is met.
 
 ## Product principles
 
@@ -96,16 +112,16 @@ legible, fast, responsive, and polished before additional choices ship.
 
 Use a small, named type hierarchy:
 
-| Role | Use | Rule |
-| --- | --- | --- |
-| Display | Rare landing or major context moment | Never substitutes for the page heading |
-| Page title | One per page | Maps to the page's `h1` unless document structure requires otherwise |
-| Section title | Major region within a page | Keeps a consistent step below the page title |
-| Component title | Card, panel, dialog, or table region | Cannot visually compete with the page title |
-| Body | Instructions and working content | Default reading style |
-| Supporting | Secondary explanation and metadata | Must still meet contrast and zoom requirements |
-| Label | Form and data labels | Uses weight and position, not all-caps at small sizes |
-| Data | Values, dates, amounts, and identifiers | Uses tabular numerals where comparison matters |
+| Role            | Use                                     | Rule                                                                 |
+| --------------- | --------------------------------------- | -------------------------------------------------------------------- |
+| Display         | Rare landing or major context moment    | Never substitutes for the page heading                               |
+| Page title      | One per page                            | Maps to the page's `h1` unless document structure requires otherwise |
+| Section title   | Major region within a page              | Keeps a consistent step below the page title                         |
+| Component title | Card, panel, dialog, or table region    | Cannot visually compete with the page title                          |
+| Body            | Instructions and working content        | Default reading style                                                |
+| Supporting      | Secondary explanation and metadata      | Must still meet contrast and zoom requirements                       |
+| Label           | Form and data labels                    | Uses weight and position, not all-caps at small sizes                |
+| Data            | Values, dates, amounts, and identifiers | Uses tabular numerals where comparison matters                       |
 
 Heading semantics remain correct even when the visual role needs to differ. A `Heading` component
 therefore separates document level from visual style rather than encouraging arbitrary font-size
@@ -115,13 +131,13 @@ classes.
 
 Use only five surface roles:
 
-| Surface | Purpose | Visual treatment |
-| --- | --- | --- |
-| Canvas | Page background | Quiet, low chroma, no elevation |
-| Panel | Groups related work | Border before shadow; comfortable internal rhythm |
-| Inset | Secondary or explanatory region | Subtle contrast from its parent |
-| Interactive | Clickable/selectable row or tile | Clear hover, focus, selected, and disabled states |
-| Overlay | Dialog, popover, or temporary raised layer | Elevation communicates actual stacking only |
+| Surface     | Purpose                                    | Visual treatment                                  |
+| ----------- | ------------------------------------------ | ------------------------------------------------- |
+| Canvas      | Page background                            | Quiet, low chroma, no elevation                   |
+| Panel       | Groups related work                        | Border before shadow; comfortable internal rhythm |
+| Inset       | Secondary or explanatory region            | Subtle contrast from its parent                   |
+| Interactive | Clickable/selectable row or tile           | Clear hover, focus, selected, and disabled states |
+| Overlay     | Dialog, popover, or temporary raised layer | Elevation communicates actual stacking only       |
 
 Avoid a dashboard made from equal cards. A surface exists because it groups or layers information,
 not because a developer wants visual decoration.
@@ -176,15 +192,15 @@ alone.
 
 Start with the smallest useful matrix:
 
-| Axis | Initial choices | Product rule |
-| --- | --- | --- |
-| Appearance | System, light, dark | System is the default; no flash between server render and hydration |
-| Contrast | Standard, high | Both are complete product profiles; forced-colour mode still wins |
+| Axis       | Initial choices                                   | Product rule                                                                                         |
+| ---------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Appearance | System, light, dark                               | System is the default; no flash between server render and hydration                                  |
+| Contrast   | Standard, high                                    | Both are complete product profiles; forced-colour mode still wins                                    |
 | Typography | Source Sans 3, Atkinson Hyperlegible Next, system | The readable candidate was designed for low-vision legibility; all are self-hosted or platform-owned |
-| Text scale | 100%, 112.5%, 125% | Works in addition to browser zoom, never instead of it |
-| Density | Comfortable, compact | Compact cannot reduce minimum targets or touch usability |
-| Accent | Default plus at most three tested families | Changes actions and decorative emphasis, never status semantics |
-| Motion | System, reduced | Operating-system reduce always overrides an enabled preference |
+| Text scale | 100%, 112.5%, 125%                                | Works in addition to browser zoom, never instead of it                                               |
+| Density    | Comfortable, compact                              | Compact cannot reduce minimum targets or touch usability                                             |
+| Accent     | Default plus at most three tested families        | Changes actions and decorative emphasis, never status semantics                                      |
+| Motion     | System, reduced                                   | Operating-system reduce always overrides an enabled preference                                       |
 
 Do not launch every axis at once. The first proof should use appearance, typography, and reset;
 add contrast, scale, density, and accent only after the test matrix and user evidence show that each
@@ -357,10 +373,10 @@ only after production identity and interface work is authorized.
 
 ### Proposed resources
 
-| Resource | Ownership | Stores | Must not store |
-| --- | --- | --- | --- |
-| `TenantExperiencePolicy` | Tenant | Default cosmetic identifiers, optional reviewed brand-profile ID, and compatible manifest revision | CSS, token values, selectors, font URLs, arbitrary JSON, disabled product accessibility choices |
-| `ActorExperiencePreference` | Tenant and actor | Selected identifiers and optimistic version | Role assertions, tenant selection, CSS, uploaded assets |
+| Resource                    | Ownership        | Stores                                                                                             | Must not store                                                                                  |
+| --------------------------- | ---------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `TenantExperiencePolicy`    | Tenant           | Default cosmetic identifiers, optional reviewed brand-profile ID, and compatible manifest revision | CSS, token values, selectors, font URLs, arbitrary JSON, disabled product accessibility choices |
+| `ActorExperiencePreference` | Tenant and actor | Selected identifiers and optimistic version                                                        | Role assertions, tenant selection, CSS, uploaded assets                                         |
 
 The exact names remain provisional until the implementation slice is authorized.
 
@@ -472,6 +488,9 @@ approved. No runtime change is needed.
 
 ### DS-1 — Token compiler and default parity
 
+**Implemented with focused local verification on 2026-10-03.** The evidence record is
+[design-system token foundation](../phase-1/evidence/design-system-token-foundation.md).
+
 - Introduce the typed token source and deterministic browser generator.
 - Generate the existing default profile first.
 - Add the `themes` layer while preserving current UI-0 rendering through compatibility aliases.
@@ -481,6 +500,9 @@ approved. No runtime change is needed.
 reproducible, and no preference UI or core resource exists.
 
 ### DS-2 — Component ownership and visual refinement
+
+**Implemented with focused local verification on 2026-10-03.** The evidence record is
+[design-system component foundation](../phase-1/evidence/design-system-component-foundation.md).
 
 - Split the component stylesheet into owned component families.
 - Introduce semantic React component APIs for the smallest repeated set.
@@ -492,6 +514,11 @@ reproducible, and no preference UI or core resource exists.
 route-local visual invention.
 
 ### DS-3 — Local governed-choice proof
+
+**Technical proof implemented with focused local verification and revised-profile owner approval
+to advance to representative testing on 2026-10-03; representative human evidence remains open.**
+The evidence record is
+[design-system governed-choice proof](../phase-1/evidence/design-system-governed-choice-proof.md).
 
 - Add dark and one readability-focused profile.
 - Add an in-memory preference preview and reset to UI-0 only.
@@ -525,18 +552,18 @@ the browser component tree or layout into the native client.
 
 ## Acceptance matrix
 
-| Concern | Required proof |
-| --- | --- |
-| Consistency | Every reference flow uses named hierarchy, surface, emphasis, tone, and state roles |
-| Choice safety | All selectable profiles are complete; status meaning and focus do not vary |
-| Default quality | Product-design review and representative task evidence for the default |
-| Accessibility | WCAG 2.2 AA floor plus declared stronger focus, zoom, target, color, and motion checks |
-| Agility | A reference workflow is assembled without new raw tokens or route-local component CSS |
-| Portability | Token source generates deterministic browser assets without browser semantics in token names |
-| Security | No arbitrary CSS/code/URLs; fonts and assets are owned; identifiers are allowlisted |
-| Tenancy | Future preference reads/writes require trusted actor and tenant; cross-tenant and other-actor tests deny |
-| Recovery | Unknown, removed, partial, or stale profile selection falls back before rendering a broken UI |
-| Performance | No network theme fetch; font and CSS budgets are measured; no first-paint profile flash |
+| Concern         | Required proof                                                                                           |
+| --------------- | -------------------------------------------------------------------------------------------------------- |
+| Consistency     | Every reference flow uses named hierarchy, surface, emphasis, tone, and state roles                      |
+| Choice safety   | All selectable profiles are complete; status meaning and focus do not vary                               |
+| Default quality | Product-design review and representative task evidence for the default                                   |
+| Accessibility   | WCAG 2.2 AA floor plus declared stronger focus, zoom, target, color, and motion checks                   |
+| Agility         | A reference workflow is assembled without new raw tokens or route-local component CSS                    |
+| Portability     | Token source generates deterministic browser assets without browser semantics in token names             |
+| Security        | No arbitrary CSS/code/URLs; fonts and assets are owned; identifiers are allowlisted                      |
+| Tenancy         | Future preference reads/writes require trusted actor and tenant; cross-tenant and other-actor tests deny |
+| Recovery        | Unknown, removed, partial, or stale profile selection falls back before rendering a broken UI            |
+| Performance     | No network theme fetch; font and CSS budgets are measured; no first-paint profile flash                  |
 
 ## Explicit non-goals
 
@@ -557,22 +584,24 @@ This proposal does not authorize:
 
 ## Main risks and controls
 
-| Risk | Control |
-| --- | --- |
-| Choice explosion | Start with three axes, cap choices, require matrix cost in every proposal |
-| Inconsistent status meaning | Keep tone tokens product-owned and outside accent profiles |
-| Attractive but unusable system | Validate complete task flows with representative people |
-| CSS becomes another ungoverned framework | Enforce layers, ownership, component APIs, and empty overrides |
-| Ash becomes a presentation engine | Store only stable profile IDs; keep token values and rendering in code |
-| Tenant branding harms accessibility | Accessibility choices and product invariants outrank tenant defaults |
-| First-paint flash | Resolve server-side and ship all released profile CSS statically |
-| Font privacy or availability | Self-host reviewed fonts; no runtime external font calls |
-| Vendor lock-in | Own tokens and component APIs; wrap optional headless behavior dependencies |
-| Design stagnation | Version tokens, keep review triggers, and use user evidence to retire weak choices |
+| Risk                                     | Control                                                                            |
+| ---------------------------------------- | ---------------------------------------------------------------------------------- |
+| Choice explosion                         | Start with three axes, cap choices, require matrix cost in every proposal          |
+| Inconsistent status meaning              | Keep tone tokens product-owned and outside accent profiles                         |
+| Attractive but unusable system           | Validate complete task flows with representative people                            |
+| CSS becomes another ungoverned framework | Enforce layers, ownership, component APIs, and empty overrides                     |
+| Ash becomes a presentation engine        | Store only stable profile IDs; keep token values and rendering in code             |
+| Tenant branding harms accessibility      | Accessibility choices and product invariants outrank tenant defaults               |
+| First-paint flash                        | Resolve server-side and ship all released profile CSS statically                   |
+| Font privacy or availability             | Self-host reviewed fonts; no runtime external font calls                           |
+| Vendor lock-in                           | Own tokens and component APIs; wrap optional headless behavior dependencies        |
+| Design stagnation                        | Version tokens, keep review triggers, and use user evidence to retire weak choices |
 
 ## Approval boundary
 
-Approval of this proposal should first authorize only DS-0: accountable review of the visual
-language, token contract, preference axes, quality gates, and ownership. DS-1 and each later slice
-need explicit authorization. In particular, this proposal does not authorize durable preferences
-or a production browser connection.
+The initial proposal authorized only DS-0. The explicit 2026-10-03 instructions authorized DS-1,
+DS-2, and DS-3 as separate bounded slices. DS-1 and DS-2 are complete. DS-3's technical proof is
+implemented, and the product owner approved its revised profiles to enter representative testing
+on 2026-10-03, but its representative-human outcome gate remains open. DS-4 and DS-5 still need
+separate authorization. In particular, this approval does not authorize durable preferences, an
+Ash preference resource, or a production browser connection.

@@ -1,5 +1,8 @@
 import type { HomeViewData } from "../ports/view-data";
-import Link from "next/link";
+import { ActionLink } from "../design-system/components/actions";
+import { PageHeading } from "../design-system/components/page-heading";
+import { Panel } from "../design-system/components/panel";
+import { StatusBadge } from "../design-system/components/status-badge";
 
 type HomeViewProps = Readonly<{
   viewData: HomeViewData;
@@ -8,21 +11,19 @@ type HomeViewProps = Readonly<{
 export function HomeView({ viewData }: HomeViewProps) {
   return (
     <div className="l-page-stack">
-      <header className="c-page-heading">
-        <div className="c-page-heading__copy">
-          <span className="c-page-heading__eyebrow">Today</span>
-          <h1 className="c-page-heading__title">A clear place to begin</h1>
-          <p className="c-page-heading__lede">
-            Review what needs attention in this local experience prototype.
-          </p>
-        </div>
-        <div className="c-page-heading__assurance" role="status">
-          <span className="c-status c-status--positive">Prototype ready</span>
-          <span className="c-page-heading__assurance-copy">
-            Everything shown is deterministic and synthetic.
-          </span>
-        </div>
-      </header>
+      <PageHeading
+        eyebrow="Today"
+        title="A clear place to begin"
+        description="Review what needs attention in this local experience prototype."
+        aside={
+          <>
+            <StatusBadge tone="positive">Prototype ready</StatusBadge>
+            <span className="c-page-heading__assurance-copy">
+              Everything shown is deterministic and synthetic.
+            </span>
+          </>
+        }
+      />
 
       <section
         className="c-priority-card has-leading-icon"
@@ -39,15 +40,9 @@ export function HomeView({ viewData }: HomeViewProps) {
           <p className="c-priority-card__description">
             {viewData.priority.description}
           </p>
-          <a
-            className="c-button c-button--primary c-priority-card__action"
-            href={viewData.priority.actionHref}
-          >
+          <ActionLink href={viewData.priority.actionHref} icon="down" variant="primary">
             {viewData.priority.actionLabel}
-            <span className="c-button__icon" aria-hidden="true">
-              ↓
-            </span>
-          </a>
+          </ActionLink>
         </div>
         <p className="c-priority-card__note">
           Local review surface
@@ -56,23 +51,19 @@ export function HomeView({ viewData }: HomeViewProps) {
       </section>
 
       <div className="l-page-grid">
-        <section
-          className="c-panel c-panel--attention"
+        <Panel
+          eyebrow="Needs a person"
+          title="Attention"
+          titleId="attention-title"
           id="attention"
-          aria-labelledby="attention-title"
-        >
-          <div className="c-panel__header">
-            <div className="c-panel__heading-group">
-              <p className="c-panel__eyebrow">Needs a person</p>
-              <h2 className="c-panel__title" id="attention-title">
-                Attention
-              </h2>
-            </div>
-            <span className="c-status c-status--attention">
+          tone="attention"
+          badge={
+            <StatusBadge tone="attention">
               {viewData.attention.length} items
-            </span>
-          </div>
-
+            </StatusBadge>
+          }
+          footer="Example content only. These rows do not open a school workflow."
+        >
           <ul className="c-item-list" aria-label="Synthetic attention items">
             {viewData.attention.map((item) => (
               <li className="c-item-row" key={item.id}>
@@ -88,22 +79,13 @@ export function HomeView({ viewData }: HomeViewProps) {
               </li>
             ))}
           </ul>
+        </Panel>
 
-          <p className="c-panel__footnote">
-            Example content only. These rows do not open a school workflow.
-          </p>
-        </section>
-
-        <section className="c-panel" aria-labelledby="activity-title">
-          <div className="c-panel__header">
-            <div className="c-panel__heading-group">
-              <p className="c-panel__eyebrow">Traceable and calm</p>
-              <h2 className="c-panel__title" id="activity-title">
-                Recent activity
-              </h2>
-            </div>
-          </div>
-
+        <Panel
+          eyebrow="Traceable and calm"
+          title="Recent activity"
+          titleId="activity-title"
+        >
           <ol className="c-activity-list">
             {viewData.activity.map((item) => (
               <li className="c-activity-row" key={item.id}>
@@ -116,7 +98,7 @@ export function HomeView({ viewData }: HomeViewProps) {
               </li>
             ))}
           </ol>
-        </section>
+        </Panel>
       </div>
 
       <aside className="c-prototype-notice" aria-labelledby="prototype-note-title">
@@ -132,12 +114,9 @@ export function HomeView({ viewData }: HomeViewProps) {
             recovery guidance. It has no production data or authority.
           </p>
         </div>
-        <Link className="c-button c-button--quiet" href="/ui-preview">
+        <ActionLink href="/ui-preview" icon="forward" variant="quiet">
           Explore UI states
-          <span className="c-button__icon" aria-hidden="true">
-            →
-          </span>
-        </Link>
+        </ActionLink>
       </aside>
     </div>
   );

@@ -1,5 +1,9 @@
 import type { PreviewViewData } from "../ports/view-data";
-import Link from "next/link";
+import { ActionButton, ActionLink } from "../design-system/components/actions";
+import { ExperienceProfilePreview } from "../design-system/components/experience-profile-preview";
+import { PageHeading } from "../design-system/components/page-heading";
+import { Panel } from "../design-system/components/panel";
+import { StatusBadge } from "../design-system/components/status-badge";
 import { InterfaceStateExplorer } from "./interface-state-explorer";
 
 type UiPreviewProps = Readonly<{
@@ -9,22 +13,16 @@ type UiPreviewProps = Readonly<{
 export function UiPreview({ viewData }: UiPreviewProps) {
   return (
     <div className="l-page-stack">
-      <header className="c-page-heading c-page-heading--preview">
-        <div className="c-page-heading__copy">
-          <span className="c-page-heading__eyebrow">Review surface</span>
-          <h1 className="c-page-heading__title">UI preview</h1>
-          <p className="c-page-heading__lede">
-            Inspect the small set of interface primitives and public response states
-            used by this synthetic prototype.
-          </p>
-        </div>
-        <Link className="c-button c-button--quiet" href="/">
-          <span className="c-button__icon" aria-hidden="true">
-            ←
-          </span>
-          Return to Home
-        </Link>
-      </header>
+      <PageHeading
+        eyebrow="Review surface"
+        title="UI preview"
+        description="Inspect the small set of interface primitives and public response states used by this synthetic prototype."
+        aside={
+          <ActionLink href="/" icon="back" iconPosition="before" variant="quiet">
+            Return to Home
+          </ActionLink>
+        }
+      />
 
       <aside className="c-boundary-banner" aria-label="Prototype boundary">
         <span className="c-boundary-banner__label">Synthetic review mode</span>
@@ -34,70 +32,52 @@ export function UiPreview({ viewData }: UiPreviewProps) {
         </p>
       </aside>
 
-      <section
-        className="c-preview-section"
-        id="interface-states"
-        aria-labelledby="states-title"
+      <Panel
+        eyebrow="Governed choice"
+        title="Experience profiles"
+        titleId="profiles-title"
+        description="Compare three complete profiles. The information hierarchy, component behavior, and status meaning stay fixed."
+        badge={<StatusBadge tone="information">Local preview only</StatusBadge>}
       >
-        <div className="c-preview-section__heading">
-          <div className="c-preview-section__heading-copy">
-            <p className="c-preview-section__eyebrow">Recovery language</p>
-            <h2 className="c-preview-section__title" id="states-title">
-              Interface states
-            </h2>
-            <p className="c-preview-section__description">
-              Every state has a written label, a non-disclosing explanation, and a next
-              step. Colour is supporting information only.
-            </p>
-          </div>
-          <span className="c-status c-status--synthetic">8 public states</span>
-        </div>
+        <ExperienceProfilePreview />
+      </Panel>
+
+      <Panel
+        eyebrow="Recovery language"
+        title="Interface states"
+        titleId="states-title"
+        id="interface-states"
+        description="Every state has a written label, a non-disclosing explanation, and a next step. Colour is supporting information only."
+        badge={<StatusBadge tone="information">8 public states</StatusBadge>}
+      >
         <InterfaceStateExplorer states={viewData.states} />
-      </section>
+      </Panel>
 
       <div className="l-preview-grid">
-        <section className="c-preview-section" aria-labelledby="actions-title">
-          <div className="c-preview-section__heading">
-            <div className="c-preview-section__heading-copy">
-              <p className="c-preview-section__eyebrow">Clear intent</p>
-              <h2 className="c-preview-section__title" id="actions-title">
-                Actions and links
-              </h2>
-            </div>
-          </div>
+        <Panel eyebrow="Clear intent" title="Actions and links" titleId="actions-title">
           <div className="c-preview-stack">
-            <a className="c-button c-button--primary" href="#form-example">
+            <ActionLink href="#form-example" icon="down" variant="primary">
               Go to form example
-              <span className="c-button__icon" aria-hidden="true">
-                ↓
-              </span>
-            </a>
-            <Link className="c-button c-button--secondary" href="/">
+            </ActionLink>
+            <ActionLink href="/" variant="secondary">
               Return to Home
-            </Link>
-            <button className="c-button c-button--quiet" type="button" disabled>
+            </ActionLink>
+            <ActionButton variant="quiet" disabled>
               Unavailable example
-            </button>
+            </ActionButton>
             <p className="c-preview-stack__note">
               Disabled controls stay labelled and visually distinct. They are never
               hidden as an authorization technique.
             </p>
           </div>
-        </section>
+        </Panel>
 
-        <section
-          className="c-preview-section"
+        <Panel
+          eyebrow="Accessible defaults"
+          title="Form fields"
+          titleId="form-title"
           id="form-example"
-          aria-labelledby="form-title"
         >
-          <div className="c-preview-section__heading">
-            <div className="c-preview-section__heading-copy">
-              <p className="c-preview-section__eyebrow">Accessible defaults</p>
-              <h2 className="c-preview-section__title" id="form-title">
-                Form fields
-              </h2>
-            </div>
-          </div>
           <form className="c-form" aria-label="Synthetic form example">
             <div className="c-field">
               <label className="c-field__label" htmlFor="example-reference">
@@ -135,26 +115,21 @@ export function UiPreview({ viewData }: UiPreviewProps) {
               </span>
             </div>
 
-            <button className="c-button c-button--primary" type="button" disabled>
+            <ActionButton disabled variant="primary">
               Saving is unavailable in UI-0
-            </button>
+            </ActionButton>
           </form>
-        </section>
+        </Panel>
       </div>
 
-      <section className="c-preview-section" aria-labelledby="content-title">
-        <div className="c-preview-section__heading">
-          <div className="c-preview-section__heading-copy">
-            <p className="c-preview-section__eyebrow">Progressive disclosure</p>
-            <h2 className="c-preview-section__title" id="content-title">
-              Content containers
-            </h2>
-          </div>
-        </div>
-
+      <Panel
+        eyebrow="Progressive disclosure"
+        title="Content containers"
+        titleId="content-title"
+      >
         <div className="l-content-example-grid">
           <article className="c-example-card">
-            <span className="c-status c-status--positive">Ready</span>
+            <StatusBadge tone="positive">Ready</StatusBadge>
             <h3 className="c-example-card__title">A focused card</h3>
             <p className="c-example-card__copy">
               Cards group one idea. They do not turn every fact into a dashboard tile.
@@ -169,9 +144,9 @@ export function UiPreview({ viewData }: UiPreviewProps) {
             <p className="c-empty-state__copy">
               Empty states explain what is absent and offer a safe route back.
             </p>
-            <Link className="c-text-link" href="/">
+            <ActionLink href="/" variant="quiet">
               Return to Home
-            </Link>
+            </ActionLink>
           </div>
 
           <div className="c-skeleton-card is-loading" aria-busy="true">
@@ -184,7 +159,7 @@ export function UiPreview({ viewData }: UiPreviewProps) {
             <span className="c-skeleton-card__line c-skeleton-card__line--medium" />
           </div>
         </div>
-      </section>
+      </Panel>
     </div>
   );
 }

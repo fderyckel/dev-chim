@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 
+import { ActionButton } from "../design-system/components/actions";
 import type { InterfaceState, InterfaceStateKey } from "../ports/view-data";
 
 type InterfaceStateExplorerProps = Readonly<{
@@ -80,13 +81,9 @@ export function InterfaceStateExplorer({ states }: InterfaceStateExplorerProps) 
           </p>
         </div>
         {selectedState.key !== "ready" ? (
-          <button
-            className="c-button c-button--secondary"
-            type="button"
-            onClick={resetState}
-          >
+          <ActionButton onClick={resetState} variant="secondary">
             Return to ready
-          </button>
+          </ActionButton>
         ) : null}
       </div>
     </div>

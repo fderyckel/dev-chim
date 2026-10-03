@@ -13,12 +13,16 @@ interface therefore needs a product-owned visual language that can remain cohere
 workflows while still giving people, especially learners, meaningful control over how the product
 looks and feels to them.
 
-UI-0 already proves a useful local foundation: semantic CSS custom properties, fixed cascade
+UI-0 already proved a useful local foundation: semantic CSS custom properties, fixed cascade
 layers, owned class prefixes, explicit interface states, accessible reflow, and an empty override
-layer. It is nevertheless a synthetic browser harness, not a production design system. Its current
-token file is hand-authored CSS, its component stylesheet has grown with the prototype, and it has
-no contract for dark mode, typography choices, user preferences, tenant defaults, portable token
-generation, theme completeness, or visual regression across choices.
+layer. At this ADR's proposal baseline its token file was hand-authored CSS. The bounded DS-1
+implementation now provides typed token source, portable static generation, completeness checks,
+and default-profile parity. The bounded DS-2 implementation adds owned component families and
+constrained React APIs for the first repeated primitives, but UI-0 remains a synthetic browser
+harness rather than a production design system. The bounded DS-3 technical proof adds three
+complete local profile candidates and an in-memory preview/reset path. It still has no approved
+public dark mode or typography choice, durable user preference, tenant default, or representative
+human evidence that the candidates improve outcomes.
 
 Unbounded theming would solve the wrong problem. Arbitrary CSS, user-supplied colors, font URLs,
 or per-tenant component overrides could make warning and error meaning inconsistent, damage
@@ -225,19 +229,34 @@ domain boundary. Telemetry uses approved low-cardinality profile identifiers onl
 does not include child data, labels, user-supplied CSS, or unrestricted preference payloads.
 
 Theme generation rejects incomplete semantic token sets, alias cycles, unsupported values, and
-contrast failures. Releases retain a compatibility map for renamed profile identifiers and a
-deterministic default for removed profiles. A theme failure must not block sign-in, recovery, or a
-critical workflow; the server can fall back to the built-in default without a database migration.
+unsafe extensions. Cross-profile browser verification rejects contrast failures. Releases retain a
+compatibility map for renamed profile identifiers and a deterministic default for removed
+profiles. A theme failure must not block sign-in, recovery, or a critical workflow; the server can
+fall back to the built-in default without a database migration.
 
-The existing UI-0 stylesheet remains in place until a bounded migration is authorized. Migration
-is expand-and-contract: introduce generated tokens and compatibility aliases, migrate components,
-prove all supported profile matrices, then remove old aliases. Do not combine the migration with a
-new school workflow or production identity boundary.
+The bounded DS-1 migration replaced the hand-authored token stylesheet with generated reference
+and default-profile assets, with exact rendered parity. The bounded DS-2 migration split the
+component layer and moved the first shared headings, panels, statuses, and actions behind
+constrained component APIs. Later migration remains expand-and-contract: extend shared patterns,
+prove all supported profile matrices, then remove any temporary compatibility aliases. Do not
+combine that work with a new school workflow or production identity boundary.
+
+The bounded DS-3 proof compiles Quiet Light, Calm Dark, and Clear Reading as complete static
+profiles. Only the UI-preview client component may apply an allowlisted profile identifier to the
+document root. Selection is memory-only, reset is explicit, leaving or reloading returns to the
+built-in default, and no cookie, browser storage, remote font, or core preference state exists.
 
 ## Validation evidence
 
-Current evidence proves only the UI-0 CSS and accessibility contract recorded in the
-[local browser evidence](../phase-1/evidence/local-browser-experience.md). The
+Current evidence proves the UI-0 CSS and accessibility contract recorded in the
+[local browser evidence](../phase-1/evidence/local-browser-experience.md) and the bounded token
+compiler, drift, completeness, safety, and exact default-parity result recorded in the
+[DS-1 implementation evidence](../phase-1/evidence/design-system-token-foundation.md), plus the
+component ownership, semantic API, route adoption, and reviewed responsive rendering recorded in
+the [DS-2 implementation evidence](../phase-1/evidence/design-system-component-foundation.md), and
+the complete-profile, first-paint, accessibility-preference, non-persistence, matrix, and rendered
+review recorded in the
+[DS-3 technical evidence](../phase-1/evidence/design-system-governed-choice-proof.md). The
 [DTCG 2025.10 format](https://www.designtokens.org/TR/2025.10/format/) is a stable Community Group
 report for interoperable typed token data; it is not itself proof that a Chimwemwe token compiler
 or theme is correct. [WCAG 2.2](https://www.w3.org/TR/WCAG22/) is the minimum conformance baseline,

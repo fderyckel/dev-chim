@@ -1,10 +1,16 @@
-@layer reset, tokens, base, layout, components, utilities, states, overrides;
+@layer reset, tokens, themes, base, layout, components, utilities, states, overrides;
 
 @import url("./reset.css");
-@import url("./tokens.css");
+@import url("../design-system/generated/tokens.css");
+@import url("../design-system/generated/themes.css");
 @import url("./base.css");
 @import url("./layout.css");
-@import url("./components.css");
+@import url("./components/shell.css");
+@import url("./components/primitives.css");
+@import url("./components/home.css");
+@import url("./components/structure.css");
+@import url("./components/preview.css");
+@import url("./components/bridge.css");
 @import url("./utilities.css");
 @import url("./states.css");
 @import url("./overrides.css");

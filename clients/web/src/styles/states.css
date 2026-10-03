@@ -1,4 +1,10 @@
 @layer states {
+  :root[data-theme-changing="true"] *,
+  :root[data-theme-changing="true"] *::before,
+  :root[data-theme-changing="true"] *::after {
+    transition: none;
+  }
+
   .is-selected {
     border-color: var(--color-action);
     background: var(--color-action-soft);
@@ -98,12 +104,20 @@
       scroll-behavior: auto;
       transition-duration: 0.01ms;
     }
+
+    .is-loading .c-skeleton-card__line,
+    .c-spinner.is-loading {
+      animation-duration: 0.01ms;
+      animation-iteration-count: 1;
+    }
   }
 
   @media (forced-colors: active) {
     .c-brand__mark,
     .c-status,
     .c-prototype-flag,
+    .c-profile-option,
+    .c-profile-option__indicator,
     .c-state-notice__symbol,
     .c-empty-state__symbol {
       border: var(--border-width) solid currentcolor;

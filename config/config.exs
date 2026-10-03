@@ -33,7 +33,9 @@ if config_env() == :dev and
      (System.get_env("CHIMWEMWE_UI1_LOCAL") == "true" or
         System.get_env("CHIMWEMWE_UI1_SETUP") == "true" or
         System.get_env("CHIMWEMWE_AUTH_DEMO") == "true" or
-        System.get_env("CHIMWEMWE_AUTH_SETUP") == "true") do
+        System.get_env("CHIMWEMWE_AUTH_SETUP") == "true" or
+        System.get_env("CHIMWEMWE_ORGANIZATION_LEGAL_DEMO") == "true" or
+        System.get_env("CHIMWEMWE_ORGANIZATION_LEGAL_DEMO_SETUP") == "true") do
   database_connection =
     case System.get_env("PGHOST") do
       nil -> [socket_dir: "/tmp"]
@@ -41,12 +43,25 @@ if config_env() == :dev and
       hostname -> [hostname: hostname]
     end
 
-  repo_config = [
-    database:
-      System.get_env(
-        "CHIMWEMWE_AUTH_DATABASE",
+  database =
+    cond do
+      System.get_env("CHIMWEMWE_AUTH_DEMO") == "true" or
+          System.get_env("CHIMWEMWE_AUTH_SETUP") == "true" ->
+        System.get_env("CHIMWEMWE_AUTH_DATABASE", "chimwemwe_auth_demo")
+
+      System.get_env("CHIMWEMWE_ORGANIZATION_LEGAL_DEMO") == "true" or
+          System.get_env("CHIMWEMWE_ORGANIZATION_LEGAL_DEMO_SETUP") == "true" ->
+        System.get_env(
+          "CHIMWEMWE_ORGANIZATION_LEGAL_DEMO_DATABASE",
+          "chimwemwe_organization_legal_demo"
+        )
+
+      true ->
         System.get_env("CHIMWEMWE_UI1_DATABASE", "chimwemwe_ui1_local")
-      ),
+    end
+
+  repo_config = [
+    database: database,
     password: System.get_env("PGPASSWORD"),
     pool: DBConnection.ConnectionPool,
     pool_size: 4,

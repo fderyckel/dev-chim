@@ -4,6 +4,9 @@ import type {
   MoveImpact,
   ReviewStructureNode,
 } from "../ports/view-data";
+import { PageHeading } from "../design-system/components/page-heading";
+import { Panel } from "../design-system/components/panel";
+import { StatusBadge } from "../design-system/components/status-badge";
 
 type InstitutionalStructurePrototypeProps = Readonly<{
   viewData: InstitutionalStructureViewData;
@@ -39,13 +42,9 @@ function UnitTree({
                   {unit.localLabel} · {unit.code}
                 </span>
               </span>
-              <span
-                className={`c-status${
-                  unit.status === "closed" ? " c-status--attention" : ""
-                }`}
-              >
+              <StatusBadge tone={unit.status === "closed" ? "attention" : "neutral"}>
                 {unit.status === "closed" ? "Closed" : "Current"}
-              </span>
+              </StatusBadge>
             </div>
             {hasChildren ? (
               <UnitTree
@@ -87,13 +86,9 @@ function ReviewTree({
                   {node.meaning} · {node.reference}
                 </span>
               </span>
-              <span
-                className={
-                  node.status === "closed" ? "c-status c-status--attention" : "c-status"
-                }
-              >
+              <StatusBadge tone={node.status === "closed" ? "attention" : "neutral"}>
                 {node.status === "closed" ? "Closed" : "Current"}
-              </span>
+              </StatusBadge>
             </div>
             {hasChildren ? (
               <ReviewTree nodes={node.children} level={level + 1} />
@@ -133,24 +128,19 @@ export function InstitutionalStructurePrototype({
 }: InstitutionalStructurePrototypeProps) {
   return (
     <div className="l-page-stack">
-      <header className="c-page-heading">
-        <div className="c-page-heading__copy">
-          <p className="c-page-heading__eyebrow">ADR 0025 · L0 review prototype</p>
-          <h1 className="c-page-heading__title">Institutional structure</h1>
-          <p className="c-page-heading__lede">
-            Review linked legal, corporate, and educational structures without merging
-            their identities or treating any relationship as authority.
-          </p>
-        </div>
-        <div className="c-page-heading__assurance">
-          <span className="c-status c-status--synthetic">
-            Read-only synthetic evidence
-          </span>
-          <span className="c-page-heading__assurance-copy">
-            No record, access grant, module, report, or placement can change here.
-          </span>
-        </div>
-      </header>
+      <PageHeading
+        eyebrow="ADR 0025 · L0 review prototype"
+        title="Institutional structure"
+        description="Review linked legal, corporate, and educational structures without merging their identities or treating any relationship as authority."
+        aside={
+          <>
+            <StatusBadge tone="information">Read-only synthetic evidence</StatusBadge>
+            <span className="c-page-heading__assurance-copy">
+              No record, access grant, module, report, or placement can change here.
+            </span>
+          </>
+        }
+      />
 
       <section className="c-boundary-banner" aria-label="Structure boundary">
         <span className="c-boundary-banner__label">Separate structures</span>
@@ -173,16 +163,13 @@ export function InstitutionalStructurePrototype({
       </section>
 
       <div className="l-structure-grid l-structure-grid--balanced">
-        <section className="c-panel" aria-labelledby="legal-entities-title">
-          <div className="c-panel__header">
-            <div>
-              <p className="c-panel__eyebrow">Legal accountability</p>
-              <h2 className="c-panel__title" id="legal-entities-title">
-                Legal entities
-              </h2>
-            </div>
-            <span className="c-status">Consolidation context</span>
-          </div>
+        <Panel
+          eyebrow="Legal accountability"
+          title="Legal entities"
+          titleId="legal-entities-title"
+          badge={<StatusBadge>Consolidation context</StatusBadge>}
+          footer="Consolidation is not ownership, complete control evidence, or authority. Legal relationships outside this tree remain separate."
+        >
           <div className="c-structure-tree">
             <ReviewTree
               nodes={viewData.linkedStructure.legalEntities}
@@ -198,22 +185,14 @@ export function InstitutionalStructurePrototype({
               </li>
             ))}
           </ul>
-          <p className="c-panel__footnote">
-            Consolidation is not ownership, complete control evidence, or authority.
-            Legal relationships outside this tree remain separate.
-          </p>
-        </section>
+        </Panel>
 
-        <section className="c-panel" aria-labelledby="corporate-units-title">
-          <div className="c-panel__header">
-            <div>
-              <p className="c-panel__eyebrow">Internal organization</p>
-              <h2 className="c-panel__title" id="corporate-units-title">
-                Corporate units
-              </h2>
-            </div>
-            <span className="c-status">One exact legal entity</span>
-          </div>
+        <Panel
+          eyebrow="Internal organization"
+          title="Corporate units"
+          titleId="corporate-units-title"
+          badge={<StatusBadge>One exact legal entity</StatusBadge>}
+        >
           <div className="c-structure-tree">
             <ReviewTree
               nodes={viewData.linkedStructure.corporateUnits}
@@ -231,19 +210,16 @@ export function InstitutionalStructurePrototype({
               <dd>Finance access, employment, workflow, or programme ownership</dd>
             </div>
           </dl>
-        </section>
+        </Panel>
       </div>
 
-      <section className="c-panel" aria-labelledby="legal-responsibility-title">
-        <div className="c-panel__header">
-          <div>
-            <p className="c-panel__eyebrow">Exact link to educational structure</p>
-            <h2 className="c-panel__title" id="legal-responsibility-title">
-              Legal responsibility
-            </h2>
-          </div>
-          <span className="c-status c-status--positive">One primary operator</span>
-        </div>
+      <Panel
+        eyebrow="Exact link to educational structure"
+        title="Legal responsibility"
+        titleId="legal-responsibility-title"
+        badge={<StatusBadge tone="positive">One primary operator</StatusBadge>}
+        footer="A second legal relationship never becomes a second primary operator. An educational unit resolves accountability through its containing institution."
+      >
         <dl className="c-fact-list">
           <div>
             <dt>Educational institution</dt>
@@ -264,11 +240,7 @@ export function InstitutionalStructurePrototype({
             ),
           )}
         </ul>
-        <p className="c-panel__footnote">
-          A second legal relationship never becomes a second primary operator. An
-          educational unit resolves accountability through its containing institution.
-        </p>
-      </section>
+      </Panel>
 
       <section className="c-structure-introduction" aria-labelledby="governance-title">
         <p className="c-panel__eyebrow">Primary-operator governance</p>
@@ -283,16 +255,12 @@ export function InstitutionalStructurePrototype({
       </section>
 
       <div className="l-structure-grid l-structure-grid--balanced">
-        <section className="c-panel" aria-labelledby="operator-workflow-title">
-          <div className="c-panel__header">
-            <div>
-              <p className="c-panel__eyebrow">Future-effective example</p>
-              <h2 className="c-panel__title" id="operator-workflow-title">
-                Transfer review path
-              </h2>
-            </div>
-            <span className="c-status">No automatic activation</span>
-          </div>
+        <Panel
+          eyebrow="Future-effective example"
+          title="Transfer review path"
+          titleId="operator-workflow-title"
+          badge={<StatusBadge>No automatic activation</StatusBadge>}
+        >
           <ol className="c-governance-steps">
             {viewData.linkedStructure.operatorGovernance.workflow.map((step, index) => (
               <li key={step.label}>
@@ -303,26 +271,29 @@ export function InstitutionalStructurePrototype({
                   <strong>{step.label}</strong>
                   <span className="c-governance-steps__detail">{step.detail}</span>
                 </div>
-                <span
-                  className={`c-status c-governance-steps__state c-status--governance-${step.state}`}
+                <StatusBadge
+                  tone={
+                    step.state === "complete"
+                      ? "positive"
+                      : step.state === "current"
+                        ? "attention"
+                        : "neutral"
+                  }
                 >
                   {governanceStateLabels[step.state]}
-                </span>
+                </StatusBadge>
               </li>
             ))}
           </ol>
-        </section>
+        </Panel>
 
-        <section className="c-panel" aria-labelledby="operator-control-title">
-          <div className="c-panel__header">
-            <div>
-              <p className="c-panel__eyebrow">Controls and evidence</p>
-              <h2 className="c-panel__title" id="operator-control-title">
-                Approval paths
-              </h2>
-            </div>
-            <span className="c-status c-status--positive">Evidence verified</span>
-          </div>
+        <Panel
+          eyebrow="Controls and evidence"
+          title="Approval paths"
+          titleId="operator-control-title"
+          badge={<StatusBadge tone="positive">Evidence verified</StatusBadge>}
+          footer="The structure keeps classified metadata and a protected reference. It does not copy the legal document into this view, audit, or event payload."
+        >
           <ul className="c-relationship-list">
             {viewData.linkedStructure.operatorGovernance.approvalPaths.map((path) => (
               <li key={path.label}>
@@ -355,11 +326,7 @@ export function InstitutionalStructurePrototype({
               <dd>{viewData.linkedStructure.operatorGovernance.evidence.verifiedOn}</dd>
             </div>
           </dl>
-          <p className="c-panel__footnote">
-            The structure keeps classified metadata and a protected reference. It does
-            not copy the legal document into this view, audit, or event payload.
-          </p>
-        </section>
+        </Panel>
       </div>
 
       <section className="c-structure-introduction" aria-labelledby="education-title">
@@ -372,16 +339,13 @@ export function InstitutionalStructurePrototype({
       </section>
 
       <div className="l-structure-grid">
-        <section className="c-panel" aria-labelledby="structure-tree-title">
-          <div className="c-panel__header">
-            <div>
-              <p className="c-panel__eyebrow">Canonical containment</p>
-              <h2 className="c-panel__title" id="structure-tree-title">
-                Five representative contexts
-              </h2>
-            </div>
-            <span className="c-status">Bounded view</span>
-          </div>
+        <Panel
+          eyebrow="Canonical containment"
+          title="Five representative contexts"
+          titleId="structure-tree-title"
+          badge={<StatusBadge>Bounded view</StatusBadge>}
+          footer="Primary/early-years, secondary, combined formal education, college, and university contexts are visible in one fixed fixture. This is not a tenant-wide enumeration endpoint or a required type ladder."
+        >
           <div className="c-structure-tree">
             <UnitTree
               units={viewData.roots}
@@ -389,23 +353,14 @@ export function InstitutionalStructurePrototype({
               selectedId={viewData.selectedUnit.id}
             />
           </div>
-          <p className="c-panel__footnote">
-            Primary/early-years, secondary, combined formal education, college, and
-            university contexts are visible in one fixed fixture. This is not a
-            tenant-wide enumeration endpoint or a required type ladder.
-          </p>
-        </section>
+        </Panel>
 
-        <section className="c-panel" aria-labelledby="selected-unit-title">
-          <div className="c-panel__header">
-            <div>
-              <p className="c-panel__eyebrow">Selected exact unit</p>
-              <h2 className="c-panel__title" id="selected-unit-title">
-                {viewData.selectedUnit.name}
-              </h2>
-            </div>
-            <span className="c-status c-status--positive">Current</span>
-          </div>
+        <Panel
+          eyebrow="Selected exact unit"
+          title={viewData.selectedUnit.name}
+          titleId="selected-unit-title"
+          badge={<StatusBadge tone="positive">Current</StatusBadge>}
+        >
           <dl className="c-fact-list">
             <div>
               <dt>Classification</dt>
@@ -436,19 +391,11 @@ export function InstitutionalStructurePrototype({
               <dd>{viewData.selectedUnit.timeZone}</dd>
             </div>
           </dl>
-        </section>
+        </Panel>
       </div>
 
       <div className="l-structure-grid l-structure-grid--balanced">
-        <section className="c-panel" aria-labelledby="sites-title">
-          <div className="c-panel__header">
-            <div>
-              <p className="c-panel__eyebrow">Separate identities</p>
-              <h2 className="c-panel__title" id="sites-title">
-                Sites
-              </h2>
-            </div>
-          </div>
+        <Panel eyebrow="Separate identities" title="Sites" titleId="sites-title">
           <ul className="c-relationship-list">
             {viewData.sites.map((site) => (
               <li key={site.label}>
@@ -457,17 +404,13 @@ export function InstitutionalStructurePrototype({
               </li>
             ))}
           </ul>
-        </section>
+        </Panel>
 
-        <section className="c-panel" aria-labelledby="affiliations-title">
-          <div className="c-panel__header">
-            <div>
-              <p className="c-panel__eyebrow">Cross-cutting relationship</p>
-              <h2 className="c-panel__title" id="affiliations-title">
-                Affiliations
-              </h2>
-            </div>
-          </div>
+        <Panel
+          eyebrow="Cross-cutting relationship"
+          title="Affiliations"
+          titleId="affiliations-title"
+        >
           <ul className="c-relationship-list">
             {viewData.affiliations.map((affiliation) => (
               <li key={affiliation.label}>
@@ -476,19 +419,17 @@ export function InstitutionalStructurePrototype({
               </li>
             ))}
           </ul>
-        </section>
+        </Panel>
       </div>
 
-      <section className="c-panel" aria-labelledby="move-preview-title">
-        <div className="c-panel__header">
-          <div>
-            <p className="c-panel__eyebrow">Governed preview · no mutation</p>
-            <h2 className="c-panel__title" id="move-preview-title">
-              Move impact
-            </h2>
-          </div>
-          <span className="c-status c-status--attention">Blocked</span>
-        </div>
+      <Panel
+        eyebrow="Governed preview · no mutation"
+        title="Move impact"
+        titleId="move-preview-title"
+        tone="attention"
+        badge={<StatusBadge tone="attention">Blocked</StatusBadge>}
+        footer="The preview deliberately blocks the move because one downstream effect is unclassified. No action control is exposed in this L0 prototype."
+      >
         <div className="c-move-summary">
           <strong>{viewData.movePreview.unit}</strong>
           <span>Current parent: {viewData.movePreview.from}</span>
@@ -509,38 +450,32 @@ export function InstitutionalStructurePrototype({
             </li>
           ))}
         </ul>
-        <p className="c-panel__footnote">
-          The preview deliberately blocks the move because one downstream effect is
-          unclassified. No action control is exposed in this L0 prototype.
-        </p>
-      </section>
+      </Panel>
 
       {viewData.linkedStructure.operatorTransferPreviews.map((preview) => {
         const blocked = preview.state === "blocked";
 
         return (
-          <section
-            className="c-panel"
-            aria-labelledby={`${preview.id}-title`}
+          <Panel
+            eyebrow="Governed preview · no mutation"
+            title={`Primary-operator transfer · ${blocked ? "blocked" : "ready"}`}
+            titleId={`${preview.id}-title`}
+            tone={blocked ? "attention" : "neutral"}
+            badge={
+              <StatusBadge tone={blocked ? "attention" : "positive"}>
+                {blocked ? "Blocked" : "Ready for boundary check"}
+              </StatusBadge>
+            }
+            footer={
+              <>
+                {blocked
+                  ? "An unknown downstream effect blocks this transfer. Historical records remain unchanged."
+                  : "All known preconditions are satisfied, but the named activation action must revalidate the facts at the effective boundary."}{" "}
+                No action control is exposed in this L0 prototype.
+              </>
+            }
             key={preview.id}
           >
-            <div className="c-panel__header">
-              <div>
-                <p className="c-panel__eyebrow">Governed preview · no mutation</p>
-                <h2 className="c-panel__title" id={`${preview.id}-title`}>
-                  Primary-operator transfer · {blocked ? "blocked" : "ready"}
-                </h2>
-              </div>
-              <span
-                className={
-                  blocked
-                    ? "c-status c-status--attention"
-                    : "c-status c-status--positive"
-                }
-              >
-                {blocked ? "Blocked" : "Ready for boundary check"}
-              </span>
-            </div>
             <div className="c-move-summary c-move-summary--operator">
               <strong>{preview.institution}</strong>
               <span>Current operator: {preview.from}</span>
@@ -566,26 +501,18 @@ export function InstitutionalStructurePrototype({
                 </li>
               ))}
             </ul>
-            <p className="c-panel__footnote">
-              {blocked
-                ? "An unknown downstream effect blocks this transfer. Historical records remain unchanged."
-                : "All known preconditions are satisfied, but the named activation action must revalidate the facts at the effective boundary."}{" "}
-              No action control is exposed in this L0 prototype.
-            </p>
-          </section>
+          </Panel>
         );
       })}
 
-      <section className="c-panel" aria-labelledby="accountability-review-title">
-        <div className="c-panel__header">
-          <div>
-            <p className="c-panel__eyebrow">Post-effect evidence invalidation</p>
-            <h2 className="c-panel__title" id="accountability-review-title">
-              Legal accountability under review
-            </h2>
-          </div>
-          <span className="c-status c-status--attention">Visible restricted state</span>
-        </div>
+      <Panel
+        eyebrow="Post-effect evidence invalidation"
+        title="Legal accountability under review"
+        titleId="accountability-review-title"
+        tone="attention"
+        badge={<StatusBadge tone="attention">Visible restricted state</StatusBadge>}
+        footer="There is no generic dismiss action. This state does not silently verify or replace an operator, close the institution, or change access or module activation."
+      >
         <div className="c-review-summary">
           <strong>
             {
@@ -627,12 +554,7 @@ export function InstitutionalStructurePrototype({
             )}
           </ul>
         </div>
-        <p className="c-panel__footnote">
-          There is no generic dismiss action. This state does not silently verify or
-          replace an operator, close the institution, or change access or module
-          activation.
-        </p>
-      </section>
+      </Panel>
     </div>
   );
 }

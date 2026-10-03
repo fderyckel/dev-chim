@@ -6,7 +6,9 @@ defmodule Chimwemwe.OrganizationLegal.Foundation do
   the immutable release declaration plus current entitlement/activation and a
   tenant-defined capability, and runs on the current authoritative writer.
   There is no collection read, generic mutation, caller-selected repository,
-  public route, migration intake, relationship, or educational structure here.
+  public route, migration intake, or educational structure here. ADR 0031 and
+  ADR 0033 keep relationship, corporate-unit, and bounded lifecycle actions in
+  a separate boundary while sharing this release declaration.
   """
 
   alias Chimwemwe.OrganizationLegal.{
@@ -34,7 +36,7 @@ defmodule Chimwemwe.OrganizationLegal.Foundation do
 
   @release_declaration %{
     key: @module_key,
-    version: "1.0.0",
+    version: "1.2.0",
     owner: "Corporate/legal structure",
     dependencies: []
   }

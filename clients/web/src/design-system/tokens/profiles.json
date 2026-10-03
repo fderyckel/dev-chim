@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "defaultProfile": "light",
+  "profiles": [
+    {
+      "id": "light",
+      "label": "Quiet light",
+      "description": "Warm, calm surfaces with the standard Chimwemwe type scale.",
+      "colorScheme": "light",
+      "tokens": "semantic.tokens.json"
+    },
+    {
+      "id": "dark",
+      "label": "Calm dark",
+      "description": "Midnight-neutral surfaces with a quiet blue accent and fixed status meanings.",
+      "colorScheme": "dark",
+      "tokens": "dark.tokens.json"
+    },
+    {
+      "id": "readable",
+      "label": "Clear reading",
+      "description": "Larger platform type, generous spacing, and a soft low-glare paper palette.",
+      "colorScheme": "light",
+      "tokens": "readable.tokens.json"
+    }
+  ]
+}

@@ -1,0 +1,129 @@
+{
+  "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
+  "$description": "Complete semantic color contract for the default Chimwemwe light profile.",
+  "color": {
+    "$type": "color",
+    "action": {
+      "$value": "{palette.teal.700}",
+      "$description": "Primary action and selection color."
+    },
+    "action-strong": {
+      "$value": "{palette.teal.800}",
+      "$description": "High-emphasis action text and interaction color."
+    },
+    "action-soft": {
+      "$value": "{palette.teal.050}",
+      "$description": "Quiet action and selection surface."
+    },
+    "attention-surface": {
+      "$value": "{palette.amber.100}",
+      "$description": "Attention state surface; meaning does not change with accent choice."
+    },
+    "attention-text": {
+      "$value": "{palette.amber.800}",
+      "$description": "Attention state foreground; meaning does not change with accent choice."
+    },
+    "border": {
+      "$value": "{palette.stone.200}",
+      "$description": "Default boundary and separator."
+    },
+    "border-strong": {
+      "$value": "{palette.stone.300}",
+      "$description": "Emphasized boundary and interactive outline."
+    },
+    "canvas": {
+      "$value": "{palette.stone.100}",
+      "$description": "Primary page canvas."
+    },
+    "canvas-subtle": {
+      "$value": "{palette.stone.050}",
+      "$description": "Quiet canvas variation."
+    },
+    "critical-surface": {
+      "$value": "{palette.red.100}",
+      "$description": "Critical and error state surface."
+    },
+    "critical-text": {
+      "$value": "{palette.red.800}",
+      "$description": "Critical and error state foreground."
+    },
+    "information-surface": {
+      "$value": "{palette.blue.100}",
+      "$description": "Informational state surface."
+    },
+    "information-text": {
+      "$value": "{palette.blue.700}",
+      "$description": "Informational state foreground."
+    },
+    "positive-surface": {
+      "$value": "{palette.teal.100}",
+      "$description": "Positive state surface."
+    },
+    "positive-text": {
+      "$value": "{palette.teal.800}",
+      "$description": "Positive state foreground."
+    },
+    "surface": {
+      "$value": "{palette.white}",
+      "$description": "Primary working surface."
+    },
+    "surface-muted": {
+      "$value": "{palette.stone.150}",
+      "$description": "Muted or disabled surface."
+    },
+    "surface-subtle": {
+      "$value": "{palette.stone.050}",
+      "$description": "Inset and secondary surface."
+    },
+    "text": {
+      "$value": "{palette.ink.950}",
+      "$description": "Primary text and icon foreground."
+    },
+    "text-faint": {
+      "$value": "{palette.ink.500}",
+      "$description": "Lowest supported text emphasis."
+    },
+    "text-soft": {
+      "$value": "{palette.ink.650}",
+      "$description": "Supporting text and secondary icon foreground."
+    }
+  },
+  "font": {
+    "sans": {
+      "$type": "fontFamily",
+      "$value": "{typeface.interface}"
+    },
+    "size": {
+      "$type": "dimension",
+      "base": {
+        "$value": "{type-scale.standard.base}"
+      },
+      "lg": {
+        "$value": "{type-scale.standard.lg}"
+      },
+      "md": {
+        "$value": "{type-scale.standard.md}"
+      },
+      "sm": {
+        "$value": "{type-scale.standard.sm}"
+      },
+      "xl": {
+        "$value": "{type-scale.standard.xl}"
+      },
+      "xs": {
+        "$value": "{type-scale.standard.xs}"
+      }
+    }
+  },
+  "line": {
+    "height": {
+      "$type": "number",
+      "copy": {
+        "$value": "{leading.standard-copy}"
+      },
+      "tight": {
+        "$value": "{leading.standard-tight}"
+      }
+    }
+  }
+}

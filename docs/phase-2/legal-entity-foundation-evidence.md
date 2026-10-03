@@ -3,7 +3,7 @@
 - Status: Complete at L1 with synthetic local data; no public route or L2 claim
 - Date: 2026-09-28
 - Governing decision: Conditionally Accepted ADR 0025, condition C25-01
-- Module: `organization.legal` version `1.0.0`
+- Module at completion: `organization.legal` version `1.0.0` (advanced to `1.1.0` by ADR 0031)
 - Boundary: private production-core candidate using synthetic test data only
 
 ## Entry disposition
@@ -117,13 +117,44 @@ Verification on 2026-09-28:
 C25-01 and the L1 first-business-aggregate gate are satisfied by this bounded proof. This removes
 the minimal persistence dependency that preceded Slice 2.0-E, but it does not satisfy C25-05.
 The connected/public structure workflow remains prohibited until the named representative
-comprehension and accountable product-experience dispositions are recorded. No Slice 2.1-C or
-educational-structure implementation starts through this evidence.
+comprehension and accountable product-experience dispositions are recorded. At this Slice 2.1-B
+evidence's original completion, no Slice 2.1-C or educational-structure implementation had
+started. ADR 0031 later authorizes and separately evidences only bounded synthetic Slice 2.1-C1.
+
+## Local synthetic demonstration
+
+On 2026-10-03, the bounded slice gained a development-only demonstration invoked with
+`make legal-demo`. It uses a dedicated `chimwemwe_organization_legal_demo` database and is guarded
+by `CHIMWEMWE_ORGANIZATION_LEGAL_DEMO=true`. The original boundary creates the synthetic
+membership, tenant-defined role and capabilities, module entitlement, and activation needed to
+enter the action boundary. It then registers these review aliases through
+`register_legal_entity`: `LE-GROUP`, `LE-OPS`, `LE-PROPERTY`, `LE-JOINT`, `LE-NEW-OPS`, and
+`LE-INDEPENDENT`.
+
+Fixed idempotency and causation identifiers make repeated runs return the original six committed
+entities without duplicate state or automatic write retry. ADR 0031 later expands the same local
+command with explicit synthetic relationships, management-reporting parentage, and corporate
+units. That expansion is governed and evidenced separately by
+[Slice 2.1-C1](legal-structure-foundation-evidence.md); it does not retroactively enlarge the
+completed Slice 2.1-B boundary.
+
+Demo verification on 2026-10-03:
+
+| Check | Result |
+| --- | --- |
+| Focused legal-entity suite at initial completion | Passed: 10 tests |
+| Initial `make legal-demo`, repeated against the same database | Passed: the same six entity UUIDs were returned without duplicate facts |
+| Isolated clean-checkout rehearsal for the exact demo candidate | Passed: bootstrap, selected checks, and 182 production-core tests |
+| `make docs-check` | Passed before the concurrent ADR-index reformat; the current combined checkout later reports every padded ADR-table entry as missing |
+| Production-core portion of `make check` | Passed: 182 tests, with formatting, drift, lint, dependency, and type checks |
+| Complete repository `make check` | Stopped later at the current web dependency audit: 9 high-severity `braces` findings in the style-tool dependency chain |
 
 ## References
 
 - [ADR 0025](../adr/0025-learning-institution-operating-system-and-institutional-structure.md)
+- [ADR 0031](../adr/0031-bounded-cross-jurisdiction-legal-structure-foundation.md)
 - [Phase 2 entry register](entry-decision-register.md)
 - [Institutional-structure decision evidence](institutional-structure-decision-evidence.md)
 - [Institutional-structure experience evidence](institutional-structure-experience-evidence.md)
 - [Phase 2 implementation proposal](../plans/phase-2-entry-and-school-structure-proposal.md)
+- [Slice 2.1-C1 bounded legal-structure evidence](legal-structure-foundation-evidence.md)

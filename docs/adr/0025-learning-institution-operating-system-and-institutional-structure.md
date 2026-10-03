@@ -12,6 +12,9 @@
   corporate governance/finance domain ownership, and representative learning-institution domain
   owners
 - Supersedes: None
+- Partially superseded by: [ADR 0032](0032-c25-02-delegated-contract-acceptance.md), which closes C25-02 through explicit delegated Project Owner review; the original decision below is retained as history and C25-03 through C25-06 remain binding
+
+- Additional partial supersession: [ADR 0034](0034-c25-03-delegated-educational-structure-acceptance.md) closes C25-03 for synthetic L1 through delegated review; external representative validation remains C25-03-R and C25-04 through C25-06 remain binding
 
 ## Context
 

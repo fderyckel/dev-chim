@@ -178,7 +178,12 @@ defmodule Chimwemwe.Platform.ExecutionContextTest do
 
     assert MapSet.new(Info.resources(Chimwemwe.OrganizationLegal)) ==
              MapSet.new([
+               Chimwemwe.OrganizationLegal.CorporateUnit,
+               Chimwemwe.OrganizationLegal.CorporateUnitProfileRevision,
                Chimwemwe.OrganizationLegal.LegalEntity,
+               Chimwemwe.OrganizationLegal.LegalEntityConsolidationParentage,
+               Chimwemwe.OrganizationLegal.LegalEntityRelationship,
+               Chimwemwe.OrganizationLegal.LegalEntityRelationshipTermination,
                Chimwemwe.OrganizationLegal.LegalEntityProfileRevision
              ])
   end

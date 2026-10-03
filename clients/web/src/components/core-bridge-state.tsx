@@ -1,4 +1,5 @@
 import type { CoreBridgeFailure } from "../ports/core-bridge";
+import { PageHeading } from "../design-system/components/page-heading";
 
 type CoreBridgeStateProps = Readonly<{
   result: CoreBridgeFailure;
@@ -38,15 +39,11 @@ export function CoreBridgeStateView({ result }: CoreBridgeStateProps) {
 
   return (
     <div className="l-page-stack">
-      <header className="c-page-heading">
-        <div className="c-page-heading__copy">
-          <p className="c-page-heading__eyebrow">Authority preparation</p>
-          <h1 className="c-page-heading__title">Prepare a role assignment</h1>
-          <p className="c-page-heading__lede">
-            A local, read-only core connection is required for this qualification view.
-          </p>
-        </div>
-      </header>
+      <PageHeading
+        eyebrow="Authority preparation"
+        title="Prepare a role assignment"
+        description="A local, read-only core connection is required for this qualification view."
+      />
 
       <section className="c-bridge-state" role="status">
         <span className="c-bridge-state__symbol" aria-hidden="true">

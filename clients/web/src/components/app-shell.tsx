@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 
+import { StatusBadge } from "../design-system/components/status-badge";
 import type { NavigationKey, PrototypeContext } from "../ports/view-data";
 
 type AppShellProps = Readonly<{
@@ -77,9 +78,7 @@ export function AppShell({ activePage, context, children }: AppShellProps) {
           <div className="c-context-summary">
             <span className="c-context-summary__eyebrow">Viewing context</span>
             <strong className="c-context-summary__name">{context.tenantName}</strong>
-            <span className="c-status c-status--synthetic c-context-summary__status">
-              Synthetic tenant
-            </span>
+            <StatusBadge tone="information">Synthetic tenant</StatusBadge>
           </div>
           <div className="c-connection-summary" aria-label="Prototype status">
             <span className="c-connection-summary__date">{context.dateLabel}</span>

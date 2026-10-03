@@ -1,4 +1,7 @@
 import type { AssignmentOptionsData } from "../ports/core-bridge";
+import { ActionButton } from "../design-system/components/actions";
+import { PageHeading } from "../design-system/components/page-heading";
+import { StatusBadge } from "../design-system/components/status-badge";
 
 type AssignmentPreparationProps = Readonly<{
   data: AssignmentOptionsData;
@@ -7,22 +10,19 @@ type AssignmentPreparationProps = Readonly<{
 export function AssignmentPreparation({ data }: AssignmentPreparationProps) {
   return (
     <div className="l-page-stack">
-      <header className="c-page-heading">
-        <div className="c-page-heading__copy">
-          <p className="c-page-heading__eyebrow">Authority preparation</p>
-          <h1 className="c-page-heading__title">Prepare a role assignment</h1>
-          <p className="c-page-heading__lede">
-            Review tenant-qualified membership and role options read from the local
-            core. This slice cannot save or change an assignment.
-          </p>
-        </div>
-        <div className="c-page-heading__assurance">
-          <span className="c-status c-status--positive">Core read ready</span>
-          <span className="c-page-heading__assurance-copy">
-            Contract v{data.contract_version} · local only
-          </span>
-        </div>
-      </header>
+      <PageHeading
+        eyebrow="Authority preparation"
+        title="Prepare a role assignment"
+        description="Review tenant-qualified membership and role options read from the local core. This slice cannot save or change an assignment."
+        aside={
+          <>
+            <StatusBadge tone="positive">Core read ready</StatusBadge>
+            <span className="c-page-heading__assurance-copy">
+              Contract v{data.contract_version} · local only
+            </span>
+          </>
+        }
+      />
 
       <aside className="c-read-boundary" aria-label="Read-only boundary">
         <span className="c-read-boundary__mark" aria-hidden="true">
@@ -45,9 +45,9 @@ export function AssignmentPreparation({ data }: AssignmentPreparationProps) {
               Select the intended assignment
             </h2>
           </div>
-          <span className="c-status">
+          <StatusBadge>
             {data.memberships.length + data.roles.length} options
-          </span>
+          </StatusBadge>
         </div>
 
         <form className="c-assignment-form">
@@ -98,9 +98,9 @@ export function AssignmentPreparation({ data }: AssignmentPreparationProps) {
           </div>
 
           <div className="c-assignment-form__actions">
-            <button className="c-button c-button--primary" disabled type="button">
+            <ActionButton disabled variant="primary">
               Save unavailable in UI-1A
-            </button>
+            </ActionButton>
             <p className="c-assignment-form__note">
               No write request, mutation route, or browser persistence exists in this
               slice.

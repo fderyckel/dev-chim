@@ -7,6 +7,7 @@
   activation, migration execution, or real data
 - Accountable reviewers still required: Corporate governance/finance domain owner,
   educational-structure domain owner, and platform engineering
+- Subsequent C25-02 disposition: Corporate/legal contract approved on 2026-10-03 in the [completed delegated review](c25-02-corporate-governance-finance-review.md) under [ADR 0032](../adr/0032-c25-02-delegated-contract-acceptance.md); educational/platform and wider G1 findings remain separate
 
 ## Purpose
 
@@ -333,8 +334,10 @@ The named reviewers must answer these questions with `yes`, `condition`, or `no`
 7. Which relationship types or attributes are required before Slice 2.1-C, and which should remain
    deferred rather than hidden in a generic edge?
 
-The technical walkthrough answers **representable** for LS-01 through LS-10. It does not answer
-the domain-adequacy questions on behalf of the named reviewers. G1 remains open until the corporate
+The technical walkthrough answers **representable** for LS-01 through LS-10. The subsequent
+[completed C25-02 review](c25-02-corporate-governance-finance-review.md) records the corporate/legal
+disposition under delegated authority; the walkthrough itself does not supply that approval.
+Wider G1 remains open until the corporate
 governance/finance, educational-structure, and platform reviewers record their dispositions in the
 [representative and accountable review packet](institutional-structure-review-packet.md).
 

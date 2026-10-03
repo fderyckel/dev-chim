@@ -526,6 +526,24 @@ roots, stable identities through reorganization, same-tenant relationships, dire
 concurrent cycle treatment where a relationship type requires acyclicity, and no implicit
 authorization, reporting, configuration, module, or placement effect.
 
+On 2026-10-03, [ADR 0031](../adr/0031-bounded-cross-jurisdiction-legal-structure-foundation.md)
+authorized bounded synthetic Slice 2.1-C1 entry. The subsequent
+[ADR 0032](../adr/0032-c25-02-delegated-contract-acceptance.md) closes C25-02 through the
+[completed delegated review](../phase-2/c25-02-corporate-governance-finance-review.md), without
+expanding implementation authority. C1 implements the accepted closed direct catalogue,
+management-reporting-only parentage, corporate-unit registration, and exact reads. It deliberately
+deferred relationship ending/correction, parent changes, corporate-unit moves/revisions/closure,
+framework-specific consolidation scopes, migration, public interfaces, and real data. The
+[implementation evidence](../phase-2/legal-structure-foundation-evidence.md) records its precise
+boundary and verification.
+
+On 2026-10-03, [ADR 0033](../adr/0033-append-only-legal-structure-lifecycle-foundation.md)
+authorizes Slice 2.1-C2a after the Project Owner confirmed C25-02 approved while consultant review
+continues. C2a adds only append-only direct-relationship ending and corporate-unit name-profile
+revision. Consolidation-parent changes, corporate-unit moves/transfers/closure, impact preview,
+and every educational, migration, real-data, or public boundary remain deferred. The
+[C2a evidence](../phase-2/legal-structure-lifecycle-evidence.md) records the exact boundary.
+
 ### Slice 2.1-D — educational institutions, units, and legal responsibility
 
 Implement the educational-structure module declaration and the smallest accepted

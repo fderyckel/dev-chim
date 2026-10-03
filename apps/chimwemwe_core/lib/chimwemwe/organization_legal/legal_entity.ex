@@ -2,10 +2,10 @@ defmodule Chimwemwe.OrganizationLegal.LegalEntity do
   @moduledoc """
   Stable tenant-qualified identity for one legally accountable organization.
 
-  Slice 2.1-B keeps only identity, lifecycle state, and optimistic version on
-  this record. Names live in immutable profile revisions so renaming never
-  replaces the entity UUID. Registration, jurisdiction, relationships,
-  ownership, consolidation, and corporate-unit meaning remain deferred.
+  Identity, lifecycle state, and optimistic version stay on this record. Names
+  live in immutable profile revisions so renaming never replaces the entity
+  UUID. ADR 0031 keeps direct relationships, management-reporting parentage,
+  and corporate units in separate resources rather than overloading identity.
   """
 
   use Chimwemwe.Platform.Resource,

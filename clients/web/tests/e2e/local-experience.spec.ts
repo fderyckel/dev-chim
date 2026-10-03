@@ -1,5 +1,25 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+const previewProfiles = [
+  { id: "light", label: "Quiet light" },
+  { id: "dark", label: "Calm dark" },
+  { id: "readable", label: "Clear reading" },
+] as const;
+
+async function chooseProfile(page: Page, label: string) {
+  const radio = page.getByRole("radio", { name: new RegExp(label) });
+  await radio.focus();
+  await page.keyboard.press("Space");
+  await expect(radio).toBeChecked();
+
+  const profileId = await radio.getAttribute("value");
+  if (profileId === "light") {
+    await expect(page.locator("html")).not.toHaveAttribute("data-theme");
+  } else {
+    await expect(page.locator("html")).toHaveAttribute("data-theme", profileId ?? "");
+  }
+}
 
 test("home clearly identifies its synthetic context and primary next step", async ({
   page,
@@ -128,4 +148,116 @@ test("local prototype pages have no automatically detectable accessibility viola
 
     expect(result.violations, `${path} accessibility violations`).toEqual([]);
   }
+});
+
+test("experience profiles preview locally, reset explicitly, and never persist", async ({
+  page,
+}) => {
+  await page.goto("/ui-preview");
+
+  const root = page.locator("html");
+  await expect(root).not.toHaveAttribute("data-theme");
+  await expect(page.getByRole("radio", { name: /Quiet light/ })).toBeChecked();
+
+  await chooseProfile(page, "Calm dark");
+  await expect(root).toHaveAttribute("data-theme", "dark");
+  await expect(page.getByRole("status").filter({ hasText: "Calm dark" })).toContainText(
+    "not saved",
+  );
+
+  await chooseProfile(page, "Clear reading");
+  await expect(root).toHaveAttribute("data-theme", "readable");
+  await expect(
+    page.getByRole("status").filter({ hasText: "Clear reading" }),
+  ).toContainText("not saved");
+
+  await page.getByRole("button", { name: "Reset to Chimwemwe default" }).click();
+  await expect(root).not.toHaveAttribute("data-theme");
+  await expect(page.getByRole("radio", { name: /Quiet light/ })).toBeChecked();
+
+  const storage = await page.evaluate(() => ({
+    local: window.localStorage.length,
+    session: window.sessionStorage.length,
+  }));
+  expect(storage).toEqual({ local: 0, session: 0 });
+  expect(await page.context().cookies()).toEqual([]);
+
+  await chooseProfile(page, "Calm dark");
+  await page.getByRole("link", { name: "Return to Home" }).first().click();
+  await expect(root).not.toHaveAttribute("data-theme");
+});
+
+test("every governed profile keeps the living specimen accessible", async ({
+  page,
+}) => {
+  await page.goto("/ui-preview");
+
+  for (const profile of previewProfiles) {
+    await chooseProfile(page, profile.label);
+    const result = await new AxeBuilder({ page }).analyze();
+
+    expect(result.violations, `${profile.label} accessibility violations`).toEqual([]);
+  }
+});
+
+test("every governed profile reflows at the 320 CSS-pixel zoom equivalent", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 320, height: 900 });
+  await page.goto("/ui-preview");
+
+  for (const profile of previewProfiles) {
+    await chooseProfile(page, profile.label);
+    const widths = await page.evaluate(() => ({
+      viewport: window.innerWidth,
+      document: document.documentElement.scrollWidth,
+    }));
+
+    expect(
+      widths.document,
+      `${profile.label} should reflow at 320 CSS pixels`,
+    ).toBeLessThanOrEqual(widths.viewport);
+  }
+});
+
+test("platform forced-colour and reduced-motion preferences outrank profiles", async ({
+  page,
+}) => {
+  await page.emulateMedia({ forcedColors: "active", reducedMotion: "reduce" });
+  await page.goto("/ui-preview");
+  await chooseProfile(page, "Calm dark");
+  await page.getByRole("button", { name: "Loading" }).click();
+
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(page.locator(".c-profile-option").first()).toHaveCSS(
+    "border-top-style",
+    "solid",
+  );
+
+  const motion = await page.locator(".c-spinner").evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      animationDuration: style.animationDuration,
+      transitionDuration: style.transitionDuration,
+    };
+  });
+  expect(Number.parseFloat(motion.animationDuration)).toBeLessThanOrEqual(0.00001);
+  expect(Number.parseFloat(motion.transitionDuration)).toBeLessThanOrEqual(0.00001);
+});
+
+test.describe("default first paint without client JavaScript", () => {
+  test.use({ javaScriptEnabled: false });
+
+  test("renders the complete default profile before hydration", async ({ page }) => {
+    await page.goto("/ui-preview");
+
+    await expect(
+      page.getByRole("heading", { level: 1, name: "UI preview" }),
+    ).toBeVisible();
+    await expect(page.locator("html")).not.toHaveAttribute("data-theme");
+    await expect(page.locator("body")).toHaveCSS(
+      "background-color",
+      "rgb(247, 247, 241)",
+    );
+  });
 });

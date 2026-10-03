@@ -20,9 +20,15 @@ identity architecture is accepted in provider-neutral ADR 0029, including Micros
 hybrid/on-premises Active Directory, Google Workspace, generic OIDC, and qualified SAML gateway
 paths. The internal provider-neutral identity/session/support foundations and bounded public
 session adapter are implemented but not enabled as an L2 release. Conditionally Accepted ADR 0025
-now governs a minimal synthetic `organization.legal` Slice 2.1-B proof with stable legal-entity
-identity, immutable name-profile history, two named actions, and one exact read. It adds no public
-business route, educational structure, real-data authority, or production deployment.
+governs the stable institutional-structure direction; ADR 0031 authorizes the bounded synthetic
+`organization.legal` Slice 2.1-C1 start. [ADR 0032](docs/adr/0032-c25-02-delegated-contract-acceptance.md)
+closes C25-02’s logical contract through the Project Owner’s expressly delegated review; it does
+not expand implementation or release authority. [ADR 0033](docs/adr/0033-append-only-legal-structure-lifecycle-foundation.md)
+authorizes bounded Slice 2.1-C2a lifecycle work. The module now separates stable legal entities,
+four explicit direct relationship meanings, management-reporting parentage, and corporate units,
+and can append one relationship end or the next corporate-unit name profile. It
+adds no public business route, educational structure, real-data authority, statutory consolidation
+claim, or production deployment.
 
 ## Start here
 
@@ -50,6 +56,7 @@ make check-staged
 make test-fast
 make test
 make docs-check
+make legal-demo
 make web-dev
 make web-core-dev
 make web-check
@@ -62,6 +69,11 @@ These commands are the project contract. Editor tasks and future CI jobs must ca
 `make fix` applies Ruff's safe fixes, then runs the repository-owned Python, Elixir, and web formatters.
 `make check-changed` selects documentation, Phase 0, repository-tool, core, web, and shell-tooling suites from changed paths. `make check-staged` applies the same policy to staged paths for the pre-commit hook.
 `make test-fast` is the short production-core feedback loop during development; it does not replace the selected core boundary suite before sharing a core change.
+`make legal-demo` creates a dedicated local database and idempotently seeds six synthetic legal
+entities, four direct relationships, three management-reporting parentages, and six corporate
+units from the Phase 2.1 review fixture. One relationship is ended and one corporate unit receives
+a second name profile through append-only lifecycle actions. It adds no educational structure, public route, statutory
+consolidation conclusion, or real data.
 `make web-dev` starts the explicitly synthetic, local-only UI-0 experience at `http://127.0.0.1:3000`.
 `make web-core-dev` starts the guarded UI-1A qualification at
 `http://127.0.0.1:3000/authority/assignments`, backed by a dedicated local synthetic database
@@ -74,13 +86,14 @@ and a server-owned ephemeral session. It is read-only and is not production auth
 - The production core and Foundation Lab use the reviewed Ash 3.33.11 security-patch baseline.
 - The accepted authoring model keeps Ash resources, actions, policies, and migrations authoritative while derived metadata may configure views and reports; it does not add a second runtime ORM.
 - Roles and access scopes are tenant-defined data, never a fixed list of institutional job titles.
-- Conditionally Accepted ADR 0025 separates tenant-owned legal entities and corporate units from educational
+- Conditionally Accepted ADRs 0025 and 0031 separate tenant-owned legal entities and corporate units from educational
   institutions and units. Legal ownership/control may be a typed graph with an optional
   consolidation tree; educational units may nest to any reviewed depth. Every published
   educational institution requires one effective primary legal operator. No relationship or
   hierarchy grants access or silently supplies finance/reporting, workflow/configuration, site,
   module, or placement semantics. See
-  [ADR 0025](docs/adr/0025-learning-institution-operating-system-and-institutional-structure.md).
+  [ADR 0025](docs/adr/0025-learning-institution-operating-system-and-institutional-structure.md)
+  and [ADR 0031](docs/adr/0031-bounded-cross-jurisdiction-legal-structure-foundation.md).
 - Logical tenant controls remain mandatory in pooled databases, dedicated databases, and dedicated cells; physical placement is evidence-driven.
 - Module release availability, entitlement, tenant activation, and actor authorization are separate server-side gates.
 - All examples and tests use synthetic data.
@@ -91,8 +104,11 @@ and a server-owned ephemeral session. It is read-only and is not production auth
   generated TypeScript types, and exposes no assignment write or production identity path.
 - Phase 2's bounded implementation sequence is authorized. Phase 2.0 is conditionally approved and
   closed at L1: Slices 2.0-B/2.0-C, bounded provider-neutral 2.0-D engineering, and the minimal
-  Slice 2.1-B legal-entity proof pass their synthetic gates. Slice 2.0-E is a dated C25-05 residual
+  Slice 2.1-B legal-entity proof pass their synthetic gates. ADR 0031 authorizes the bounded
+  synthetic Slice 2.1-C1 implementation, and ADR 0033 authorizes the append-only Slice 2.1-C2a
+  lifecycle increment, while retaining external finance/governance validation before L2, real
+  data, migration, or jurisdictional/accounting claims. Slice 2.0-E is a dated C25-05 residual
   condition: expert/representative comprehension and accountable product-experience review is due
   by 2026-12-15 or before the first connected/public institutional-structure workflow, whichever
-  is earlier. The deferral does not authorize that workflow, a later Phase 2.1 slice, deployment,
-  or real data.
+  is earlier. The deferral does not authorize the connected workflow, educational-structure
+  persistence, deployment, or real data.

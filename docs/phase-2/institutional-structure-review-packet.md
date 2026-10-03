@@ -6,6 +6,7 @@
 - Condition review due: 2026-12-15, or before the first connected/public
   institutional-structure workflow, whichever is earlier
 - Gates: ADR 0025 G1 through G6
+- C25-02 disposition: Closed on 2026-10-03 under [ADR 0032](../adr/0032-c25-02-delegated-contract-acceptance.md); [completed corporate/finance review](c25-02-corporate-governance-finance-review.md)
 - Boundary: Review of the logical linked-structure contract only; approval does not authorize
   persistence, real data, a public interface, module activation, or production release
 
@@ -91,6 +92,17 @@ Record `yes`, `condition`, `no`, or `unclear` for each question.
 
 ## Representative-institution reviews — G2
 
+**C25-03 is closed for synthetic L1 on 2026-10-03**, under François's explicit delegation and
+[ADR 0034](../adr/0034-c25-03-delegated-educational-structure-acceptance.md). The
+[completed five-context review](c25-03-educational-structure-review.md) supplies all seven common
+answers across the contexts, all fifteen context-specific answers, the educational-domain
+catalogue, and scenario/migration dispositions. It does not fabricate real participant records.
+
+The requirements below remain mandatory under **C25-03-R before connected workflows (including
+synthetic L2), real data/import, pilot, or deployment**. Synthetic L1 eligibility is limited to
+unpublished identities and the included initial structural meanings; C25-04 still blocks operator
+assignment/transfer persistence and institution publication.
+
 Each row requires a real named person with current or recent operating knowledge of that context.
 One person may cover more than one context only when the record explains their relevant experience
 for each. Product ownership or document authorship alone does not satisfy representative review.
@@ -145,6 +157,24 @@ for each. Product ownership or document authorship alone does not satisfy repres
     or programme scope?
 
 ## Corporate governance and finance review
+
+**Current disposition: C25-02 closed, `approve`, on 2026-10-03.** François expressly delegated
+this gate's decision to Codex. [ADR 0032](../adr/0032-c25-02-delegated-contract-acceptance.md)
+supersedes the required reviewer route and accepts the
+[completed corporate-governance/finance review](c25-02-corporate-governance-finance-review.md).
+That record contains all seven common answers, thirteen specialist answers, the eleven-field
+catalogue, LS-01–LS-10 findings, Sources C–F dispositions, and the named delegated decision.
+It is AI review under delegated Project Owner authority, not invented human professional service.
+
+The accepted catalogue separates four direct legal meanings, management-navigation parentage,
+and corporate membership/parentage. It fixes equity basis, scoped rights, type-specific cycles,
+evidence, and non-inference. Legal/corporate synthetic Dates use the explicit UTC fixture calendar
+in the completed review; institution-local Dates apply to the separate operator contract.
+
+ADR 0031 continues to limit implementation to synthetic private C1 establishment/registration and
+exact reads. Its external validation before later adoption remains due by 2026-12-15 or the first
+affected gate, whichever is earlier; it is not outstanding C25-02 approval. ADR 0034 now closes C25-03 for synthetic L1 only; C25-03-R and C25-04 through C25-06
+remain binding. Operator-policy recommendations in the completed answers do not close C25-04.
 
 - Minimum scenarios: LS-01 through LS-10 and migration Sources C through F.
 - Required questions:
@@ -214,6 +244,11 @@ review.
 
 Copy this section once for each reviewer. Do not combine several unnamed opinions into one record.
 
+The completed C25-02 record is in the [corporate/finance review](c25-02-corporate-governance-finance-review.md#completed-review-record).
+The completed synthetic C25-03 record is in the [educational review](c25-03-educational-structure-review.md#completed-delegated-review-record).
+The blank template below remains for actual external and other reviews; it does not reopen the
+completed delegated decisions.
+
 | Field | Recorded value |
 | --- | --- |
 | Reviewer name | Open |
@@ -238,8 +273,8 @@ revised.
 
 | Gate | Evidence complete? | Required named reviews complete? | Blocking findings | Disposition |
 | --- | --- | --- | --- | --- |
-| G1 — scenarios and vocabulary | Technical educational and linked scenario packs prepared | Specialist findings open | No current technical rejection; C25-02/C25-03 block the affected later slices | Accepted as bounded decision evidence |
-| G2 — five representative contexts | Review instructions prepared | Five perspective records open | Educational persistence blocked by C25-03 | Deferred to first affected slice |
+| G1 — scenarios and vocabulary | Linked packs plus completed C25-02 and five-context C25-03 reviews | Corporate/legal and educational-domain synthetic dispositions closed under ADRs 0032/0034; platform and external findings remain separate | C25-03-R and later adoption/release gates remain | Logical contract accepted for bounded synthetic work |
+| G2 — five representative contexts | All five delegated analytical perspectives completed | Synthetic C25-03 closed; actual representative records remain open under C25-03-R | C25-03-R blocks connected use, real data/import, pilot and deployment; C25-04 blocks operator persistence/publication | Approved for synthetic L1 only |
 | G3 — security/privacy | Technical control and negative-test contract prepared | Named and executable per-slice review open | C25-01/C25-05/C25-06 remain binding | Accepted as bounded design evidence |
 | G4 — migration/correction | Synthetic mappings and temporal contract prepared | Named records/migration review open | Migration and real data blocked by C25-06 | Accepted as synthetic design evidence |
 | G5 — experience/accessibility | Current-contract prototype and focused checks pass | Accountable/representative comprehension review open | Connected/public structure workflow remains prohibited by C25-05 | Technical evidence ready; condition review due 2026-12-15 or the first affected gate |
@@ -258,12 +293,16 @@ complete; each is attached to a fail-closed condition before the first slice tha
 | Remaining implementation conditions | ADR 0025 C25-01 through C25-06 |
 | Accepted residual risks and owners | Product Owner accepts the recorded residual risks only within C25-01 through C25-06; named specialist and representative owners remain to be recorded before their affected slices |
 | Outcome | **Conditionally accept ADR 0025** |
-| Effect on Slice 2.1 persistence | Minimal synthetic Slice 2.1-B may seek its separate entry disposition; later slices remain gated by C25-02 through C25-06 |
+| Effect on Slice 2.1 persistence | Minimal synthetic Slice 2.1-B has its separate disposition; ADRs 0031/0033 authorize synthetic 2.1-C1/C2a; ADR 0032 closes C25-02; ADR 0034 closes C25-03 for synthetic L1; C25-03-R, later adoption validation and C25-04 through C25-06 remain gated |
 
-Conditional acceptance settles the logical direction only. It makes the separately authorized
+The original 2026-09-27 conditional acceptance settles the logical direction only. It makes the separately authorized
 minimal first synthetic corporate/legal persistence slice eligible; it does not approve a
 migration, public interface, deployment, real data, pilot, relationship catalogue, corporate-unit
 model, operator workflow, or educational-structure persistence.
+
+The later ADR 0032 separately accepts the C25-02 catalogue and corporate-unit logical contract.
+That completed decision does not change the original G6 record or accept operator/educational
+workflows. ADR 0033 separately authorizes the bounded append-only C2a implementation candidate.
 
 ## Phase 2.0 conditional-approval addendum
 

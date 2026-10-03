@@ -2,7 +2,10 @@
 
 - Status: Phase 2.0 conditionally approved and closed at L1; Slices 2.0-B, 2.0-C, internal D.2a
   through D.2c, the bounded D.3 public-session adapter, and the minimal Slice 2.1-B legal-entity
-  aggregate have synthetic evidence; 2.0-E is a dated deferred condition and L2 remains gated
+  aggregate have synthetic evidence; ADR 0031 authorizes bounded synthetic Slice 2.1-C1 and ADR
+  0033 authorizes append-only Slice 2.1-C2a; C2a focused migration, action, and demo evidence is
+  passing while its complete repository gate remains pending; 2.0-E is a dated deferred condition
+  and L2 remains gated
 - Owner: Product and platform engineering, with learning-institution domain and security/privacy
   review
 - Start basis: explicit project-owner direction on 2026-09-26
@@ -49,13 +52,44 @@ read-only synthetic hierarchy/move-preview prototype. The Product Owner then app
 separation of legal entities, corporate units, educational institutions, and educational units,
 with corporate/legal structure first. The linked technical scenario, control, and migration
 addenda are prepared. François then conditionally accepted ADR 0025 for the logical direction and
-minimal synthetic Slice 2.1-B entry. The prototype refresh and focused G5 checks now pass; named
-specialist/representative reviews remain open under C25-02 through C25-06 and are not reported as
-completed. The separately recorded C25-01 entry disposition now permits and closes the minimal
+minimal synthetic Slice 2.1-B entry. The prototype refresh and focused G5 checks now pass. The
+separately recorded C25-01 entry disposition permits and closes the minimal
 synthetic Slice 2.1-B `LegalEntity` proof: stable identity, immutable name-profile history, two
 named actions, one exact read, lifecycle/capability gates, concurrency, replay, audit, outbox, and
 rollback. This small Phase 2.1 dependency was implemented only to apply the Phase 2.0 foundation
-to a business aggregate. No 2.1-C or educational persistence has started.
+to a business aggregate.
+
+On 2026-10-03, the Project Owner directed a best-judgement cross-country legal-structure start.
+ADR 0031 conditionally accepts the closed direct relationship catalogue,
+management-reporting-only parentage, and corporate-unit identity for synthetic L1 Slice 2.1-C1.
+Focused and production-core evidence passes; the complete repository gate remains pending because
+the clean-checkout rehearsal no longer matches the changed Makefile. The C25-02 review and ADR
+index now pass focused document validation. No
+qualified reviewer is invented, and external corporate/finance validation remains due before L2,
+real data, migration, external financial reporting, pilot, deployment, or
+jurisdictional/accounting claims. The later ADR 0034 closes C25-03 for synthetic L1 only;
+C25-03-R and C25-04 through C25-06 remain open. No educational implementation is claimed here.
+
+The subsequent [ADR 0032](../adr/0032-c25-02-delegated-contract-acceptance.md) and
+[completed corporate/finance review](c25-02-corporate-governance-finance-review.md) close C25-02
+on 2026-10-03 under François’s explicitly delegated authority. All catalogue fields, thirteen
+specialist answers, scenarios, and migration findings have a disposition. This closes the logical
+contract, not the current candidate’s implementation exit or the later adoption/release gates.
+
+François then confirmed that consultants are reviewing C25-02, instructed the project to consider
+it approved for now, and directed work to the next slice. [ADR 0033](../adr/0033-append-only-legal-structure-lifecycle-foundation.md)
+therefore authorizes bounded synthetic Slice 2.1-C2a: one append-only relationship-ending action
+and one append-only corporate-unit name-profile revision action. Focused clean-database and demo
+evidence passes. That legal lifecycle decision does not authorize structural moves,
+consolidation-parent changes, educational persistence, or later releases.
+
+On the same date, [ADR 0034](../adr/0034-c25-03-delegated-educational-structure-acceptance.md)
+and the [five-context educational review](c25-03-educational-structure-review.md) close C25-03
+for synthetic L1 under explicit delegated Project Owner authority. Unpublished educational identity,
+initial containment, sites/associations, and terminology become eligible within the existing
+sequence and its other prerequisites. C25-04 still blocks operator persistence and publication.
+Actual external representative validation remains C25-03-R before connected use, real data/import,
+pilot, or deployment; the packet's 2026-12-15 or first-affected-gate deadline is retained.
 
 On 2026-09-28, the Project Owner conditionally approved Phase 2.0 at the completed L1 foundation
 boundary. Slice 2.0-E is carried as a dated deferred condition: C25-05's expert/representative
@@ -70,8 +104,8 @@ Selected deployment, real data, pilot, and production release remain later gates
 | Level | Current status | Permitted now | Principal blockers |
 | --- | --- | --- | --- |
 | L0 — paper and prototype | Closed for current entry scope | Slices 2.0-D.2a through D.2c and bounded D.3 engineering are complete; ADR 0025's technical evidence, refreshed prototype, and conditional G6 decision are recorded | Named reviews remain conditions on their first affected later slices, not claims of completed evidence |
-| L1 — synthetic module proof | Closed for the minimal candidate | Slice 2.0-B outbox/drain, Accepted ADR 0018 temporal evidence, internal Slice 2.0-D foundations, and the Slice 2.1-B `LegalEntity` proof pass | C25-02 blocks 2.1-C; this closure does not authorize educational persistence |
-| L2 — connected synthetic workflow | Conditionally deferred; not released | ADRs 0029/0030, D.2a–D.2c, bounded D.3 adapter evidence, and the minimal business aggregate are complete; UI-0/UI-1A remain qualification-only | C25-05 expert/representative comprehension and product-experience disposition by 2026-12-15 or the first affected gate, the first complete accessible 2.0-E browser workflow, and deployment-specific D.3 qualification |
+| L1 — synthetic module proof | Closed for the minimal candidate; 2.1-C2a exit pending | Slice 2.0-B outbox/drain, Accepted ADR 0018 temporal evidence, internal Slice 2.0-D foundations, and the Slice 2.1-B `LegalEntity` proof pass; ADRs 0031/0033 permit bounded synthetic 2.1-C1/C2a | Complete repository gate for 2.1-C2a; external finance validation at ADR 0031's later boundary; C25-03-R blocks connected adoption; C25-04 blocks operator persistence/publication; ADR 0034 admits only bounded unpublished synthetic educational work |
+| L2 — connected synthetic workflow | Conditionally deferred; not released | ADRs 0029/0030, D.2a–D.2c, bounded D.3 adapter evidence, and the minimal business aggregate are complete; UI-0/UI-1A remain qualification-only | C25-03-R external five-context validation plus C25-05 expert/representative comprehension and product-experience disposition by 2026-12-15 or the first affected gate, the first complete accessible 2.0-E browser workflow, and deployment-specific D.3 qualification |
 | L3 — controlled real-data pilot | Blocked | No real institutional or Restricted data | Selected-deployment qualification, independent security/privacy review, learning-institution records ownership, and all lower-level gates |
 | L4 — production release | Blocked | No general availability | Accepted operating envelope, production release decision, and all lower-level gates |
 
@@ -90,6 +124,8 @@ test, owner role, or later slice does not satisfy one of those later gates.
 - [Institutional-structure security, migration, and temporal review](institutional-structure-security-migration-review.md)
 - [Institutional-structure experience evidence](institutional-structure-experience-evidence.md)
 - [Slice 2.1-B minimal legal-entity foundation evidence](legal-entity-foundation-evidence.md)
+- [Slice 2.1-C1 bounded legal-structure foundation evidence](legal-structure-foundation-evidence.md)
+- [Slice 2.1-C2a append-only lifecycle evidence](legal-structure-lifecycle-evidence.md)
 - [Slice 2.0-B operational outbox and module-drain evidence](operational-outbox-and-module-drain-evidence.md)
 - [Slice 2.0-C temporal completion and recovery evidence](temporal-completion-and-recovery-evidence.md)
 - [Temporal retention and recovery runbook](../operations/temporal-retention-and-recovery.md)

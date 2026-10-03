@@ -69,6 +69,26 @@ save an assignment. Stop both processes with Control-C.
 The token is process-local and must not be copied into browser code, screenshots, committed
 configuration, or logs. This command does not configure production identity, hosting, or data.
 
+## Local Phase 2.1-C2a legal-structure demonstration
+
+Run:
+
+```sh
+make legal-demo
+```
+
+The command creates and migrates the dedicated `chimwemwe_organization_legal_demo` database, then
+uses the production-core named actions to register six deterministic synthetic legal entities,
+four explicit direct relationships, three management-reporting parentages, and six corporate
+units. It then ends one relationship and appends one corporate-unit name revision. Re-running it
+returns the same committed facts through exact idempotent replay. The output lists the stable
+entity, relationship, and corporate-unit UUIDs plus the lifecycle summary.
+
+This is a local data demonstration only. Relationship facts never imply transitive control, and
+the management-reporting parent is not a statutory or accounting-framework consolidation
+conclusion. The demo adds no browser route, educational structure, primary-operator workflow,
+production identity, or real record. The command is non-destructive.
+
 ## Troubleshooting
 
 - Run `mise doctor` when a pinned runtime is not selected.
