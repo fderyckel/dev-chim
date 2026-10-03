@@ -30,7 +30,22 @@ and can append one relationship end or the next corporate-unit name profile. It
 adds no public business route, educational structure, real-data authority, statutory consolidation
 claim, or production deployment.
 
+[ADR 0034](docs/adr/0034-c25-03-delegated-educational-structure-acceptance.md) closes C25-03 for
+synthetic L1 under delegated Project Owner authority. Its five-context review makes unpublished
+educational identity, initial parentage, sites, and terminology eligible within the bounded
+sequence. [ADR 0035](docs/adr/0035-c25-04-delegated-primary-operator-acceptance.md) closes C25-04
+for synthetic L1 operator assignment, publication and controlled transfer/reconciliation proof.
+Actual representative validation remains C25-03-R before connected workflows, real data, or
+deployment; existing legal adoption and release gates remain. These are contract decisions,
+not implementation claims.
+
 ## Start here
+
+The active delivery priority is the authorized
+[classroom-first six-week plan](docs/plans/classroom-first-six-week-plan.md), covering 5 October
+through 15 November 2026: academic calendar, people, enrolment, and daily attendance in one usable
+journey. Further corporate/legal expansion is paused. The plan changes sequencing, preserves
+existing work, and retains domain and connected-release gates; classroom implementation is pending.
 
 1. Read [the Phase 0 outcome](docs/phase-0/README.md) and its binding later gates.
 2. Read [the Phase 1 core scope](docs/phase-1/README.md).
@@ -40,8 +55,8 @@ claim, or production deployment.
 5. Follow [local setup](docs/development/getting-started.md).
 6. Run the suite selected by `make check-changed` before sharing changes; reserve `make check` for an explicit integration check.
 
-The execution sequences are in the [Phase 0 implementation plan](docs/plans/phase-0-implementation-plan.md),
-the [Phase 1 core-foundation plan](docs/plans/phase-1-core-foundation-plan.md), and the accepted
+The completed foundations are summarized in the [Phase 0 handover](docs/phase-0/handover-evidence.md)
+and [Phase 1 handover](docs/phase-1/handover-evidence.md). Current work follows the accepted
 [Phase 2 sequencing proposal](docs/plans/phase-2-entry-and-school-structure-proposal.md).
 
 ## Stable commands

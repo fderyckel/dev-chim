@@ -38,9 +38,9 @@ migration; DS-2, the shared component foundation and reviewed default refinement
 local, non-persistent governed-choice proof. UI-0 remains local and synthetic, and no production
 preference resource, identity path, public interface, school workflow, or durable preference UI
 is added. See the
-[DS-1 implementation evidence](../phase-1/evidence/design-system-token-foundation.md) and
-[DS-2 implementation evidence](../phase-1/evidence/design-system-component-foundation.md), plus
-the [DS-3 technical evidence](../phase-1/evidence/design-system-governed-choice-proof.md).
+[DS-1 implementation evidence](../phase-1/handover-evidence.md) and
+[DS-2 implementation evidence](../phase-1/handover-evidence.md), plus
+the [DS-3 technical evidence](../phase-1/handover-evidence.md).
 
 ## Why the current foundation should evolve
 
@@ -489,7 +489,7 @@ approved. No runtime change is needed.
 ### DS-1 — Token compiler and default parity
 
 **Implemented with focused local verification on 2026-10-03.** The evidence record is
-[design-system token foundation](../phase-1/evidence/design-system-token-foundation.md).
+[design-system token foundation](../phase-1/handover-evidence.md).
 
 - Introduce the typed token source and deterministic browser generator.
 - Generate the existing default profile first.
@@ -502,7 +502,7 @@ reproducible, and no preference UI or core resource exists.
 ### DS-2 — Component ownership and visual refinement
 
 **Implemented with focused local verification on 2026-10-03.** The evidence record is
-[design-system component foundation](../phase-1/evidence/design-system-component-foundation.md).
+[design-system component foundation](../phase-1/handover-evidence.md).
 
 - Split the component stylesheet into owned component families.
 - Introduce semantic React component APIs for the smallest repeated set.
@@ -518,7 +518,7 @@ route-local visual invention.
 **Technical proof implemented with focused local verification and revised-profile owner approval
 to advance to representative testing on 2026-10-03; representative human evidence remains open.**
 The evidence record is
-[design-system governed-choice proof](../phase-1/evidence/design-system-governed-choice-proof.md).
+[design-system governed-choice proof](../phase-1/handover-evidence.md).
 
 - Add dark and one readability-focused profile.
 - Add an in-memory preference preview and reset to UI-0 only.

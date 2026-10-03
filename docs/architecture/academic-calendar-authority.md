@@ -259,5 +259,5 @@ ADR acceptance and implementation require all evidence named in ADR 0021 plus:
 - [ADR 0016](../adr/0016-scheduling-service-contract-and-publication-boundary.md)
 - [ADR 0018](../adr/0018-temporal-records-correction-audit-and-evidence-semantics.md)
 - [ADR 0020](../adr/0020-human-interface-experience-and-client-platform-boundary.md)
-- [Phase 1 core-foundation plan](../plans/phase-1-core-foundation-plan.md)
+- [Phase 1 handover evidence](../phase-1/handover-evidence.md)
 - [Threat model](../security/threat-model.md)

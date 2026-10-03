@@ -15,7 +15,7 @@
       "sources": [
         "lib/ash_foundation_lab/foundation_record.ex"
       ],
-      "evidence": "../../docs/phase-0/evidence/ash-pressure-test.md#named-action-and-tenant-role-slice"
+      "evidence": "../../docs/phase-0/handover-evidence.md"
     },
     {
       "id": "dynamic_repository_sql",
@@ -35,7 +35,7 @@
         "lib/ash_foundation_lab/synthetic_module_lifecycle.ex",
         "lib/ash_foundation_lab/trusted_routing.ex"
       ],
-      "evidence": "../../docs/phase-0/evidence/ash-pressure-test.md"
+      "evidence": "../../docs/phase-0/handover-evidence.md"
     },
     {
       "id": "page_limit_edge_adapter",
@@ -49,7 +49,7 @@
         "lib/ash_foundation_lab/api_router.ex",
         "lib/ash_foundation_lab/json_api_page_limit.ex"
       ],
-      "evidence": "../../docs/phase-0/evidence/ash-pressure-test.md#generated-jsonapi-policy-slice"
+      "evidence": "../../docs/phase-0/handover-evidence.md"
     },
     {
       "id": "failure_header_edge_adapter",
@@ -63,7 +63,7 @@
         "lib/ash_foundation_lab/api_router.ex",
         "lib/ash_foundation_lab/json_api_failure_headers.ex"
       ],
-      "evidence": "../../docs/phase-0/evidence/ash-pressure-test.md#stable-public-error-taxonomy-slice"
+      "evidence": "../../docs/phase-0/handover-evidence.md"
     },
     {
       "id": "openapi_contract_modifier",
@@ -77,7 +77,7 @@
         "lib/ash_foundation_lab/json_api_contract.ex",
         "lib/ash_foundation_lab/json_api_router.ex"
       ],
-      "evidence": "../../docs/phase-0/evidence/ash-pressure-test.md#idempotency-and-generated-typescript-client-slice"
+      "evidence": "../../docs/phase-0/handover-evidence.md"
     },
     {
       "id": "retained_data_migration_choreography",
@@ -96,7 +96,7 @@
         "priv/retained_data_migration_rehearsal/migrations/20260915030000_validate_foundation_record_name.exs",
         "priv/retained_data_migration_rehearsal/migrations/20260915040000_contract_foundation_record_name.exs"
       ],
-      "evidence": "../../docs/phase-0/evidence/retained-data-migration-rehearsal.md"
+      "evidence": "../../docs/phase-0/handover-evidence.md"
     },
     {
       "id": "resource_descriptor_and_metadata_validator",
@@ -111,7 +111,7 @@
         "lib/ash_foundation_lab/resource_descriptor.ex",
         "lib/mix/tasks/phase0.descriptor.check.ex"
       ],
-      "evidence": "../../docs/phase-0/evidence/resource-authoring-and-governed-metadata.md"
+      "evidence": "../../docs/phase-0/handover-evidence.md"
     },
     {
       "id": "tenant_movement_and_non_http_routing",
@@ -124,7 +124,7 @@
       "sources": [
         "lib/ash_foundation_lab/trusted_routing.ex"
       ],
-      "evidence": "../../docs/phase-0/evidence/trusted-routing.md#tenant-movement-and-non-http-interface-slice"
+      "evidence": "../../docs/phase-0/handover-evidence.md"
     }
   ]
 }

@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help bootstrap fix format lint check-changed check-staged test-fast test docs-check check-docs check-phase0 check-repository-tools check-core check-web check-tooling check-clean-rehearsal auth-demo legal-demo web-dev web-core-dev web-check web-e2e web-core-e2e check
+.PHONY: help bootstrap fix format lint check-changed check-staged test-fast test docs-check check-docs check-archive-phase0 check-repository-tools check-core check-web check-tooling check-clean auth-demo legal-demo web-dev web-core-dev web-check web-e2e web-core-e2e check
 
 help:
 	@echo "bootstrap  Install and prepare local workspace dependencies"
@@ -9,9 +9,11 @@ help:
 	@echo "lint       Run non-mutating static checks"
 	@echo "check-changed Run only the suites selected by changes since upstream"
 	@echo "check-staged Run only the suites selected by staged changes"
-	@echo "test-fast  Run the provisional production-core tests only"
-	@echo "test       Run Python and Elixir tests"
+	@echo "test-fast  Run the core-platform tests only"
+	@echo "test       Run maintained repository, core, and web unit tests"
 	@echo "docs-check Validate repository and ADR documentation"
+	@echo "check-archive-phase0 Verify the retired Phase 0 lab after archive changes"
+	@echo "check-clean Reproduce staged changes in a temporary clean checkout"
 	@echo "auth-demo  Start the local database-backed authentication administration proof"
 	@echo "legal-demo Seed the local synthetic Phase 2.1-C2a legal-structure demonstration"
 	@echo "web-dev    Start the local synthetic UI-0 browser workspace"
@@ -31,24 +33,12 @@ fix:
 format:
 	mise exec -- uv run ruff format tools tests/tools
 	mise exec -- mix format
-	cd spikes/ash-foundation-lab && mise exec -- mix format
 	cd clients/web && mise exec -- npm exec -- prettier --write .
 
 lint:
 	mise exec -- uv run ruff format --check tools tests/tools
 	mise exec -- uv run ruff check tools tests/tools
-	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/bootstrap bin/core-check bin/format-staged-elixir bin/organization-legal-demo bin/phase0-check bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
-	cd spikes/ash-foundation-lab && mise exec -- mix format --check-formatted
-	cd spikes/ash-foundation-lab && mise exec -- mix ash_postgres.generate_migrations --check --migration-path priv/generated_migration_review/migrations --snapshot-path priv/generated_migration_review/resource_snapshots
-	cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix openapi.spec.json --spec AshFoundationLab.JsonApiRouter --check --pretty=true --filename priv/openapi/phase0-v1.json
-	cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix phase0.descriptor.check
-	cd spikes/ash-foundation-lab && mise exec -- mix credo --strict
-	mise exec -- uv run python tools/check_ash_dependency_warnings.py
-	cd spikes/ash-foundation-lab && mise exec -- mix hex.audit
-	cd spikes/ash-foundation-lab && mise exec -- mix deps.unlock --check-unused
-	cd spikes/ash-foundation-lab && mise exec -- mix dialyzer
-	cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm run generate:check
-	cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm run typecheck
+	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/bootstrap bin/check-changed bin/core-check bin/format-staged-elixir bin/organization-legal-demo bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
 	mise exec -- mix format --check-formatted
 	mise exec -- env MIX_ENV=test mix compile --warnings-as-errors
 	mise exec -- env MIX_ENV=test mix run tools/check_ui1_openapi.exs
@@ -75,26 +65,24 @@ test-fast:
 	mise exec -- env MIX_ENV=test mix test
 
 test:
-	mise exec -- uv run pytest
-	cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix test
-	cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm test
+	mise exec -- uv run pytest tests/tools/test_check_docs.py
 	mise exec -- env MIX_ENV=test mix ecto.create --quiet
 	mise exec -- env MIX_ENV=test mix ecto.migrate --quiet
 	mise exec -- env MIX_ENV=test mix test
 	cd clients/web && CHIMWEMWE_UI0_SYNTHETIC=true mise exec -- npm run test:unit
 
 docs-check:
-	mise exec -- uv run python tools/check_phase0.py
+	mise exec -- uv run python tools/check_docs.py
 
 check-docs: docs-check
 
-check-phase0:
-	./bin/with-verification-lock --resource phase0 -- ./bin/phase0-check
+check-archive-phase0:
+	./bin/with-verification-lock --resource archive-phase0 -- ./bin/phase0-check
 
 check-repository-tools:
 	mise exec -- uv run ruff format --check tools tests/tools
 	mise exec -- uv run ruff check tools tests/tools
-	mise exec -- uv run pytest tests/tools
+	mise exec -- uv run pytest tests/tools/test_check_docs.py
 
 check-core:
 	./bin/with-verification-lock --resource core-test -- ./bin/core-check
@@ -103,11 +91,11 @@ check-web:
 	./bin/with-verification-lock --resource web-qualification -- $(MAKE) web-e2e web-core-e2e
 
 check-tooling:
-	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/bootstrap bin/check-changed bin/core-check bin/format-staged-elixir bin/organization-legal-demo bin/phase0-check bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
+	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/bootstrap bin/check-changed bin/core-check bin/format-staged-elixir bin/organization-legal-demo bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
 	$(MAKE) -n check-changed check-staged
 
-check-clean-rehearsal:
-	./bin/with-verification-lock --resource clean-checkout -- mise exec -- uv run python tools/rehearse_phase0_clean_checkout.py --output spikes/ash-foundation-lab/priv/maintenance/clean-checkout-rehearsal.json
+check-clean:
+	./bin/with-verification-lock --resource clean-checkout -- mise exec -- uv run python tools/rehearse_clean_checkout.py
 
 auth-demo:
 	./bin/auth-demo
@@ -136,7 +124,6 @@ web-core-e2e: web-check
 
 check:
 	$(MAKE) check-docs
-	$(MAKE) check-phase0
 	$(MAKE) check-repository-tools
 	$(MAKE) check-core
 	$(MAKE) check-web

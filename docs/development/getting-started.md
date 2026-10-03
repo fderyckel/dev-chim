@@ -30,14 +30,14 @@ The bootstrap command creates `.venv` through uv. Developers do not need to acti
 
 ## PostgreSQL
 
-Phase 0 uses the Homebrew PostgreSQL 18 service and a synthetic test database. Check it with:
+Local core and archived-lab tests use the Homebrew PostgreSQL 18 service and synthetic test databases. Check it with:
 
 ```sh
 brew services list
 pg_isready
 ```
 
-`make bootstrap` starts the service when needed and creates/migrates only the spike's test database. No production or personal data belongs in it.
+`make bootstrap` starts the service when needed and prepares only synthetic local databases. No production or personal data belongs in them.
 
 ## Daily loop
 
@@ -47,7 +47,6 @@ make fix
 make test-fast
 git add path/to/changed-file ...
 make check-staged
-make check
 ```
 
 See [testing.md](testing.md) for focused commands and [git-workflow.md](git-workflow.md) before pushing.
@@ -95,5 +94,5 @@ production identity, or real record. The command is non-destructive.
 - Run `brew bundle check` to identify missing macOS dependencies.
 - Run `uv sync --group dev --locked` if `.venv` is missing.
 - Run `pg_isready`; if it fails, use `brew services start postgresql@18`.
-- Run the failing command from `bin/phase0-check` directly for full output.
+- Run the failing boundary command reported by `make check-changed` directly for full output.
 - Do not delete lock files or databases as a first troubleshooting step.

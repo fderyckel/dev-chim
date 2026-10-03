@@ -11,6 +11,14 @@
 
 ## Purpose
 
+Subsequent educational disposition: [ADR 0034](../adr/0034-c25-03-delegated-educational-structure-acceptance.md)
+and the [five-context review](c25-03-educational-structure-review.md) close C25-03 for synthetic
+L1. [ADR 0035](../adr/0035-c25-04-delegated-primary-operator-acceptance.md) and the
+[completed operator review](c25-04-primary-operator-review.md) subsequently close synthetic C25-04
+with explicit controls and 14-day/72-hour deadlines. Actual representative validation remains
+C25-03-R and operator implementation proof remains separate. The
+original scenarios below describe the full logical target, not authorization for all their actions.
+
 This addendum expands scenario S9 in the
 [institutional-structure walkthrough](institutional-structure-scenario-review.md). It tests whether
 the amended ADR 0025 contract can represent linked corporate/legal and educational structures

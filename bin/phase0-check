@@ -21,11 +21,11 @@ mise exec -- uv run ruff check tools tests/tools
 echo "[3/12] Shell lint"
 shellcheck .githooks/pre-push bin/bootstrap bin/check-changed bin/phase0-check bin/with-verification-lock
 
-echo "[4/12] Repository and documentation conventions"
-mise exec -- uv run python tools/check_phase0.py
+echo "[4/12] Current repository and documentation conventions"
+mise exec -- uv run python tools/check_docs.py
 
-echo "[5/12] Python tests"
-mise exec -- uv run pytest
+echo "[5/12] Archived dependency-warning tests"
+mise exec -- uv run pytest tests/tools/test_check_ash_dependency_warnings.py
 
 echo "[6/12] Elixir formatting, generated migration drift, and lint"
 (
@@ -78,4 +78,4 @@ echo "[11/12] Elixir and PostgreSQL tests"
 echo "[12/12] Git whitespace check"
 git diff --check
 
-echo "Phase 0 local verification passed."
+echo "Archived Phase 0 lab verification passed."

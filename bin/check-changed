@@ -30,20 +30,31 @@ done
 repo_root=$(cd "$(dirname "$0")/.." && pwd -P)
 cd "$repo_root"
 
+comparison_base() {
+  upstream=$(git rev-parse --verify '@{upstream}' 2>/dev/null || true)
+
+  if [[ -z $upstream ]]; then
+    upstream=$(git symbolic-ref --quiet --short refs/remotes/origin/HEAD 2>/dev/null || true)
+  fi
+
+  if [[ -z $upstream ]] && git rev-parse --verify origin/main >/dev/null 2>&1; then
+    upstream=origin/main
+  fi
+
+  if [[ -n $upstream ]]; then
+    git merge-base "$upstream" HEAD
+  else
+    git rev-list --max-parents=0 HEAD | tail -n 1
+  fi
+}
+
 changed_paths() {
   case $mode in
     staged)
       git diff --cached --name-only --diff-filter=ACMR
       ;;
     upstream)
-      upstream=$(git rev-parse --verify '@{upstream}' 2>/dev/null || true)
-
-      if [[ -n $upstream ]]; then
-        base=$(git merge-base "$upstream" HEAD)
-      else
-        base=$(git rev-list --max-parents=0 HEAD | tail -n 1)
-      fi
-
+      base=$(comparison_base)
       git diff --name-only --diff-filter=ACMR "$base" HEAD
       ;;
   esac
@@ -55,21 +66,14 @@ check_whitespace() {
       git diff --cached --check
       ;;
     upstream)
-      upstream=$(git rev-parse --verify '@{upstream}' 2>/dev/null || true)
-
-      if [[ -n $upstream ]]; then
-        base=$(git merge-base "$upstream" HEAD)
-      else
-        base=$(git rev-list --max-parents=0 HEAD | tail -n 1)
-      fi
-
+      base=$(comparison_base)
       git diff --check "$base" HEAD
       ;;
   esac
 }
 
 needs_docs=false
-needs_phase0=false
+needs_archive_phase0=false
 needs_core=false
 needs_web=false
 needs_repository_tools=false
@@ -80,14 +84,14 @@ while IFS= read -r path; do
   [[ -n $path ]] || continue
 
   case $path in
-    docs/*|README.md)
-      needs_docs=true
-      ;;
-    spikes/ash-foundation-lab/priv/maintenance/clean-checkout-rehearsal.json)
+    docs/*|README.md|AGENTS.md|CONTRIBUTING.md|SECURITY.md)
       needs_docs=true
       ;;
     spikes/ash-foundation-lab/*)
-      needs_phase0=true
+      needs_archive_phase0=true
+      ;;
+    tools/check_ash_dependency_warnings.py|tests/tools/test_check_ash_dependency_warnings.py|tools/measure_phase0_*.py|bin/phase0-check)
+      needs_archive_phase0=true
       ;;
     tools/*|tests/tools/*|pyproject.toml|uv.lock)
       needs_repository_tools=true
@@ -99,10 +103,9 @@ while IFS= read -r path; do
       needs_web=true
       ;;
     mix.exs|mix.lock)
-      needs_phase0=true
       needs_core=true
       ;;
-    .githooks/*|bin/*|Makefile|.gitignore)
+    .githooks/*|bin/*|Makefile|.gitignore|.formatter.exs|mise.toml|Brewfile)
       needs_tooling=true
       ;;
     *)
@@ -120,7 +123,7 @@ fi
 
 boundaries=()
 $needs_docs && boundaries+=(docs)
-$needs_phase0 && boundaries+=(phase0)
+$needs_archive_phase0 && boundaries+=(archive-phase0)
 $needs_repository_tools && boundaries+=(repository-tools)
 $needs_core && boundaries+=(core)
 $needs_web && boundaries+=(web)
@@ -145,8 +148,8 @@ for boundary in "${boundaries[@]}"; do
     docs)
       make check-docs
       ;;
-    phase0)
-      make check-phase0
+    archive-phase0)
+      make check-archive-phase0
       ;;
     repository-tools)
       make check-repository-tools

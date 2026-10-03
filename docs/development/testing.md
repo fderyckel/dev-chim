@@ -2,8 +2,8 @@
 
 ## Test layers
 
-- Repository tests validate documentation, ADR structure, links, and phase boundaries.
-- Production core tests validate trusted actor/placement source separation, fail-closed execution context, tenant agreement, global Ash authorization and actor requirements, the resource-authoring contract, deterministic allowlisted descriptor derivation, trusted invocation of public named reads, pre-checkout tenant/placement admission, current-route repository selection with process cleanup, and tenant-authority graph isolation and resolution.
+- Repository tests validate documentation, ADR structure, links, and the four-document Phase 0/1 archive.
+- Core-platform tests validate trusted actor/placement source separation, fail-closed execution context, tenant agreement, global Ash authorization and actor requirements, the resource-authoring contract, deterministic allowlisted descriptor derivation, trusted invocation of public named reads, pre-checkout tenant/placement admission, current-route repository selection with process cleanup, and tenant-authority graph isolation and resolution.
 - Unit tests cover deterministic logic without services.
 - Integration tests use the local synthetic PostgreSQL database and exercise Ash/PostgreSQL behaviour.
 - Security tests include negative authorization and cross-tenant cases alongside positive cases.
@@ -44,10 +44,10 @@ design, maintainability, and inferred-type questions that require developer inte
 `make check-changed` selects only the suites owned by changed paths since the upstream commit;
 `make check-staged` uses the same selection for staged paths. The pre-commit hook invokes the
 latter after formatting staged Elixir files. A documentation-only change runs documentation checks,
-a core change runs the core suite, and a web change runs the web suite; a lockfile change selects
-both Phase 0 and core.
+a core change runs the core suite, and a web change runs the web suite. The retired lab runs only
+when files inside its archive boundary change.
 
-`make test-fast` creates and migrates the synthetic production-core test database, then runs only the bounded production-core test suite. It is the default short loop for core resource, action, policy, execution-context, descriptor, trusted read-invocation, admission, persistence-routing, and tenant-authority work. It does not run the disposable Ash lab, Python repository checks, generated-artifact drift checks, TypeScript contracts, lint, dependency audit, or static analysis.
+`make test-fast` creates and migrates the synthetic core-platform test database, then runs only the core-platform test suite. It is the default short loop for core resource, action, policy, execution-context, descriptor, trusted read-invocation, admission, persistence-routing, and tenant-authority work. It does not run the archived Ash lab, Python repository checks, generated-artifact drift checks, TypeScript contracts, lint, dependency audit, or static analysis.
 
 `make web-check` runs the UI-0 format, JavaScript, CSS contract, type, unit,
 component, automated accessibility, and guarded production-build checks.
@@ -72,23 +72,8 @@ passing fast loop is never Phase 0 or architecture evidence by itself.
 Focused commands:
 
 ```sh
-mise exec -- uv run pytest tests/tools
-mise exec -- uv run python tools/check_phase0.py
-mise exec -- uv run python tools/check_ash_dependency_warnings.py
-cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix test
-cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix test test/ash_foundation_lab/trusted_routing_test.exs
-cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix test test/ash_foundation_lab/synthetic_module_lifecycle_test.exs
-cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix test test/ash_foundation_lab/retained_data_migration_test.exs
-cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix test test/ash_foundation_lab/maintenance_contract_test.exs
-cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix test test/ash_foundation_lab/resource_authoring_test.exs
-cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix phase0.descriptor.check
-cd spikes/ash-foundation-lab && mise exec -- mix ash_postgres.generate_migrations --check --migration-path priv/generated_migration_review/migrations --snapshot-path priv/generated_migration_review/resource_snapshots
-cd spikes/ash-foundation-lab && mise exec -- env MIX_ENV=test mix openapi.spec.json --spec AshFoundationLab.JsonApiRouter --check --pretty=true --filename priv/openapi/phase0-v1.json
-cd spikes/ash-foundation-lab && mise exec -- mix credo --strict
-cd spikes/ash-foundation-lab && mise exec -- mix dialyzer
-cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm run generate:check
-cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm run typecheck
-cd spikes/ash-foundation-lab/typescript-client-review && mise exec -- npm test
+mise exec -- uv run pytest tests/tools/test_check_docs.py
+mise exec -- uv run python tools/check_docs.py
 mise exec -- env MIX_ENV=test mix test
 mise exec -- env MIX_ENV=test mix test apps/chimwemwe_core/test/chimwemwe/platform/persistence_test.exs
 mise exec -- env MIX_ENV=test mix test apps/chimwemwe_core/test/chimwemwe/platform/authority_test.exs
@@ -99,6 +84,9 @@ cd clients/web/openapi-client-generator && mise exec -- npm run generate:check
 make web-core-e2e
 ./bin/core-check
 ```
+
+If the archived Phase 0 lab itself changes, run `make check-archive-phase0`. Ordinary Phase 2,
+core, browser, documentation, and tooling changes do not run that suite.
 
 ## Rules
 
@@ -128,13 +116,13 @@ make web-core-e2e
 - Every production-core schema change must pass the AshPostgres migration/snapshot drift check and follow [the migration discipline](migrations.md); generated output is reviewed rather than accepted as generated.
 - Every new non-atomic action, raw-SQL source, generated-interface edge adapter, OpenAPI modifier, or platform-owned migration choreography path must be registered with an owner, cost, bounded remedy, closure gate, recheck trigger, source, and evidence.
 - Every descriptor or experience-metadata change must preserve one-way derivation, stable allowlisted references, exact revision checks, trusted tenant/actor binding, sanitized query input, and domain-boundary re-authorization; add private, stale, cross-tenant, executable, authority, and removed-reference negatives.
-- Every dependency or Elixir/OTP change must force the complete spike dependency compile and produce a reviewed zero-delta warning result. Both added and removed warning groups require an explicit baseline update; application code remains governed by warnings-as-errors.
+- Every current core dependency or Elixir/OTP change must pass the core dependency audit, compile, static analysis, and owned boundary tests. A dependency change inside the archived lab additionally requires `make check-archive-phase0` and an explicit warning-baseline review.
 - Every pool or application-node change must recalculate the per-placement connection budget, including writer, reader, Oban, administration, monitoring, replication, and failover reserve.
 - A benchmark report states its data shape, time distribution, hardware, PostgreSQL settings, connections, repeated-run variance, and limitations. Row-count arithmetic alone is not benchmark evidence.
 - Do not weaken an assertion to make an unsafe implementation pass.
 - Record an intentionally skipped test with its owner and unblock condition.
 
 `make check-changed` is the required pre-push proof. A clean exit means the changed boundaries and
-their selected verification passed; it does not close Phase 0, accept an ADR, or certify later
-foundation gates that have not been implemented. `make check` remains an explicit full-integration
-command.
+their selected verification passed; it does not accept an ADR or certify later gates that have not
+been implemented. `make check` remains an explicit full-integration command for the live repository
+boundaries.

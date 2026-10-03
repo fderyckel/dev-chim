@@ -76,7 +76,7 @@ It cannot own authorization, tenant routing, persistent relationships, database 
 
 ## Phase 0 authoring scenario
 
-The neutral, disposable exercise is now recorded in [resource-authoring and governed-metadata evidence](../phase-0/evidence/resource-authoring-and-governed-metadata.md):
+The neutral, disposable exercise is now recorded in [resource-authoring and governed-metadata evidence](../phase-0/handover-evidence.md):
 
 1. A developer creates a small tenant-owned Ash resource using the provisional core conventions, with one named read and one named transition.
 2. The normal Ash and PostgreSQL workflow generates and reviews its migration.
@@ -102,14 +102,14 @@ resource reference, derived classification, and optimistic lock version. Publica
 independent module gates and a separate actor capability on the writer and records minimized audit,
 outbox, and exact-replay evidence in the same transaction. There is no renderer or live consumer,
 so retaining a valid definition does not expose or execute data. See the
-[Slice 1I-A evidence](../phase-1/evidence/governed-extension-definitions.md).
+[Slice 1I-A evidence](../phase-1/handover-evidence.md).
 
 Slice 1I-B adds only exact internal compatibility resolution. Before returning one stored
 definition, the resolver requires separate read authority, all current module gates, exact current
 schema/resource/descriptor/content/classification agreement, and an exact or explicitly compatible
 module version. It returns metadata only and never invokes the stored action reference. There is no
 enumeration, public contract, renderer, or domain-record read. See the
-[Slice 1I-B evidence](../phase-1/evidence/governed-extension-resolution.md).
+[Slice 1I-B evidence](../phase-1/handover-evidence.md).
 
 ## Reports, views, security, and APIs
 

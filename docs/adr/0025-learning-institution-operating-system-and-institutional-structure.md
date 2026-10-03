@@ -18,6 +18,10 @@
 
 ## Context
 
+Current supersession notice: [ADR 0035](0035-c25-04-delegated-primary-operator-acceptance.md)
+closes C25-04 for synthetic L1 and settles its operator controls and deadlines. The original
+decision below is retained; C25-03-R, C25-05/C25-06 and existing external adoption gates remain.
+
 Chimwemwe is an operating system for learning institutions. It is intended for kindergartens,
 primary and secondary schools, combined schools, colleges, community colleges, universities, and
 other governed learning environments. These are first-class product contexts, not later extensions

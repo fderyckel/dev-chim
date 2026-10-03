@@ -7,8 +7,9 @@
   institutional-structure workflow, whichever is earlier
 - Gates: ADR 0025 G1 through G6
 - C25-02 disposition: Closed on 2026-10-03 under [ADR 0032](../adr/0032-c25-02-delegated-contract-acceptance.md); [completed corporate/finance review](c25-02-corporate-governance-finance-review.md)
-- Boundary: Review of the logical linked-structure contract only; approval does not authorize
-  persistence, real data, a public interface, module activation, or production release
+- C25-03 disposition: Closed for synthetic L1 on 2026-10-03 under [ADR 0034](../adr/0034-c25-03-delegated-educational-structure-acceptance.md); [completed five-context review](c25-03-educational-structure-review.md); external validation remains C25-03-R
+- Boundary: Logical review; exact synthetic persistence eligibility comes from the governing
+  slice ADRs, including ADR 0034. No real data, connected/public workflow, or release is approved
 
 ## How to use this packet
 
@@ -99,9 +100,9 @@ answers across the contexts, all fifteen context-specific answers, the education
 catalogue, and scenario/migration dispositions. It does not fabricate real participant records.
 
 The requirements below remain mandatory under **C25-03-R before connected workflows (including
-synthetic L2), real data/import, pilot, or deployment**. Synthetic L1 eligibility is limited to
-unpublished identities and the included initial structural meanings; C25-04 still blocks operator
-assignment/transfer persistence and institution publication.
+synthetic L2), real data/import, pilot, or deployment**. ADR 0034 admits the included initial structural meanings; ADR 0035 subsequently closes C25-04
+for bounded synthetic operator assignment, internal publication and controlled transfer/reconciliation
+proof. These decisions do not certify implementation.
 
 Each row requires a real named person with current or recent operating knowledge of that context.
 One person may cover more than one context only when the record explains their relevant experience
@@ -173,8 +174,12 @@ in the completed review; institution-local Dates apply to the separate operator 
 
 ADR 0031 continues to limit implementation to synthetic private C1 establishment/registration and
 exact reads. Its external validation before later adoption remains due by 2026-12-15 or the first
-affected gate, whichever is earlier; it is not outstanding C25-02 approval. ADR 0034 now closes C25-03 for synthetic L1 only; C25-03-R and C25-04 through C25-06
-remain binding. Operator-policy recommendations in the completed answers do not close C25-04.
+affected gate, whichever is earlier; it is not outstanding C25-02 approval. ADR 0034 now closes C25-03 for synthetic L1 only; C25-03-R and C25-05/C25-06
+remain binding. The subsequent [ADR 0035](../adr/0035-c25-04-delegated-primary-operator-acceptance.md)
+and [completed operator review](c25-04-primary-operator-review.md) close C25-04 for synthetic L1,
+settling all seven rules, a compliance/governance owner, 14-day retrospective completion and
+immediate revocation controls with human reconciliation within 72 hours. Those accepted synthetic
+values supersede earlier C25-02 timing recommendations.
 
 - Minimum scenarios: LS-01 through LS-10 and migration Sources C through F.
 - Required questions:
@@ -274,7 +279,7 @@ revised.
 | Gate | Evidence complete? | Required named reviews complete? | Blocking findings | Disposition |
 | --- | --- | --- | --- | --- |
 | G1 — scenarios and vocabulary | Linked packs plus completed C25-02 and five-context C25-03 reviews | Corporate/legal and educational-domain synthetic dispositions closed under ADRs 0032/0034; platform and external findings remain separate | C25-03-R and later adoption/release gates remain | Logical contract accepted for bounded synthetic work |
-| G2 — five representative contexts | All five delegated analytical perspectives completed | Synthetic C25-03 closed; actual representative records remain open under C25-03-R | C25-03-R blocks connected use, real data/import, pilot and deployment; C25-04 blocks operator persistence/publication | Approved for synthetic L1 only |
+| G2 — five representative contexts | All five delegated analytical perspectives completed | Synthetic C25-03 closed; actual representative records remain open under C25-03-R | C25-03-R blocks connected use, real data/import, pilot and deployment; synthetic C25-04 is closed under ADR 0035; operator implementation proof remains | Approved for synthetic L1 only |
 | G3 — security/privacy | Technical control and negative-test contract prepared | Named and executable per-slice review open | C25-01/C25-05/C25-06 remain binding | Accepted as bounded design evidence |
 | G4 — migration/correction | Synthetic mappings and temporal contract prepared | Named records/migration review open | Migration and real data blocked by C25-06 | Accepted as synthetic design evidence |
 | G5 — experience/accessibility | Current-contract prototype and focused checks pass | Accountable/representative comprehension review open | Connected/public structure workflow remains prohibited by C25-05 | Technical evidence ready; condition review due 2026-12-15 or the first affected gate |
@@ -293,7 +298,7 @@ complete; each is attached to a fail-closed condition before the first slice tha
 | Remaining implementation conditions | ADR 0025 C25-01 through C25-06 |
 | Accepted residual risks and owners | Product Owner accepts the recorded residual risks only within C25-01 through C25-06; named specialist and representative owners remain to be recorded before their affected slices |
 | Outcome | **Conditionally accept ADR 0025** |
-| Effect on Slice 2.1 persistence | Minimal synthetic Slice 2.1-B has its separate disposition; ADRs 0031/0033 authorize synthetic 2.1-C1/C2a; ADR 0032 closes C25-02; ADR 0034 closes C25-03 for synthetic L1; C25-03-R, later adoption validation and C25-04 through C25-06 remain gated |
+| Effect on Slice 2.1 persistence | Minimal synthetic Slice 2.1-B has its separate disposition; ADRs 0031/0033 authorize synthetic 2.1-C1/C2a; ADR 0032 closes C25-02; ADR 0034 closes C25-03 for synthetic L1; ADR 0035 closes synthetic C25-04; C25-03-R, later adoption validation and C25-05/C25-06 remain gated |
 
 The original 2026-09-27 conditional acceptance settles the logical direction only. It makes the separately authorized
 minimal first synthetic corporate/legal persistence slice eligible; it does not approve a

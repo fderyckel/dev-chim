@@ -1,6 +1,6 @@
 # Toolchain contract
 
-- Status: Active for Phase 0, authorized Phase 1 core slices, UI-0, and UI-1A
+- Status: Active for the Phase 2 repository, core platform, UI-0, UI-1A, and archive maintenance
 - Owner: Platform engineering
 - Review trigger: runtime security advisory, package incompatibility, or Phase 1 workspace start
 

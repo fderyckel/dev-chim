@@ -249,14 +249,14 @@ built-in default, and no cookie, browser storage, remote font, or core preferenc
 ## Validation evidence
 
 Current evidence proves the UI-0 CSS and accessibility contract recorded in the
-[local browser evidence](../phase-1/evidence/local-browser-experience.md) and the bounded token
+[local browser evidence](../phase-1/handover-evidence.md) and the bounded token
 compiler, drift, completeness, safety, and exact default-parity result recorded in the
-[DS-1 implementation evidence](../phase-1/evidence/design-system-token-foundation.md), plus the
+[DS-1 implementation evidence](../phase-1/handover-evidence.md), plus the
 component ownership, semantic API, route adoption, and reviewed responsive rendering recorded in
-the [DS-2 implementation evidence](../phase-1/evidence/design-system-component-foundation.md), and
+the [DS-2 implementation evidence](../phase-1/handover-evidence.md), and
 the complete-profile, first-paint, accessibility-preference, non-persistence, matrix, and rendered
 review recorded in the
-[DS-3 technical evidence](../phase-1/evidence/design-system-governed-choice-proof.md). The
+[DS-3 technical evidence](../phase-1/handover-evidence.md). The
 [DTCG 2025.10 format](https://www.designtokens.org/TR/2025.10/format/) is a stable Community Group
 report for interoperable typed token data; it is not itself proof that a Chimwemwe token compiler
 or theme is correct. [WCAG 2.2](https://www.w3.org/TR/WCAG22/) is the minimum conformance baseline,

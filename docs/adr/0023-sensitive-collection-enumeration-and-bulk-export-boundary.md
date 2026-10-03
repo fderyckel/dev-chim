@@ -25,7 +25,7 @@ The boundary must prevent an ordinary list or search API from becoming an undecl
 while preserving deliberately bounded school tasks.
 
 This decision is the governing treatment for the **Page-limit edge adapter** production condition in
-the [Ash bounded-condition disposition](../phase-0/evidence/ash-bounded-condition-disposition.md).
+the [Ash bounded-condition disposition](../phase-0/handover-evidence.md).
 Conditional acceptance establishes the policy but does not close that candidate-specific
 condition or authorize a public API, a learning-institution module, or a production export.
 
@@ -199,4 +199,4 @@ generic tenant-wide sensitive list is not a fallback.
 - [Data classification](../security/data-classification.md)
 - [Threat model](../security/threat-model.md)
 - [Security abuse cases](../security/abuse-cases.md)
-- [Ash bounded-condition disposition](../phase-0/evidence/ash-bounded-condition-disposition.md)
+- [Ash bounded-condition disposition](../phase-0/handover-evidence.md)
