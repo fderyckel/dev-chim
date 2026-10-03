@@ -1,6 +1,6 @@
 # First classroom slice: calendar publication and daily attendance
 
-- Status: Implementation brief under the authorized six-week plan; domain details proposed
+- Status: Active implementation brief; calendar domain accepted for bounded private synthetic L1
 - Prepared on: 2026-10-03
 - Owner: Product and platform engineering
 - Review trigger: domain ADR disposition, representative findings, implementation entry, or a changed release gate
@@ -19,7 +19,7 @@ experience gates. While those are open, eligible private synthetic foundation wo
 within its existing authorization. Do not introduce an active/public institution alias to bypass
 the draft-only boundary in ADR 0034.
 
-## Proposed calendar contract to settle in ADR 0021
+## Calendar contract settled in ADR 0021
 
 Use an explicit tenant-qualified calendar identity owned by one exact `institutional_unit_id`.
 An academic year and its periods belong to that calendar. The class chooses an explicit calendar
@@ -40,9 +40,9 @@ Attendance pins the revision it used. Template adoption, multiple programme scop
 instructional-day exceptions, and calendar correction UI are deferred beyond the initial calendar
 slice, not silently removed from the wider Proposed ADR's future concerns.
 
-This paragraph is a concrete candidate for the ADR revision, not acceptance of that ADR. The
-revision must reconcile its decision, resolver, constraints, scenarios, and migration language
-before persistence begins.
+ADR 0021 now accepts this boundary for bounded private synthetic L1. Its first executable increment
+validates and resolves publication candidates without persistence. Database publication remains
+behind the minimal institutional/operator writer and the ADR's named persistence evidence.
 
 ## Named action and screen sequence
 

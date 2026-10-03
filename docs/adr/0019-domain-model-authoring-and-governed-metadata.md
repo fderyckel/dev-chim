@@ -107,7 +107,7 @@ If ADR 0002 rejects Ash, retain the same boundary over explicit Phoenix/Ecto sch
 
 ## Related records
 
-- [Domain model authoring and metadata boundary](../architecture/domain-model-authoring-and-metadata.md)
+- [Domain model authoring and metadata workflow](../development/code-conventions.md#domain-model-authoring)
 - [ADR 0002](0002-ash-adoption-criteria-and-fallback.md)
 - [ADR 0003](0003-tenant-model-and-optional-postgresql-rls.md)
 - [ADR 0005](0005-domain-action-and-state-transition-convention.md)

@@ -184,4 +184,4 @@ The core validates context shape and source separation, resolves an immutable st
 - no external service, web workspace, or production infrastructure; and
 - no claim that Phase 0 completion authorizes any capability outside the explicitly approved slice.
 
-See the consolidated [Phase 1 handover evidence](../phase-1/handover-evidence.md), [Phase 0 handover evidence](../phase-0/handover-evidence.md), [Slice 2.0-C evidence](../phase-2/temporal-completion-and-recovery-evidence.md), [temporal retention and recovery runbook](../operations/temporal-retention-and-recovery.md), [domain-model authoring boundary](domain-model-authoring-and-metadata.md), and [threat model](../security/threat-model.md).
+See the consolidated [Phase 1 handover evidence](../phase-1/handover-evidence.md), [Phase 0 handover evidence](../phase-0/handover-evidence.md), [Slice 2.0-C evidence](../phase-2/temporal-completion-and-recovery-evidence.md), [temporal retention and recovery runbook](../operations/temporal-retention-and-recovery.md), [domain-model authoring workflow](../development/code-conventions.md#domain-model-authoring), and [threat model](../security/threat-model.md).

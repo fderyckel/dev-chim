@@ -5,7 +5,9 @@
   aggregate have synthetic evidence; ADR 0031 authorizes bounded synthetic Slice 2.1-C1 and ADR
   0033 authorizes append-only Slice 2.1-C2a; C2a focused migration, action, and demo evidence is
   passing while its complete repository gate is blocked by the concurrent web candidate's
-  dependency audit; 2.0-E is a dated deferred condition and L2 remains gated
+  dependency audit; revised ADR 0021 conditionally accepts the calendar contract for bounded
+  synthetic L1 and its first executable validation/resolution increment passes; 2.0-E is a dated
+  deferred condition and L2 remains gated
 - Owner: Product and platform engineering, with learning-institution domain and security/privacy
   review
 - Start basis: explicit project-owner direction on 2026-09-26
@@ -19,7 +21,8 @@ delivery order for 5 October–15 November: minimal institutional prerequisites,
 people and class preparation, enrolment, and daily attendance. Further corporate/legal expansion
 is paused. The [first-slice brief](classroom-first-slice-contract.md) defines the calendar-to-classroom
 contract and planned evidence. Existing decisions and release gates below remain binding; this
-course change is authorization and planning, not implemented educational functionality.
+course change is now in its first executable calendar increment, not yet persistent or connected
+educational functionality.
 
 Phase 2 has started at release level L0. Slice 2.0-B closes the provider-neutral local
 operational-outbox and module-drain foundation contract. Slice 2.0-C completes the neutral temporal
@@ -109,6 +112,15 @@ and requires human reconciliation within 72 elapsed hours. Bounded operator impl
 internal publication become eligible within the authorized sequence, with their own required
 proof. External adoption, connected-use and real-data/deployment gates remain unchanged.
 
+François then instructed the project to start calendar construction. Revised
+[ADR 0021](../adr/0021-academic-calendar-authority-and-template-adoption.md) conditionally accepts
+the exact-unit, multiple-calendar, pinned-publication contract for bounded private synthetic L1.
+`Chimwemwe.AcademicCalendar` now validates and canonicalizes a publication candidate, calculates
+instructional dates, and resolves terms, gaps, weekdays, and closures. This pre-persistence
+increment adds no table, publication action, module activation, public route, or connected screen.
+CF-1's minimal institutional/operator writer remains the next prerequisite for persistent calendar
+publication.
+
 On 2026-09-28, the Project Owner conditionally approved Phase 2.0 at the completed L1 foundation
 boundary. Slice 2.0-E is carried as a dated deferred condition: C25-05's expert/representative
 comprehension and accountable product-experience disposition is due by 2026-12-15 or before the
@@ -144,6 +156,7 @@ test, owner role, or later slice does not satisfy one of those later gates.
 - [Slice 2.1-B minimal legal-entity foundation evidence](legal-entity-foundation-evidence.md)
 - [Slice 2.1-C1 bounded legal-structure foundation evidence](legal-structure-foundation-evidence.md)
 - [Slice 2.1-C2a append-only lifecycle evidence](legal-structure-lifecycle-evidence.md)
+- [Academic calendar executable-contract evidence](academic-calendar-contract-evidence.md)
 - [Slice 2.0-B operational outbox and module-drain evidence](operational-outbox-and-module-drain-evidence.md)
 - [Slice 2.0-C temporal completion and recovery evidence](temporal-completion-and-recovery-evidence.md)
 - [Temporal retention and recovery runbook](../operations/temporal-retention-and-recovery.md)

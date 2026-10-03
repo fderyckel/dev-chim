@@ -98,4 +98,4 @@ François accepts the bounded Phase 0 residual risk as interim Security/Privacy 
 - [Tenant placement and workload capacity](../architecture/tenant-placement-and-capacity.md)
 - [PostgreSQL availability, recovery, and read routing](../architecture/postgresql-availability-recovery-and-read-routing.md)
 - [Module activation and lifecycle](../architecture/module-activation-and-lifecycle.md)
-- [Domain model authoring and metadata](../architecture/domain-model-authoring-and-metadata.md)
+- [Domain model authoring and metadata workflow](../development/code-conventions.md#domain-model-authoring)

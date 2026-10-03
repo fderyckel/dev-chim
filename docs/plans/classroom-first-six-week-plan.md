@@ -17,10 +17,12 @@ minimal people, calendar, class, enrolment, and attendance work needed by that j
 not require completion of the entire structural hierarchy or the entire Phase 2.2 people backlog.
 
 The Project Owner has authorized this bounded programme. Do not ask for the same prioritization
-approval again. Domain decisions, independent evidence, and release conditions remain applicable;
-this approval does not accept ADR 0021, invent representative review, or close C25-04/C25-05.
-Existing accepted architectural decisions are unchanged. Amend a Proposed ADR or supersede an
-Accepted ADR before implementation changes its stable boundary.
+approval again. At the plan's original approval, it did not accept ADR 0021, invent representative
+review, or close C25-04/C25-05. ADR 0035 later closed C25-04 for synthetic L1, and the Project
+Owner's 2026-10-03 instruction to start calendar construction conditionally accepted the revised
+ADR 0021 for bounded private synthetic L1. Independent evidence and release conditions remain
+applicable. Amend a Proposed ADR or supersede an Accepted ADR before implementation changes its
+stable boundary.
 
 Existing corporate work and unrelated changes are preserved. No rollback, deletion, commit, or
 push is authorized by this plan. A paused feature remains available for later reconsideration;
@@ -99,9 +101,9 @@ real authentication.
 
 | Order | Bounded work item | Current disposition |
 | --- | --- | --- |
-| CF-0 | Record the course change, first-slice contract, dependencies, and acceptance scenarios | This documentation increment; no classroom application is implemented |
+| CF-0 | Record the course change, first-slice contract, dependencies, and acceptance scenarios | Complete for the current plan; later evidence remains attached to its owning slice |
 | CF-1 | Minimal institutional identity under ADR 0034; implement the minimum operator/publication contract accepted by ADR 0035 | Next eligible foundation work; operator writes require their bounded implementation proof |
-| CF-2 | Reframe ADR 0021 and implement the calendar contract with a small preparation screen | Contract preparation authorized; persistence requires the recorded domain disposition |
+| CF-2 | Reframe ADR 0021 and implement the calendar contract with a small preparation screen | Revised ADR conditionally accepted for synthetic L1; executable pre-persistence validation/resolution is implemented; persistence and the preparation screen follow CF-1 |
 | CF-3 | Qualify one actual identity connection and the first same-origin calendar write | Prepare alongside CF-1/CF-2; connected execution requires the gates below |
 | CF-4 | Minimal people, staff-account association, class, teaching assignment, enrolment, and placement, with preparation screens | Bring forward only these parts of Phase 2.2; domain action/records decisions precede persistence |
 | CF-5 | Attendance submission, correction, and recovery through the complete UI | Depends on the calendar, roster, assignment, and authorization contracts |
@@ -113,7 +115,7 @@ real authentication.
 | --- | --- | --- | --- |
 | Educational identity | ADR 0034 closes C25-03 only for unpublished synthetic L1 | Use that bounded entry; preserve C25-03-R actual five-context validation before connected use | François arranges representatives; review schedule in week one, evidence before connection |
 | Primary legal operator | C25-04 closed for synthetic L1 under ADR 0035; a published institution needs one effective verified primary operator | Implement and verify initial assignment/publication under the accepted contract; broader transfer/reorganization features remain outside this classroom increment | Platform engineering under the delegated decision; retained external legal/records validation before connected or real use |
-| Calendar | ADR 0021 remains Proposed with obsolete flat-school scope | Resolve exact calendar ownership, multiple calendar identities, pinned history, and first action contract using the linked slice brief | Product/platform and the ADR's named decider functions; before calendar persistence |
+| Calendar | Revised ADR 0021 is conditionally accepted for bounded private synthetic L1; the exact-owner validation/resolution contract is executable | After CF-1, persist the accepted aggregate/actions and add the small preparation screen with full tenant, capability, idempotency, audit/outbox, rollback, and migration proof | Product/platform; next active calendar increment after the institutional/operator prerequisite |
 | People and participation | Existing Phase 2.2 proposal separates person, account, membership, and participation | Record the bounded people/account association ADR and enrolment/assignment/attendance action and records contracts | Product/platform and domain/records review; before dependent persistence |
 | Real authentication | D.2 foundations and bounded D.3 adapter exist; no qualified real connection is demonstrated | Choose and qualify one connection and environment under ADRs 0029/0030; retain current-session, origin/CSRF, revocation, and redaction controls | François supplies institutional connection context; platform/security qualify before connection |
 | Connected experience | C25-05 and 2.0-E remain open; UI-1A is local read-only qualification | Complete the representative/accessibility/security disposition for the bounded journey; do not promote the local token or silently enable public routes | Product experience/security and François; before first connected workflow |

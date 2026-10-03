@@ -5,6 +5,17 @@
 
 ADRs record decisions that shape stable platform boundaries. Every record starts Proposed. Only named deciders may accept it after reviewing linked evidence.
 
+## Document responsibilities
+
+Each ADR owns its decision, rationale, alternatives, conditions, and approval history. This index
+summarizes those records. [Architecture guides](../architecture/README.md) explain how decisions
+fit together and supply detailed implementation contracts; they link to the governing ADR for
+decision status and rationale. Evidence records retain tests, measurements, and reviews, while
+phase records and delivery plans track implementation progress and next steps.
+
+Keep each contract and calculation in one authoritative location and link to it elsewhere.
+Short summaries may aid readers, but must not become separately maintained decisions or statuses.
+
 ## Process
 
 1. Copy [ADR 0000](0000-template.md) and allocate the next reserved number from the source backlog.
@@ -33,7 +44,7 @@ ADRs record decisions that shape stable platform boundaries. Every record starts
 | [0018](0018-temporal-records-correction-audit-and-evidence-semantics.md) | Temporal records, correction, audit, and evidence semantics | Accepted | Platform engineering and domain records owners | [Decision review](../architecture/temporal-records-decision-review.md), [T1-C evidence](../phase-1/handover-evidence.md), and [Slice 2.0-C evidence](../phase-2/temporal-completion-and-recovery-evidence.md); neutral TR-01–TR-07 engineering and accountable residual-risk review are complete, while TR-08 remains a binding library restraint |
 | [0019](0019-domain-model-authoring-and-governed-metadata.md) | Domain model authoring and governed metadata | Accepted | Platform engineering | [Authoring and metadata scenario](../phase-0/handover-evidence.md) |
 | [0020](0020-human-interface-experience-and-client-platform-boundary.md) | Human-interface experience and client-platform boundary | Conditionally Accepted | Product experience and platform engineering | Journey research, prototypes, accessibility checks, and public-client contract tests |
-| [0021](0021-academic-calendar-authority-and-template-adoption.md) | Academic calendar authority and template adoption | Proposed | Product and platform engineering | [Synthetic scenario review](../architecture/academic-calendar-synthetic-scenario-review.md); stakeholder, migration, security, and interaction evidence required |
+| [0021](0021-academic-calendar-authority-and-template-adoption.md) | Academic calendar authority and explicit adoption | Conditionally Accepted | Product and platform engineering | Project Owner authorized bounded synthetic L1 on 2026-10-03; executable candidate validation/resolution tests pass; institutional/operator writer, persistence, representative review, migration, security, and connected experience evidence remain |
 | [0022](0022-local-read-only-browser-core-bridge.md) | Local read-only browser-to-core bridge | Conditionally Accepted | Product experience and platform engineering | [UI-1A local interface, tenant-isolation, generated-client, and browser evidence](../phase-1/handover-evidence.md) passed; representative school-user terminology/usability review and the local-only sunset boundary remain conditions |
 | [0023](0023-sensitive-collection-enumeration-and-bulk-export-boundary.md) | Sensitive-collection enumeration and bulk-export boundary | Conditionally Accepted | Security architecture with platform and product engineering | Non-enumeration and separate-export policy accepted; page-limit, adversarial traversal, cumulative-exposure, export-authorization, OpenAPI, generated-client, and independent-review evidence remain per-candidate gates |
 | [0024](0024-assurance-proportionality-and-module-evolution.md) | Assurance proportionality and module evolution | Proposed | Architecture review group | Representative module and external-boundary classification evidence required |

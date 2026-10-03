@@ -1,6 +1,6 @@
 # PostgreSQL availability, recovery, and read routing
 
-- Status: Proposed during Phase 0
+- Status: Architecture guide; decision status and conditions belong to the governing ADR
 - Owner: Platform engineering and operations
 - Governing record: [ADR 0017](../adr/0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md)
 - Review trigger: material workload, consistency, recovery, placement, provider, or connection-topology change
@@ -30,7 +30,9 @@ writer endpoint --> PostgreSQL primary --> same-region HA standby
                                                              notifications and analytics
 ```
 
-The Phase 0 repository defines this contract and its evidence requirements. Production infrastructure, production applications, and school business modules remain outside Phase 0.
+The governing ADR defines this contract and its evidence requirements. This guide does not
+select a hosting provider or authorize production infrastructure; selected-deployment qualification
+remains required.
 
 ## Topology responsibilities
 
@@ -59,26 +61,11 @@ Read-after-write and replica-lag tests must use real separate connections. Ecto 
 
 ## Attendance burst model
 
-The current synthetic population is 5,000 learners in one school and 800 learners in each of four schools. One synchronized period therefore produces 8,200 baseline attendance facts.
-
-| Peak window | 5,000-learner school | All five schools |
-| --- | ---: | ---: |
-| Five minutes | 16.7 facts/second | 27.3 facts/second |
-| One minute | 83.3 facts/second | 136.7 facts/second |
-| Thirty seconds | 166.7 facts/second | 273.3 facts/second |
-
-These are logical facts, not physical writes or transactions. If a synthetic average classroom has 25 learners, all five schools create about 328 attendance-session transactions per period, or about 10.9 session transactions per second in a 30-second window. This is an illustrative batching hypothesis, not a target or benchmark.
-
-Physical pressure is modelled as:
-
-```text
-peak_fact_rate = facts_due_in_peak_window / peak_window_seconds
-peak_transaction_rate = session_batches / peak_window_seconds
-physical_write_rate = peak_fact_rate x measured_write_amplification
-connection_demand = concurrent_actions x connections_held_per_action
-```
-
-Write amplification includes current state, immutable changes, security audit, outbox, indexes, WAL, corrections, retries, and any synchronous projection. The benchmark must measure it; architecture prose cannot assume a multiplier.
+Use the shared [attendance planning model](tenant-placement-and-capacity.md#attendance-planning-model)
+for population, annual volume, synchronized burst rates, batching assumptions, and physical-pressure
+calculations. It distinguishes logical facts, transactions, and measured write amplification.
+These hypotheses inform the bounded write path below; they do not replace the accepted
+[quality targets](quality-attribute-targets.md) or selected-deployment measurements.
 
 ## Bounded write path
 
