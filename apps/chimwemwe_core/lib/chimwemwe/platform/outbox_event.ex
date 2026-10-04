@@ -74,8 +74,9 @@ defmodule Chimwemwe.Platform.OutboxEvent do
         check: "routing_version >= 1"
       )
 
-      check_constraint(:classification, "platform_outbox_classification_must_be_internal",
-        check: "classification = 'internal'"
+      check_constraint(:classification, "platform_outbox_classification_domain_boundary",
+        check:
+          "(classification = 'internal' AND aggregate_type NOT LIKE 'people.core.%') OR (classification = 'restricted' AND aggregate_type IN ('people.core.person', 'people.core.participation', 'people.core.account') AND event_type LIKE 'people.core.%')"
       )
 
       check_constraint(:payload, "platform_outbox_payload_must_be_an_object",
@@ -174,7 +175,7 @@ defmodule Chimwemwe.Platform.OutboxEvent do
     attribute :classification, :atom do
       allow_nil? false
       public? false
-      constraints one_of: [:internal]
+      constraints one_of: [:internal, :restricted]
     end
 
     attribute :payload, :map do

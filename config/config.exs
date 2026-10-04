@@ -19,7 +19,8 @@ config :chimwemwe_core,
     Chimwemwe.Identity,
     Chimwemwe.OrganizationLegal,
     Chimwemwe.InstitutionalStructure,
-    Chimwemwe.AcademicCalendar
+    Chimwemwe.AcademicCalendar,
+    Chimwemwe.People
   ],
   base_resources: [Chimwemwe.Platform.Resource],
   ecto_repos: [Chimwemwe.Repo]

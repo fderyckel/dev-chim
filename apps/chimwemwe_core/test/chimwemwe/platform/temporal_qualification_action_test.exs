@@ -49,6 +49,9 @@ defmodule Chimwemwe.Platform.TemporalQualificationActionTest do
   @consumer_read_capability "platform.temporal_qualification.consumers.read_history"
 
   @tables [
+    "people_staff_account_associations",
+    "people_participations",
+    "people_persons",
     "identity_support_access_grants",
     "identity_application_sessions",
     "identity_invitations",

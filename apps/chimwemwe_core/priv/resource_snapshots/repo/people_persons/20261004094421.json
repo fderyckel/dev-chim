@@ -1,0 +1,175 @@
+{
+  "attributes": [
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"gen_random_uuid()\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": true,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "tenant_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "display_name",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "1",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "lock_version",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "inserted_at",
+      "type": "utc_datetime_usec"
+    }
+  ],
+  "base_filter": null,
+  "check_constraints": [
+    {
+      "attribute": [
+        "display_name"
+      ],
+      "base_filter": null,
+      "check": "char_length(btrim(display_name)) BETWEEN 1 AND 200",
+      "name": "people_persons_name"
+    },
+    {
+      "attribute": [
+        "lock_version"
+      ],
+      "base_filter": null,
+      "check": "lock_version >= 1",
+      "name": "people_persons_version"
+    }
+  ],
+  "create_table_options": null,
+  "custom_indexes": [
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "id",
+        "tenant_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "people_persons_id_tenant_idx",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    }
+  ],
+  "custom_statements": [
+    {
+      "after_tables": [
+        "people_persons",
+        "people_participations",
+        "people_staff_account_associations"
+      ],
+      "code?": false,
+      "down": "DROP FUNCTION people_record_guard();",
+      "global?": true,
+      "name": "people_record_guard",
+      "up": "CREATE FUNCTION people_record_guard() RETURNS trigger LANGUAGE plpgsql AS $$\nDECLARE\npart people_participations%ROWTYPE;\nperson_version bigint;\nmember_actor uuid;\nlocal_day date;\nproof jsonb;\nBEGIN\nIF TG_OP = 'DELETE' THEN\nRAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'people records require retained history';\nEND IF;\nIF TG_OP = 'INSERT' AND NEW.lock_version <> 1 THEN\nRAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'invalid initial people version';\nEND IF;\nIF TG_TABLE_NAME = 'people_persons' THEN\nIF TG_OP = 'UPDATE' AND (\n(to_jsonb(NEW) - ARRAY['display_name','lock_version']) IS DISTINCT FROM (to_jsonb(OLD) - ARRAY['display_name','lock_version'])\nOR NEW.lock_version <> OLD.lock_version + 1) THEN\nRAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'immutable person identity';\nEND IF;\nELSIF TG_TABLE_NAME = 'people_participations' THEN\nSELECT (statement_timestamp() AT TIME ZONE time_zone)::date INTO local_day\nFROM institutional_units WHERE id = NEW.institutional_unit_id AND tenant_id = NEW.tenant_id AND status = 'published' FOR SHARE;\nIF local_day IS NULL THEN\nRAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'published exact institution required';\nEND IF;\nIF TG_OP = 'UPDATE' AND (\n(to_jsonb(NEW) - ARRAY['effective_until','lock_version']) IS DISTINCT FROM (to_jsonb(OLD) - ARRAY['effective_until','lock_version'])\nOR OLD.effective_until IS NOT NULL OR NEW.effective_until IS NULL\nOR NEW.effective_until < local_day OR NEW.lock_version <> 2 OR OLD.lock_version <> 1) THEN\nRAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'invalid participation ending';\nEND IF;\nELSIF TG_TABLE_NAME = 'people_staff_account_associations' THEN\nIF TG_OP = 'UPDATE' THEN\nIF (to_jsonb(NEW) - ARRAY['revoked_at','revoked_by_actor_id','lock_version']) IS DISTINCT FROM (to_jsonb(OLD) - ARRAY['revoked_at','revoked_by_actor_id','lock_version'])\nOR OLD.revoked_at IS NOT NULL OR NEW.revoked_at IS NULL OR NEW.revoked_by_actor_id IS NULL\nOR NEW.lock_version <> 2 OR OLD.lock_version <> 1\nOR NEW.revoked_at < (transaction_timestamp() AT TIME ZONE 'UTC')\nOR NEW.revoked_at > (clock_timestamp() AT TIME ZONE 'UTC') THEN\nRAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'invalid account revocation';\nEND IF;\nELSE\nSELECT * INTO STRICT part FROM people_participations WHERE id = NEW.participation_id AND tenant_id = NEW.tenant_id FOR SHARE;\nSELECT lock_version INTO STRICT person_version FROM people_persons WHERE id = NEW.person_id AND tenant_id = NEW.tenant_id FOR SHARE;\nSELECT actor_id INTO STRICT member_actor FROM platform_tenant_memberships WHERE id = NEW.membership_id AND tenant_id = NEW.tenant_id FOR SHARE;\nSELECT (statement_timestamp() AT TIME ZONE time_zone)::date INTO local_day FROM institutional_units WHERE id = part.institutional_unit_id AND tenant_id = part.tenant_id AND status = 'published' FOR SHARE;\nIF part.person_id <> NEW.person_id OR part.kind <> 'staff' OR local_day IS NULL\nOR part.effective_from > local_day OR (part.effective_until IS NOT NULL AND part.effective_until <= local_day) THEN\nRAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'current matching staff participation required';\nEND IF;\nproof := NEW.verification;\nIF (jsonb_typeof(proof) = 'object'\nAND proof->>'policy' = 'synthetic.people.staff_account.v1'\nAND proof->>'tenant_id' = NEW.tenant_id::text\nAND proof->>'person_id' = NEW.person_id::text\nAND (proof->>'person_version')::bigint = person_version\nAND proof->>'participation_id' = part.id::text\nAND (proof->>'participation_version')::bigint = part.lock_version\nAND proof->>'membership_id' = NEW.membership_id::text\nAND proof->>'actor_id' = member_actor::text\nAND proof->>'evidence_reference' = NEW.evidence_reference::text\nAND proof->'matched' = 'true'::jsonb AND proof->'human_account' = 'true'::jsonb\nAND (proof->>'checked_at')::timestamptz >= transaction_timestamp()\nAND (proof->>'checked_at')::timestamptz <= clock_timestamp()\nAND proof - ARRAY['policy','tenant_id','person_id','person_version','participation_id','participation_version','membership_id','actor_id','evidence_reference','matched','human_account','checked_at'] = '{}'::jsonb) IS DISTINCT FROM TRUE THEN\nRAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'invalid staff account proof';\nEND IF;\nEND IF;\nEND IF;\nRETURN NEW;\nEND $$;\n"
+    },
+    {
+      "after_tables": [
+        "people_persons",
+        "people_participations",
+        "people_staff_account_associations"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER people_persons_guard ON people_persons;",
+      "global?": true,
+      "name": "people_persons_guard",
+      "up": "CREATE TRIGGER people_persons_guard BEFORE INSERT OR UPDATE OR DELETE ON people_persons FOR EACH ROW EXECUTE FUNCTION people_record_guard();\n"
+    },
+    {
+      "after_tables": [
+        "people_persons",
+        "people_participations",
+        "people_staff_account_associations"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER people_participations_guard ON people_participations;",
+      "global?": true,
+      "name": "people_participations_guard",
+      "up": "CREATE TRIGGER people_participations_guard BEFORE INSERT OR UPDATE OR DELETE ON people_participations FOR EACH ROW EXECUTE FUNCTION people_record_guard();\n"
+    },
+    {
+      "after_tables": [
+        "people_persons",
+        "people_participations",
+        "people_staff_account_associations"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER people_staff_account_associations_guard ON people_staff_account_associations;",
+      "global?": true,
+      "name": "people_staff_account_associations_guard",
+      "up": "CREATE TRIGGER people_staff_account_associations_guard BEFORE INSERT OR UPDATE OR DELETE ON people_staff_account_associations FOR EACH ROW EXECUTE FUNCTION people_record_guard();\n"
+    }
+  ],
+  "has_create_action": false,
+  "hash": "D0E3596696662401A1ED18F4256BE798EEFB4C248474A20DA692B30EC4798F7E",
+  "identities": [],
+  "multitenancy": {
+    "attribute": "tenant_id",
+    "global": false,
+    "strategy": "attribute"
+  },
+  "repo": "Elixir.Chimwemwe.Repo",
+  "schema": null,
+  "table": "people_persons"
+}

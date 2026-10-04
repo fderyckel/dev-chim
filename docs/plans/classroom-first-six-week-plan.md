@@ -102,10 +102,10 @@ real authentication.
 | Order | Bounded work item | Current disposition |
 | --- | --- | --- |
 | CF-0 | Record the course change, first-slice contract, dependencies, and acceptance scenarios | Complete for the current plan; later evidence remains attached to its owning slice |
-| CF-1 | Minimal institutional identity under ADR 0034; implement the minimum operator/publication contract accepted by ADR 0035 | Next eligible foundation work; operator writes require their bounded implementation proof |
+| CF-1 | Minimal institutional identity under ADR 0034; implement the minimum operator/publication contract accepted by ADR 0035 | Private synthetic registration, initial assignment, publication and exact read implemented; [verification and calendar handoff](../phase-2/institutional-foundation-evidence.md) records the achieved boundary |
 | CF-2 | Reframe ADR 0021 and implement the calendar contract with a small preparation screen | Revised ADR conditionally accepted for synthetic L1; executable pre-persistence validation/resolution is implemented; persistence and the preparation screen follow CF-1 |
 | CF-3 | Qualify one actual identity connection and the first same-origin calendar write | Prepare alongside CF-1/CF-2; connected execution requires the gates below |
-| CF-4 | Minimal people, staff-account association, class, teaching assignment, enrolment, and placement, with preparation screens | Bring forward only these parts of Phase 2.2; domain action/records decisions precede persistence |
+| CF-4 | Minimal people, staff-account association, class, teaching assignment, enrolment, and placement, with preparation screens | CF-4A private synthetic person, dated participation and verified staff-account association implemented; [evidence and enrolment handoff](../phase-2/people-foundation-evidence.md). Class, teaching assignment, enrolment, placement and preparation screens remain follow-ons |
 | CF-5 | Attendance submission, correction, and recovery through the complete UI | Depends on the calendar, roster, assignment, and authorization contracts |
 | CF-6 | User evaluation, repair, and final verification | Planned; no user findings or completion results claimed |
 

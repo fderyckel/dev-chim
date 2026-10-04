@@ -41,6 +41,9 @@ defmodule Chimwemwe.Platform.TemporalQualificationCompletionTest do
   ]
 
   @tables [
+    "people_staff_account_associations",
+    "people_participations",
+    "people_persons",
     "identity_support_access_grants",
     "identity_application_sessions",
     "identity_invitations",

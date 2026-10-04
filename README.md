@@ -47,8 +47,10 @@ through 15 November 2026: academic calendar, people, enrolment, and daily attend
 journey. Further corporate/legal expansion is paused. The plan changes sequencing, preserves
 existing work, and retains domain and connected-release gates. Calendar construction has now begun
 with the accepted synthetic L1 definition/preview/resolution
-contract. It is executable and tested but intentionally pre-persistence; the minimal
-institutional/operator writer, calendar database actions, and preparation screen remain next.
+contract and a local preparation prototype. The private synthetic
+[institutional/operator writer](docs/phase-2/institutional-foundation-evidence.md) and
+[people/participation foundation](docs/phase-2/people-foundation-evidence.md) are implemented.
+Calendar named database actions and connected preparation remain separate work.
 
 1. Read [the Phase 0 outcome](docs/phase-0/README.md) and its binding later gates.
 2. Read [the Phase 1 core scope](docs/phase-1/README.md).

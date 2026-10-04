@@ -15,6 +15,15 @@
 
 ## Current boundary
 
+CF-4A adds the private synthetic [people and participation foundation](people-foundation-evidence.md):
+student/staff participation and verified staff-account association without implied permissions.
+Enrolment, teaching assignments and connected preparation remain separate follow-ons.
+
+CF-1 now supplies private synthetic institutional registration, initial operator assignment,
+publication and an exact authorized read. See the
+[implementation evidence and calendar handoff](institutional-foundation-evidence.md). Connected
+use and real records remain subject to the retained gates.
+
 On 2026-10-03 François approved the
 [classroom-first six-week plan](../plans/classroom-first-six-week-plan.md). It is the active
 delivery order for 5 October–15 November: minimal institutional prerequisites, academic calendar,

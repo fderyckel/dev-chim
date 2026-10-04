@@ -450,7 +450,10 @@ defmodule Chimwemwe.InstitutionalStructure.Foundation do
   end
 
   defp clock(zone) do
-    case Repo.query("SELECT NOW(), (NOW() AT TIME ZONE $1)::date", [zone]) do
+    case Repo.query(
+           "SELECT statement_timestamp(), (statement_timestamp() AT TIME ZONE $1)::date",
+           [zone]
+         ) do
       {:ok, %{rows: [[%DateTime{} = now, %Date{} = date]]}} ->
         {:ok, %{checked_at: now, local_date: date}}
 
