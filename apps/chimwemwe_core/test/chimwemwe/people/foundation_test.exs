@@ -1108,6 +1108,10 @@ defmodule Chimwemwe.People.FoundationTest do
              Persistence.with_writer(runtime, context_a(), fn ->
                Repo.query!("""
                TRUNCATE
+                 classroom_placements,
+                 classroom_teaching_assignments,
+                 classroom_enrolments,
+                 classroom_classes,
                  people_staff_account_associations,
                  people_participations,
                  people_persons,

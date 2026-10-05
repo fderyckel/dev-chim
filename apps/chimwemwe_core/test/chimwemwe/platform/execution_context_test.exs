@@ -138,7 +138,8 @@ defmodule Chimwemwe.Platform.ExecutionContextTest do
              Chimwemwe.OrganizationLegal,
              Chimwemwe.InstitutionalStructure,
              Chimwemwe.AcademicCalendar,
-             Chimwemwe.People
+             Chimwemwe.People,
+             Chimwemwe.Classroom
            ]
 
     assert Application.fetch_env!(:chimwemwe_core, :base_resources) == [

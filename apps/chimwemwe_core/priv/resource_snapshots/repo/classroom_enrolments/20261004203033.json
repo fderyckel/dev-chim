@@ -1,0 +1,257 @@
+{
+  "attributes": [
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"gen_random_uuid()\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": true,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "tenant_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "index_where": null,
+        "match_tenant?": true,
+        "match_type": "full",
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "classroom_enrolments_participation_id_fk",
+        "on_delete": "restrict",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "people_participations"
+      },
+      "scale": null,
+      "size": null,
+      "source": "participation_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "index_where": null,
+        "match_tenant?": true,
+        "match_type": "full",
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "classroom_enrolments_academic_year_id_fk",
+        "on_delete": "restrict",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "academic_years"
+      },
+      "scale": null,
+      "size": null,
+      "source": "academic_year_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "calendar_revision",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "effective_from",
+      "type": "date"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "effective_until",
+      "type": "date"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "lock_version",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "inserted_at",
+      "type": "utc_datetime_usec"
+    }
+  ],
+  "base_filter": null,
+  "check_constraints": [
+    {
+      "attribute": [
+        "lock_version"
+      ],
+      "base_filter": null,
+      "check": "lock_version IN (1, 2)",
+      "name": "classroom_enrolments_version"
+    },
+    {
+      "attribute": [
+        "effective_until"
+      ],
+      "base_filter": null,
+      "check": "effective_until > effective_from",
+      "name": "classroom_enrolments_interval"
+    },
+    {
+      "attribute": [
+        "calendar_revision"
+      ],
+      "base_filter": null,
+      "check": "calendar_revision ~ '^[0-9a-f]{64}$'",
+      "name": "classroom_enrolments_revision"
+    }
+  ],
+  "create_table_options": null,
+  "custom_indexes": [
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "id",
+        "tenant_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "classroom_enrolments_id_tenant_idx",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "tenant_id",
+        "participation_id",
+        "academic_year_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "participation_id"
+        },
+        {
+          "type": "atom",
+          "value": "academic_year_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "classroom_enrolments_scope_idx",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    }
+  ],
+  "custom_statements": [],
+  "has_create_action": false,
+  "hash": "8DFC44308F0279176094C77555CBEA7BC56D43E3BCD4E1A84492F6D7E22B1613",
+  "identities": [],
+  "multitenancy": {
+    "attribute": "tenant_id",
+    "global": false,
+    "strategy": "attribute"
+  },
+  "repo": "Elixir.Chimwemwe.Repo",
+  "schema": null,
+  "table": "classroom_enrolments"
+}

@@ -17,7 +17,9 @@
 
 CF-4A adds the private synthetic [people and participation foundation](people-foundation-evidence.md):
 student/staff participation and verified staff-account association without implied permissions.
-Enrolment, teaching assignments and connected preparation remain separate follow-ons.
+CF-4B adds the private synthetic [classroom setup foundation](classroom-foundation-evidence.md):
+class/register, year enrolment, teaching assignment and dated placement. Connected preparation
+and the educator roster/attendance workflow remain separate follow-ons.
 
 CF-1 now supplies private synthetic institutional registration, initial operator assignment,
 publication and an exact authorized read. See the
@@ -30,8 +32,8 @@ delivery order for 5 October–15 November: minimal institutional prerequisites,
 people and class preparation, enrolment, and daily attendance. Further corporate/legal expansion
 is paused. The [first-slice brief](classroom-first-slice-contract.md) defines the calendar-to-classroom
 contract and planned evidence. Existing decisions and release gates below remain binding; this
-course change is now in its first executable calendar increment, not yet persistent or connected
-educational functionality.
+course change now includes private synthetic calendar, people and classroom persistence;
+connected educational functionality remains to be delivered.
 
 Phase 2 has started at release level L0. Slice 2.0-B closes the provider-neutral local
 operational-outbox and module-drain foundation contract. Slice 2.0-C completes the neutral temporal

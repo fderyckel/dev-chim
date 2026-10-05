@@ -50,7 +50,10 @@ with the accepted synthetic L1 definition/preview/resolution
 contract and a local preparation prototype. The private synthetic
 [institutional/operator writer](docs/phase-2/institutional-foundation-evidence.md) and
 [people/participation foundation](docs/phase-2/people-foundation-evidence.md) are implemented.
-Calendar named database actions and connected preparation remain separate work.
+The [classroom setup foundation](docs/phase-2/classroom-foundation-evidence.md) now adds class
+registers, enrolment, teaching assignments and dated placements, tested against the named
+[calendar publication writer](docs/phase-2/academic-calendar-contract-evidence.md). Connected
+preparation and the educator roster/attendance workflow remain separate work.
 
 1. Read [the Phase 0 outcome](docs/phase-0/README.md) and its binding later gates.
 2. Read [the Phase 1 core scope](docs/phase-1/README.md).

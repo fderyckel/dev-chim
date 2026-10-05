@@ -1,16 +1,14 @@
 defmodule Chimwemwe.AcademicCalendar do
   @moduledoc """
-  Executable contract for the first institution-owned academic calendar slice.
+  Private domain for the institution-owned academic calendar foundation.
 
-  This module validates and previews one exact calendar definition and resolves
-  local dates against that candidate. It deliberately performs no persistence
-  or publication: those actions remain behind the institutional-unit and
-  primary-operator eligibility boundary described by ADRs 0021, 0034, and 0035.
+  The pure contract validates and previews one exact definition and resolves
+  local dates against that candidate. `Chimwemwe.AcademicCalendar.Foundation`
+  owns the separately authorized persistent draft and publication actions.
 
-  Tenant context is therefore not accepted as calendar input. The later named
-  writer action must derive it from trusted execution context, verify that the
-  exact institutional unit belongs to it, and persist the accepted definition
-  with audit, outbox, idempotency, and optimistic-concurrency evidence.
+  Tenant context is never accepted as calendar definition input. The writer
+  derives it from trusted execution context and keeps all resources closed to
+  generic Ash actions.
   """
 
   use Ash.Domain, otp_app: :chimwemwe_core

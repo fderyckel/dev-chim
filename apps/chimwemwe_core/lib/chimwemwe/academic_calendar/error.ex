@@ -1,6 +1,6 @@
 defmodule Chimwemwe.AcademicCalendar.Error do
   @moduledoc """
-  Stable validation and resolution error for the calendar contract.
+  Stable, non-disclosing error for the calendar contract and writer boundary.
 
   The optional field identifies the rejected part of the synthetic candidate;
   it never carries another tenant's record or any restricted information.
@@ -10,12 +10,18 @@ defmodule Chimwemwe.AcademicCalendar.Error do
   defexception [:code, :field]
 
   @type code ::
-          :duplicate
+          :conflict
+          | :duplicate
+          | :forbidden
+          | :idempotency_conflict
           | :invalid_date_range
           | :invalid_input
+          | :module_unavailable
           | :not_found
           | :overlap
           | :outside_year
+          | :retryable_dependency
+          | :stale
           | :unsupported_time_zone
 
   @type t :: %__MODULE__{code: code(), field: atom() | nil}

@@ -1,6 +1,6 @@
 # Academic calendar authority
 
-- Status: Accepted synthetic L1 contract; first executable pre-persistence increment implemented
+- Status: Accepted synthetic L1 contract; CF-2B private publication writer implemented
 - Owner: Product and platform engineering
 - Governing record: [ADR 0021](../adr/0021-academic-calendar-authority-and-template-adoption.md)
 - Review trigger: first persistent writer, first browser preparation screen, representative finding,
@@ -13,12 +13,12 @@ will consume. It uses one exact tenant-qualified `AcademicCalendar` owned by one
 `institutional_unit_id`; `school_scope_id`, active-unit selection, and parent/default fallback are
 not accepted contracts.
 
-The first executable increment is intentionally pre-persistence. `Chimwemwe.AcademicCalendar`
-validates and canonicalizes one publication candidate, calculates instructional dates, produces a
-deterministic candidate revision, and resolves a local date. It creates no table, publication,
-module activation, public API, job, or browser route. The later writer must revalidate the same
-meaning with trusted tenant, actor, unit, operator, module, capability, version, and idempotency
-state on PostgreSQL.
+`Chimwemwe.AcademicCalendar` validates and canonicalizes one publication candidate, calculates
+instructional dates, produces a deterministic candidate revision, and resolves a local date.
+`Chimwemwe.AcademicCalendar.Foundation` now owns the private persistent named-action boundary. It
+revalidates trusted tenant, actor, placement, institution/operator publication, module, capability,
+version, idempotency, stored revision and database time zone on PostgreSQL. The four resources
+remain closed to generic Ash actions, and no public API or connected browser route is included.
 
 ## Ownership model
 
@@ -66,9 +66,9 @@ Gaps are valid and non-instructional. A closure in a gap preserves its named-bre
 first slice does not include opening exceptions, recurring rules, overlapping secondary cycles,
 or stored generated-day authority.
 
-The first executable contract currently validates IANA-shaped zone names and performs only local
-date calculations. The persistent publication writer must validate the name against the selected
-runtime/database time-zone catalogue before commit; syntax alone is not publication evidence.
+The pure executable contract validates IANA-shaped zone names. The persistent writer additionally
+checks PostgreSQL's time-zone catalogue when defining or replacing a draft and again before
+publication; syntax alone is not publication evidence.
 
 ## Invariants
 
@@ -86,10 +86,13 @@ runtime/database time-zone catalogue before commit; syntax alone is not publicat
 - Durable consumers store the exact calendar, year, and publication revision they used.
 - State, audit, outbox, and idempotency result commit atomically on the authoritative writer.
 
-Database constraints will enforce every invariant that is independent of current policy. The
-first generated migration requires explicit review of table order, compound keys, owner and child
-foreign keys, publication overlap enforcement, indexes, lock behavior, retained data, and safe
-forward-fix or rollback behavior.
+Database constraints enforce the policy-independent invariants. Compound foreign keys preserve
+tenant ownership. Triggers enforce eligible initial ownership, lifecycle/version transitions,
+draft-only child replacement, child containment, published immutability, and evidence-backed
+state transitions. A partial GiST exclusion constraint enforces non-overlapping published years
+within one exact tenant/calendar even under concurrency. Rollback refuses retained calendar state
+or authority evidence; the bundled `btree_gist` extension is retained because another schema may
+reuse it.
 
 ## Resolution contract
 
@@ -162,13 +165,13 @@ and analytics are disposable projections and never another calendar authority.
 1. **Implemented: executable candidate contract.** Validate exact ownership inputs, year and
    period boundaries, overlap, weekday and closure uniqueness; calculate instructional dates;
    resolve terms, gaps, weekdays, and closures; produce a deterministic candidate revision.
-2. **Next: CF-1 institutional prerequisite.** Persist the minimum institutional identity and
+2. **Implemented: CF-1 institutional prerequisite.** Persist the minimum institutional identity and
    primary-operator publication eligibility admitted by ADRs 0034/0035. Do not add the wider
    hierarchy, site, affiliation, or transfer backlog merely to reach calendar work.
-3. **Next: calendar persistence.** Add tenant-owned calendar/year/revision/period/closure resources,
+3. **Implemented: CF-2B calendar persistence.** Add tenant-owned calendar/year/period/closure resources,
    reviewed migrations, lifecycle declaration, named draft/preview/publish/read actions, compound
    integrity, authorization, concurrency, idempotency, audit/outbox, and rollback proof.
-4. **Then: preparation screen.** Use the same-origin named-action boundary for a small accessible
+4. **Next: CF-3 connected preparation screen.** Use the same-origin named-action boundary for a small accessible
    year/term/weekday/closure workflow; refresh from the committed writer revision.
 5. **Later:** successor correction, templates, migration shadow, additional exceptions, and the
    first pinned attendance consumer, each through its own admitted slice.
@@ -184,19 +187,19 @@ The implemented contract tests currently prove:
 - missing owner, caller-supplied tenant, malformed identity, invalid ranges, outside-year periods,
   overlap, duplicate sequences/dates/weekdays, invalid zone shape, and out-of-range date rejection.
 
-This is useful executable evidence, but it does not prove database publication, module gates,
-tenant/capability isolation, idempotency, outbox recovery, browser usability, or representative
-calendar correctness. Those claims remain attached to their implementation exits.
+The CF-2B suite adds focused database publication, module/dependency/capability denial,
+tenant-isolation, exact idempotency, rollback, immutable-publication, direct-write, time-zone,
+overlap, exact-read and resolution evidence. It does not prove connected browser usability,
+external outbox consumption/recovery, representative calendar correctness, real-data adoption, or
+deployment readiness. Those claims remain attached to their separate exits.
 
 Before connected or real adoption, retain C25-03-R, C25-05, C25-06, identity and selected-
 environment qualification, actual operator/legal validation, and representative review of at
 least two materially different calendar patterns. Synthetic fixtures and repository checks cannot
 substitute for those records.
 
-## Explicit non-goals for the current increment
+## Explicit non-goals for CF-2B
 
-- no database table, migration, persistent resource, publication, or correction;
-- no module entitlement or activation record;
 - no public or connected browser route;
 - no template catalogue, recurrence engine, scheduling solver, or generated-day authority;
 - no real institution, person, student, staff, or restricted data;
