@@ -26,7 +26,7 @@ defmodule ChimwemweCore.MixProject do
 
   defp deps do
     [
-      {:ash, "== 3.33.11"},
+      {:ash, "== 3.34.4"},
       {:ash_authentication, "~> 5.0.0-rc.14"},
       {:ash_authentication_phoenix, "~> 3.0.0-rc.11"},
       {:ash_postgres, "== 2.13.1"},
