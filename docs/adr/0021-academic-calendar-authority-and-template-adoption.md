@@ -8,6 +8,9 @@
 - Deciders: François — Project Owner, with the accepted platform, security, temporal, and institutional-structure boundaries remaining binding
 - Required later reviewers: representative learning-institution/domain review before connected or real adoption; product-experience and security review at their existing gates
 - Supersedes: The obsolete flat `school_scope_id` and single-school assumptions in this ADR's original proposal
+- Partially superseded by: [ADR 0039](0039-public-calendar-evidence-for-cf-3-engineering-entry.md),
+  which admits a disabled local synthetic CF-3 implementation from official public calendar
+  evidence while retaining institution-side validation before real adoption
 - Implementation authorization: François's instruction on 2026-10-03 to start calendar construction after C25-04 closure
 
 ## Context

@@ -91,8 +91,9 @@ validation. No
 qualified reviewer is invented, and external corporate/finance validation remains due before L2,
 real data, migration, external financial reporting, pilot, deployment, or
 jurisdictional/accounting claims. The later ADR 0034 closes C25-03 for synthetic L1 only;
-C25-03-R and C25-05/C25-06 remain open; ADR 0035 below subsequently closes synthetic C25-04.
-No educational implementation is claimed here.
+C25-03-R and C25-05/C25-06 remain open adoption/release concerns; ADR 0035 below subsequently
+closes synthetic C25-04. ADR 0039 later admits only the disabled local synthetic CF-3 engineering
+candidate from official public calendar evidence. No representative approval is claimed here.
 
 The subsequent [ADR 0032](../adr/0032-c25-02-delegated-contract-acceptance.md) and
 [completed corporate/finance review](c25-02-corporate-governance-finance-review.md) close C25-02
@@ -112,8 +113,10 @@ and the [five-context educational review](c25-03-educational-structure-review.md
 for synthetic L1 under explicit delegated Project Owner authority. Unpublished educational identity,
 initial containment, sites/associations, and terminology become eligible within the existing
 sequence and its other prerequisites. ADR 0035 below closes its temporary C25-04 dependency.
-Actual external representative validation remains C25-03-R before connected use, real data/import,
-pilot, or deployment; the packet's 2026-12-15 or first-affected-gate deadline is retained.
+Actual external representative validation remains C25-03-R before real data/import, an
+institutional pilot, deployment, production reliance, or claims of representative correctness.
+ADR 0039 moves it out of the disabled local synthetic CF-3 engineering entry without marking it
+complete.
 
 [ADR 0035](../adr/0035-c25-04-delegated-primary-operator-acceptance.md) and the
 [completed primary-operator review](c25-04-primary-operator-review.md) close C25-04 for synthetic
@@ -132,6 +135,13 @@ increment adds no table, publication action, module activation, public route, or
 CF-1's minimal institutional/operator writer remains the next prerequisite for persistent calendar
 publication.
 
+On 2026-10-06, [ADR 0039](../adr/0039-public-calendar-evidence-for-cf-3-engineering-entry.md)
+accepted the [official public calendar source review](cf-3-public-calendar-source-review.md) as
+sufficient external evidence for a disabled local synthetic CF-3 implementation candidate. Public
+documents are not representative testimony. Institution-side validation, representative
+usability, independent review, selected identity/deployment, real data, pilot, and production
+remain later gates.
+
 On 2026-09-28, the Project Owner conditionally approved Phase 2.0 at the completed L1 foundation
 boundary. Slice 2.0-E is carried as a dated deferred condition: C25-05's expert/representative
 comprehension and accountable product-experience disposition is due by 2026-12-15 or before the
@@ -145,8 +155,8 @@ Selected deployment, real data, pilot, and production release remain later gates
 | Level | Current status | Permitted now | Principal blockers |
 | --- | --- | --- | --- |
 | L0 — paper and prototype | Closed for current entry scope | Slices 2.0-D.2a through D.2c and bounded D.3 engineering are complete; ADR 0025's technical evidence, refreshed prototype, and conditional G6 decision are recorded | Named reviews remain conditions on their first affected later slices, not claims of completed evidence |
-| L1 — synthetic module proof | Closed for the minimal candidate; 2.1-C2a exit blocked at repository integration | Slice 2.0-B outbox/drain, Accepted ADR 0018 temporal evidence, internal Slice 2.0-D foundations, and the Slice 2.1-B `LegalEntity` proof pass; ADRs 0031/0033 permit bounded synthetic 2.1-C1/C2a | Complete repository gate for 2.1-C2a, currently blocked by the concurrent web dependency audit; external finance validation at ADR 0031's later boundary; C25-03-R blocks connected adoption; ADR 0035 closes the synthetic C25-04 operator decision; ADRs 0034/0035 admit bounded educational/operator work subject to implementation proof |
-| L2 — connected synthetic workflow | Conditionally deferred; not released | ADRs 0029/0030, D.2a–D.2c, bounded D.3 adapter evidence, and the minimal business aggregate are complete; UI-0/UI-1A remain qualification-only | C25-03-R external five-context validation plus C25-05 expert/representative comprehension and product-experience disposition by 2026-12-15 or the first affected gate, the first complete accessible 2.0-E browser workflow, and deployment-specific D.3 qualification |
+| L1 — synthetic module proof | Closed for the minimal candidate; 2.1-C2a exit blocked at repository integration | Slice 2.0-B outbox/drain, Accepted ADR 0018 temporal evidence, internal Slice 2.0-D foundations, and the Slice 2.1-B `LegalEntity` proof pass; ADRs 0031/0033 permit bounded synthetic 2.1-C1/C2a; ADR 0039 admits CF-3 engineering | Complete repository gate for 2.1-C2a, currently blocked by the concurrent web dependency audit; external finance validation at ADR 0031's later boundary; ADR 0035 closes the synthetic C25-04 operator decision; ADRs 0034/0035 admit bounded educational/operator work subject to implementation proof |
+| L2 — connected synthetic workflow | Engineering candidate authorized; not released | ADRs 0029/0030, D.2a–D.2c, bounded D.3 adapter evidence, the calendar writer, and ADR 0039's source-backed entry are complete enough to build CF-3 locally | CF-3 implementation and accessible technical evidence, deployment-specific D.3 qualification, selected identity/origin, and an explicit L2 release decision; representative and institution-side evidence remains mandatory before real adoption or pilot |
 | L3 — controlled real-data pilot | Blocked | No real institutional or Restricted data | Selected-deployment qualification, independent security/privacy review, learning-institution records ownership, and all lower-level gates |
 | L4 — production release | Blocked | No general availability | Accepted operating envelope, production release decision, and all lower-level gates |
 

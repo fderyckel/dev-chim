@@ -16,6 +16,11 @@
 
 - Additional partial supersession: [ADR 0034](0034-c25-03-delegated-educational-structure-acceptance.md) closes C25-03 for synthetic L1 through delegated review; external representative validation remains C25-03-R and C25-04 through C25-06 remain binding
 
+- Additional partial supersession: [ADR 0039](0039-public-calendar-evidence-for-cf-3-engineering-entry.md)
+  moves actual representative validation from the disabled local synthetic CF-3 engineering entry
+  to real institutional adoption, pilot, deployment, and production boundaries; it does not claim
+  representative approval
+
 ## Context
 
 Current supersession notice: [ADR 0035](0035-c25-04-delegated-primary-operator-acceptance.md)

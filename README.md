@@ -35,9 +35,11 @@ synthetic L1 under delegated Project Owner authority. Its five-context review ma
 educational identity, initial parentage, sites, and terminology eligible within the bounded
 sequence. [ADR 0035](docs/adr/0035-c25-04-delegated-primary-operator-acceptance.md) closes C25-04
 for synthetic L1 operator assignment, publication and controlled transfer/reconciliation proof.
-Actual representative validation remains C25-03-R before connected workflows, real data, or
-deployment; existing legal adoption and release gates remain. These are contract decisions,
-not implementation claims.
+Actual representative validation remains C25-03-R before real institutional adoption, import,
+pilot, deployment, or production reliance. [ADR 0039](docs/adr/0039-public-calendar-evidence-for-cf-3-engineering-entry.md)
+now admits a disabled local synthetic CF-3 candidate from official public calendar evidence
+without claiming representative approval. Existing legal adoption and release gates remain.
+These are contract decisions, not implementation claims.
 
 ## Start here
 

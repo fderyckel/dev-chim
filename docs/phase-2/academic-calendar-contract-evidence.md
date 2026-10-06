@@ -135,8 +135,9 @@ CF-3 is the connected synthetic calendar preparation workflow: connect the exist
 year/period/weekday/closure screen to these exact named actions through the accepted same-origin
 session boundary, refresh it from the committed writer result, and prove accessible success,
 validation, denial, stale-version, session, origin, and CSRF states. It must not expose generic
-resource actions or turn the browser's current draft into calendar authority. C25-03-R, C25-05,
-C25-06 and the other connected/real-adoption gates remain fail closed. The exact representative,
-calendar-pattern, product-experience/accessibility, security/privacy, identity-connection, and
-Project Owner records required before CF-3 are collected in the
-[CF-3 connected calendar entry review packet](cf-3-connected-calendar-entry-review-packet.md).
+resource actions or turn the browser's current draft into calendar authority. ADR 0039 and the
+[public calendar source review](cf-3-public-calendar-source-review.md) now admit this disabled
+local synthetic engineering candidate. The
+[CF-3 connected calendar entry disposition](cf-3-connected-calendar-entry-review-packet.md)
+records its exact exit checks. C25-03-R institution-side adoption, representative usability,
+C25-06, selected identity/deployment, real data, pilot, and production gates remain fail closed.

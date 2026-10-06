@@ -64,5 +64,6 @@ Short summaries may aid readers, but must not become separately maintained decis
 | [0037](0037-class-register-enrolment-and-placement.md) | Class register, enrolment and dated placement | Proposed | Product and platform engineering | Project Owner authorized bounded private synthetic CF-4B; calendar integration and classroom checks recorded separately from connected adoption |
 
 | [0038](0038-local-classroom-attendance-workflow.md) | Local session-bound classroom attendance | Proposed | Product and platform engineering | Project Owner authorized the bounded synthetic screen-to-writer increment; [workflow evidence](../phase-2/classroom-attendance-workflow-evidence.md) retains real-data and release gates |
+| [0039](0039-public-calendar-evidence-for-cf-3-engineering-entry.md) | Public-calendar evidence for CF-3 engineering entry | Accepted | François — Project Owner and interim Security/Privacy Owner | Official public operational calendars admit a disabled local synthetic CF-3 candidate without inventing representative testimony; institution-side, real-data, identity, pilot, deployment, and production gates remain |
 
 Allowed decision statuses are Proposed, Accepted, Conditionally Accepted, Rejected, Superseded, and Deferred. `Template` is reserved for ADR 0000.

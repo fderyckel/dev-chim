@@ -171,7 +171,8 @@ and analytics are disposable projections and never another calendar authority.
 3. **Implemented: CF-2B calendar persistence.** Add tenant-owned calendar/year/period/closure resources,
    reviewed migrations, lifecycle declaration, named draft/preview/publish/read actions, compound
    integrity, authorization, concurrency, idempotency, audit/outbox, and rollback proof.
-4. **Next: CF-3 connected preparation screen.** Use the same-origin named-action boundary for a small accessible
+4. **Next: CF-3 connected preparation screen.** ADR 0039 admits a disabled local synthetic
+   candidate using the same-origin named-action boundary for a small accessible
    year/term/weekday/closure workflow; refresh from the committed writer revision.
 5. **Later:** successor correction, templates, migration shadow, additional exceptions, and the
    first pinned attendance consumer, each through its own admitted slice.
@@ -193,10 +194,12 @@ overlap, exact-read and resolution evidence. It does not prove connected browser
 external outbox consumption/recovery, representative calendar correctness, real-data adoption, or
 deployment readiness. Those claims remain attached to their separate exits.
 
-Before connected or real adoption, retain C25-03-R, C25-05, C25-06, identity and selected-
-environment qualification, actual operator/legal validation, and representative review of at
-least two materially different calendar patterns. Synthetic fixtures and repository checks cannot
-substitute for those records.
+ADR 0039 accepts official public operational calendars as source-backed pressure-test evidence for
+the disabled local synthetic CF-3 candidate. It does not call those documents representative
+review. Before real institutional adoption, import, pilot, deployment, or production reliance,
+retain C25-03-R institution-side validation, representative C25-05 evidence, C25-06, identity and
+selected-environment qualification, and actual operator/legal validation. Synthetic fixtures and
+repository checks cannot substitute for those later records.
 
 ## Explicit non-goals for CF-2B
 

@@ -25,10 +25,11 @@ dependency, owner and first affected boundary; the
 [first-slice contract](classroom-first-slice-contract.md) records planned acceptance scenarios.
 
 This is satisfied project-owner prioritization authority, not acceptance of ADR 0021 or new
-people/attendance domain contracts. C25-03 remains closed for synthetic L1 under ADR 0034;
-C25-03-R, C25-05, applicable legal-adoption validation, identity/deployment qualification,
-and C25-06 retain their existing blocking effects. No implementation or connected release is
-claimed by this documentation increment. No repeated approval of this delivery direction is due.
+people/attendance domain contracts. C25-03 remains closed for synthetic L1 under ADR 0034.
+ADR 0039 later admits disabled local synthetic CF-3 engineering from official public calendar
+evidence. C25-03-R institution-side adoption, representative C25-05, applicable legal-adoption
+validation, identity/deployment qualification, and C25-06 retain their later blocking effects. No
+connected release is claimed by this prioritization increment.
 
 ### Retained Phase 2 release disposition
 
@@ -51,8 +52,9 @@ entry disposition. That disposition is recorded and the bounded proof passes. AD
 authorized synthetic L1 Slice 2.1-C1; ADR 0032 subsequently closes C25-02 through delegated review,
 and ADR 0033 authorizes append-only synthetic Slice 2.1-C2a. ADR 0034 now closes C25-03 for
 synthetic L1 and permits the unpublished educational foundation within the existing sequence.
-ADR 0035 subsequently closes C25-04's synthetic operator decision. Connected workflows, real data,
-and deployment remain gated; operator implementation must prove its own accepted controls.
+ADR 0035 subsequently closes C25-04's synthetic operator decision. ADR 0039 later admits only the
+disabled local synthetic CF-3 engineering candidate. Connected release, real data, pilot, and
+deployment remain gated; operator implementation must prove its own accepted controls.
 
 The Project Owner's 2026-09-28 decision conditionally approves Phase 2.0 for planning and carries
 2.0-E as a residual condition through 2026-12-15 or the first connected/public
@@ -97,9 +99,10 @@ C25-03 closed for synthetic L1**. Primary/early-years, secondary, combined educa
 and university perspectives, all fifteen context questions, seven common questions, and the
 educational-domain disposition are complete as delegated analysis, not actual participant reviews.
 
-The unopened external part is explicitly **C25-03-R**: real named representative and domain-owner
-validation before connected use, including synthetic L2, or real data/import, pilot, or deployment;
-retain the packet's 2026-12-15 or first-affected-gate deadline. The Project Owner owns arranging it.
+ADR 0039 subsequently narrows that timing. The external part remains **C25-03-R**, but it no
+longer blocks the disabled local synthetic CF-3 implementation. Institution-side validation is
+required before real data/import, an institutional pilot, deployment, production reliance, or a
+claim of representative correctness. It is not reported as complete.
 The subsequent ADR 0035 below closes the temporary C25-04 operator/publication dependency.
 Educational and operator implementation still requires bounded increments and their applicable
 checks. No educational or operator implementation is certified by these review decisions.
@@ -126,7 +129,7 @@ or existing external legal/records/adoption validation. No further synthetic rat
 | Bounded production-core baseline | Phase 1 is complete at Slices 1A through 1J-B, including neutral lifecycle drain/reactivation, internal delivery leases, supervised database-local consumption, durable receipts, and exact dead-letter replay. | Satisfied for starting L0 only. Phase 1 closure does not satisfy any later release-level gate; every later candidate must pass its own complete gate. | None for L0 | Platform engineering |
 | Operational outbox, real consumer, replay, and module drain | Slice 2.0-B connects immutable stream positions, cursor paging/range replay, supervised module-aware consumers, atomic cursor advancement, inactive reconciliation, fail-closed reactivation, sanitized telemetry, recovery drills, and runbooks. | Satisfied for the provider-neutral local synthetic L1 foundation. Selected-deployment thresholds, restore, external effects, movement, and real-data review remain L3 gates. | None for L1 foundation | Platform engineering and operations, with security architecture |
 | Temporal retention, erasure, migration, and recovery | ADR 0018 T1-A/T1-B/T1-C plus Slice 2.0-C provide executable TR-01 through TR-07 evidence, explicit local limits, retained-data migration refusal, PostgreSQL dump/restore, and governed projection convergence. On 2026-09-27, the accountable approver reviewed and approved all six residual risks after the complete repository gate had passed. | Satisfied for the neutral local synthetic L1 foundation; ADR 0018 is Accepted. Domain policy, selected-deployment qualification, independent review, downstream propagation, and TR-08 remain later or candidate-specific gates. | None for L1 foundation | Platform engineering, domain records owners, and the accountable approver |
-| Linked corporate/legal and educational structure meaning and module boundary | ADR 0025 records separate legal/educational identities and non-authority; ADR 0032 closes C25-02; ADR 0034 and its five-context review close C25-03 for synthetic L1 | C25-01 satisfied for minimal 2.1-B; C25-02 closed; C25-03 synthetic contract closed. C25-03-R preserves external representative validation; C25-04 synthetic contract closed under ADR 0035; operator implementation proof remains; C25-05 blocks connected experience; C25-06 blocks real data/migration/deployment. Legal adoption validation also remains | No C25-03 block on included unpublished synthetic educational work after applicable prerequisites; all affected later boundaries remain gated | François as delegating Project Owner; Codex as synthetic domain reviewer; actual representative, operator, security, records and experience owners at their retained gates |
+| Linked corporate/legal and educational structure meaning and module boundary | ADR 0025 records separate legal/educational identities and non-authority; ADR 0032 closes C25-02; ADR 0034 closes C25-03 for synthetic L1; ADR 0039 admits source-backed CF-3 engineering | C25-01 satisfied for minimal 2.1-B; C25-02 closed; C25-03 synthetic contract closed. C25-03-R preserves institution-side adoption validation; C25-04 synthetic contract closed under ADR 0035; operator implementation proof remains; representative C25-05 and C25-06 block pilot/real-data/deployment claims. Legal adoption validation also remains | No C25-03 block on included unpublished synthetic educational work or the disabled local synthetic CF-3 candidate; all affected adoption and release boundaries remain gated | François as delegating Project Owner and interim synthetic security/privacy owner; Codex as synthetic domain reviewer; actual representative, operator, security, records and experience owners at their retained gates |
 | First learning-institution state-transition qualification | `organization.legal` version 1.2.0 retains the stable entity/profile and C1 structure foundation and adds append-only relationship ending and corporate-unit name-profile revision. The boundary preserves tenant routing, lifecycle and capability gates, cycle and revision serialization, exact idempotency, minimized audit, transactional outbox, rollback, and non-disclosure. | Slice 2.1-B remains satisfied. Focused clean-database C2a evidence is passing; the complete repository gate remains required before its L1 exit is declared and is currently blocked by the concurrent web dependency audit. No public interface, educational structure, migration, real data, statutory consolidation claim, structural move, or L2 release is qualified. | None for 2.1-B; 2.1-C2a exit blocked at repository integration | Platform engineering under ADRs 0031/0033's bounded Product Owner disposition; consultant findings remain a revision trigger and external finance/governance validation remains required at ADR 0031's later gates |
 | Production identity and session chain | Accepted [ADR 0029](../adr/0029-provider-neutral-identity-federation-and-directory-connections.md) and its [decision review](identity-session-and-support-access-decision-review.md) establish a provider-neutral OIDC/gateway seam, protocol-qualified external-identity links, application-owned opaque sessions, writer-resolved tenant selection, bounded assurance, separate service identities, and optional separately gated SCIM provisioning. Accepted [ADR 0030](../adr/0030-same-origin-public-session-and-named-action-boundary.md) and the [implementation evidence](identity-session-and-support-access-implementation-evidence.md) add the bounded provider-neutral callback/cookie adapter, current placement/session revalidation, origin/CSRF controls, logout, and checked contract. | Satisfied through bounded D.3 synthetic engineering. No real provider callback, provider credential, directory sync, enabled endpoint, selected-connection/deployment qualification, or L2 release exists. | L2 | Security architecture and platform engineering |
 | Bounded support access | TM-03 and accepted ADRs 0029/0030 retain a non-impersonating, independently approved, one-tenant, purpose/ticket-bound, strongly assured, allowlisted grant lasting at most 60 minutes. The resource/action suite proves per-use recheck, revocation, minimized evidence, concurrency, rollback, and negatives; D.3 carries only one encrypted grant reference and returns safe real-actor/purpose/expiry/scope presentation state after writer validation. | Bounded D.3 adapter evidence is satisfied. The complete visible tenant-labelled accessible browser experience and deployment qualification remain 2.0-E/L2 gates. | L2 | Security architecture with product and platform engineering |
@@ -158,7 +161,7 @@ qualify the first learning-institution module or its public client.
 | --- | --- | --- |
 | Production identity, session, and support access | Accepted ADR 0029 supersedes ADR 0027's provider selection and defines provider-neutral qualified OIDC/gateway connections, application-owned sessions, explicit external-identity links, writer-resolved tenant context, separate service identities, separately gated provisioning, and non-impersonating support grants. Accepted ADR 0030 owns the public callback/cookie seam; ADR 0022 remains local qualification only. | D.2a through D.2c and bounded D.3 synthetic implementation are satisfied. Per-connection contractual/privacy, selected deployment, independent review, real data, and L2 release gates remain closed. |
 | First public browser/API boundary | Accepted ADR 0030 selects the same-origin Next.js/Phoenix production candidate and keeps ADR 0023 non-enumeration binding. UI-1A remains local-only. | Decision complete. The checked session contract is implemented; the first business action/read contract and complete accessible browser evidence remain 2.0-E work after its linked-structure dependency passes. |
-| Linked corporate/legal and educational structure | ADR 0025 is Conditionally Accepted; ADRs 0032/0034 accept C25-02 and synthetic C25-03 domain contracts; ADRs 0031/0033 retain their legal implementation scopes | Synthetic unpublished educational identity, initial containment, sites and terminology become eligible under ADR 0034. Actual representative validation is C25-03-R; synthetic operator publication/control meaning is accepted under ADR 0035; C25-05/C25-06 and legal adoption validation remain binding |
+| Linked corporate/legal and educational structure | ADR 0025 is Conditionally Accepted; ADRs 0032/0034 accept C25-02 and synthetic C25-03 domain contracts; ADRs 0031/0033 retain their legal implementation scopes; ADR 0039 governs CF-3 evidence timing | Synthetic unpublished educational identity, initial containment, sites and terminology become eligible under ADR 0034. Official calendar sources admit disabled local synthetic CF-3 engineering. Actual representative validation is retained for adoption; synthetic operator publication/control meaning is accepted under ADR 0035; C25-05/C25-06 and legal adoption validation remain binding at their revised boundaries |
 | Deployment candidate | ADRs 0003 and 0017 define provider-neutral placement, availability, recovery, and routing contracts. | Unselected. Local PostgreSQL and browser evidence must not be relabelled as a deployment candidate. |
 
 ## Deployment and reviewer record
@@ -168,7 +171,7 @@ qualify the first learning-institution module or its public client.
 | Deployment candidate | Unselected | No L3 qualification, real data, pilot, or production claim |
 | Independent security/privacy reviewer | Unassigned | No real Restricted data or pilot |
 | Learning-institution-side records/governance owner | Unassigned | No real-data migration, records-policy acceptance, or pilot |
-| C25-03-R external representatives and educational-domain validation | Unassigned actual reviewers across five contexts; François owns obtaining the records; synthetic delegated review complete under ADR 0034 | Before connected workflows including synthetic L2, real data/import, pilot, or deployment; by 2026-12-15 or first affected gate |
+| C25-03-R institution-side representative and educational-domain validation | Public operational calendar source review complete; actual participant review unavailable and not claimed | Does not block disabled local synthetic CF-3 engineering under ADR 0039; required before real data/import, an institutional pilot, deployment, production reliance, or representative-correctness claims |
 | Interim security/privacy owner | François, through the existing Phase 0 residual-risk boundary | May govern synthetic design and implementation evidence; does not provide independent review |
 | Operational owner for dispatcher, replay, backup, and recovery | Unassigned for the selected environment | No operational outbox completion or deployment acceptance |
 
@@ -187,10 +190,10 @@ synthetic 2.1-B proof, whose entry and L1 exit disposition are now recorded.
 Slices **2.0-D.2a through D.2c and the bounded D.3 public-session adapter are implemented with
 synthetic evidence**. D.3 is not released at L2 and the endpoint is not enabled. Phase 2.0 is
 conditionally approved at L1; Slice 2.0-E is its dated deferred condition. Its minimal persistence
-dependency is complete, but C25-05 still prohibits the connected/public workflow until the named
-expert/representative-comprehension and accountable product-experience dispositions are recorded,
-no later than 2026-12-15 or the first affected gate. This does not reopen the L1 foundation closure
-or weaken the completed identity and session foundation.
+dependency is complete. ADR 0039 admits the disabled local synthetic CF-3 implementation with
+technical accessibility and Project Owner synthetic disposition. Representative C25-05 evidence
+still prohibits an institutional pilot or representative-usability claim. This does not reopen the
+L1 foundation closure or weaken the completed identity and session foundation.
 
 ## Slice 2.1-B L1 entry and exit disposition
 
@@ -247,7 +250,10 @@ deferrals.
 
 This disposition does not authorize relationship correction/reactivation, consolidation-parent
 changes, corporate-unit moves/transfers/closure, impact preview, educational or operator state,
-migration, real data, or a public workflow. ADR 0034 now closes C25-03 for the unpublished synthetic foundation of 2.1-D; ADR 0035 subsequently closes synthetic C25-04; operator implementation proof and C25-03-R later connected/real adoption remain gated.
+migration, real data, or a public workflow. ADR 0034 now closes C25-03 for the unpublished
+synthetic foundation of 2.1-D; ADR 0035 subsequently closes synthetic C25-04; operator
+implementation proof and C25-03-R real-adoption validation remain gated. ADR 0039 separately
+admits only the disabled local synthetic CF-3 candidate.
 
 ## Evidence references
 
