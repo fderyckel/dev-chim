@@ -33,6 +33,7 @@ erl_crash.dump
 node_modules/
 .next/
 .next-check/
+.next-classroom/
 clients/web/next-env.d.ts
 *.tsbuildinfo
 dist/

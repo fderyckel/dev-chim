@@ -7,7 +7,7 @@ core_dir="$repo_root/apps/chimwemwe_core"
 cd "$repo_root"
 
 echo "[1/9] Core platform shell and formatting"
-shellcheck bin/auth-demo bin/check-changed bin/core-check bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
+shellcheck bin/classroom-demo bin/auth-demo bin/check-changed bin/core-check bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
 mise exec -- mix format --check-formatted
 
 echo "[2/9] Core platform compilation"
@@ -15,6 +15,7 @@ mise exec -- env MIX_ENV=test mix compile --warnings-as-errors
 
 echo "[3/9] UI-1A OpenAPI contract drift"
 mise exec -- env MIX_ENV=test mix run tools/check_ui1_openapi.exs
+mise exec -- env MIX_ENV=test mix run tools/check_public_openapi.exs
 
 echo "[4/9] Core platform migration drift"
 (

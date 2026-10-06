@@ -51,22 +51,41 @@ defmodule Chimwemwe.PublicApi.SessionPlug do
   defp purpose("GET", "/api/v1/session"), do: {:ok, :session_read}
   defp purpose("POST", "/api/v1/session/logout"), do: {:ok, :session_logout}
   defp purpose("POST", "/api/v1/session/support/elevate"), do: {:ok, :support_elevate}
+  defp purpose("GET", "/api/v1/classroom/classes"), do: {:ok, :classroom_read}
+  defp purpose("POST", "/api/v1/classroom/prepare-attendance"), do: {:ok, :classroom_read}
+  defp purpose("POST", "/api/v1/classroom/submit-attendance"), do: {:ok, :classroom_submit}
   defp purpose(_method, _path), do: :error
 
   defp locale(conn) do
+    # Browser language ranges are preferences, not exact application locale codes.
     conn
     |> get_req_header("accept-language")
-    |> List.first()
-    |> case do
-      nil -> "en"
-      value -> value |> String.split([",", ";"], parts: 2) |> List.first()
+    |> Enum.flat_map(&String.split(&1, ","))
+    |> Enum.find_value("en", &supported_locale/1)
+  end
+
+  defp supported_locale(range) do
+    value = range |> String.split(";", parts: 2) |> hd() |> String.trim() |> String.downcase()
+
+    case String.split(value, "-", parts: 2) do
+      ["en", "mw"] -> "en-MW"
+      ["en" | _] -> "en"
+      ["fr" | _] -> "fr"
+      _ -> nil
     end
   end
 
   defp request_id(conn) do
     case get_resp_header(conn, "x-request-id") do
-      [request_id] -> request_id
-      _missing -> Ecto.UUID.generate()
+      [request_id] ->
+        # Plug's default request IDs (and incoming trace IDs) are not necessarily UUIDs.
+        case Ecto.UUID.cast(request_id) do
+          {:ok, uuid} -> uuid
+          :error -> Ecto.UUID.generate()
+        end
+
+      _missing ->
+        Ecto.UUID.generate()
     end
   end
 end

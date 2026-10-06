@@ -4,6 +4,57 @@
  */
 
 export interface paths {
+    readonly "/api/v1/classroom/classes": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** @description Disabled by default. Local synthetic HTTPS qualification only. Today and assigned classes only; no arbitrary dates, search or pagination. Cumulative actor/day scope: 12 classes, 720 people. POST requires exact Origin and X-CSRF-Token. No automatic retry. */
+        readonly get: operations["assignedClasses"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/classroom/prepare-attendance": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** @description Disabled by default. Local synthetic HTTPS qualification only. Today and assigned classes only; no arbitrary dates, search or pagination. Cumulative actor/day scope: 12 classes, 720 people. POST requires exact Origin and X-CSRF-Token. No automatic retry. */
+        readonly post: operations["prepareAttendance"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/classroom/submit-attendance": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** @description Disabled by default. Local synthetic HTTPS qualification only. Today and assigned classes only; no arbitrary dates, search or pagination. Cumulative actor/day scope: 12 classes, 720 people. POST requires exact Origin and X-CSRF-Token. No automatic retry. */
+        readonly post: operations["submitAttendance"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/session": {
         readonly parameters: {
             readonly query?: never;
@@ -65,6 +116,40 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        readonly AssignedClassesResponse: {
+            readonly data: readonly {
+                /** Format: uuid */
+                readonly id: string;
+                readonly label: string;
+                /** Format: date */
+                readonly local_date: string;
+            }[];
+        };
+        readonly AttendanceReceiptResponse: {
+            readonly data: {
+                /** Format: uuid */
+                readonly submission_id: string;
+            };
+        };
+        readonly AttendanceResponse: {
+            readonly data: components["schemas"]["AttendanceView"];
+        };
+        readonly AttendanceView: {
+            readonly calendar_revision: string;
+            /** Format: uuid */
+            readonly class_id: string;
+            readonly label: string;
+            /** Format: date */
+            readonly local_date: string;
+            readonly roster_basis: string;
+            readonly students: readonly {
+                /** Format: uuid */
+                readonly id: string;
+                readonly mark: ("present" | "absent" | "late") | null;
+                readonly name: string;
+            }[];
+            readonly submission_id: string | null;
+        };
         readonly ElevateSupportRequest: {
             /** Format: uuid */
             readonly grant_id: string;
@@ -75,6 +160,10 @@ export interface components {
         };
         readonly ErrorResponse: {
             readonly errors: readonly components["schemas"]["ErrorItem"][];
+        };
+        readonly PrepareAttendanceRequest: {
+            /** Format: uuid */
+            readonly class_id: string;
         };
         readonly SessionData: {
             /** Format: uuid */
@@ -88,6 +177,24 @@ export interface components {
         };
         readonly SessionResponse: {
             readonly data: components["schemas"]["SessionData"];
+        };
+        readonly SubmitAttendanceRequest: {
+            readonly calendar_revision: string;
+            /** Format: uuid */
+            readonly causation_id: string;
+            /** Format: uuid */
+            readonly class_id: string;
+            /** Format: uuid */
+            readonly idempotency_key: string;
+            /** Format: date */
+            readonly local_date: string;
+            readonly marks: readonly {
+                /** @enum {string} */
+                readonly mark: "present" | "absent" | "late";
+                /** Format: uuid */
+                readonly person_id: string;
+            }[];
+            readonly roster_basis: string;
         };
         readonly SupportSession: {
             readonly capability_scope: readonly string[];
@@ -111,6 +218,242 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    readonly assignedClasses: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Current writer result */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["AssignedClassesResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 400: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 401: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 403: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 404: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 409: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 503: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    readonly prepareAttendance: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                readonly Origin: string;
+                readonly "X-CSRF-Token": string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["PrepareAttendanceRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Current writer result */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["AttendanceResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 400: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 401: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 403: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 404: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 409: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 503: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    readonly submitAttendance: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                readonly Origin: string;
+                readonly "X-CSRF-Token": string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["SubmitAttendanceRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Current writer result */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["AttendanceReceiptResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 400: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 401: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 403: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 404: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 409: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 503: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     readonly getCurrentSession: {
         readonly parameters: {
             readonly query?: never;

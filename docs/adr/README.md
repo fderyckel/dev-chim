@@ -63,4 +63,6 @@ Short summaries may aid readers, but must not become separately maintained decis
 
 | [0037](0037-class-register-enrolment-and-placement.md) | Class register, enrolment and dated placement | Proposed | Product and platform engineering | Project Owner authorized bounded private synthetic CF-4B; calendar integration and classroom checks recorded separately from connected adoption |
 
+| [0038](0038-local-classroom-attendance-workflow.md) | Local session-bound classroom attendance | Proposed | Product and platform engineering | Project Owner authorized the bounded synthetic screen-to-writer increment; [workflow evidence](../phase-2/classroom-attendance-workflow-evidence.md) retains real-data and release gates |
+
 Allowed decision statuses are Proposed, Accepted, Conditionally Accepted, Rejected, Superseded, and Deferred. `Template` is reserved for ADR 0000.

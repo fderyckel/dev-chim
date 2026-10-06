@@ -47,6 +47,8 @@ defmodule Chimwemwe.Identity.PublicSessionAdapter do
   ]
   @callback_keys [:code, :state]
   @purpose_names %{
+    classroom_read: "public.classroom.read",
+    classroom_submit: "public.classroom.submit",
     session_read: "public.session.read",
     session_logout: "public.session.logout",
     support_elevate: "public.support.elevate",

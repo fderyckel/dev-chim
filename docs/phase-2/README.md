@@ -182,3 +182,7 @@ test, owner role, or later slice does not satisfy one of those later gates.
 - [Phase 0 binding later gates](../phase-0/README.md#binding-later-gates)
 - [ADR index](../adr/README.md)
 - [Threat model](../security/threat-model.md)
+
+The next bounded classroom increment is the [local attendance workflow](classroom-attendance-workflow-evidence.md),
+governed by [ADR 0038](../adr/0038-local-classroom-attendance-workflow.md). Its synthetic
+screen-to-writer proof does not close connected-release or real-data conditions.

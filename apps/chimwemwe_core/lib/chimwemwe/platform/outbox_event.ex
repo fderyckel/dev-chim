@@ -76,7 +76,7 @@ defmodule Chimwemwe.Platform.OutboxEvent do
 
       check_constraint(:classification, "platform_outbox_classification_domain_boundary",
         check:
-          "(classification = 'internal' AND aggregate_type NOT LIKE 'people.core.%' AND aggregate_type NOT LIKE 'classroom.core.%') OR (classification = 'restricted' AND aggregate_type IN ('people.core.person', 'people.core.participation', 'people.core.account') AND event_type LIKE 'people.core.%') OR (classification = 'restricted' AND aggregate_type IN ('classroom.core.class', 'classroom.core.enrolment', 'classroom.core.assignment', 'classroom.core.placement') AND event_type LIKE 'classroom.core.%')"
+          "(classification = 'internal' AND aggregate_type NOT LIKE 'people.core.%' AND aggregate_type NOT LIKE 'classroom.core.%' AND aggregate_type NOT LIKE 'classroom.attendance.%') OR (classification = 'restricted' AND aggregate_type IN ('people.core.person', 'people.core.participation', 'people.core.account') AND event_type LIKE 'people.core.%') OR (classification = 'restricted' AND aggregate_type IN ('classroom.core.class', 'classroom.core.enrolment', 'classroom.core.assignment', 'classroom.core.placement') AND event_type LIKE 'classroom.core.%') OR (classification = 'restricted' AND aggregate_type = 'classroom.attendance.submission' AND event_type = 'classroom.attendance.submit.completed')"
       )
 
       check_constraint(:payload, "platform_outbox_payload_must_be_an_object",

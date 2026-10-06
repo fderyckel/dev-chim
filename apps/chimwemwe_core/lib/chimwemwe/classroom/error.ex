@@ -18,6 +18,8 @@ defmodule Chimwemwe.Classroom.Error do
           | :module_unavailable
           | :not_found
           | :retryable_dependency
+          | :scope_limit
+          | :non_instructional
           | :stale
 
   @type t :: %__MODULE__{code: code()}

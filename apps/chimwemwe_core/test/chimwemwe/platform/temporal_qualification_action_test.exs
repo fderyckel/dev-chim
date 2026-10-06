@@ -49,6 +49,8 @@ defmodule Chimwemwe.Platform.TemporalQualificationActionTest do
   @consumer_read_capability "platform.temporal_qualification.consumers.read_history"
 
   @tables [
+    "classroom_attendance_submissions",
+    "classroom_attendance_exposures",
     "classroom_placements",
     "classroom_teaching_assignments",
     "classroom_enrolments",

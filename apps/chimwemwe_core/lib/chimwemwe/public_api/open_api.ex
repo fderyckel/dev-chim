@@ -1,11 +1,13 @@
 defmodule Chimwemwe.PublicApi.OpenApi do
   @moduledoc "Checked OpenAPI contract for the public application-session adapter."
 
+  alias Chimwemwe.PublicApi.ClassroomOpenApi
+
   @spec document() :: map()
   def document do
     %{
       "components" => %{
-        "schemas" => schemas(),
+        "schemas" => Map.merge(schemas(), ClassroomOpenApi.schemas()),
         "securitySchemes" => %{
           "applicationSession" => %{
             "in" => "cookie",
@@ -21,7 +23,7 @@ defmodule Chimwemwe.PublicApi.OpenApi do
         "version" => "1.0.0"
       },
       "openapi" => "3.1.0",
-      "paths" => paths()
+      "paths" => Map.merge(paths(), ClassroomOpenApi.paths())
     }
   end
 

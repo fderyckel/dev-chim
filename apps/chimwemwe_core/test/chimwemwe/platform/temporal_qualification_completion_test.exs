@@ -41,6 +41,8 @@ defmodule Chimwemwe.Platform.TemporalQualificationCompletionTest do
   ]
 
   @tables [
+    "classroom_attendance_submissions",
+    "classroom_attendance_exposures",
     "classroom_placements",
     "classroom_teaching_assignments",
     "classroom_enrolments",

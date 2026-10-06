@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := help
 
-.PHONY: help bootstrap fix format lint check-changed check-staged test-fast test docs-check check-docs check-archive-phase0 check-repository-tools check-core check-web check-tooling check-clean auth-demo legal-demo web-dev web-core-dev web-check web-e2e web-core-e2e check
+.PHONY: help bootstrap fix format lint check-changed check-staged test-fast test docs-check check-docs check-archive-phase0 check-repository-tools check-core check-web check-tooling check-clean auth-demo legal-demo classroom-demo web-dev web-core-dev web-check web-e2e web-core-e2e web-classroom-e2e check
 
 help:
 	@echo "bootstrap  Install and prepare local workspace dependencies"
@@ -16,6 +16,7 @@ help:
 	@echo "check-clean Reproduce staged changes in a temporary clean checkout"
 	@echo "auth-demo  Start the local database-backed authentication administration proof"
 	@echo "legal-demo Seed the local synthetic Phase 2.1-C2a legal-structure demonstration"
+	@echo "classroom-demo Start the synthetic HTTPS attendance workflow"
 	@echo "web-dev    Start the local synthetic UI-0 browser workspace"
 	@echo "web-core-dev Start the local read-only UI-1A core connection"
 	@echo "web-check  Verify UI-0 formatting, styles, types, tests, and build"
@@ -38,7 +39,7 @@ format:
 lint:
 	mise exec -- uv run ruff format --check tools tests/tools
 	mise exec -- uv run ruff check tools tests/tools
-	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/bootstrap bin/check-changed bin/core-check bin/format-staged-elixir bin/organization-legal-demo bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
+	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/classroom-demo bin/bootstrap bin/check-changed bin/core-check bin/format-staged-elixir bin/organization-legal-demo bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
 	mise exec -- mix format --check-formatted
 	mise exec -- env MIX_ENV=test mix compile --warnings-as-errors
 	mise exec -- env MIX_ENV=test mix run tools/check_ui1_openapi.exs
@@ -88,10 +89,10 @@ check-core:
 	./bin/with-verification-lock --resource core-test -- ./bin/core-check
 
 check-web:
-	./bin/with-verification-lock --resource web-qualification -- $(MAKE) web-e2e web-core-e2e
+	./bin/with-verification-lock --resource web-qualification -- $(MAKE) web-e2e web-core-e2e web-classroom-e2e
 
 check-tooling:
-	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/bootstrap bin/check-changed bin/core-check bin/format-staged-elixir bin/organization-legal-demo bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
+	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/classroom-demo bin/bootstrap bin/check-changed bin/core-check bin/format-staged-elixir bin/organization-legal-demo bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
 	$(MAKE) -n check-changed check-staged
 
 check-clean:
@@ -102,6 +103,9 @@ auth-demo:
 
 legal-demo:
 	./bin/organization-legal-demo
+
+classroom-demo:
+	./bin/classroom-demo
 
 web-dev:
 	cd clients/web && CHIMWEMWE_UI0_SYNTHETIC=true mise exec -- npm run dev
@@ -121,6 +125,9 @@ web-e2e: web-check
 web-core-e2e: web-check
 	cd clients/web && mise exec -- npm run test:e2e:ui1
 	cd clients/web && mise exec -- npm run test:e2e:ui1-unavailable
+
+web-classroom-e2e: web-check
+	cd clients/web && mise exec -- npm exec playwright -- test --config playwright.classroom.config.ts
 
 check:
 	$(MAKE) check-docs

@@ -52,8 +52,9 @@ contract and a local preparation prototype. The private synthetic
 [people/participation foundation](docs/phase-2/people-foundation-evidence.md) are implemented.
 The [classroom setup foundation](docs/phase-2/classroom-foundation-evidence.md) now adds class
 registers, enrolment, teaching assignments and dated placements, tested against the named
-[calendar publication writer](docs/phase-2/academic-calendar-contract-evidence.md). Connected
-preparation and the educator roster/attendance workflow remain separate work.
+[calendar publication writer](docs/phase-2/academic-calendar-contract-evidence.md). The [local attendance workflow](docs/phase-2/classroom-attendance-workflow-evidence.md) now connects
+an assigned synthetic educator to today’s register and an atomic attendance submission. Routine
+preparation screens, actual provider sign-in and production release remain separate work.
 
 1. Read [the Phase 0 outcome](docs/phase-0/README.md) and its binding later gates.
 2. Read [the Phase 1 core scope](docs/phase-1/README.md).

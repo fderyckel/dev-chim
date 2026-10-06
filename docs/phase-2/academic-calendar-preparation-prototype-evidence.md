@@ -70,8 +70,9 @@ in progress.
 
 ## What remains
 
-The planned classroom calendar slice is not complete. It still requires the independently owned
-CF-1 institutional/operator prerequisite, authoritative calendar resources and named actions,
-tenant/capability/module enforcement, optimistic concurrency, exact idempotency, audit/outbox
-atomicity, rollback and recovery proof, a reviewed migration, same-origin session protections,
-and a browser confirmation read from committed state.
+The planned connected calendar slice is not complete. CF-1 and the private CF-2B writer are now
+implemented with their separate evidence. The browser step still requires the accepted human and
+identity-connection dispositions, same-origin session protections, exact named-action adapters,
+accessible failure and recovery states, and confirmation refreshed from committed writer state.
+It remains fail closed pending the completed
+[CF-3 connected calendar entry review packet](cf-3-connected-calendar-entry-review-packet.md).

@@ -1,6 +1,157 @@
 {
   "components": {
     "schemas": {
+      "AssignedClassesResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "label": {
+                  "type": "string"
+                },
+                "local_date": {
+                  "format": "date",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "label",
+                "local_date"
+              ],
+              "type": "object"
+            },
+            "maxItems": 12,
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "AttendanceReceiptResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "additionalProperties": false,
+            "properties": {
+              "submission_id": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "submission_id"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "AttendanceResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/AttendanceView"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "AttendanceView": {
+        "additionalProperties": false,
+        "properties": {
+          "calendar_revision": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "class_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "local_date": {
+            "format": "date",
+            "type": "string"
+          },
+          "roster_basis": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "students": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "mark": {
+                  "anyOf": [
+                    {
+                      "enum": [
+                        "present",
+                        "absent",
+                        "late"
+                      ],
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "mark",
+                "name"
+              ],
+              "type": "object"
+            },
+            "maxItems": 60,
+            "type": "array"
+          },
+          "submission_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "calendar_revision",
+          "class_id",
+          "label",
+          "local_date",
+          "roster_basis",
+          "students",
+          "submission_id"
+        ],
+        "type": "object"
+      },
       "ElevateSupportRequest": {
         "additionalProperties": false,
         "properties": {
@@ -43,6 +194,19 @@
         },
         "required": [
           "errors"
+        ],
+        "type": "object"
+      },
+      "PrepareAttendanceRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "class_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "class_id"
         ],
         "type": "object"
       },
@@ -97,6 +261,72 @@
         },
         "required": [
           "data"
+        ],
+        "type": "object"
+      },
+      "SubmitAttendanceRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "calendar_revision": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "causation_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "class_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "local_date": {
+            "format": "date",
+            "type": "string"
+          },
+          "marks": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "mark": {
+                  "enum": [
+                    "present",
+                    "absent",
+                    "late"
+                  ],
+                  "type": "string"
+                },
+                "person_id": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "mark",
+                "person_id"
+              ],
+              "type": "object"
+            },
+            "maxItems": 60,
+            "minItems": 1,
+            "type": "array"
+          },
+          "roster_basis": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          }
+        },
+        "required": [
+          "calendar_revision",
+          "causation_id",
+          "class_id",
+          "idempotency_key",
+          "local_date",
+          "marks",
+          "roster_basis"
         ],
         "type": "object"
       },
@@ -168,6 +398,311 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/classroom/classes": {
+      "get": {
+        "description": "Disabled by default. Local synthetic HTTPS qualification only. Today and assigned classes only; no arbitrary dates, search or pagination. Cumulative actor/day scope: 12 classes, 720 people. POST requires exact Origin and X-CSRF-Token. No automatic retry.",
+        "operationId": "assignedClasses",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignedClassesResponse"
+                }
+              }
+            },
+            "description": "Current writer result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        },
+        "security": [
+          {
+            "applicationSession": []
+          }
+        ]
+      }
+    },
+    "/api/v1/classroom/prepare-attendance": {
+      "post": {
+        "description": "Disabled by default. Local synthetic HTTPS qualification only. Today and assigned classes only; no arbitrary dates, search or pagination. Cumulative actor/day scope: 12 classes, 720 people. POST requires exact Origin and X-CSRF-Token. No automatic retry.",
+        "operationId": "prepareAttendance",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrepareAttendanceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttendanceResponse"
+                }
+              }
+            },
+            "description": "Current writer result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        },
+        "security": [
+          {
+            "applicationSession": []
+          }
+        ]
+      }
+    },
+    "/api/v1/classroom/submit-attendance": {
+      "post": {
+        "description": "Disabled by default. Local synthetic HTTPS qualification only. Today and assigned classes only; no arbitrary dates, search or pagination. Cumulative actor/day scope: 12 classes, 720 people. POST requires exact Origin and X-CSRF-Token. No automatic retry.",
+        "operationId": "submitAttendance",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubmitAttendanceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttendanceReceiptResponse"
+                }
+              }
+            },
+            "description": "Current writer result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        },
+        "security": [
+          {
+            "applicationSession": []
+          }
+        ]
+      }
+    },
     "/api/v1/session": {
       "get": {
         "operationId": "getCurrentSession",

@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$(dirname "$0")/.."
+# Every run creates a fresh database. Existing retained evidence is never reset.
+export MIX_ENV=test CHIMWEMWE_CLASSROOM_DEMO=true CHIMWEMWE_UI0_SYNTHETIC=true
+CHIMWEMWE_TEST_DATABASE="chimwemwe_attendance_demo_$(date +%s)_$$"
+export CHIMWEMWE_TEST_DATABASE
+cert_dir=$(mktemp -d /tmp/chimwemwe-classroom-cert.XXXXXX)
+backend_pid=""
+web_pid=""
+edge_pid=""
+cleanup() {
+  for process_id in "$edge_pid" "$web_pid" "$backend_pid"; do
+    if [[ -n "$process_id" ]]; then kill "$process_id" 2>/dev/null || true; fi
+  done
+  rm -f "$cert_dir/key.pem" "$cert_dir/cert.pem"
+  rmdir "$cert_dir" 2>/dev/null || true
+}
+trap cleanup EXIT INT TERM
+openssl req -x509 -newkey rsa:2048 -nodes -keyout "$cert_dir/key.pem" -out "$cert_dir/cert.pem" \
+  -days 1 -subj /CN=localhost -addext subjectAltName=DNS:localhost >/dev/null 2>&1
+mise exec -- mix ecto.create
+mise exec -- mix ecto.migrate > /tmp/chimwemwe-classroom-migration.log 2>&1
+mise exec -- mix run tools/classroom_demo.exs &
+backend_pid=$!
+(
+  cd clients/web
+  export CHIMWEMWE_WEB_BUILD_DIR=.next-classroom
+  exec mise exec -- node node_modules/next/dist/bin/next dev --hostname 127.0.0.1 --port 3014
+) &
+web_pid=$!
+# Do not advertise a usable screen until the prepared writer is accepting sessions.
+writer_ready=false
+for _attempt in {1..60}; do
+  if [[ "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:4013/api/v1/classroom/classes || true)" == "401" ]]; then
+    writer_ready=true
+    break
+  fi
+  kill -0 "$backend_pid" 2>/dev/null || { echo "Classroom writer did not start" >&2; exit 1; }
+  sleep 1
+done
+[[ "$writer_ready" == "true" ]] || { echo "Classroom writer startup timed out" >&2; exit 1; }
+mise exec -- node tools/classroom_https.mjs "$cert_dir/key.pem" "$cert_dir/cert.pem" &
+edge_pid=$!
+printf 'Synthetic database retained for review: %s\n' "$CHIMWEMWE_TEST_DATABASE"
+wait "$backend_pid"
