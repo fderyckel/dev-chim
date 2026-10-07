@@ -5,15 +5,23 @@ import { AcademicCalendarPreparation } from "../../src/components/academic-calen
 import { syntheticViewData } from "../../src/fixtures/synthetic-view-data";
 
 export const metadata: Metadata = {
-  title: "Academic calendar preview",
+  title: "Academic calendar",
 };
 
 export default async function AcademicCalendarPage() {
   const viewData = await syntheticViewData.getAcademicCalendarPreparation();
+  const connected = process.env.CHIMWEMWE_CLASSROOM_DEMO === "true";
+  const context = connected
+    ? {
+        ...viewData.context,
+        dateLabel: "Synthetic calendar qualification",
+        connectionLabel: "Local synthetic session · authoritative core writer",
+      }
+    : viewData.context;
 
   return (
-    <AppShell activePage="calendar" context={viewData.context}>
-      <AcademicCalendarPreparation viewData={viewData} />
+    <AppShell activePage="calendar" context={context} writerConnected={connected}>
+      <AcademicCalendarPreparation connected={connected} viewData={viewData} />
     </AppShell>
   );
 }

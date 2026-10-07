@@ -1,6 +1,30 @@
 {
   "components": {
     "schemas": {
+      "AddStudentRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "causation_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "display_name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "causation_id",
+          "display_name",
+          "idempotency_key"
+        ],
+        "type": "object"
+      },
       "AssignedClassesResponse": {
         "additionalProperties": false,
         "properties": {
@@ -152,6 +176,348 @@
         ],
         "type": "object"
       },
+      "CalendarPreparationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CalendarPreparationView"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "CalendarPreparationView": {
+        "additionalProperties": false,
+        "properties": {
+          "candidate_revision": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "definition": {
+            "additionalProperties": false,
+            "properties": {
+              "closures": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "date": {
+                      "format": "date",
+                      "type": "string"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "label": {
+                      "maxLength": 240,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "reason_key": {
+                      "pattern": "^[a-z][a-z0-9_]{0,79}$",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "date",
+                    "id",
+                    "label",
+                    "reason_key"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 366,
+                "type": "array"
+              },
+              "code": {
+                "pattern": "^[a-z][a-z0-9_]{0,79}$",
+                "type": "string"
+              },
+              "end_on": {
+                "format": "date",
+                "type": "string"
+              },
+              "instructional_weekdays": {
+                "items": {
+                  "maximum": 7,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "maxItems": 7,
+                "minItems": 1,
+                "type": "array",
+                "uniqueItems": true
+              },
+              "label": {
+                "maxLength": 240,
+                "minLength": 1,
+                "type": "string"
+              },
+              "periods": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "end_on": {
+                      "format": "date",
+                      "type": "string"
+                    },
+                    "id": {
+                      "format": "uuid",
+                      "type": "string"
+                    },
+                    "label": {
+                      "maxLength": 240,
+                      "minLength": 1,
+                      "type": "string"
+                    },
+                    "period_type_key": {
+                      "pattern": "^[a-z][a-z0-9_]{0,79}$",
+                      "type": "string"
+                    },
+                    "sequence": {
+                      "minimum": 1,
+                      "type": "integer"
+                    },
+                    "start_on": {
+                      "format": "date",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "end_on",
+                    "id",
+                    "label",
+                    "period_type_key",
+                    "sequence",
+                    "start_on"
+                  ],
+                  "type": "object"
+                },
+                "maxItems": 64,
+                "minItems": 1,
+                "type": "array"
+              },
+              "start_on": {
+                "format": "date",
+                "type": "string"
+              },
+              "time_zone": {
+                "maxLength": 240,
+                "minLength": 1,
+                "type": "string"
+              }
+            },
+            "required": [
+              "closures",
+              "code",
+              "end_on",
+              "instructional_weekdays",
+              "label",
+              "periods",
+              "start_on",
+              "time_zone"
+            ],
+            "type": "object"
+          },
+          "instructional_date_count": {
+            "minimum": 0,
+            "type": "integer"
+          },
+          "lock_version": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "draft",
+              "published"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "candidate_revision",
+          "definition",
+          "instructional_date_count",
+          "lock_version",
+          "status"
+        ],
+        "type": "object"
+      },
+      "CalendarResolution": {
+        "additionalProperties": false,
+        "properties": {
+          "academic_period_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "candidate_revision": {
+            "pattern": "^[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "closure_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "closure_reason_key": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z][a-z0-9_]{0,79}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "local_date": {
+            "format": "date",
+            "type": "string"
+          },
+          "reason": {
+            "enum": [
+              "closure",
+              "instructional_weekday",
+              "ordinary_weekday_off",
+              "outside_period"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "instructional",
+              "non_instructional"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "academic_period_id",
+          "candidate_revision",
+          "closure_id",
+          "closure_reason_key",
+          "local_date",
+          "reason",
+          "status"
+        ],
+        "type": "object"
+      },
+      "CalendarResolutionResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CalendarResolution"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "ClassroomPreparationResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ClassroomPreparationView"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "ClassroomPreparationView": {
+        "additionalProperties": false,
+        "properties": {
+          "academic_year_label": {
+            "type": "string"
+          },
+          "class": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "code": {
+                    "pattern": "^[a-z][a-z0-9_]{0,79}$",
+                    "type": "string"
+                  },
+                  "id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "label": {
+                    "maxLength": 160,
+                    "minLength": 1,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "code",
+                  "id",
+                  "label"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "educator_name": {
+            "type": "string"
+          },
+          "institution_name": {
+            "type": "string"
+          },
+          "students": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "name": {
+                  "maxLength": 200,
+                  "minLength": 1,
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name"
+              ],
+              "type": "object"
+            },
+            "maxItems": 60,
+            "type": "array"
+          }
+        },
+        "required": [
+          "academic_year_label",
+          "class",
+          "educator_name",
+          "institution_name",
+          "students"
+        ],
+        "type": "object"
+      },
       "ElevateSupportRequest": {
         "additionalProperties": false,
         "properties": {
@@ -207,6 +573,212 @@
         },
         "required": [
           "class_id"
+        ],
+        "type": "object"
+      },
+      "PrepareClassRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "causation_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "code": {
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 160,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "causation_id",
+          "code",
+          "idempotency_key",
+          "label"
+        ],
+        "type": "object"
+      },
+      "PublishAcademicYearRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "causation_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "expected_version": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "causation_id",
+          "expected_version",
+          "idempotency_key"
+        ],
+        "type": "object"
+      },
+      "ResolveCalendarDateRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "local_date": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "local_date"
+        ],
+        "type": "object"
+      },
+      "SaveCalendarDraftRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "causation_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "closures": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "date": {
+                  "format": "date",
+                  "type": "string"
+                },
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "label": {
+                  "maxLength": 240,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "reason_key": {
+                  "pattern": "^[a-z][a-z0-9_]{0,79}$",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "date",
+                "id",
+                "label",
+                "reason_key"
+              ],
+              "type": "object"
+            },
+            "maxItems": 366,
+            "type": "array"
+          },
+          "code": {
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "type": "string"
+          },
+          "end_on": {
+            "format": "date",
+            "type": "string"
+          },
+          "expected_version": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "instructional_weekdays": {
+            "items": {
+              "maximum": 7,
+              "minimum": 1,
+              "type": "integer"
+            },
+            "maxItems": 7,
+            "minItems": 1,
+            "type": "array",
+            "uniqueItems": true
+          },
+          "label": {
+            "maxLength": 240,
+            "minLength": 1,
+            "type": "string"
+          },
+          "periods": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "end_on": {
+                  "format": "date",
+                  "type": "string"
+                },
+                "id": {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                "label": {
+                  "maxLength": 240,
+                  "minLength": 1,
+                  "type": "string"
+                },
+                "period_type_key": {
+                  "pattern": "^[a-z][a-z0-9_]{0,79}$",
+                  "type": "string"
+                },
+                "sequence": {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                "start_on": {
+                  "format": "date",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "end_on",
+                "id",
+                "label",
+                "period_type_key",
+                "sequence",
+                "start_on"
+              ],
+              "type": "object"
+            },
+            "maxItems": 64,
+            "minItems": 1,
+            "type": "array"
+          },
+          "start_on": {
+            "format": "date",
+            "type": "string"
+          },
+          "time_zone": {
+            "maxLength": 240,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "causation_id",
+          "closures",
+          "code",
+          "end_on",
+          "expected_version",
+          "idempotency_key",
+          "instructional_weekdays",
+          "label",
+          "periods",
+          "start_on",
+          "time_zone"
         ],
         "type": "object"
       },
@@ -398,6 +970,533 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/v1/calendar/preparation": {
+      "get": {
+        "description": "Disabled by default. Local synthetic HTTPS qualification for one server-selected calendar only. Calendar, academic-year, institution, tenant, actor, placement and capability authority are never accepted from browser input. POST requires exact Origin and X-CSRF-Token. No automatic retry.",
+        "operationId": "getCalendarPreparation",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPreparationResponse"
+                }
+              }
+            },
+            "description": "Current writer result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        },
+        "security": [
+          {
+            "applicationSession": []
+          }
+        ]
+      }
+    },
+    "/api/v1/calendar/publish": {
+      "post": {
+        "description": "Disabled by default. Local synthetic HTTPS qualification for one server-selected calendar only. Calendar, academic-year, institution, tenant, actor, placement and capability authority are never accepted from browser input. POST requires exact Origin and X-CSRF-Token. No automatic retry.",
+        "operationId": "publishAcademicYear",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PublishAcademicYearRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPreparationResponse"
+                }
+              }
+            },
+            "description": "Current writer result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        },
+        "security": [
+          {
+            "applicationSession": []
+          }
+        ]
+      }
+    },
+    "/api/v1/calendar/resolve": {
+      "post": {
+        "description": "Disabled by default. Local synthetic HTTPS qualification for one server-selected calendar only. Calendar, academic-year, institution, tenant, actor, placement and capability authority are never accepted from browser input. POST requires exact Origin and X-CSRF-Token. No automatic retry.",
+        "operationId": "resolveCalendarDate",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResolveCalendarDateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarResolutionResponse"
+                }
+              }
+            },
+            "description": "Current writer result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        },
+        "security": [
+          {
+            "applicationSession": []
+          }
+        ]
+      }
+    },
+    "/api/v1/calendar/save-draft": {
+      "post": {
+        "description": "Disabled by default. Local synthetic HTTPS qualification for one server-selected calendar only. Calendar, academic-year, institution, tenant, actor, placement and capability authority are never accepted from browser input. POST requires exact Origin and X-CSRF-Token. No automatic retry.",
+        "operationId": "saveCalendarDraft",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveCalendarDraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CalendarPreparationResponse"
+                }
+              }
+            },
+            "description": "Current writer result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        },
+        "security": [
+          {
+            "applicationSession": []
+          }
+        ]
+      }
+    },
+    "/api/v1/classroom/add-student": {
+      "post": {
+        "description": "Register one fictional student, participation, enrolment and placement atomically. Maximum 60 students. POST requires exact Origin and X-CSRF-Token; do not retry with a new idempotency key.",
+        "operationId": "addStudentToPreparedClass",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddStudentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassroomPreparationResponse"
+                }
+              }
+            },
+            "description": "Current writer result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        },
+        "security": [
+          {
+            "applicationSession": []
+          }
+        ]
+      }
+    },
     "/api/v1/classroom/classes": {
       "get": {
         "description": "Disabled by default. Local synthetic HTTPS qualification only. Today and assigned classes only; no arbitrary dates, search or pagination. Cumulative actor/day scope: 12 classes, 720 people. POST requires exact Origin and X-CSRF-Token. No automatic retry.",
@@ -408,6 +1507,89 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AssignedClassesResponse"
+                }
+              }
+            },
+            "description": "Current writer result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        },
+        "security": [
+          {
+            "applicationSession": []
+          }
+        ]
+      }
+    },
+    "/api/v1/classroom/preparation": {
+      "get": {
+        "description": "Read one server-owned local synthetic preparation workspace. No directory, selector, search or pagination.",
+        "operationId": "classroomPreparation",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassroomPreparationResponse"
                 }
               }
             },
@@ -519,6 +1701,117 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AttendanceResponse"
+                }
+              }
+            },
+            "description": "Current writer result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        },
+        "security": [
+          {
+            "applicationSession": []
+          }
+        ]
+      }
+    },
+    "/api/v1/classroom/prepare-class": {
+      "post": {
+        "description": "Create the workspace's one class and educator assignment atomically. Scope is server-owned. POST requires exact Origin and X-CSRF-Token; do not retry with a new idempotency key.",
+        "operationId": "prepareClass",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PrepareClassRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClassroomPreparationResponse"
                 }
               }
             },

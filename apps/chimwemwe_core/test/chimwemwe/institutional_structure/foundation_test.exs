@@ -798,6 +798,7 @@ defmodule Chimwemwe.InstitutionalStructure.FoundationTest do
              Persistence.with_writer(runtime, context_a(), fn ->
                Repo.query!("""
                TRUNCATE
+                 classroom_preparation_workspaces,
                  classroom_attendance_submissions,
                  classroom_attendance_exposures,
                  classroom_placements,

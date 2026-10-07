@@ -7,6 +7,7 @@ import type { NavigationKey, PrototypeContext } from "../ports/view-data";
 type AppShellProps = Readonly<{
   activePage: NavigationKey;
   context: PrototypeContext;
+  writerConnected?: boolean;
   children: ReactNode;
 }>;
 
@@ -25,7 +26,12 @@ const ui0Navigation = [
   { key: "preview" as const, label: "UI preview", href: "/ui-preview" },
 ];
 
-export function AppShell({ activePage, context, children }: AppShellProps) {
+export function AppShell({
+  activePage,
+  context,
+  writerConnected = false,
+  children,
+}: AppShellProps) {
   const navigation =
     context.experience === "ui1"
       ? [
@@ -37,8 +43,12 @@ export function AppShell({ activePage, context, children }: AppShellProps) {
           },
           ui0Navigation[3],
         ]
-      : ui0Navigation;
-  const connected = context.experience === "ui1";
+      : writerConnected
+        ? ui0Navigation.map((item) =>
+            item.key === "calendar" ? { ...item, label: "Academic calendar" } : item,
+          )
+        : ui0Navigation;
+  const connected = context.experience === "ui1" || writerConnected;
 
   return (
     <div className="l-app-shell">
@@ -140,7 +150,9 @@ export function AppShell({ activePage, context, children }: AppShellProps) {
       <footer className="c-product-footer">
         <p className="c-product-footer__copy">
           {connected
-            ? "UI-1A local qualification · synthetic server-owned context · read-only core connection · no writes or production authentication"
+            ? writerConnected
+              ? "CF-3 local qualification · synthetic session and writer · no real data, deployment, or production authentication"
+              : "UI-1A local qualification · synthetic server-owned context · read-only core connection · no writes or production authentication"
             : "UI-0 local experience foundation · synthetic fixtures only · no writes, authentication, storage, or server connection"}
         </p>
       </footer>

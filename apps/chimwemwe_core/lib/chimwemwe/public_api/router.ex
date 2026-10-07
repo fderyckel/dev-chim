@@ -23,15 +23,34 @@ defmodule Chimwemwe.PublicApi.Router do
     plug(Chimwemwe.PublicApi.ClassroomPlug)
   end
 
+  pipeline :local_calendar do
+    plug(Chimwemwe.PublicApi.CalendarPlug)
+  end
+
+  scope "/api/v1/calendar", Chimwemwe.PublicApi do
+    pipe_through [:local_calendar, :authenticated]
+    get("/preparation", CalendarController, :show, log: false)
+  end
+
+  scope "/api/v1/calendar", Chimwemwe.PublicApi do
+    pipe_through [:local_calendar, :authenticated, :unsafe]
+    post("/save-draft", CalendarController, :save, log: false)
+    post("/publish", CalendarController, :publish, log: false)
+    post("/resolve", CalendarController, :resolve, log: false)
+  end
+
   scope "/api/v1/classroom", Chimwemwe.PublicApi do
     pipe_through [:local_classroom, :authenticated]
     get("/classes", ClassroomController, :classes, log: false)
+    get("/preparation", ClassroomController, :preparation, log: false)
   end
 
   scope "/api/v1/classroom", Chimwemwe.PublicApi do
     pipe_through [:local_classroom, :authenticated, :unsafe]
     post("/prepare-attendance", ClassroomController, :prepare, log: false)
     post("/submit-attendance", ClassroomController, :submit, log: false)
+    post("/prepare-class", ClassroomController, :prepare_class, log: false)
+    post("/add-student", ClassroomController, :add_student, log: false)
   end
 
   scope "/auth", Chimwemwe.PublicApi do

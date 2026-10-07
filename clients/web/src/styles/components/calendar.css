@@ -28,6 +28,14 @@
     font-size: var(--font-size-xs);
   }
 
+  .c-calendar-status {
+    padding: var(--space-3) var(--space-4);
+    border-left: 0.25rem solid var(--color-information-text);
+    background: var(--color-information-surface);
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+  }
+
   .c-calendar-form,
   .c-date-check {
     overflow: hidden;

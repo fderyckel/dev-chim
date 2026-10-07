@@ -47,6 +47,9 @@ defmodule Chimwemwe.Identity.PublicSessionAdapter do
   ]
   @callback_keys [:code, :state]
   @purpose_names %{
+    calendar_manage: "public.calendar.manage",
+    calendar_read: "public.calendar.read",
+    classroom_prepare: "public.classroom.prepare",
     classroom_read: "public.classroom.read",
     classroom_submit: "public.classroom.submit",
     session_read: "public.session.read",

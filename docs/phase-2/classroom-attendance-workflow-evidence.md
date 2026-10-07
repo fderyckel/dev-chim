@@ -96,8 +96,11 @@ synthetic engineering evidence, not representative-user or independent security 
 
 ## Remaining scope
 
-This first submission cannot be corrected or backdated. Routine school preparation screens,
-representative attendance policies, cumulative-budget calibration and retention, actual identity
-provider qualification, Restricted consumers and connected-release conditions remain open.
+This first submission cannot be corrected or backdated. One disabled local synthetic
+[classroom preparation workflow](classroom-preparation-workflow-evidence.md) now creates its exact
+class and fictional students without a developer, but multiple-class administration, staff or
+calendar selection, real onboarding, representative attendance policies, cumulative-budget
+calibration and retention, actual identity provider qualification, Restricted consumers and
+connected-release conditions remain open.
 C25-03-R/C25-05/C25-06 and the earlier production gates are unchanged. No external identity
 provider, real child record, production deployment or representative-user sign-off is claimed.

@@ -18,6 +18,7 @@ defmodule Chimwemwe.AcademicCalendar.Foundation do
     YearView
   }
 
+  alias Chimwemwe.Identity.{PublicRequestSession, SessionFoundation}
   alias Chimwemwe.InstitutionalStructure.Foundation, as: Institutions
   alias Chimwemwe.Platform.{ModuleLifecycle, ModuleLifecycleError}
   alias Chimwemwe.Platform.ModuleLifecycle.ReleaseManifest
@@ -84,26 +85,61 @@ defmodule Chimwemwe.AcademicCalendar.Foundation do
 
   @spec replace_draft_calendar_definition(Runtime.t(), term(), map()) ::
           {:ok, ActionResult.t()} | {:error, term()}
+  def replace_draft_calendar_definition(
+        runtime,
+        %PublicRequestSession{} = request,
+        input
+      ),
+      do: mutate_from_session(runtime, request, :replace, input)
+
   def replace_draft_calendar_definition(runtime, context, input),
     do: mutate(runtime, context, :replace, input)
 
   @spec publish_academic_year(Runtime.t(), term(), map()) ::
           {:ok, ActionResult.t()} | {:error, term()}
+  def publish_academic_year(runtime, %PublicRequestSession{} = request, input),
+    do: mutate_from_session(runtime, request, :publish, input)
+
   def publish_academic_year(runtime, context, input),
     do: mutate(runtime, context, :publish, input)
 
   @spec preview_academic_year_publication(Runtime.t(), term(), term(), term()) ::
           {:ok, YearView.t()} | {:error, term()}
+  def preview_academic_year_publication(
+        runtime,
+        %PublicRequestSession{} = request,
+        calendar_id,
+        academic_year_id
+      ),
+      do: read_year_from_session(runtime, request, calendar_id, academic_year_id, :draft, :manage)
+
   def preview_academic_year_publication(runtime, context, calendar_id, academic_year_id),
     do: read_year(runtime, context, calendar_id, academic_year_id, :draft, :manage)
 
   @spec read_published_academic_year(Runtime.t(), term(), term(), term()) ::
           {:ok, YearView.t()} | {:error, term()}
+  def read_published_academic_year(
+        runtime,
+        %PublicRequestSession{} = request,
+        calendar_id,
+        academic_year_id
+      ),
+      do:
+        read_year_from_session(runtime, request, calendar_id, academic_year_id, :published, :read)
+
   def read_published_academic_year(runtime, context, calendar_id, academic_year_id),
     do: read_year(runtime, context, calendar_id, academic_year_id, :published, :read)
 
   @spec resolve_instructional_context(Runtime.t(), term(), term(), Date.t()) ::
           {:ok, Chimwemwe.AcademicCalendar.Resolution.t()} | {:error, term()}
+  def resolve_instructional_context(
+        runtime,
+        %PublicRequestSession{} = request,
+        calendar_id,
+        %Date{} = local_date
+      ),
+      do: resolve_from_session(runtime, request, calendar_id, local_date)
+
   def resolve_instructional_context(runtime, context, calendar_id, %Date{} = local_date) do
     with {:ok, persistence} <- Runtime.persistence(runtime),
          {:ok, calendar_id} <- uuid(calendar_id) do
@@ -124,6 +160,31 @@ defmodule Chimwemwe.AcademicCalendar.Foundation do
         persistence,
         context,
         &mutate_authorized(&1, &2, operation, input)
+      )
+    end
+  end
+
+  defp mutate_from_session(runtime, request, operation, input) do
+    with {:ok, persistence} <- Runtime.persistence(runtime) do
+      InternalWriter.run(
+        persistence,
+        request.context,
+        &with_current_session(persistence, &1, &2, request, fn actor, validated ->
+          mutate_authorized(actor, validated, operation, input)
+        end)
+      )
+    end
+  end
+
+  defp resolve_from_session(runtime, request, calendar_id, local_date) do
+    with {:ok, persistence} <- Runtime.persistence(runtime),
+         {:ok, calendar_id} <- uuid(calendar_id) do
+      InternalWriter.run(
+        persistence,
+        request.context,
+        &with_current_session(persistence, &1, &2, request, fn actor, validated ->
+          resolve_authorized(actor, validated, calendar_id, local_date)
+        end)
       )
     end
   end
@@ -293,6 +354,57 @@ defmodule Chimwemwe.AcademicCalendar.Foundation do
       )
     end
   end
+
+  defp read_year_from_session(
+         runtime,
+         request,
+         calendar_id,
+         academic_year_id,
+         status,
+         capability
+       ) do
+    with {:ok, persistence} <- Runtime.persistence(runtime),
+         {:ok, calendar_id} <- uuid(calendar_id),
+         {:ok, academic_year_id} <- uuid(academic_year_id) do
+      InternalWriter.run(
+        persistence,
+        request.context,
+        &with_current_session(persistence, &1, &2, request, fn actor, validated ->
+          read_year_authorized(
+            actor,
+            validated,
+            calendar_id,
+            academic_year_id,
+            status,
+            capability
+          )
+        end)
+      )
+    end
+  end
+
+  defp with_current_session(
+         persistence,
+         actor,
+         validated,
+         %PublicRequestSession{support: nil} = request,
+         operation
+       ) do
+    with %{rows: [["read committed"]]} <- Repo.query!("SHOW transaction_isolation"),
+         {:ok, current} <-
+           SessionFoundation.validate(persistence, validated, %{token: request.session_token}),
+         true <-
+           current.id == request.session.id and current.actor_id == actor.actor_id and
+             current.tenant_id == actor.tenant_id and
+             current.membership_id == request.session.membership_id do
+      operation.(actor, validated)
+    else
+      _denied -> error(:forbidden)
+    end
+  end
+
+  defp with_current_session(_persistence, _actor, _validated, _request, _operation),
+    do: error(:forbidden)
 
   defp read_year_authorized(actor, validated, calendar_id, academic_year_id, status, capability) do
     with :ok <- authorize(validated, capability),

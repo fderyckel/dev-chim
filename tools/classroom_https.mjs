@@ -5,7 +5,11 @@ import http from "node:http";
 const [keyPath, certPath] = process.argv.slice(2);
 const routes = new Set([
   "/api/v1/session", "/api/v1/session/logout", "/api/v1/classroom/classes",
+  "/api/v1/classroom/preparation", "/api/v1/classroom/prepare-class",
+  "/api/v1/classroom/add-student",
   "/api/v1/classroom/prepare-attendance", "/api/v1/classroom/submit-attendance",
+  "/api/v1/calendar/preparation", "/api/v1/calendar/save-draft",
+  "/api/v1/calendar/publish", "/api/v1/calendar/resolve",
   "/api/v1/classroom-demo/sign-in",
 ]);
 const server = https.createServer({ key: fs.readFileSync(keyPath), cert: fs.readFileSync(certPath) }, (req, res) => {

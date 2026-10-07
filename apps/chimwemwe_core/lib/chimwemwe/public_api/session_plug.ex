@@ -52,8 +52,15 @@ defmodule Chimwemwe.PublicApi.SessionPlug do
   defp purpose("POST", "/api/v1/session/logout"), do: {:ok, :session_logout}
   defp purpose("POST", "/api/v1/session/support/elevate"), do: {:ok, :support_elevate}
   defp purpose("GET", "/api/v1/classroom/classes"), do: {:ok, :classroom_read}
+  defp purpose("GET", "/api/v1/classroom/preparation"), do: {:ok, :classroom_read}
+  defp purpose("POST", "/api/v1/classroom/prepare-class"), do: {:ok, :classroom_prepare}
+  defp purpose("POST", "/api/v1/classroom/add-student"), do: {:ok, :classroom_prepare}
   defp purpose("POST", "/api/v1/classroom/prepare-attendance"), do: {:ok, :classroom_read}
   defp purpose("POST", "/api/v1/classroom/submit-attendance"), do: {:ok, :classroom_submit}
+  defp purpose("GET", "/api/v1/calendar/preparation"), do: {:ok, :calendar_read}
+  defp purpose("POST", "/api/v1/calendar/save-draft"), do: {:ok, :calendar_manage}
+  defp purpose("POST", "/api/v1/calendar/publish"), do: {:ok, :calendar_manage}
+  defp purpose("POST", "/api/v1/calendar/resolve"), do: {:ok, :calendar_read}
   defp purpose(_method, _path), do: :error
 
   defp locale(conn) do

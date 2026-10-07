@@ -14,6 +14,19 @@ defmodule Chimwemwe.PublicApi.ClassroomOpenApi do
         "mark" => %{"anyOf" => [mark, %{"type" => "null"}]}
       })
 
+    prepared_class =
+      object(%{
+        "id" => uuid,
+        "code" => %{"type" => "string", "pattern" => "^[a-z][a-z0-9_]{0,79}$"},
+        "label" => %{"type" => "string", "minLength" => 1, "maxLength" => 160}
+      })
+
+    prepared_student =
+      object(%{
+        "id" => uuid,
+        "name" => %{"type" => "string", "minLength" => 1, "maxLength" => 200}
+      })
+
     %{
       "AssignedClassesResponse" => object(%{"data" => array(class, 12)}),
       "PrepareAttendanceRequest" => object(%{"class_id" => uuid}),
@@ -28,6 +41,28 @@ defmodule Chimwemwe.PublicApi.ClassroomOpenApi do
           "submission_id" => %{"anyOf" => [uuid, %{"type" => "null"}]}
         }),
       "AttendanceResponse" => object(%{"data" => ref("AttendanceView")}),
+      "ClassroomPreparationView" =>
+        object(%{
+          "institution_name" => %{"type" => "string"},
+          "academic_year_label" => %{"type" => "string"},
+          "educator_name" => %{"type" => "string"},
+          "class" => %{"anyOf" => [prepared_class, %{"type" => "null"}]},
+          "students" => array(prepared_student, 60)
+        }),
+      "ClassroomPreparationResponse" => object(%{"data" => ref("ClassroomPreparationView")}),
+      "PrepareClassRequest" =>
+        object(%{
+          "code" => %{"type" => "string", "pattern" => "^[a-z][a-z0-9_]{0,79}$"},
+          "label" => %{"type" => "string", "minLength" => 1, "maxLength" => 160},
+          "idempotency_key" => uuid,
+          "causation_id" => uuid
+        }),
+      "AddStudentRequest" =>
+        object(%{
+          "display_name" => %{"type" => "string", "minLength" => 1, "maxLength" => 200},
+          "idempotency_key" => uuid,
+          "causation_id" => uuid
+        }),
       "SubmitAttendanceRequest" =>
         object(%{
           "class_id" => uuid,
@@ -48,6 +83,33 @@ defmodule Chimwemwe.PublicApi.ClassroomOpenApi do
       "/api/v1/classroom/classes" => %{
         "get" => operation("assignedClasses", nil, "AssignedClassesResponse")
       },
+      "/api/v1/classroom/preparation" => %{
+        "get" =>
+          operation(
+            "classroomPreparation",
+            nil,
+            "ClassroomPreparationResponse",
+            "Read one server-owned local synthetic preparation workspace. No directory, selector, search or pagination."
+          )
+      },
+      "/api/v1/classroom/prepare-class" => %{
+        "post" =>
+          operation(
+            "prepareClass",
+            "PrepareClassRequest",
+            "ClassroomPreparationResponse",
+            "Create the workspace's one class and educator assignment atomically. Scope is server-owned. POST requires exact Origin and X-CSRF-Token; do not retry with a new idempotency key."
+          )
+      },
+      "/api/v1/classroom/add-student" => %{
+        "post" =>
+          operation(
+            "addStudentToPreparedClass",
+            "AddStudentRequest",
+            "ClassroomPreparationResponse",
+            "Register one fictional student, participation, enrolment and placement atomically. Maximum 60 students. POST requires exact Origin and X-CSRF-Token; do not retry with a new idempotency key."
+          )
+      },
       "/api/v1/classroom/prepare-attendance" => %{
         "post" => operation("prepareAttendance", "PrepareAttendanceRequest", "AttendanceResponse")
       },
@@ -58,12 +120,13 @@ defmodule Chimwemwe.PublicApi.ClassroomOpenApi do
     }
   end
 
-  defp operation(id, input, output) do
+  defp operation(id, input, output, description \\ nil) do
     common = %{
       "operationId" => id,
       "security" => [%{"applicationSession" => []}],
       "description" =>
-        "Disabled by default. Local synthetic HTTPS qualification only. Today and assigned classes only; no arbitrary dates, search or pagination. Cumulative actor/day scope: 12 classes, 720 people. POST requires exact Origin and X-CSRF-Token. No automatic retry.",
+        description ||
+          "Disabled by default. Local synthetic HTTPS qualification only. Today and assigned classes only; no arbitrary dates, search or pagination. Cumulative actor/day scope: 12 classes, 720 people. POST requires exact Origin and X-CSRF-Token. No automatic retry.",
       "responses" =>
         Map.new([200, 400, 401, 403, 404, 409, 503], fn status ->
           {Integer.to_string(status),

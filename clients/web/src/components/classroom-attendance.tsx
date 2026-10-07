@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import createClient from "openapi-fetch";
 import type { components, paths } from "../generated/public/session-schema";
-import { ActionButton } from "../design-system/components/actions";
+import { ActionButton, ActionLink } from "../design-system/components/actions";
 import { PageHeading } from "../design-system/components/page-heading";
 import { Panel } from "../design-system/components/panel";
 
@@ -157,6 +157,11 @@ export function ClassroomAttendance() {
         Fictional people and a prepared class. Real school sign-in is not connected.
         Submitted attendance cannot yet be corrected.
       </p>
+      <div className="c-classroom__actions">
+        <ActionLink href="/classroom/setup" variant="secondary" icon="forward">
+          Prepare a class
+        </ActionLink>
+      </div>
       <p className="c-classroom__message" role="status" aria-live="polite">
         {message}
       </p>

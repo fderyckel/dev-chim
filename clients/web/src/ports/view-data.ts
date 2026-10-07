@@ -66,6 +66,7 @@ export type PreviewViewData = Readonly<{
 export type AcademicCalendarPeriod = Readonly<{
   id: string;
   label: string;
+  periodTypeKey?: string;
   sequence: number;
   startOn: string;
   endOn: string;

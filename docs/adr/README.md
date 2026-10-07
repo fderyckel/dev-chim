@@ -65,5 +65,6 @@ Short summaries may aid readers, but must not become separately maintained decis
 
 | [0038](0038-local-classroom-attendance-workflow.md) | Local session-bound classroom attendance | Proposed | Product and platform engineering | Project Owner authorized the bounded synthetic screen-to-writer increment; [workflow evidence](../phase-2/classroom-attendance-workflow-evidence.md) retains real-data and release gates |
 | [0039](0039-public-calendar-evidence-for-cf-3-engineering-entry.md) | Public-calendar evidence for CF-3 engineering entry | Accepted | François — Project Owner and interim Security/Privacy Owner | Official public operational calendars admit a disabled local synthetic CF-3 candidate without inventing representative testimony; institution-side, real-data, identity, pilot, deployment, and production gates remain |
+| [0040](0040-session-bound-classroom-preparation-workspace.md) | Session-bound classroom preparation workspace | Proposed | Product and platform engineering | Project Owner authorized the disabled local synthetic CF-4 preparation screen; implementation evidence must retain exact scope, atomic named actions, browser handoff and real-data gates |
 
 Allowed decision statuses are Proposed, Accepted, Conditionally Accepted, Rejected, Superseded, and Deferred. `Template` is reserved for ADR 0000.

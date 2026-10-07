@@ -4,6 +4,91 @@
  */
 
 export interface paths {
+    readonly "/api/v1/calendar/preparation": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** @description Disabled by default. Local synthetic HTTPS qualification for one server-selected calendar only. Calendar, academic-year, institution, tenant, actor, placement and capability authority are never accepted from browser input. POST requires exact Origin and X-CSRF-Token. No automatic retry. */
+        readonly get: operations["getCalendarPreparation"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/calendar/publish": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** @description Disabled by default. Local synthetic HTTPS qualification for one server-selected calendar only. Calendar, academic-year, institution, tenant, actor, placement and capability authority are never accepted from browser input. POST requires exact Origin and X-CSRF-Token. No automatic retry. */
+        readonly post: operations["publishAcademicYear"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/calendar/resolve": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** @description Disabled by default. Local synthetic HTTPS qualification for one server-selected calendar only. Calendar, academic-year, institution, tenant, actor, placement and capability authority are never accepted from browser input. POST requires exact Origin and X-CSRF-Token. No automatic retry. */
+        readonly post: operations["resolveCalendarDate"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/calendar/save-draft": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** @description Disabled by default. Local synthetic HTTPS qualification for one server-selected calendar only. Calendar, academic-year, institution, tenant, actor, placement and capability authority are never accepted from browser input. POST requires exact Origin and X-CSRF-Token. No automatic retry. */
+        readonly post: operations["saveCalendarDraft"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/classroom/add-student": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** @description Register one fictional student, participation, enrolment and placement atomically. Maximum 60 students. POST requires exact Origin and X-CSRF-Token; do not retry with a new idempotency key. */
+        readonly post: operations["addStudentToPreparedClass"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/classroom/classes": {
         readonly parameters: {
             readonly query?: never;
@@ -13,6 +98,23 @@ export interface paths {
         };
         /** @description Disabled by default. Local synthetic HTTPS qualification only. Today and assigned classes only; no arbitrary dates, search or pagination. Cumulative actor/day scope: 12 classes, 720 people. POST requires exact Origin and X-CSRF-Token. No automatic retry. */
         readonly get: operations["assignedClasses"];
+        readonly put?: never;
+        readonly post?: never;
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/classroom/preparation": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        /** @description Read one server-owned local synthetic preparation workspace. No directory, selector, search or pagination. */
+        readonly get: operations["classroomPreparation"];
         readonly put?: never;
         readonly post?: never;
         readonly delete?: never;
@@ -32,6 +134,23 @@ export interface paths {
         readonly put?: never;
         /** @description Disabled by default. Local synthetic HTTPS qualification only. Today and assigned classes only; no arbitrary dates, search or pagination. Cumulative actor/day scope: 12 classes, 720 people. POST requires exact Origin and X-CSRF-Token. No automatic retry. */
         readonly post: operations["prepareAttendance"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
+    readonly "/api/v1/classroom/prepare-class": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** @description Create the workspace's one class and educator assignment atomically. Scope is server-owned. POST requires exact Origin and X-CSRF-Token; do not retry with a new idempotency key. */
+        readonly post: operations["prepareClass"];
         readonly delete?: never;
         readonly options?: never;
         readonly head?: never;
@@ -116,6 +235,13 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        readonly AddStudentRequest: {
+            /** Format: uuid */
+            readonly causation_id: string;
+            readonly display_name: string;
+            /** Format: uuid */
+            readonly idempotency_key: string;
+        };
         readonly AssignedClassesResponse: {
             readonly data: readonly {
                 /** Format: uuid */
@@ -150,6 +276,79 @@ export interface components {
             }[];
             readonly submission_id: string | null;
         };
+        readonly CalendarPreparationResponse: {
+            readonly data: components["schemas"]["CalendarPreparationView"];
+        };
+        readonly CalendarPreparationView: {
+            readonly candidate_revision: string;
+            readonly definition: {
+                readonly closures: readonly {
+                    /** Format: date */
+                    readonly date: string;
+                    /** Format: uuid */
+                    readonly id: string;
+                    readonly label: string;
+                    readonly reason_key: string;
+                }[];
+                readonly code: string;
+                /** Format: date */
+                readonly end_on: string;
+                readonly instructional_weekdays: readonly number[];
+                readonly label: string;
+                readonly periods: readonly {
+                    /** Format: date */
+                    readonly end_on: string;
+                    /** Format: uuid */
+                    readonly id: string;
+                    readonly label: string;
+                    readonly period_type_key: string;
+                    readonly sequence: number;
+                    /** Format: date */
+                    readonly start_on: string;
+                }[];
+                /** Format: date */
+                readonly start_on: string;
+                readonly time_zone: string;
+            };
+            readonly instructional_date_count: number;
+            readonly lock_version: number;
+            /** @enum {string} */
+            readonly status: "draft" | "published";
+        };
+        readonly CalendarResolution: {
+            readonly academic_period_id: string | null;
+            readonly candidate_revision: string;
+            readonly closure_id: string | null;
+            readonly closure_reason_key: string | null;
+            /** Format: date */
+            readonly local_date: string;
+            /** @enum {string} */
+            readonly reason: "closure" | "instructional_weekday" | "ordinary_weekday_off" | "outside_period";
+            /** @enum {string} */
+            readonly status: "instructional" | "non_instructional";
+        };
+        readonly CalendarResolutionResponse: {
+            readonly data: components["schemas"]["CalendarResolution"];
+        };
+        readonly ClassroomPreparationResponse: {
+            readonly data: components["schemas"]["ClassroomPreparationView"];
+        };
+        readonly ClassroomPreparationView: {
+            readonly academic_year_label: string;
+            readonly class: {
+                readonly code: string;
+                /** Format: uuid */
+                readonly id: string;
+                readonly label: string;
+            } | null;
+            readonly educator_name: string;
+            readonly institution_name: string;
+            readonly students: readonly {
+                /** Format: uuid */
+                readonly id: string;
+                readonly name: string;
+            }[];
+        };
         readonly ElevateSupportRequest: {
             /** Format: uuid */
             readonly grant_id: string;
@@ -164,6 +363,59 @@ export interface components {
         readonly PrepareAttendanceRequest: {
             /** Format: uuid */
             readonly class_id: string;
+        };
+        readonly PrepareClassRequest: {
+            /** Format: uuid */
+            readonly causation_id: string;
+            readonly code: string;
+            /** Format: uuid */
+            readonly idempotency_key: string;
+            readonly label: string;
+        };
+        readonly PublishAcademicYearRequest: {
+            /** Format: uuid */
+            readonly causation_id: string;
+            readonly expected_version: number;
+            /** Format: uuid */
+            readonly idempotency_key: string;
+        };
+        readonly ResolveCalendarDateRequest: {
+            /** Format: date */
+            readonly local_date: string;
+        };
+        readonly SaveCalendarDraftRequest: {
+            /** Format: uuid */
+            readonly causation_id: string;
+            readonly closures: readonly {
+                /** Format: date */
+                readonly date: string;
+                /** Format: uuid */
+                readonly id: string;
+                readonly label: string;
+                readonly reason_key: string;
+            }[];
+            readonly code: string;
+            /** Format: date */
+            readonly end_on: string;
+            readonly expected_version: number;
+            /** Format: uuid */
+            readonly idempotency_key: string;
+            readonly instructional_weekdays: readonly number[];
+            readonly label: string;
+            readonly periods: readonly {
+                /** Format: date */
+                readonly end_on: string;
+                /** Format: uuid */
+                readonly id: string;
+                readonly label: string;
+                readonly period_type_key: string;
+                readonly sequence: number;
+                /** Format: date */
+                readonly start_on: string;
+            }[];
+            /** Format: date */
+            readonly start_on: string;
+            readonly time_zone: string;
         };
         readonly SessionData: {
             /** Format: uuid */
@@ -218,6 +470,404 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    readonly getCalendarPreparation: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Current writer result */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["CalendarPreparationResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 400: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 401: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 403: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 404: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 409: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 503: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    readonly publishAcademicYear: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                readonly Origin: string;
+                readonly "X-CSRF-Token": string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["PublishAcademicYearRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Current writer result */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["CalendarPreparationResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 400: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 401: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 403: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 404: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 409: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 503: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    readonly resolveCalendarDate: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                readonly Origin: string;
+                readonly "X-CSRF-Token": string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["ResolveCalendarDateRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Current writer result */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["CalendarResolutionResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 400: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 401: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 403: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 404: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 409: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 503: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    readonly saveCalendarDraft: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                readonly Origin: string;
+                readonly "X-CSRF-Token": string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["SaveCalendarDraftRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Current writer result */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["CalendarPreparationResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 400: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 401: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 403: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 404: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 409: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 503: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    readonly addStudentToPreparedClass: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                readonly Origin: string;
+                readonly "X-CSRF-Token": string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["AddStudentRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Current writer result */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ClassroomPreparationResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 400: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 401: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 403: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 404: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 409: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 503: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
     readonly assignedClasses: {
         readonly parameters: {
             readonly query?: never;
@@ -234,6 +884,80 @@ export interface operations {
                 };
                 content: {
                     readonly "application/json": components["schemas"]["AssignedClassesResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 400: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 401: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 403: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 404: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 409: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 503: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    readonly classroomPreparation: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody?: never;
+        readonly responses: {
+            /** @description Current writer result */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ClassroomPreparationResponse"];
                 };
             };
             /** @description Non-disclosing failure */
@@ -315,6 +1039,87 @@ export interface operations {
                 };
                 content: {
                     readonly "application/json": components["schemas"]["AttendanceResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 400: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 401: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 403: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 404: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 409: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 503: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    readonly prepareClass: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                readonly Origin: string;
+                readonly "X-CSRF-Token": string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["PrepareClassRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Current writer result */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ClassroomPreparationResponse"];
                 };
             };
             /** @description Non-disclosing failure */

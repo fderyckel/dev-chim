@@ -18,8 +18,11 @@
 CF-4A adds the private synthetic [people and participation foundation](people-foundation-evidence.md):
 student/staff participation and verified staff-account association without implied permissions.
 CF-4B adds the private synthetic [classroom setup foundation](classroom-foundation-evidence.md):
-class/register, year enrolment, teaching assignment and dated placement. Connected preparation
-and the educator roster/attendance workflow remain separate follow-ons.
+class/register, year enrolment, teaching assignment and dated placement. The disabled local
+[classroom preparation workflow](classroom-preparation-workflow-evidence.md) now lets a session-bound
+synthetic administrator create one class and add fictional students through the existing named
+actions, then opens that class in the educator attendance screen. Real identity, representative
+review, correction/recovery and release gates remain separate follow-ons.
 
 CF-1 now supplies private synthetic institutional registration, initial operator assignment,
 publication and an exact authorized read. See the
@@ -142,6 +145,12 @@ documents are not representative testimony. Institution-side validation, represe
 usability, independent review, selected identity/deployment, real data, pilot, and production
 remain later gates.
 
+The [CF-3 connected calendar workflow](connected-calendar-workflow-evidence.md) now passes its
+session, authority, writer, browser, responsive-layout, and automated-accessibility checks. The
+required repository gate passed the full 285-test core stage and then stopped at the retained
+frontend dependency-audit blocker. The bounded local candidate is complete, the repository is not
+green, and this is not an L2 release.
+
 On 2026-09-28, the Project Owner conditionally approved Phase 2.0 at the completed L1 foundation
 boundary. Slice 2.0-E is carried as a dated deferred condition: C25-05's expert/representative
 comprehension and accountable product-experience disposition is due by 2026-12-15 or before the
@@ -178,6 +187,8 @@ test, owner role, or later slice does not satisfy one of those later gates.
 - [Slice 2.1-C1 bounded legal-structure foundation evidence](legal-structure-foundation-evidence.md)
 - [Slice 2.1-C2a append-only lifecycle evidence](legal-structure-lifecycle-evidence.md)
 - [Academic calendar executable-contract evidence](academic-calendar-contract-evidence.md)
+- [CF-3 connected academic-calendar workflow evidence](connected-calendar-workflow-evidence.md)
+- [Classroom preparation workflow evidence](classroom-preparation-workflow-evidence.md)
 - [Slice 2.0-B operational outbox and module-drain evidence](operational-outbox-and-module-drain-evidence.md)
 - [Slice 2.0-C temporal completion and recovery evidence](temporal-completion-and-recovery-evidence.md)
 - [Temporal retention and recovery runbook](../operations/temporal-retention-and-recovery.md)

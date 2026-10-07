@@ -103,16 +103,21 @@ independent review and cannot be reused for real Restricted data or deployment.
 
 ## CF-3 implementation exit checklist
 
-- [ ] Only exact named calendar actions and exact reads are exposed.
-- [ ] Browser input cannot supply tenant, placement, capability, role, module state, or authority.
-- [ ] The writer supplies committed state and immediate read-after-write confirmation.
-- [ ] Success, validation, denial, stale-version, conflict, session, module, origin, CSRF, rollback,
+- [x] Only exact named calendar actions and exact reads are exposed.
+- [x] Browser input cannot supply tenant, placement, capability, role, module state, or authority.
+- [x] The writer supplies committed state and immediate read-after-write confirmation.
+- [x] Success, validation, denial, stale-version, conflict, session, module, origin, CSRF, rollback,
       interrupted-request, and stable non-disclosure states are tested.
-- [ ] Keyboard, focus, narrow layout, error recovery, and automated accessibility checks pass.
-- [ ] Rotation, recurrence, timetable, event, subscription, and import behavior remains absent.
-- [ ] Fixtures are fictional and contain no copied school operational dataset or personal data.
-- [ ] The candidate cannot be enabled outside the explicit local synthetic environment.
-- [ ] The required repository gate is run and its exact result is reported.
+- [x] Keyboard, focus, narrow layout, error recovery, and automated accessibility checks pass.
+- [x] Rotation, recurrence, timetable, event, subscription, and import behavior remains absent.
+- [x] Fixtures are fictional and contain no copied school operational dataset or personal data.
+- [x] The candidate cannot be enabled outside the explicit local synthetic environment.
+- [x] The required repository gate is run and its exact result is reported.
+
+Implementation and verification are recorded in the
+[CF-3 connected workflow evidence](connected-calendar-workflow-evidence.md). The local candidate
+meets this exit checklist, but the repository is not green: `make check` stopped at the retained
+frontend dependency-audit blocker documented there.
 
 ## Consolidated entry decision
 
@@ -130,3 +135,7 @@ independent review and cannot be reused for real Restricted data or deployment.
 
 Approval authorizes implementation and verification, not completion. CF-3 becomes complete only
 after the exit checklist and implementation evidence are recorded.
+
+The local synthetic CF-3 implementation candidate completed that bounded exit on 2026-10-06. This
+does not satisfy any retained adoption, representative, identity, deployment, pilot, real-data, or
+production gate above.

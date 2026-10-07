@@ -16,7 +16,7 @@ help:
 	@echo "check-clean Reproduce staged changes in a temporary clean checkout"
 	@echo "auth-demo  Start the local database-backed authentication administration proof"
 	@echo "legal-demo Seed the local synthetic Phase 2.1-C2a legal-structure demonstration"
-	@echo "classroom-demo Start the synthetic HTTPS attendance workflow"
+	@echo "classroom-demo Start the synthetic HTTPS attendance and calendar workflows"
 	@echo "web-dev    Start the local synthetic UI-0 browser workspace"
 	@echo "web-core-dev Start the local read-only UI-1A core connection"
 	@echo "web-check  Verify UI-0 formatting, styles, types, tests, and build"
