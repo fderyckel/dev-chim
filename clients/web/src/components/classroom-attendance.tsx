@@ -23,6 +23,7 @@ const client = createClient<Mutable<paths>>({
   cache: "no-store",
 });
 const markLabels = { present: "Present", absent: "Absent", late: "Late" } as const;
+const oidcSignInEnabled = process.env.NEXT_PUBLIC_CHIMWEMWE_OIDC_SIGN_IN === "true";
 
 export function ClassroomAttendance() {
   const [csrf, setCsrf] = useState<string | null>(null);
@@ -66,7 +67,11 @@ export function ClassroomAttendance() {
     const result = await client.GET("/api/v1/session");
     if (!result.data) {
       clearSession();
-      setMessage("Start a synthetic educator session to open your classes.");
+      setMessage(
+        oidcSignInEnabled
+          ? "Sign in with your school account to open your classes."
+          : "Start a synthetic educator session to open your classes.",
+      );
       return;
     }
     const token = result.data.data.csrf_token;
@@ -242,10 +247,18 @@ export function ClassroomAttendance() {
         eyebrow="Chimwemwe · classroom"
         title="Today’s attendance"
         description="Open your class, mark each student, and save the register."
-        aside={<p>Synthetic educator · local evaluation</p>}
+        aside={
+          <p>
+            {oidcSignInEnabled
+              ? "Educator · school account"
+              : "Synthetic educator · local evaluation"}
+          </p>
+        }
       />
       <p className="c-classroom__notice">
-        Fictional people and a prepared class. Real school sign-in is not connected.
+        {oidcSignInEnabled
+          ? "School account sign-in is available for the pre-linked educator configured by this deployment. "
+          : "Fictional people and a prepared class. Real school sign-in is not connected. "}
         Corrections are limited to today’s assigned class and retain every earlier
         register.
       </p>
@@ -258,23 +271,27 @@ export function ClassroomAttendance() {
         {message}
       </p>
       {!csrf ? (
-        <ActionButton
-          disabled={busy}
-          onClick={() =>
-            void guarded(async () => {
-              const result = await fetch("/api/v1/classroom-demo/sign-in", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: "{}",
-                cache: "no-store",
-              });
-              if (!result.ok) throw new Error("Sign-in unavailable");
-              await session();
-            })
-          }
-        >
-          Start synthetic educator session
-        </ActionButton>
+        oidcSignInEnabled ? (
+          <ActionLink href="/auth/sign-in">Sign in with your school account</ActionLink>
+        ) : (
+          <ActionButton
+            disabled={busy}
+            onClick={() =>
+              void guarded(async () => {
+                const result = await fetch("/api/v1/classroom-demo/sign-in", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: "{}",
+                  cache: "no-store",
+                });
+                if (!result.ok) throw new Error("Sign-in unavailable");
+                await session();
+              })
+            }
+          >
+            Start synthetic educator session
+          </ActionButton>
+        )
       ) : (
         <>
           <div className="c-classroom__actions">

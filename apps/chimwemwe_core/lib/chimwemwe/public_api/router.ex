@@ -57,6 +57,7 @@ defmodule Chimwemwe.PublicApi.Router do
   scope "/auth", Chimwemwe.PublicApi do
     pipe_through(:callback)
 
+    get("/sign-in", SignInController, :show)
     get("/callback", CallbackController, :show)
   end
 

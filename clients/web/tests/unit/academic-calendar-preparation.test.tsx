@@ -63,9 +63,16 @@ describe("the academic-calendar preparation screen", () => {
       screen.getByRole("heading", { name: "Prepare an academic calendar" }),
     ).toBeVisible();
     expect(screen.getByText("Not saved")).toBeVisible();
+    expect(screen.getByRole("tab", { name: "Calendar" })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: /15 Oct 2026/ })).toBeVisible();
     expect(screen.getByText("Named closure")).toBeVisible();
-    expect(screen.getAllByText("Mothers' Day")).toHaveLength(2);
+    expect(screen.getByText("Mothers' Day")).toBeVisible();
 
+    await user.click(screen.getByRole("tab", { name: "Form" }));
+    expect(screen.getAllByText("Mothers' Day")).toHaveLength(2);
     await user.clear(screen.getByLabelText("Term 2 Starts"));
     await user.type(screen.getByLabelText("Term 2 Starts"), "2026-12-18");
     await user.click(screen.getByRole("button", { name: "Preview calendar" }));

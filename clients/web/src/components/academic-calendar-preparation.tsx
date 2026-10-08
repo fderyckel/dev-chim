@@ -13,6 +13,11 @@ import {
   type CalendarPreview,
 } from "../lib/academic-calendar-preview";
 import type {
+  ModelViewRecord,
+  ModelViewSetDefinition,
+} from "../model-views/model-view-contract";
+import { ModelViewWorkspace } from "../model-views/model-view-workspace";
+import type {
   AcademicCalendarDraft,
   AcademicCalendarPreparationViewData,
 } from "../ports/view-data";
@@ -104,6 +109,39 @@ const reasonLabels = {
   outside_year: "Outside this academic year",
 } as const;
 
+const academicCalendarViewSet = {
+  schemaVersion: 1,
+  sourceRef: "academics.calendar.prepared_entries",
+  title: "Academic calendar entries",
+  identityField: "entry_id",
+  fields: [
+    { ref: "entry_id", label: "Entry", type: "text" },
+    { ref: "title", label: "Name", type: "text" },
+    { ref: "kind", label: "Type", type: "status" },
+    { ref: "start_on", label: "Starts", type: "date" },
+    { ref: "end_on", label: "Ends", type: "date" },
+  ],
+  views: [
+    {
+      kind: "calendar",
+      titleField: "title",
+      startField: "start_on",
+      endField: "end_on",
+      statusField: "kind",
+    },
+    { kind: "list", fields: ["title", "kind", "start_on", "end_on"] },
+    { kind: "form", fields: ["title", "kind", "start_on", "end_on"] },
+    {
+      kind: "gantt",
+      titleField: "title",
+      startField: "start_on",
+      endField: "end_on",
+      groupField: "kind",
+    },
+  ],
+  defaultView: "calendar",
+} as const satisfies ModelViewSetDefinition;
+
 export function AcademicCalendarPreparation({
   connected = false,
   viewData,
@@ -143,6 +181,22 @@ export function AcademicCalendarPreparation({
     connected && (busy || mustReload || writerView?.status === "published");
   const awaitingWriterResolution =
     connected && writerView?.status === "published" && !writerResolution;
+  const modelViewRecords: ReadonlyArray<ModelViewRecord> = [
+    ...preview.periods.map((period) => ({
+      entry_id: `period.${period.id}`,
+      title: period.label,
+      kind: "Academic period",
+      start_on: period.startOn,
+      end_on: period.endOn,
+    })),
+    ...preview.closures.map((closure) => ({
+      entry_id: `closure.${closure.id}`,
+      title: closure.label,
+      kind: "Closure",
+      start_on: closure.date,
+      end_on: closure.date,
+    })),
+  ];
 
   function applyWriterView(view: WriterView, message: string) {
     const nextDraft = draftFromWriter(view);
@@ -401,6 +455,70 @@ export function AcademicCalendarPreparation({
     setAnnouncement("Date resolved from the published calendar in the database.");
   }
 
+  const dateResolutionPanel = (
+    <section className="c-date-check" aria-labelledby="date-check-title">
+      <div className="c-date-check__heading">
+        <div className="c-date-check__fact">
+          <p className="c-panel__eyebrow">Date resolution</p>
+          <h2 id="date-check-title">What does this date mean?</h2>
+        </div>
+        <StatusBadge
+          tone={resolution.status === "instructional" ? "positive" : "neutral"}
+        >
+          {awaitingWriterResolution
+            ? "Not checked"
+            : resolution.status === "instructional"
+              ? "Instructional"
+              : "Non-instructional"}
+        </StatusBadge>
+      </div>
+      <label className="c-field" htmlFor="resolution-date">
+        <span className="c-field__label">Local calendar date</span>
+        <input
+          className="c-input"
+          id="resolution-date"
+          type="date"
+          value={resolutionDate}
+          onChange={(event) => {
+            setResolutionDate(event.target.value);
+            setWriterResolution(null);
+          }}
+        />
+      </label>
+      {connected && writerView?.status === "published" ? (
+        <ActionButton
+          disabled={busy}
+          onClick={() => void guarded(resolveWriterDate)}
+          variant="secondary"
+        >
+          Resolve date from database
+        </ActionButton>
+      ) : null}
+      {awaitingWriterResolution ? (
+        <p>Resolve this date to read its meaning from the published calendar.</p>
+      ) : (
+        <dl className="c-date-check__result">
+          <div>
+            <dt>Reason</dt>
+            <dd>{reasonLabels[resolution.reason]}</dd>
+          </div>
+          {resolution.periodLabel ? (
+            <div className="c-date-check__fact">
+              <dt>Term</dt>
+              <dd>{resolution.periodLabel}</dd>
+            </div>
+          ) : null}
+          {resolution.closureLabel ? (
+            <div className="c-date-check__fact">
+              <dt>Closure</dt>
+              <dd>{resolution.closureLabel}</dd>
+            </div>
+          ) : null}
+        </dl>
+      )}
+    </section>
+  );
+
   return (
     <div className="l-page-stack">
       <PageHeading
@@ -489,399 +607,393 @@ export function AcademicCalendarPreparation({
           </ActionButton>
         </Panel>
       ) : (
-        <div className="l-calendar-workspace">
-          <form className="c-calendar-form" onSubmit={previewCalendar}>
-            <header className="c-calendar-form__header">
-              <div>
-                <p className="c-panel__eyebrow">
-                  {connected ? "Writer-backed definition" : "Synthetic definition"}
-                </p>
-                <h2>Calendar details</h2>
-                <p className="c-calendar-form__institution">
-                  {viewData.institution.label}
-                </p>
-              </div>
-              <StatusBadge tone={dirty ? "attention" : "positive"}>
-                {dirty
-                  ? connected
-                    ? "Changes not saved"
-                    : "Changes not previewed"
-                  : connected
-                    ? writerView?.status === "published"
-                      ? "Published"
-                      : "Saved draft current"
-                    : "Preview current"}
-              </StatusBadge>
-            </header>
-
-            <div className="c-calendar-form__body">
-              <div className="l-calendar-fields">
-                <label className="c-field" htmlFor="calendar-label">
-                  <span className="c-field__label">Academic year label</span>
-                  <input
-                    className="c-input"
-                    id="calendar-label"
-                    disabled={editorDisabled}
-                    value={draft.label}
-                    onChange={(event) =>
-                      changeDraft({ ...draft, label: event.target.value })
-                    }
-                  />
-                </label>
-                <label className="c-field" htmlFor="calendar-code">
-                  <span className="c-field__label">Code</span>
-                  <input
-                    className="c-input"
-                    id="calendar-code"
-                    disabled={editorDisabled}
-                    value={draft.code}
-                    onChange={(event) =>
-                      changeDraft({ ...draft, code: event.target.value })
-                    }
-                  />
-                </label>
-              </div>
-
-              <div className="l-calendar-date-pair">
-                <label className="c-field" htmlFor="calendar-start">
-                  <span className="c-field__label">Year starts</span>
-                  <input
-                    className="c-input"
-                    id="calendar-start"
-                    disabled={editorDisabled}
-                    type="date"
-                    value={draft.startOn}
-                    onChange={(event) =>
-                      changeDraft({ ...draft, startOn: event.target.value })
-                    }
-                  />
-                </label>
-                <label className="c-field" htmlFor="calendar-end">
-                  <span className="c-field__label">Year ends</span>
-                  <input
-                    className="c-input"
-                    id="calendar-end"
-                    disabled={editorDisabled}
-                    type="date"
-                    value={draft.endOn}
-                    onChange={(event) =>
-                      changeDraft({ ...draft, endOn: event.target.value })
-                    }
-                  />
-                </label>
-              </div>
-
-              <label className="c-field" htmlFor="calendar-time-zone">
-                <span className="c-field__label">Calendar time zone</span>
-                <input
-                  className="c-input"
-                  id="calendar-time-zone"
-                  disabled={editorDisabled}
-                  value={draft.timeZone}
-                  onChange={(event) =>
-                    changeDraft({ ...draft, timeZone: event.target.value })
-                  }
-                />
-                <span className="c-field__hint">
-                  This calendar keeps its own explicit IANA time zone.
-                </span>
-              </label>
-
-              <fieldset className="c-weekday-fieldset">
-                <legend>Instructional weekdays</legend>
-                <div className="c-weekday-options">
-                  {weekdays.map((weekday) => (
-                    <label className="c-weekday-option" key={weekday.value}>
-                      <input
-                        className="c-weekday-option__control"
-                        checked={draft.instructionalWeekdays.includes(weekday.value)}
-                        disabled={editorDisabled}
-                        onChange={() => toggleWeekday(weekday.value)}
-                        type="checkbox"
-                      />
-                      <span className="c-weekday-option__short" aria-hidden="true">
-                        {weekday.short}
-                      </span>
-                      <span className="u-visually-hidden">{weekday.label}</span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-
-              <fieldset className="c-calendar-collection">
-                <legend>Terms</legend>
-                <div className="c-calendar-collection__items">
-                  {draft.periods.map((period) => (
-                    <div className="c-calendar-entry" key={period.id}>
-                      <label className="c-field" htmlFor={`term-${period.id}-label`}>
-                        <span className="c-field__label">Term {period.sequence}</span>
-                        <input
-                          className="c-input"
-                          id={`term-${period.id}-label`}
-                          disabled={editorDisabled}
-                          value={period.label}
-                          onChange={(event) =>
-                            updatePeriod(period.id, "label", event.target.value)
-                          }
-                        />
-                      </label>
-                      <div className="l-calendar-date-pair">
-                        <label className="c-field" htmlFor={`term-${period.id}-start`}>
-                          <span className="c-field__label">Starts</span>
-                          <input
-                            aria-label={`${period.label} Starts`}
-                            className="c-input"
-                            id={`term-${period.id}-start`}
-                            disabled={editorDisabled}
-                            type="date"
-                            value={period.startOn}
-                            onChange={(event) =>
-                              updatePeriod(period.id, "startOn", event.target.value)
-                            }
-                          />
-                        </label>
-                        <label className="c-field" htmlFor={`term-${period.id}-end`}>
-                          <span className="c-field__label">Ends</span>
-                          <input
-                            aria-label={`${period.label} Ends`}
-                            className="c-input"
-                            id={`term-${period.id}-end`}
-                            disabled={editorDisabled}
-                            type="date"
-                            value={period.endOn}
-                            onChange={(event) =>
-                              updatePeriod(period.id, "endOn", event.target.value)
-                            }
-                          />
-                        </label>
-                      </div>
+        <ModelViewWorkspace
+          definition={academicCalendarViewSet}
+          records={modelViewRecords}
+          selectedDate={resolutionDate}
+          onSelectDate={(value) => {
+            setResolutionDate(value);
+            setWriterResolution(null);
+          }}
+          overrides={{
+            form: (
+              <div className="l-calendar-workspace">
+                <form className="c-calendar-form" onSubmit={previewCalendar}>
+                  <header className="c-calendar-form__header">
+                    <div>
+                      <p className="c-panel__eyebrow">
+                        {connected
+                          ? "Writer-backed definition"
+                          : "Synthetic definition"}
+                      </p>
+                      <h2>Calendar details</h2>
+                      <p className="c-calendar-form__institution">
+                        {viewData.institution.label}
+                      </p>
                     </div>
-                  ))}
-                </div>
-              </fieldset>
+                    <StatusBadge tone={dirty ? "attention" : "positive"}>
+                      {dirty
+                        ? connected
+                          ? "Changes not saved"
+                          : "Changes not previewed"
+                        : connected
+                          ? writerView?.status === "published"
+                            ? "Published"
+                            : "Saved draft current"
+                          : "Preview current"}
+                    </StatusBadge>
+                  </header>
 
-              <fieldset className="c-calendar-collection">
-                <legend>Closures</legend>
-                <div className="c-calendar-collection__items">
-                  {draft.closures.map((closure) => (
-                    <div
-                      className="c-calendar-entry c-calendar-entry--closure"
-                      key={closure.id}
-                    >
-                      <label
-                        className="c-field"
-                        htmlFor={`closure-${closure.id}-label`}
-                      >
-                        <span className="c-field__label">Closure label</span>
+                  <div className="c-calendar-form__body">
+                    <div className="l-calendar-fields">
+                      <label className="c-field" htmlFor="calendar-label">
+                        <span className="c-field__label">Academic year label</span>
                         <input
                           className="c-input"
-                          id={`closure-${closure.id}-label`}
+                          id="calendar-label"
                           disabled={editorDisabled}
-                          value={closure.label}
+                          value={draft.label}
                           onChange={(event) =>
-                            updateClosure(closure.id, "label", event.target.value)
+                            changeDraft({ ...draft, label: event.target.value })
                           }
                         />
                       </label>
-                      <label className="c-field" htmlFor={`closure-${closure.id}-date`}>
-                        <span className="c-field__label">Date</span>
+                      <label className="c-field" htmlFor="calendar-code">
+                        <span className="c-field__label">Code</span>
                         <input
                           className="c-input"
-                          id={`closure-${closure.id}-date`}
+                          id="calendar-code"
+                          disabled={editorDisabled}
+                          value={draft.code}
+                          onChange={(event) =>
+                            changeDraft({ ...draft, code: event.target.value })
+                          }
+                        />
+                      </label>
+                    </div>
+
+                    <div className="l-calendar-date-pair">
+                      <label className="c-field" htmlFor="calendar-start">
+                        <span className="c-field__label">Year starts</span>
+                        <input
+                          className="c-input"
+                          id="calendar-start"
                           disabled={editorDisabled}
                           type="date"
-                          value={closure.date}
+                          value={draft.startOn}
                           onChange={(event) =>
-                            updateClosure(closure.id, "date", event.target.value)
+                            changeDraft({ ...draft, startOn: event.target.value })
+                          }
+                        />
+                      </label>
+                      <label className="c-field" htmlFor="calendar-end">
+                        <span className="c-field__label">Year ends</span>
+                        <input
+                          className="c-input"
+                          id="calendar-end"
+                          disabled={editorDisabled}
+                          type="date"
+                          value={draft.endOn}
+                          onChange={(event) =>
+                            changeDraft({ ...draft, endOn: event.target.value })
                           }
                         />
                       </label>
                     </div>
-                  ))}
-                </div>
-              </fieldset>
 
-              {errors.length > 0 ? (
-                <div className="c-calendar-errors" role="alert">
-                  <strong>Preview needs attention</strong>
-                  <ul>
-                    {errors.map((error) => (
-                      <li key={error}>{error}</li>
-                    ))}
-                  </ul>
-                </div>
-              ) : null}
-            </div>
-
-            <footer className="c-calendar-form__actions">
-              <ActionButton
-                disabled={editorDisabled || (connected && !dirty)}
-                type="submit"
-                variant="primary"
-              >
-                {connected ? (busy ? "Saving…" : "Save draft") : "Preview calendar"}
-              </ActionButton>
-              <ActionButton disabled={busy} onClick={resetExample} variant="secondary">
-                {connected ? "Reload from database" : "Reset example"}
-              </ActionButton>
-              {connected && writerView?.status === "draft" ? (
-                <ActionButton
-                  disabled={busy || dirty || mustReload}
-                  onClick={() => void guarded(publishCalendar)}
-                  variant="secondary"
-                >
-                  Publish academic year
-                </ActionButton>
-              ) : null}
-              <p className="c-calendar-form__note">
-                {connected
-                  ? writerView?.status === "published"
-                    ? "Published definitions are immutable in this slice."
-                    : "Publishing is irreversible in this local qualification slice."
-                  : "No save or publish action exists in this prototype."}
-              </p>
-            </footer>
-          </form>
-
-          <div className="c-calendar-preview" aria-label="Prepared calendar preview">
-            <Panel
-              eyebrow="Prepared result"
-              title={preview.definition.label}
-              titleId="calendar-preview-title"
-              badge={
-                <StatusBadge
-                  tone={writerView?.status === "published" ? "positive" : "information"}
-                >
-                  {connected
-                    ? writerView?.status === "published"
-                      ? "Published"
-                      : "Authoritative draft"
-                    : "Local preview"}
-                </StatusBadge>
-              }
-              footer={
-                connected
-                  ? `Time zone: ${preview.definition.timeZone} · Read from the core writer.`
-                  : `Time zone: ${preview.definition.timeZone} · This result is not persisted.`
-              }
-            >
-              <div className="c-calendar-metrics">
-                <div>
-                  <strong className="c-calendar-metrics__value">
-                    {preview.instructionalDateCount}
-                  </strong>
-                  <span className="c-calendar-metrics__label">Instructional dates</span>
-                </div>
-                <div>
-                  <strong className="c-calendar-metrics__value">
-                    {preview.periods.length}
-                  </strong>
-                  <span className="c-calendar-metrics__label">Terms</span>
-                </div>
-                <div>
-                  <strong className="c-calendar-metrics__value">
-                    {preview.closures.length}
-                  </strong>
-                  <span className="c-calendar-metrics__label">Closures</span>
-                </div>
-              </div>
-
-              <ol className="c-calendar-periods" aria-label="Prepared terms">
-                {preview.periods.map((period) => (
-                  <li className="c-calendar-periods__item" key={period.id}>
-                    <span className="c-calendar-periods__sequence">
-                      {period.sequence}
-                    </span>
-                    <span className="c-calendar-periods__copy">
-                      <strong>{period.label}</strong>
-                      <span className="c-calendar-periods__dates">
-                        {formatDate(period.startOn)} – {formatDate(period.endOn)}
+                    <label className="c-field" htmlFor="calendar-time-zone">
+                      <span className="c-field__label">Calendar time zone</span>
+                      <input
+                        className="c-input"
+                        id="calendar-time-zone"
+                        disabled={editorDisabled}
+                        value={draft.timeZone}
+                        onChange={(event) =>
+                          changeDraft({ ...draft, timeZone: event.target.value })
+                        }
+                      />
+                      <span className="c-field__hint">
+                        This calendar keeps its own explicit IANA time zone.
                       </span>
-                    </span>
-                  </li>
-                ))}
-              </ol>
+                    </label>
 
-              <div className="c-calendar-closures">
-                <h3>Named closures</h3>
-                <ul>
-                  {preview.closures.map((closure) => (
-                    <li className="c-calendar-closures__item" key={closure.id}>
-                      <strong>{closure.label}</strong>
-                      <span className="c-calendar-closures__date">
-                        {formatDate(closure.date)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </Panel>
+                    <fieldset className="c-weekday-fieldset">
+                      <legend>Instructional weekdays</legend>
+                      <div className="c-weekday-options">
+                        {weekdays.map((weekday) => (
+                          <label className="c-weekday-option" key={weekday.value}>
+                            <input
+                              className="c-weekday-option__control"
+                              checked={draft.instructionalWeekdays.includes(
+                                weekday.value,
+                              )}
+                              disabled={editorDisabled}
+                              onChange={() => toggleWeekday(weekday.value)}
+                              type="checkbox"
+                            />
+                            <span
+                              className="c-weekday-option__short"
+                              aria-hidden="true"
+                            >
+                              {weekday.short}
+                            </span>
+                            <span className="u-visually-hidden">{weekday.label}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
 
-            <section className="c-date-check" aria-labelledby="date-check-title">
-              <div className="c-date-check__heading">
-                <div className="c-date-check__fact">
-                  <p className="c-panel__eyebrow">Date resolution</p>
-                  <h2 id="date-check-title">What does this date mean?</h2>
-                </div>
-                <StatusBadge
-                  tone={resolution.status === "instructional" ? "positive" : "neutral"}
-                >
-                  {awaitingWriterResolution
-                    ? "Not checked"
-                    : resolution.status === "instructional"
-                      ? "Instructional"
-                      : "Non-instructional"}
-                </StatusBadge>
-              </div>
-              <label className="c-field" htmlFor="resolution-date">
-                <span className="c-field__label">Local calendar date</span>
-                <input
-                  className="c-input"
-                  id="resolution-date"
-                  type="date"
-                  value={resolutionDate}
-                  onChange={(event) => {
-                    setResolutionDate(event.target.value);
-                    setWriterResolution(null);
-                  }}
-                />
-              </label>
-              {connected && writerView?.status === "published" ? (
-                <ActionButton
-                  disabled={busy}
-                  onClick={() => void guarded(resolveWriterDate)}
-                  variant="secondary"
-                >
-                  Resolve date from database
-                </ActionButton>
-              ) : null}
-              {awaitingWriterResolution ? (
-                <p>
-                  Resolve this date to read its meaning from the published calendar.
-                </p>
-              ) : (
-                <dl className="c-date-check__result">
-                  <div>
-                    <dt>Reason</dt>
-                    <dd>{reasonLabels[resolution.reason]}</dd>
+                    <fieldset className="c-calendar-collection">
+                      <legend>Terms</legend>
+                      <div className="c-calendar-collection__items">
+                        {draft.periods.map((period) => (
+                          <div className="c-calendar-entry" key={period.id}>
+                            <label
+                              className="c-field"
+                              htmlFor={`term-${period.id}-label`}
+                            >
+                              <span className="c-field__label">
+                                Term {period.sequence}
+                              </span>
+                              <input
+                                className="c-input"
+                                id={`term-${period.id}-label`}
+                                disabled={editorDisabled}
+                                value={period.label}
+                                onChange={(event) =>
+                                  updatePeriod(period.id, "label", event.target.value)
+                                }
+                              />
+                            </label>
+                            <div className="l-calendar-date-pair">
+                              <label
+                                className="c-field"
+                                htmlFor={`term-${period.id}-start`}
+                              >
+                                <span className="c-field__label">Starts</span>
+                                <input
+                                  aria-label={`${period.label} Starts`}
+                                  className="c-input"
+                                  id={`term-${period.id}-start`}
+                                  disabled={editorDisabled}
+                                  type="date"
+                                  value={period.startOn}
+                                  onChange={(event) =>
+                                    updatePeriod(
+                                      period.id,
+                                      "startOn",
+                                      event.target.value,
+                                    )
+                                  }
+                                />
+                              </label>
+                              <label
+                                className="c-field"
+                                htmlFor={`term-${period.id}-end`}
+                              >
+                                <span className="c-field__label">Ends</span>
+                                <input
+                                  aria-label={`${period.label} Ends`}
+                                  className="c-input"
+                                  id={`term-${period.id}-end`}
+                                  disabled={editorDisabled}
+                                  type="date"
+                                  value={period.endOn}
+                                  onChange={(event) =>
+                                    updatePeriod(period.id, "endOn", event.target.value)
+                                  }
+                                />
+                              </label>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </fieldset>
+
+                    <fieldset className="c-calendar-collection">
+                      <legend>Closures</legend>
+                      <div className="c-calendar-collection__items">
+                        {draft.closures.map((closure) => (
+                          <div
+                            className="c-calendar-entry c-calendar-entry--closure"
+                            key={closure.id}
+                          >
+                            <label
+                              className="c-field"
+                              htmlFor={`closure-${closure.id}-label`}
+                            >
+                              <span className="c-field__label">Closure label</span>
+                              <input
+                                className="c-input"
+                                id={`closure-${closure.id}-label`}
+                                disabled={editorDisabled}
+                                value={closure.label}
+                                onChange={(event) =>
+                                  updateClosure(closure.id, "label", event.target.value)
+                                }
+                              />
+                            </label>
+                            <label
+                              className="c-field"
+                              htmlFor={`closure-${closure.id}-date`}
+                            >
+                              <span className="c-field__label">Date</span>
+                              <input
+                                className="c-input"
+                                id={`closure-${closure.id}-date`}
+                                disabled={editorDisabled}
+                                type="date"
+                                value={closure.date}
+                                onChange={(event) =>
+                                  updateClosure(closure.id, "date", event.target.value)
+                                }
+                              />
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+                    </fieldset>
+
+                    {errors.length > 0 ? (
+                      <div className="c-calendar-errors" role="alert">
+                        <strong>Preview needs attention</strong>
+                        <ul>
+                          {errors.map((error) => (
+                            <li key={error}>{error}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
                   </div>
-                  {resolution.periodLabel ? (
-                    <div className="c-date-check__fact">
-                      <dt>Term</dt>
-                      <dd>{resolution.periodLabel}</dd>
+
+                  <footer className="c-calendar-form__actions">
+                    <ActionButton
+                      disabled={editorDisabled || (connected && !dirty)}
+                      type="submit"
+                      variant="primary"
+                    >
+                      {connected
+                        ? busy
+                          ? "Saving…"
+                          : "Save draft"
+                        : "Preview calendar"}
+                    </ActionButton>
+                    <ActionButton
+                      disabled={busy}
+                      onClick={resetExample}
+                      variant="secondary"
+                    >
+                      {connected ? "Reload from database" : "Reset example"}
+                    </ActionButton>
+                    {connected && writerView?.status === "draft" ? (
+                      <ActionButton
+                        disabled={busy || dirty || mustReload}
+                        onClick={() => void guarded(publishCalendar)}
+                        variant="secondary"
+                      >
+                        Publish academic year
+                      </ActionButton>
+                    ) : null}
+                    <p className="c-calendar-form__note">
+                      {connected
+                        ? writerView?.status === "published"
+                          ? "Published definitions are immutable in this slice."
+                          : "Publishing is irreversible in this local qualification slice."
+                        : "No save or publish action exists in this prototype."}
+                    </p>
+                  </footer>
+                </form>
+
+                <div
+                  className="c-calendar-preview"
+                  aria-label="Prepared calendar preview"
+                >
+                  <Panel
+                    eyebrow="Prepared result"
+                    title={preview.definition.label}
+                    titleId="calendar-preview-title"
+                    badge={
+                      <StatusBadge
+                        tone={
+                          writerView?.status === "published"
+                            ? "positive"
+                            : "information"
+                        }
+                      >
+                        {connected
+                          ? writerView?.status === "published"
+                            ? "Published"
+                            : "Authoritative draft"
+                          : "Local preview"}
+                      </StatusBadge>
+                    }
+                    footer={
+                      connected
+                        ? `Time zone: ${preview.definition.timeZone} · Read from the core writer.`
+                        : `Time zone: ${preview.definition.timeZone} · This result is not persisted.`
+                    }
+                  >
+                    <div className="c-calendar-metrics">
+                      <div>
+                        <strong className="c-calendar-metrics__value">
+                          {preview.instructionalDateCount}
+                        </strong>
+                        <span className="c-calendar-metrics__label">
+                          Instructional dates
+                        </span>
+                      </div>
+                      <div>
+                        <strong className="c-calendar-metrics__value">
+                          {preview.periods.length}
+                        </strong>
+                        <span className="c-calendar-metrics__label">Terms</span>
+                      </div>
+                      <div>
+                        <strong className="c-calendar-metrics__value">
+                          {preview.closures.length}
+                        </strong>
+                        <span className="c-calendar-metrics__label">Closures</span>
+                      </div>
                     </div>
-                  ) : null}
-                  {resolution.closureLabel ? (
-                    <div className="c-date-check__fact">
-                      <dt>Closure</dt>
-                      <dd>{resolution.closureLabel}</dd>
+
+                    <ol className="c-calendar-periods" aria-label="Prepared terms">
+                      {preview.periods.map((period) => (
+                        <li className="c-calendar-periods__item" key={period.id}>
+                          <span className="c-calendar-periods__sequence">
+                            {period.sequence}
+                          </span>
+                          <span className="c-calendar-periods__copy">
+                            <strong>{period.label}</strong>
+                            <span className="c-calendar-periods__dates">
+                              {formatDate(period.startOn)} – {formatDate(period.endOn)}
+                            </span>
+                          </span>
+                        </li>
+                      ))}
+                    </ol>
+
+                    <div className="c-calendar-closures">
+                      <h3>Named closures</h3>
+                      <ul>
+                        {preview.closures.map((closure) => (
+                          <li className="c-calendar-closures__item" key={closure.id}>
+                            <strong>{closure.label}</strong>
+                            <span className="c-calendar-closures__date">
+                              {formatDate(closure.date)}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  ) : null}
-                </dl>
-              )}
-            </section>
-          </div>
-        </div>
+                  </Panel>
+
+                  {dateResolutionPanel}
+                </div>
+              </div>
+            ),
+          }}
+          supplements={{ calendar: dateResolutionPanel }}
+        />
       )}
 
       {!connected ? (

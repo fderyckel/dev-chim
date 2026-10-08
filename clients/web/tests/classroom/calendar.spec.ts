@@ -9,13 +9,17 @@ test("calendar owner saves, reloads, publishes and resolves one server-selected 
   const signIn = page.getByRole("button", {
     name: "Start synthetic calendar-owner session",
   });
-  await expect(signIn.or(page.getByLabel("Academic year label"))).toBeVisible();
+  await expect(signIn.or(page.getByRole("tab", { name: "Calendar" }))).toBeVisible();
   if (await signIn.isVisible()) await signIn.click();
 
   const status = page.locator(".c-calendar-status");
   await expect(status).toContainText("Saved draft loaded from the school database");
   await expect(page.getByText("Draft saved", { exact: true })).toBeVisible();
-  await expect(page.getByLabel("Academic year label")).toHaveValue("Synthetic year");
+  await expect(page.getByRole("tab", { name: "Calendar" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  await expect(page.getByRole("button", { name: /15 Oct 2026/ })).toBeVisible();
 
   for (const width of [1440, 768, 320]) {
     await page.setViewportSize({ width, height: 900 });
@@ -33,6 +37,8 @@ test("calendar owner saves, reloads, publishes and resolves one server-selected 
   }
 
   await page.setViewportSize({ width: 1440, height: 900 });
+  await page.getByRole("tab", { name: "Form" }).click();
+  await expect(page.getByLabel("Academic year label")).toHaveValue("Synthetic year");
   await page.getByLabel("Year starts").fill("2027-11-01");
   await page.getByRole("button", { name: "Save draft" }).click();
   await expect(page.locator(".c-calendar-errors")).toContainText(
@@ -59,6 +65,7 @@ test("calendar owner saves, reloads, publishes and resolves one server-selected 
   await save.press("Enter");
   await expect(status).toContainText("Draft saved and read back");
   await page.reload();
+  await page.getByRole("tab", { name: "Form" }).click();
   await expect(page.getByLabel("Academic year label")).toHaveValue(
     "Reviewed synthetic year",
   );

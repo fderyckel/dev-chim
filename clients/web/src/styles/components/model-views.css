@@ -1,0 +1,351 @@
+@layer components {
+  .c-model-workspace {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .c-model-view-tabs {
+    display: flex;
+    width: fit-content;
+    max-width: 100%;
+    gap: var(--space-1);
+    padding: var(--space-1);
+    overflow-x: auto;
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-subtle);
+  }
+
+  .c-model-view-tabs__tab,
+  .c-model-view-control {
+    min-height: 2.75rem;
+    padding: var(--space-2) var(--space-4);
+    border: var(--border-width) solid transparent;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--color-text-soft);
+    cursor: pointer;
+    font: inherit;
+    font-size: var(--font-size-sm);
+    font-weight: 750;
+    white-space: nowrap;
+  }
+
+  .c-model-view-tabs__tab[aria-selected="true"] {
+    border-color: var(--color-border-strong);
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: var(--shadow-raised);
+  }
+
+  .c-model-view-control {
+    border-color: var(--color-border-strong);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .c-model-view-control:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .c-model-workspace__panel {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .c-model-list {
+    max-width: 100%;
+    overflow-x: auto;
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+  }
+
+  .c-model-list table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .c-model-list caption {
+    padding: var(--space-4) var(--space-5);
+    color: var(--color-text);
+    font-size: var(--font-size-lg);
+    font-weight: 800;
+    text-align: left;
+  }
+
+  .c-model-list th,
+  .c-model-list td {
+    padding: var(--space-3) var(--space-5);
+    border-top: var(--border-width) solid var(--color-border);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .c-model-list th {
+    background: var(--color-surface-subtle);
+    color: var(--color-text-soft);
+    font-size: var(--font-size-xs);
+  }
+
+  .c-model-list td {
+    color: var(--color-text);
+    font-size: var(--font-size-sm);
+  }
+
+  .c-model-form {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+    padding: var(--space-5);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+  }
+
+  .c-model-form div {
+    min-width: 0;
+    padding: var(--space-3);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-subtle);
+  }
+
+  .c-model-form dt {
+    color: var(--color-text-soft);
+    font-size: var(--font-size-xs);
+    font-weight: 750;
+  }
+
+  .c-model-form dd {
+    margin-top: var(--space-1);
+    overflow-wrap: anywhere;
+    font-size: var(--font-size-sm);
+  }
+
+  .c-model-calendar {
+    overflow: hidden;
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+  }
+
+  .c-model-calendar__header {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-bottom: var(--border-width) solid var(--color-border);
+    background: var(--color-surface-subtle);
+  }
+
+  .c-model-calendar__header h2 {
+    text-align: center;
+  }
+
+  .c-model-calendar__weekdays,
+  .c-model-calendar__grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+  }
+
+  .c-model-calendar__weekdays {
+    border-bottom: var(--border-width) solid var(--color-border);
+    background: var(--color-surface-subtle);
+  }
+
+  .c-model-calendar__weekdays span {
+    padding: var(--space-2);
+    color: var(--color-text-soft);
+    font-size: var(--font-size-xs);
+    font-weight: 750;
+    text-align: center;
+  }
+
+  .c-model-calendar__day,
+  .c-model-calendar__blank {
+    min-width: 0;
+    min-height: 6.5rem;
+    border: 0;
+    border-right: var(--border-width) solid var(--color-border);
+    border-bottom: var(--border-width) solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .c-model-calendar__day {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    align-items: flex-start;
+    padding: var(--space-2);
+    color: var(--color-text);
+    cursor: pointer;
+    font: inherit;
+    text-align: left;
+  }
+
+  .c-model-view-tabs__tab:focus-visible,
+  .c-model-view-control:focus-visible,
+  .c-model-calendar__day:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+
+  .c-model-calendar__day[data-has-events="true"] {
+    background: var(--color-action-soft);
+  }
+
+  .c-model-calendar__day[aria-pressed="true"] {
+    box-shadow: inset 0 0 0 0.15rem var(--color-action);
+  }
+
+  .c-model-calendar__date {
+    display: grid;
+    width: 1.75rem;
+    min-height: 1.75rem;
+    place-items: center;
+    border-radius: 50%;
+    font-size: var(--font-size-sm);
+    font-weight: 800;
+  }
+
+  .c-model-calendar__day[aria-pressed="true"] .c-model-calendar__date {
+    background: var(--color-action);
+    color: var(--color-surface);
+  }
+
+  .c-model-calendar__event {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--color-action-strong);
+    font-size: var(--font-size-xs);
+    font-weight: 750;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .c-model-gantt {
+    overflow: hidden;
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface);
+  }
+
+  .c-model-gantt__chart {
+    display: block;
+    width: 100%;
+    min-height: 12rem;
+    background: var(--color-surface);
+  }
+
+  .c-model-gantt__gridline {
+    stroke: var(--color-border);
+    stroke-width: 1;
+  }
+
+  .c-model-gantt__tick,
+  .c-model-gantt__label {
+    fill: var(--color-text-soft);
+    font-family: inherit;
+    font-size: 13px;
+  }
+
+  .c-model-gantt__label {
+    fill: var(--color-text);
+    font-weight: 750;
+  }
+
+  .c-model-gantt__bar {
+    fill: var(--color-action);
+  }
+
+  .c-model-gantt__bar--point {
+    fill: var(--color-attention-text);
+  }
+
+  .c-model-gantt__dates {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border-top: var(--border-width) solid var(--color-border);
+  }
+
+  .c-model-gantt__dates li {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    padding: var(--space-3);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-subtle);
+    font-size: var(--font-size-xs);
+  }
+
+  .c-model-view-error,
+  .c-model-view-empty {
+    padding: var(--space-4);
+    border: var(--border-width) solid var(--color-critical-text);
+    border-radius: var(--radius-md);
+    background: var(--color-critical-surface);
+    color: var(--color-critical-text);
+  }
+
+  .c-model-view-error ul {
+    margin-top: var(--space-2);
+    padding-left: var(--space-5);
+  }
+
+  @media (width <= 44rem) {
+    .c-model-view-tabs {
+      width: 100%;
+    }
+
+    .c-model-view-tabs__tab {
+      min-width: 0;
+      flex: 1 1 0;
+      padding-inline: var(--space-1);
+      font-size: var(--font-size-xs);
+    }
+
+    .c-model-calendar__header {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .c-model-calendar__header h2 {
+      grid-column: 1 / -1;
+      grid-row: 1;
+    }
+
+    .c-model-calendar__day,
+    .c-model-calendar__blank {
+      min-height: 4rem;
+    }
+
+    .c-model-calendar__day {
+      padding: var(--space-1);
+    }
+
+    .c-model-calendar__event {
+      display: none;
+    }
+
+    .c-model-form,
+    .c-model-gantt__dates {
+      grid-template-columns: 1fr;
+    }
+
+    .c-model-gantt__chart {
+      display: none;
+    }
+
+    .c-model-gantt__dates {
+      border-top: 0;
+    }
+  }
+}

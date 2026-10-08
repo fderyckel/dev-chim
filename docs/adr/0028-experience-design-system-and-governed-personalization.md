@@ -22,7 +22,9 @@ constrained React APIs for the first repeated primitives, but UI-0 remains a syn
 harness rather than a production design system. The bounded DS-3 technical proof adds three
 complete local profile candidates and an in-memory preview/reset path. It still has no approved
 public dark mode or typography choice, durable user preference, tenant default, or representative
-human evidence that the candidates improve outcomes.
+human evidence that the candidates improve outcomes. The Project Owner approved the revised
+profiles to enter representative testing on 2026-10-03 and authorized the representative-review
+packet on 2026-10-08; no participant session or final profile disposition is recorded yet.
 
 Unbounded theming would solve the wrong problem. Arbitrary CSS, user-supplied colors, font URLs,
 or per-tenant component overrides could make warning and error meaning inconsistent, damage
@@ -257,6 +259,10 @@ the [DS-2 implementation evidence](../phase-1/handover-evidence.md), and
 the complete-profile, first-paint, accessibility-preference, non-persistence, matrix, and rendered
 review recorded in the
 [DS-3 technical evidence](../phase-1/handover-evidence.md). The
+[DS-3 representative review packet](../phase-2/design-system-representative-review-packet.md) and
+[blank evidence register](../phase-2/design-system-representative-review-evidence.md) define the
+authorized participant boundary, privacy controls, tasks, measures, and retain/revise/remove
+disposition without claiming that readiness is human evidence. The
 [DTCG 2025.10 format](https://www.designtokens.org/TR/2025.10/format/) is a stable Community Group
 report for interoperable typed token data; it is not itself proof that a Chimwemwe token compiler
 or theme is correct. [WCAG 2.2](https://www.w3.org/TR/WCAG22/) is the minimum conformance baseline,

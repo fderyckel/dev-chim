@@ -28,6 +28,23 @@ now appends immutable corrections to today's saved register and recovers from an
 response through authoritative reload and exact retry. Backdating, correction policy, Restricted
 consumer delivery and connected use remain outside that proof.
 
+The next bounded identity increment adds the disabled
+[selected OIDC educator sign-in candidate](selected-oidc-educator-sign-in-evidence.md). It carries
+one startup-selected, pre-linked educator through a real authorization-code, S256 PKCE, nonce and
+signed-token protocol path before creating the existing opaque application session. Its local
+provider harness is synthetic. No institution, real provider, credential, subject, environment or
+connected-release decision has been supplied or qualified.
+
+[ADR 0044](../adr/0044-administrator-provisioned-local-credentials.md) subsequently selects
+administrator-provisioned local credentials as the initial authentication direction: an authorized
+administrator chooses an existing staff record, enters an email sign-in name, and receives a random
+temporary password that must be replaced at first login. The database-backed loopback candidate is
+synthetic and does not grant tenant or classroom authority. Its remaining real-staff, administrator
+MFA, HTTPS/session, secure-delivery/recovery, abuse-control, representative-review, and release work
+is recorded in the
+[local authentication production qualification plan](../plans/local-authentication-production-qualification-plan.md).
+OIDC remains an optional independent path rather than a prerequisite or automatic fallback.
+
 CF-1 now supplies private synthetic institutional registration, initial operator assignment,
 publication and an exact authorized read. See the
 [implementation evidence and calendar handoff](institutional-foundation-evidence.md). Connected
@@ -195,12 +212,14 @@ test, owner role, or later slice does not satisfy one of those later gates.
 - [Classroom preparation workflow evidence](classroom-preparation-workflow-evidence.md)
 - [Local classroom attendance workflow evidence](classroom-attendance-workflow-evidence.md)
 - [Attendance correction and request-recovery evidence](attendance-correction-and-recovery-evidence.md)
+- [Selected OIDC educator sign-in candidate evidence](selected-oidc-educator-sign-in-evidence.md)
 - [Slice 2.0-B operational outbox and module-drain evidence](operational-outbox-and-module-drain-evidence.md)
 - [Slice 2.0-C temporal completion and recovery evidence](temporal-completion-and-recovery-evidence.md)
 - [Temporal retention and recovery runbook](../operations/temporal-retention-and-recovery.md)
 - [Identity, session, and support-access decision review](identity-session-and-support-access-decision-review.md)
 - [Identity, session, and support-access implementation evidence](identity-session-and-support-access-implementation-evidence.md)
 - [ADR 0030: same-origin public session and named-action boundary](../adr/0030-same-origin-public-session-and-named-action-boundary.md)
+- [ADR 0042: selected OIDC educator sign-in candidate](../adr/0042-selected-oidc-educator-sign-in-candidate.md)
 - [Identity, session, and support-access operating runbook](../operations/identity-session-and-support-access.md)
 - [Phase 2 entry and institutional-structure proposal](../plans/phase-2-entry-and-school-structure-proposal.md)
 - [Proposed identity, people, relationships, and access plan](../plans/phase-2-identity-people-relationships-and-access-proposal.md) — companion planning only; it does not expand the authorized Phase 2.0/2.1 implementation scope

@@ -11,6 +11,7 @@ statuses; these guides explain their detailed contracts without granting impleme
 
 - [Core foundation boundary](core-foundation-boundary.md)
 - [Domain model authoring and metadata workflow](../development/code-conventions.md#domain-model-authoring)
+- [Governed model and workflow views](governed-model-views.md)
 - [Temporal records, correction, and evidence](temporal-records-correction-and-evidence.md)
 - [Academic calendar authority](academic-calendar-authority.md)
 - [Tenant placement and workload capacity](tenant-placement-and-capacity.md)

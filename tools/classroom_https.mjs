@@ -11,7 +11,7 @@ const routes = new Set([
   "/api/v1/classroom/correct-attendance",
   "/api/v1/calendar/preparation", "/api/v1/calendar/save-draft",
   "/api/v1/calendar/publish", "/api/v1/calendar/resolve",
-  "/api/v1/classroom-demo/sign-in",
+  "/api/v1/classroom-demo/sign-in", "/auth/sign-in", "/auth/callback",
 ]);
 const server = https.createServer({ key: fs.readFileSync(keyPath), cert: fs.readFileSync(certPath) }, (req, res) => {
   const path = new URL(req.url, "https://localhost:3013").pathname;

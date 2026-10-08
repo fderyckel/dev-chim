@@ -93,8 +93,12 @@ workflow, module gates, classification, relationships, uniqueness, invariants, o
 calculations; safeguarding, attendance, finance, statutory, contractual, audit, or legal evidence;
 stable API, integration, import/export, or cross-module contracts; or material indexing, joins,
 aggregation, retention, or recovery guarantees. Even non-critical local fields need separately
-approved storage and query design based on actual use cases. General renderers, visual model
-builders, and schema compilers also require the evidence and approval in
+approved storage and query design based on actual use cases. The bounded local synthetic renderer
+in [ADR 0043](../adr/0043-governed-model-and-workflow-views.md) and its
+[architecture guide](../architecture/governed-model-views.md) may present only an already-authorized
+dataset through explicitly declared read views; it does not change the stored-definition contract
+above. Visual model builders, schema compilers, stored renderer integration and generic mutation
+still require separate evidence and authorization under
 [deferred choices](../architecture/deferred-choices.md).
 
 ## Python repository tooling
