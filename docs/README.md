@@ -2,6 +2,8 @@
 
 Documentation is part of the platform contract and changes with the code or decision it describes.
 
+- [Active six-week classroom plan](plans/classroom-first-six-week-plan.md): calendar, people,
+  enrolment, and daily attendance; approved priority for 5 October–15 November 2026.
 - [Architecture](architecture/README.md): stable boundaries, quality targets, and deferred choices.
 - [Architecture decisions](adr/README.md): numbered decisions and their evidence.
 - Development:
@@ -11,15 +13,16 @@ Documentation is part of the platform contract and changes with the code or deci
   - [Production-core migration discipline](development/migrations.md)
   - [Code conventions](development/code-conventions.md)
   - [Git and push conventions](development/git-workflow.md)
-- [Phase 0](phase-0/README.md): scope, decision register, risks, review, and evidence.
-- [Phase 1](phase-1/README.md): completed bounded core-foundation implementation and closure
-  evidence.
+- [Phase 0 archive](phase-0/README.md): what was decided, how it was tested, why it mattered,
+  and the consolidated handover evidence.
+- [Phase 1 archive](phase-1/README.md): what was implemented, how it was verified, why it
+  mattered, and the consolidated handover evidence.
 - [Phase 2](phase-2/README.md): entry-gate reconciliation and the recursive
   institutional-structure sequence.
 - [Security](security/threat-model.md): data classification, trust boundaries, and abuse cases.
 - [Operations](operations/README.md): bounded dispatch, replay, drain, temporal retention, and
   recovery runbooks.
-- Plans: [Phase 0](plans/phase-0-implementation-plan.md), the completed bounded [Phase 1 core foundation](plans/phase-1-core-foundation-plan.md), the accepted [Phase 2 entry sequence and revised institutional-structure proposal](plans/phase-2-entry-and-school-structure-proposal.md), the proposed [local browser experience foundation](plans/local-browser-experience-foundation-proposal.md), and the proposed [GitHub Actions CI-readiness path](plans/github-actions-ci-readiness-proposal.md).
+- Plans: the accepted [Phase 2 entry sequence and revised institutional-structure proposal](plans/phase-2-entry-and-school-structure-proposal.md), the proposed [local browser experience foundation](plans/local-browser-experience-foundation-proposal.md), and the proposed [GitHub Actions CI-readiness path](plans/github-actions-ci-readiness-proposal.md).
 
 ## Documentation conventions
 

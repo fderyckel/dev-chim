@@ -123,7 +123,7 @@ Current evidence consists of the accepted action, outbox, tenant, PostgreSQL, mi
 
 The 2026-09-24 [decision review](../architecture/temporal-records-decision-review.md) conditionally accepts the bounded contract and records TR-01 through TR-08 as binding gates. Before full Acceptance, the neutral proof must satisfy TR-01 through TR-07, pass the complete repository gate, record performance/migration/recovery limits, and receive accountable residual-risk review. Real domain retention, legal-hold, erasure, and reason vocabularies remain owner decisions rather than conclusions from synthetic fixtures.
 
-The 2026-09-25 [T1-C evidence](../phase-1/evidence/temporal-qualification-fact-and-reconciliation.md)
+The 2026-09-25 [T1-C evidence](../phase-1/handover-evidence.md)
 implements the neutral append-only record/reversal branch and one deliberate-reconciliation
 consumer. It closes those executable portions of TR-01 through TR-05 only. TR-06, TR-07,
 performance/migration/recovery limits, and final accountable review remained open at that
@@ -174,7 +174,7 @@ Before production data exists, exit cost is documentation and prototypes. After 
 - [Temporal records, correction, and evidence contract](../architecture/temporal-records-correction-and-evidence.md)
 - [Temporal records decision review](../architecture/temporal-records-decision-review.md)
 - [Temporal records synthetic scenario review](../architecture/temporal-records-synthetic-scenario-review.md)
-- [T1-C fact-and-reconciliation evidence](../phase-1/evidence/temporal-qualification-fact-and-reconciliation.md)
+- [T1-C fact-and-reconciliation evidence](../phase-1/handover-evidence.md)
 - [Slice 2.0-C temporal completion and recovery evidence](../phase-2/temporal-completion-and-recovery-evidence.md)
 - [Temporal retention and recovery runbook](../operations/temporal-retention-and-recovery.md)
 - [ADR 0003](0003-tenant-model-and-optional-postgresql-rls.md)

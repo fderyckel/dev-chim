@@ -21,6 +21,7 @@ defmodule Chimwemwe.Identity.SessionFoundation do
     :proof
   ]
   @rotate_keys [:causation_id, :idempotency_key, :membership_id, :token]
+  @sign_in_keys [:connection_id, :external_identity_link_id, :membership_id]
   @state_keys [:causation_id, :idempotency_key, :token]
   @validate_keys [:token]
 
@@ -32,6 +33,15 @@ defmodule Chimwemwe.Identity.SessionFoundation do
          :ok <- VerifiedExternalIdentity.validate(input.proof),
          :ok <- fresh_assurance(input.proof.authenticated_at) do
       write(runtime, context, &create_write(&1, input))
+    end
+  end
+
+  @doc "Rechecks one pre-linked sign-in target before any provider redirect or callback exchange."
+  @spec authorize_sign_in(Supervisor.supervisor(), term(), map()) ::
+          {:ok, map()} | {:error, term()}
+  def authorize_sign_in(runtime, context, input) do
+    with {:ok, input} <- normalize_sign_in(input) do
+      write(runtime, context, &authorize_sign_in_read(&1, input))
     end
   end
 
@@ -76,6 +86,58 @@ defmodule Chimwemwe.Identity.SessionFoundation do
   defp create_write(context, input) do
     with :ok <- lock_writes(context.tenant_id) do
       create_transaction(context, input)
+    end
+  end
+
+  defp authorize_sign_in_read(context, input) do
+    case Repo.query(
+           """
+           SELECT connection.id::text, connection.issuer,
+                  connection.application_identifier, connection.secret_reference,
+                  connection.assurance_mapping, connection.configuration_version
+           FROM platform_tenant_memberships AS membership
+           JOIN identity_external_identity_links AS link
+             ON link.id = $4 AND link.origin_tenant_id = membership.tenant_id
+             AND link.actor_id = membership.actor_id AND link.status = 'active'
+             AND link.protocol = 'oidc'
+           JOIN identity_connections AS connection
+             ON connection.id = link.connection_id AND connection.tenant_id = membership.tenant_id
+             AND connection.status = 'active' AND connection.protocol = 'oidc'
+             AND connection.issuer = link.issuer
+             AND connection.configuration_version = link.connection_configuration_version
+           WHERE membership.tenant_id = $1 AND membership.id = $2 AND membership.actor_id = $3
+             AND connection.id = $5
+           FOR KEY SHARE OF membership, link, connection
+           """,
+           [
+             dump(context.tenant_id),
+             dump(input.membership_id),
+             dump(context.actor_id),
+             dump(input.external_identity_link_id),
+             dump(input.connection_id)
+           ]
+         ) do
+      {:ok,
+       %{
+         rows: [
+           [id, issuer, application_identifier, secret_reference, assurance_mapping, version]
+         ]
+       }} ->
+        {:ok,
+         %{
+           id: id,
+           issuer: issuer,
+           application_identifier: application_identifier,
+           secret_reference: secret_reference,
+           assurance_mapping: assurance_mapping,
+           configuration_version: version
+         }}
+
+      {:ok, %{rows: []}} ->
+        error(:forbidden)
+
+      {:error, _error} ->
+        error(:retryable_dependency)
     end
   end
 
@@ -768,6 +830,20 @@ defmodule Chimwemwe.Identity.SessionFoundation do
     else
       {:error, %Error{} = identity_error} -> {:error, identity_error}
       _invalid -> error(:invalid_input)
+    end
+  end
+
+  defp normalize_sign_in(input) do
+    with {:ok, input} <- exact_input(input, @sign_in_keys),
+         {:ok, connection_id} <- uuid(input.connection_id),
+         {:ok, link_id} <- uuid(input.external_identity_link_id),
+         {:ok, membership_id} <- uuid(input.membership_id) do
+      {:ok,
+       %{
+         connection_id: connection_id,
+         external_identity_link_id: link_id,
+         membership_id: membership_id
+       }}
     end
   end
 

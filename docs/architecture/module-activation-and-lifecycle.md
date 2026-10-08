@@ -117,7 +117,7 @@ The slice proves this state contract with synthetic facts. It adds no real Oban/
 external consumer, cache/search/webhook/analytics integration, projection rebuilder, entitlement
 expiry, offboarding, retained-data access or deletion workflow, public interface, provisioning
 flow, or business module. See the
-[Slice 1H-B evidence](../phase-1/evidence/module-lifecycle-drain-reactivation.md).
+[Slice 1H-B evidence](../phase-1/handover-evidence.md).
 
 ## Phase 0 boundary and evidence
 

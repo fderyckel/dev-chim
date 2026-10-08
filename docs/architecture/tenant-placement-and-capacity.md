@@ -1,6 +1,6 @@
 # Tenant placement and workload capacity
 
-- Status: Proposed during Phase 0
+- Status: Architecture guide; decision status and conditions belong to the governing ADR
 - Owner: Architecture review group with platform engineering and operations
 - Governing record: [ADR 0003](../adr/0003-tenant-model-and-optional-postgresql-rls.md)
 - Review trigger: material workload, residency, recovery, isolation, or placement change
@@ -24,7 +24,11 @@ The words "small", "modest", and "large" are prohibited as capacity conclusions 
 
 ## Attendance planning model
 
-The current synthetic planning case assumes one attendance fact for each scheduled attendance opportunity:
+This section owns the shared synthetic workload assumptions and calculations used by placement
+and PostgreSQL planning. These are hypotheses, not benchmarks or performance targets; accepted
+targets are maintained in [quality-attribute targets](quality-attribute-targets.md).
+
+The planning case assumes one attendance fact for each scheduled attendance opportunity:
 
 | Population | Calculation | Baseline facts per year |
 | --- | --- | ---: |
@@ -36,17 +40,35 @@ The current synthetic planning case assumes one attendance fact for each schedul
 
 These figures exclude corrections, domain history, security audit, attendance sessions, outbox events, indexes, read models, analytical copies, WAL, replicas, backups, bloat, and temporary maintenance space. They also assume 200 attendance days and eight opportunities every day for every enrolled student. Evidence must replace those assumptions with distributions for the schools being planned.
 
-Average annual volume hides synchronized period-start bursts. A benchmark profile must define at least:
+Average annual volume hides synchronized period-start bursts. One period creates 5,000 logical
+facts for the large school and 8,200 across all five schools:
+
+| Peak window | 5,000-learner school | All five schools |
+| --- | ---: | ---: |
+| Five minutes | 16.7 facts/second | 27.3 facts/second |
+| One minute | 83.3 facts/second | 136.7 facts/second |
+| Thirty seconds | 166.7 facts/second | 273.3 facts/second |
+
+These are logical facts, not physical writes or transactions. With an illustrative average batch
+of 25 learners, the all-school case becomes about 328 tenant-qualified attendance-session
+transactions per period, or 10.9 transactions per second in 30 seconds.
+
+A benchmark profile distinguishes logical facts, transactions, physical writes, and retained storage:
 
 ```text
 base_facts_per_day = enrolled_students x attendance_opportunities_per_day
-peak_facts_per_second = facts_due_in_peak_window x write_amplification / peak_window_seconds
+peak_fact_rate = facts_due_in_peak_window / peak_window_seconds
+peak_transaction_rate = session_batches / peak_window_seconds
+physical_write_rate = peak_fact_rate x measured_write_amplification
+connection_demand = concurrent_actions x connections_held_per_action
 retained_oltp_bytes = facts x row_and_index_bytes x retention_and_bloat_factors
 ```
 
-The profile also records concurrent submissions, batch-size distribution, correction rate, idempotent retries, audit and outbox amplification, report overlap, projection lag, connection count, autovacuum behaviour, backup growth, and restore duration. Results without these inputs cannot justify a placement decision.
+Write amplification includes current state, immutable changes, security audit, outbox, indexes,
+WAL, corrections, retries, and any synchronous projection. The benchmark must measure it;
+architecture prose cannot assume a multiplier.
 
-For orientation only, one period creates 5,000 logical facts for the large school and 8,200 across all five schools. A 30-second window is approximately 166.7 and 273.3 logical facts per second respectively. With an illustrative average batch of 25 learners, the all-school case becomes about 328 tenant-qualified attendance-session transactions per period, or 10.9 transactions per second in 30 seconds. These figures do not include physical write amplification and are not performance targets.
+The profile also records concurrent submissions, batch-size distribution, correction rate, idempotent retries, audit and outbox amplification, report overlap, projection lag, connection count, autovacuum behaviour, backup growth, and restore duration. Results without these inputs cannot justify a placement decision.
 
 The infrastructure implication is to preserve one authoritative writer and reduce avoidable transaction and connection amplification through bounded session batches. A read replica cannot absorb writes. High availability, stale-tolerant read scaling, point-in-time recovery, and regional disaster recovery remain separate decisions governed by [ADR 0017](../adr/0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md) and [database operations and read routing](postgresql-availability-recovery-and-read-routing.md).
 
@@ -99,7 +121,7 @@ The routing contract must:
 
 Dynamic repositories establish technical feasibility, not routing safety. The Foundation Lab must test task and job boundaries, stale routing versions, placement changes, pool exhaustion, and deliberate attempts to choose another tenant's placement.
 
-The [Phase 0 trusted-routing evidence](../phase-0/evidence/trusted-routing.md) now exercises the routing, non-HTTP scoping, and abstract movement parts of this contract against two disposable PostgreSQL placements. That closes the Ash pressure-test gap only. A durable registry, authenticated production envelopes, real external adapters, copy/outbox/object choreography, connection pressure, backup, and restore remain acceptance evidence below.
+The [Phase 0 trusted-routing evidence](../phase-0/handover-evidence.md) now exercises the routing, non-HTTP scoping, and abstract movement parts of this contract against two disposable PostgreSQL placements. That closes the Ash pressure-test gap only. A durable registry, authenticated production envelopes, real external adapters, copy/outbox/object choreography, connection pressure, backup, and restore remain acceptance evidence below.
 
 ## Future attendance design constraints
 
@@ -123,13 +145,13 @@ Range partitioning by date or academic period remains evidence-driven. PostgreSQ
 - Synthetic synchronized-burst tests with named hardware, PostgreSQL settings, data shape, and pass thresholds.
 - Mixed workload tests covering attendance writes, corrections, operational summaries, reports, outbox dispatch, and permission revocation.
 - Pool saturation, lock, WAL, autovacuum, index-growth, backup, restore, and projection-lag measurements.
-- Multi-node calibration and a managed rerun of the noisy-tenant comparison; the [pre-checkout candidate](../phase-0/evidence/precheckout-admission-measurement.md) now proves node-local admission before its repository callback, while the earlier database proxy remains historical algorithm evidence only.
+- Multi-node calibration and a managed rerun of the noisy-tenant comparison; the [pre-checkout candidate](../phase-0/handover-evidence.md) now proves node-local admission before its repository callback, while the earlier database proxy remains historical algorithm evidence only.
 - Production-integration cross-placement negative tests for HTTP, tasks, jobs, events, files, caches, search, exports, telemetry, support, and AI tools; the disposable Phase 0 lab covers all except support at its routing abstraction.
 - An operational placement-movement drill with durable version conflict, copy/outbox/object reconciliation, rollback, backup, and restore evidence; the disposable Phase 0 lab covers the abstract versioned transition and database-row reconciliation only.
 - A five-school decision signed by architecture, security/privacy, and operations owners; the arithmetic alone is insufficient.
 - Availability evidence that distinguishes writer failover, replica lag, point-in-time restore, and regional recovery, with an explicit connection budget and read-consistency classification.
 
-The evidence template is [tenant-placement capacity evidence](../phase-0/evidence/tenant-placement-capacity.md).
+The evidence template is [tenant-placement capacity evidence](../phase-0/handover-evidence.md).
 
 ## External technical evidence
 

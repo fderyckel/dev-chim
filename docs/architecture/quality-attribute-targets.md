@@ -5,9 +5,9 @@
 - Accepted: 2026-09-16 by project-owner instruction using the architect's best engineering estimate
 - Review: 2026-12-15, or earlier on a material scale, scope, provider, region, or topology change
 
-The project owner explicitly authorized the architect to adopt the best engineering estimate instead of retaining a separate accountable target-approval gate. The [technical approval record](../phase-0/evidence/quality-targets-approval.md) accepts the complete [numeric recommendation](../phase-0/evidence/quality-target-recommendation.md) without amendment. These are falsifiable engineering planning targets, not customer-facing commitments, a budget approval, a legal-retention decision, or an approved business forecast.
+The project owner explicitly authorized the architect to adopt the best engineering estimate instead of retaining a separate accountable target-approval gate. The [technical approval record](../phase-0/handover-evidence.md) accepts the complete [numeric recommendation](../phase-0/handover-evidence.md) without amendment. These are falsifiable engineering planning targets, not customer-facing commitments, a budget approval, a legal-retention decision, or an approved business forecast.
 
-The [combined local measurement](../phase-0/evidence/capacity-and-recovery-measurement.md) evaluates the five-school burst and PostgreSQL recovery subset. Its raw pooled run preserves the failed noisy-tenant result. The [database-proxy fairness follow-up](../phase-0/evidence/tenant-fairness-backpressure-measurement.md) and [pre-checkout Elixir follow-up](../phase-0/evidence/precheckout-admission-measurement.md) pass their local gates. The former AWS estimate is [withdrawn](../phase-0/evidence/managed-postgresql-topology.md); the selected non-AWS deployment must later repeat the provider-specific gates.
+The [combined local measurement](../phase-0/handover-evidence.md) evaluates the five-school burst and PostgreSQL recovery subset. Its raw pooled run preserves the failed noisy-tenant result. The [database-proxy fairness follow-up](../phase-0/handover-evidence.md) and [pre-checkout Elixir follow-up](../phase-0/handover-evidence.md) pass their local gates. The former AWS estimate is [withdrawn](../phase-0/handover-evidence.md); the selected non-AWS deployment must later repeat the provider-specific gates.
 
 | Area | SLI | Numeric target | Load and environment | Owner |
 | --- | --- | --- | --- | --- |
@@ -34,4 +34,4 @@ The machine approval binds the exact recommendation by SHA-256. Each implementat
 
 Student or user count is an input, never a placement target. Each candidate placement must use the per-domain model in [tenant placement and workload capacity](tenant-placement-and-capacity.md), including burst windows, write amplification, mixed reporting, connections, retention, backup, restore, and isolation requirements.
 
-The current five-school attendance arithmetic is recorded in [tenant-placement capacity evidence](../phase-0/evidence/tenant-placement-capacity.md). It remains a synthetic planning hypothesis even though the engineering targets used to test it are now accepted.
+The current five-school attendance arithmetic is recorded in [tenant-placement capacity evidence](../phase-0/handover-evidence.md). It remains a synthetic planning hypothesis even though the engineering targets used to test it are now accepted.

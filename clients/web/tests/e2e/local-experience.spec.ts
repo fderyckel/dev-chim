@@ -122,10 +122,38 @@ test("the structure prototype separates linked meanings and blocks unknown impac
   await expect(page.getByRole("button")).toHaveCount(0);
 });
 
+test("the calendar preparation screen previews changes without offering save", async ({
+  page,
+}) => {
+  await page.goto("/academic-calendar");
+
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Prepare an academic calendar" }),
+  ).toBeVisible();
+  await expect(page.getByText("Not saved")).toBeVisible();
+  await expect(page.getByText("Named closure", { exact: true })).toBeVisible();
+  await expect(page.getByText("Mothers' Day", { exact: true })).toHaveCount(2);
+  await expect(page.getByRole("button", { name: /save|publish/i })).toHaveCount(0);
+
+  await page.getByLabel("Term 2 Starts").fill("2026-12-18");
+  await page.getByRole("button", { name: "Preview calendar" }).click();
+  await expect(page.locator(".c-calendar-errors")).toContainText(
+    "Term dates must not overlap.",
+  );
+
+  await page.getByRole("button", { name: "Reset example" }).click();
+  await expect(page.getByText("Preview current")).toBeVisible();
+});
+
 test("local prototype pages reflow without page-level horizontal scrolling", async ({
   page,
 }) => {
-  for (const path of ["/", "/institutional-structure", "/ui-preview"]) {
+  for (const path of [
+    "/",
+    "/academic-calendar",
+    "/institutional-structure",
+    "/ui-preview",
+  ]) {
     await page.goto(path);
     const widths = await page.evaluate(() => ({
       viewport: window.innerWidth,
@@ -142,7 +170,12 @@ test("local prototype pages reflow without page-level horizontal scrolling", asy
 test("local prototype pages have no automatically detectable accessibility violations", async ({
   page,
 }) => {
-  for (const path of ["/", "/institutional-structure", "/ui-preview"]) {
+  for (const path of [
+    "/",
+    "/academic-calendar",
+    "/institutional-structure",
+    "/ui-preview",
+  ]) {
     await page.goto(path);
     const result = await new AxeBuilder({ page }).analyze();
 

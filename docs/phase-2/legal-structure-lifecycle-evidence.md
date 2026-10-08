@@ -1,6 +1,7 @@
 # Slice 2.1-C2a append-only legal-structure lifecycle evidence
 
-- Status: Bounded implementation complete; complete repository gate pending
+- Status: Bounded implementation and production-core gate passing; complete repository gate
+  blocked by the concurrent web candidate's dependency audit
 - Date: 2026-10-03
 - Governing decisions: Conditionally Accepted ADRs 0025, 0031, and 0033; Accepted ADR 0032
 - Module: `organization.legal` version `1.2.0`
@@ -10,8 +11,9 @@
 
 On 2026-10-03 the Project Owner confirmed that C25-02 is approved while consultants continue
 their review and directed the project to proceed to the next slice. ADR 0033 records the resulting
-bounded choice: extend Slice 2.1-C inside L1 rather than cross the still-open C25-03/C25-04 gates
-into educational structures or legal-operation persistence.
+bounded choice made while C25-03 and C25-04 were still open: extend Slice 2.1-C inside L1 rather
+than cross into educational structures or legal-operation persistence. ADR 0034 subsequently
+closed C25-03 for the bounded unpublished synthetic L1 foundation only.
 
 Consultant findings remain a review trigger and may require a superseding ADR. This implementation
 does not claim legal, tax, audit, accounting, or jurisdiction-specific assurance.
@@ -78,7 +80,12 @@ Verification on 2026-10-03:
 | Focused lifecycle and domain-inventory suites on the clean temporary database | Passed: 24 tests |
 | `make legal-demo`, repeated against the same database | Passed: stable six entities, four relationships with one ended, three management parentages, six corporate units, and one profile revision |
 | Production-core `make check-core` | Passed: formatting, warnings-as-errors compile, API and migration drift, strict lint, dependency audit, type analysis, 190 tests, and whitespace |
-| Complete repository `make check` | Pending |
+| Clean-checkout rehearsal of the combined candidate | Failed after docs, Phase 0, and the 190-test production-core suite passed: the unrelated current web candidate reports 9 high-severity `braces`/`micromatch` advisories through its stylelint/Next lint dependency tree; no passing receipt was written |
+| Complete repository `make check` | Failed in documentation validation because the required clean-checkout receipt remains stale after the rehearsal failure; later suites were not run by this command |
+
+The lifecycle implementation does not change the web dependency tree. Those concurrent web files
+and lockfile are preserved for their owner; this slice does not claim a green repository while that
+separate integration condition remains.
 
 ## Demonstration data
 
@@ -100,8 +107,10 @@ reopening; registered-impact preview; educational structures; legal-operation re
 migration; real data; or a connected/public surface.
 
 The structural transitions stay deferred because TM-17 and AC-18 require a registered consumer
-impact inventory, preview, and writer-side revalidation that do not yet exist. C25-03 and C25-04
-continue to block Slice 2.1-D.
+impact inventory, preview, and writer-side revalidation that do not yet exist. ADR 0034 now closes
+C25-03 for bounded unpublished synthetic L1 work; ADR 0035 subsequently closes the synthetic
+C25-04 operator decision. Operator implementation proof remains separate, and C25-03-R blocks
+connected or real adoption. Neither decision expands the C2a implementation evidenced here.
 
 ## References
 
@@ -109,6 +118,7 @@ continue to block Slice 2.1-D.
 - [ADR 0031](../adr/0031-bounded-cross-jurisdiction-legal-structure-foundation.md)
 - [ADR 0032](../adr/0032-c25-02-delegated-contract-acceptance.md)
 - [ADR 0033](../adr/0033-append-only-legal-structure-lifecycle-foundation.md)
+- [ADR 0034](../adr/0034-c25-03-delegated-educational-structure-acceptance.md)
 - [C25-02 completed review](c25-02-corporate-governance-finance-review.md)
 - [Slice 2.1-C1 evidence](legal-structure-foundation-evidence.md)
 - [Institutional-structure security and migration review](institutional-structure-security-migration-review.md)

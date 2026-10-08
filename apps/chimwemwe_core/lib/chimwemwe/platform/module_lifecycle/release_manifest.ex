@@ -64,6 +64,14 @@ defmodule Chimwemwe.Platform.ModuleLifecycle.ReleaseManifest do
   def fetch(_manifest, _key), do: {:error, :module_not_released}
 
   @doc false
+  @spec declarations(t()) :: [declaration()]
+  def declarations(%__MODULE__{declarations: declarations}) do
+    declarations
+    |> Map.values()
+    |> Enum.sort_by(& &1.key)
+  end
+
+  @doc false
   @spec fetch_extension(t(), String.t(), String.t()) ::
           {:ok, extension_contract()} | {:error, :extension_contract_not_released}
   def fetch_extension(manifest, module_key, extension_key) do

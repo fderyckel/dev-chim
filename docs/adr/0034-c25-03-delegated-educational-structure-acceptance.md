@@ -6,6 +6,10 @@
 - Decider: Codex, using the requested Jamie board-review perspective under explicit delegated Project Owner authority
 - Supersedes: ADR 0025 C25-03's representative/domain review prerequisite for the bounded synthetic L1 contract only
 - Evidence: [Completed five-context C25-03 review](../phase-2/c25-03-educational-structure-review.md)
+- Partially superseded by: [ADR 0035](0035-c25-04-delegated-primary-operator-acceptance.md), which closes synthetic C25-04 and replaces the temporary operator/publication prohibition below; all educational meanings and C25-03-R remain binding
+- Additionally partially superseded by: [ADR 0039](0039-public-calendar-evidence-for-cf-3-engineering-entry.md),
+  which allows disabled local synthetic CF-3 engineering from official public source evidence and
+  retains actual representative validation for real adoption rather than claiming it is complete
 
 ## Context
 

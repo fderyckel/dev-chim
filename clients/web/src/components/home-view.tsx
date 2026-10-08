@@ -114,8 +114,8 @@ export function HomeView({ viewData }: HomeViewProps) {
             recovery guidance. It has no production data or authority.
           </p>
         </div>
-        <ActionLink href="/ui-preview" icon="forward" variant="quiet">
-          Explore UI states
+        <ActionLink href="/academic-calendar" icon="forward" variant="quiet">
+          Try calendar preview
         </ActionLink>
       </aside>
     </div>

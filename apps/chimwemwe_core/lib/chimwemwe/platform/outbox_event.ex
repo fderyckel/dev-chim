@@ -15,7 +15,7 @@ defmodule Chimwemwe.Platform.OutboxEvent do
     ownership: :tenant_owned
 
   postgres do
-    table "platform_outbox_events"
+    table("platform_outbox_events")
     repo(Chimwemwe.Repo)
 
     custom_indexes do
@@ -74,8 +74,9 @@ defmodule Chimwemwe.Platform.OutboxEvent do
         check: "routing_version >= 1"
       )
 
-      check_constraint(:classification, "platform_outbox_classification_must_be_internal",
-        check: "classification = 'internal'"
+      check_constraint(:classification, "platform_outbox_classification_domain_boundary",
+        check:
+          "(classification = 'internal' AND aggregate_type NOT LIKE 'people.core.%' AND aggregate_type NOT LIKE 'classroom.core.%' AND aggregate_type NOT LIKE 'classroom.attendance.%') OR (classification = 'restricted' AND aggregate_type IN ('people.core.person', 'people.core.participation', 'people.core.account') AND event_type LIKE 'people.core.%') OR (classification = 'restricted' AND aggregate_type IN ('classroom.core.class', 'classroom.core.enrolment', 'classroom.core.assignment', 'classroom.core.placement') AND event_type LIKE 'classroom.core.%') OR (classification = 'restricted' AND aggregate_type = 'classroom.attendance.submission' AND event_type IN ('classroom.attendance.submit.completed', 'classroom.attendance.correct.completed'))"
       )
 
       check_constraint(:payload, "platform_outbox_payload_must_be_an_object",
@@ -85,17 +86,17 @@ defmodule Chimwemwe.Platform.OutboxEvent do
   end
 
   multitenancy do
-    strategy :attribute
-    attribute :tenant_id
-    global? false
+    strategy(:attribute)
+    attribute(:tenant_id)
+    global?(false)
   end
 
   relationships do
     belongs_to :audit_event, Chimwemwe.Platform.Authority.AuditEvent do
-      source_attribute :audit_reference
-      destination_attribute :id
-      define_attribute? false
-      public? false
+      source_attribute(:audit_reference)
+      destination_attribute(:id)
+      define_attribute?(false)
+      public?(false)
     end
   end
 
@@ -104,89 +105,89 @@ defmodule Chimwemwe.Platform.OutboxEvent do
 
   policies do
     policy always() do
-      forbid_if always()
+      forbid_if(always())
     end
   end
 
   attributes do
-    uuid_primary_key :id
+    uuid_primary_key(:id)
 
     attribute :tenant_id, :uuid do
-      allow_nil? false
-      public? false
+      allow_nil?(false)
+      public?(false)
     end
 
     attribute :actor_id, :uuid do
-      allow_nil? false
-      public? false
+      allow_nil?(false)
+      public?(false)
     end
 
     attribute :aggregate_type, :string do
-      allow_nil? false
-      public? false
-      constraints min_length: 1, max_length: 120
+      allow_nil?(false)
+      public?(false)
+      constraints(min_length: 1, max_length: 120)
     end
 
     attribute :aggregate_id, :uuid do
-      allow_nil? false
-      public? false
+      allow_nil?(false)
+      public?(false)
     end
 
     attribute :event_type, :string do
-      allow_nil? false
-      public? false
-      constraints min_length: 1, max_length: 160
+      allow_nil?(false)
+      public?(false)
+      constraints(min_length: 1, max_length: 160)
     end
 
     attribute :schema_version, :integer do
-      allow_nil? false
-      public? false
-      constraints min: 1
+      allow_nil?(false)
+      public?(false)
+      constraints(min: 1)
     end
 
     attribute :stream_position, :integer do
-      allow_nil? false
-      public? false
-      constraints min: 1
+      allow_nil?(false)
+      public?(false)
+      constraints(min: 1)
     end
 
     attribute :routing_version, :integer do
-      allow_nil? false
-      public? false
-      constraints min: 1
+      allow_nil?(false)
+      public?(false)
+      constraints(min: 1)
     end
 
     attribute :correlation_id, :uuid do
-      allow_nil? false
-      public? false
+      allow_nil?(false)
+      public?(false)
     end
 
     attribute :causation_id, :uuid do
-      allow_nil? false
-      public? false
+      allow_nil?(false)
+      public?(false)
     end
 
     attribute :audit_reference, :uuid do
-      allow_nil? false
-      public? false
+      allow_nil?(false)
+      public?(false)
     end
 
     attribute :classification, :atom do
-      allow_nil? false
-      public? false
-      constraints one_of: [:internal]
+      allow_nil?(false)
+      public?(false)
+      constraints(one_of: [:internal, :restricted])
     end
 
     attribute :payload, :map do
-      allow_nil? false
-      public? false
+      allow_nil?(false)
+      public?(false)
     end
 
     attribute :occurred_at, :utc_datetime_usec do
-      allow_nil? false
-      public? false
+      allow_nil?(false)
+      public?(false)
     end
 
-    create_timestamp :inserted_at
+    create_timestamp(:inserted_at)
   end
 end

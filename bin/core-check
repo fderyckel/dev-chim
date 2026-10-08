@@ -6,17 +6,18 @@ core_dir="$repo_root/apps/chimwemwe_core"
 
 cd "$repo_root"
 
-echo "[1/9] Phase 1 core shell and formatting"
-shellcheck bin/auth-demo bin/check-changed bin/core-check bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
+echo "[1/9] Core platform shell and formatting"
+shellcheck bin/classroom-demo bin/auth-demo bin/check-changed bin/core-check bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
 mise exec -- mix format --check-formatted
 
-echo "[2/9] Phase 1 core compilation"
+echo "[2/9] Core platform compilation"
 mise exec -- env MIX_ENV=test mix compile --warnings-as-errors
 
 echo "[3/9] UI-1A OpenAPI contract drift"
 mise exec -- env MIX_ENV=test mix run tools/check_ui1_openapi.exs
+mise exec -- env MIX_ENV=test mix run tools/check_public_openapi.exs
 
-echo "[4/9] Phase 1 core migration drift"
+echo "[4/9] Core platform migration drift"
 (
   cd "$core_dir"
   mise exec -- mix ash_postgres.generate_migrations --check \
@@ -24,23 +25,23 @@ echo "[4/9] Phase 1 core migration drift"
     --snapshot-path priv/resource_snapshots
 )
 
-echo "[5/9] Phase 1 core lint"
+echo "[5/9] Core platform lint"
 (
   cd "$core_dir"
   mise exec -- mix credo --strict
 )
 
-echo "[6/9] Phase 1 core dependency audit"
+echo "[6/9] Core platform dependency audit"
 (
   cd "$core_dir"
   mise exec -- mix hex.audit
   mise exec -- mix deps.unlock --check-unused
 )
 
-echo "[7/9] Phase 1 core type analysis"
+echo "[7/9] Core platform type analysis"
 mise exec -- mix dialyzer
 
-echo "[8/9] Phase 1 core tests"
+echo "[8/9] Core platform tests"
 mise exec -- env MIX_ENV=test mix ecto.create --quiet
 mise exec -- env MIX_ENV=test mix ecto.migrate --quiet
 mise exec -- env MIX_ENV=test mix test
@@ -48,4 +49,4 @@ mise exec -- env MIX_ENV=test mix test
 echo "[9/9] Git whitespace check"
 git diff --check
 
-echo "Phase 1 core local verification passed."
+echo "Core platform local verification passed."

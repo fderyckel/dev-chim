@@ -85,11 +85,11 @@ Code-defined model changes use generated, human-reviewed migrations with tenant 
 
 ## Validation evidence
 
-The existing [Ash pressure-test](../phase-0/evidence/ash-pressure-test.md) proves important parts of the authoritative side: named actions, policy and tenancy enforcement, relationship and field policy, generated interfaces, migration inspection, and upgrade behaviour. The provisional production core supplies a base-resource convention and resource-contract audit while keeping its domain resource-empty.
+The existing [Ash pressure-test](../phase-0/handover-evidence.md) proves important parts of the authoritative side: named actions, policy and tenancy enforcement, relationship and field policy, generated interfaces, migration inspection, and upgrade behaviour. The provisional production core supplies a base-resource convention and resource-contract audit while keeping its domain resource-empty.
 
-The disposable [resource-authoring and governed-metadata scenario](../phase-0/evidence/resource-authoring-and-governed-metadata.md) now derives and drift-checks a stable-reference descriptor from the real neutral Ash resource, validates tenant-customized view and report definitions without copied types or permissions, re-enters an authorized filtered Ash read, rejects private, stale, cross-tenant, arbitrary-SQL, executable, authority, and unapproved-action content, and exercises explicit rename plus adjacent-patch compatibility. It records both the duplication removed and the added descriptor/validator/registry cost.
+The disposable [resource-authoring and governed-metadata scenario](../phase-0/handover-evidence.md) now derives and drift-checks a stable-reference descriptor from the real neutral Ash resource, validates tenant-customized view and report definitions without copied types or permissions, re-enters an authorized filtered Ash read, rejects private, stale, cross-tenant, arbitrary-SQL, executable, authority, and unapproved-action content, and exercises explicit rename plus adjacent-patch compatibility. It records both the duplication removed and the added descriptor/validator/registry cost.
 
-Provisional Phase 1 [slice 1B](../phase-1/evidence/resource-descriptor.md) now implements only the production-core derivation seam: explicit allowlists over resources that pass the core resource contract, ownership-derived tenant scope, the full platform classification vocabulary, portable fields/actions/arguments, deterministic ordering, canonical encoding, and content revision. Neutral negative tests reject private or missing fields and actions, unsupported types and classifications, generic mutations, malformed or duplicate stable references, invalid resources, and caller-supplied authority-shaped contract data. The production domain remains resource-empty, so there is no production descriptor artifact or consumer. Durable definitions, reporting execution, metadata validation, rendering, and custom fields remain unimplemented.
+Provisional Phase 1 [slice 1B](../phase-1/handover-evidence.md) now implements only the production-core derivation seam: explicit allowlists over resources that pass the core resource contract, ownership-derived tenant scope, the full platform classification vocabulary, portable fields/actions/arguments, deterministic ordering, canonical encoding, and content revision. Neutral negative tests reject private or missing fields and actions, unsupported types and classifications, generic mutations, malformed or duplicate stable references, invalid resources, and caller-supplied authority-shaped contract data. The production domain remains resource-empty, so there is no production descriptor artifact or consumer. Durable definitions, reporting execution, metadata validation, rendering, and custom fields remain unimplemented.
 
 Before this decision can be accepted, accountable reviewers must judge that bounded cost, approve or reject the listed production closure gates, and record the ADR outcome. Passing the scenario's security tests alone does not accept this decision.
 
@@ -107,7 +107,7 @@ If ADR 0002 rejects Ash, retain the same boundary over explicit Phoenix/Ecto sch
 
 ## Related records
 
-- [Domain model authoring and metadata boundary](../architecture/domain-model-authoring-and-metadata.md)
+- [Domain model authoring and metadata workflow](../development/code-conventions.md#domain-model-authoring)
 - [ADR 0002](0002-ash-adoption-criteria-and-fallback.md)
 - [ADR 0003](0003-tenant-model-and-optional-postgresql-rls.md)
 - [ADR 0005](0005-domain-action-and-state-transition-convention.md)

@@ -18,7 +18,10 @@ Slice 2.0-C completes the neutral temporal retention/recovery engineering bounda
 Accepted at the platform level after its 2026-09-27 accountable post-evidence review. Production
 identity architecture is accepted in provider-neutral ADR 0029, including Microsoft Entra ID,
 hybrid/on-premises Active Directory, Google Workspace, generic OIDC, and qualified SAML gateway
-paths. The internal provider-neutral identity/session/support foundations and bounded public
+paths. [ADR 0044](docs/adr/0044-administrator-provisioned-local-credentials.md) now selects
+administrator-provisioned staff credentials as the initial independent login path, with a generated
+temporary password and forced first-login replacement; federation remains optional. The internal
+provider-neutral identity/session/support foundations and bounded public
 session adapter are implemented but not enabled as an L2 release. Conditionally Accepted ADR 0025
 governs the stable institutional-structure direction; ADR 0031 authorizes the bounded synthetic
 `organization.legal` Slice 2.1-C1 start. [ADR 0032](docs/adr/0032-c25-02-delegated-contract-acceptance.md)
@@ -30,7 +33,33 @@ and can append one relationship end or the next corporate-unit name profile. It
 adds no public business route, educational structure, real-data authority, statutory consolidation
 claim, or production deployment.
 
+[ADR 0034](docs/adr/0034-c25-03-delegated-educational-structure-acceptance.md) closes C25-03 for
+synthetic L1 under delegated Project Owner authority. Its five-context review makes unpublished
+educational identity, initial parentage, sites, and terminology eligible within the bounded
+sequence. [ADR 0035](docs/adr/0035-c25-04-delegated-primary-operator-acceptance.md) closes C25-04
+for synthetic L1 operator assignment, publication and controlled transfer/reconciliation proof.
+Actual representative validation remains C25-03-R before real institutional adoption, import,
+pilot, deployment, or production reliance. [ADR 0039](docs/adr/0039-public-calendar-evidence-for-cf-3-engineering-entry.md)
+now admits a disabled local synthetic CF-3 candidate from official public calendar evidence
+without claiming representative approval. Existing legal adoption and release gates remain.
+These are contract decisions, not implementation claims.
+
 ## Start here
+
+The active delivery priority is the authorized
+[classroom-first six-week plan](docs/plans/classroom-first-six-week-plan.md), covering 5 October
+through 15 November 2026: academic calendar, people, enrolment, and daily attendance in one usable
+journey. Further corporate/legal expansion is paused. The plan changes sequencing, preserves
+existing work, and retains domain and connected-release gates. Calendar construction has now begun
+with the accepted synthetic L1 definition/preview/resolution
+contract and a local preparation prototype. The private synthetic
+[institutional/operator writer](docs/phase-2/institutional-foundation-evidence.md) and
+[people/participation foundation](docs/phase-2/people-foundation-evidence.md) are implemented.
+The [classroom setup foundation](docs/phase-2/classroom-foundation-evidence.md) now adds class
+registers, enrolment, teaching assignments and dated placements, tested against the named
+[calendar publication writer](docs/phase-2/academic-calendar-contract-evidence.md). The [local attendance workflow](docs/phase-2/classroom-attendance-workflow-evidence.md) now connects
+an assigned synthetic educator to today’s register and an atomic attendance submission. Routine
+preparation screens, actual provider sign-in and production release remain separate work.
 
 1. Read [the Phase 0 outcome](docs/phase-0/README.md) and its binding later gates.
 2. Read [the Phase 1 core scope](docs/phase-1/README.md).
@@ -40,8 +69,8 @@ claim, or production deployment.
 5. Follow [local setup](docs/development/getting-started.md).
 6. Run the suite selected by `make check-changed` before sharing changes; reserve `make check` for an explicit integration check.
 
-The execution sequences are in the [Phase 0 implementation plan](docs/plans/phase-0-implementation-plan.md),
-the [Phase 1 core-foundation plan](docs/plans/phase-1-core-foundation-plan.md), and the accepted
+The completed foundations are summarized in the [Phase 0 handover](docs/phase-0/handover-evidence.md)
+and [Phase 1 handover](docs/phase-1/handover-evidence.md). Current work follows the accepted
 [Phase 2 sequencing proposal](docs/plans/phase-2-entry-and-school-structure-proposal.md).
 
 ## Stable commands
@@ -56,6 +85,7 @@ make check-staged
 make test-fast
 make test
 make docs-check
+make auth-demo
 make legal-demo
 make web-dev
 make web-core-dev
@@ -74,6 +104,10 @@ entities, four direct relationships, three management-reporting parentages, and 
 units from the Phase 2.1 review fixture. One relationship is ended and one corporate unit receives
 a second name profile through append-only lifecycle actions. It adds no educational structure, public route, statutory
 consolidation conclusion, or real data.
+`make auth-demo` starts the loopback database-backed account administration proof. It prints a
+fresh bootstrap administrator password, supports prepared synthetic staff account creation,
+one-time temporary passwords, forced first-login replacement, reissue and suspension, and grants
+no school role or permission. It is not a production identity service.
 `make web-dev` starts the explicitly synthetic, local-only UI-0 experience at `http://127.0.0.1:3000`.
 `make web-core-dev` starts the guarded UI-1A qualification at
 `http://127.0.0.1:3000/authority/assignments`, backed by a dedicated local synthetic database

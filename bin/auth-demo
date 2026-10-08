@@ -71,8 +71,9 @@ if [ "$status" != "200" ]; then
 fi
 
 echo "Chimwemwe authentication administration is ready at http://127.0.0.1:$auth_port/sign-in"
-echo "Local demonstration account: identity-admin@northstar-school.test"
-echo "Local demonstration password: $demo_password"
-echo "The password and token signing secret are generated for this local run only."
+echo "Bootstrap administrator email: identity-admin@northstar-school.test"
+echo "Bootstrap administrator password: $demo_password"
+echo "Sign in, create a prepared staff account, copy its temporary password once, then test forced password replacement."
+echo "Passwords and the token signing secret are generated for this local run only."
 
 wait "$auth_pid"

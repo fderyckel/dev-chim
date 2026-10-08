@@ -3,6 +3,7 @@ defmodule Chimwemwe.AuthDemo.Bootstrap do
 
   use GenServer
 
+  alias Chimwemwe.AuthDemo.Config
   alias Chimwemwe.Identity.{Account, SsoConnection}
 
   @demo_email "identity-admin@northstar-school.test"
@@ -29,15 +30,24 @@ defmodule Chimwemwe.AuthDemo.Bootstrap do
          |> Ash.read(authorize?: false) do
       {:ok, [account]} ->
         Ash.Changeset.for_update(account, :rotate_local_demo_password, %{
-          hashed_password: hashed_password
+          actor_id: Config.admin_actor_id(),
+          hashed_password: hashed_password,
+          status: :active,
+          temporary_password_expires_at: nil,
+          password_changed_at: DateTime.utc_now(),
+          failed_attempt_count: 0,
+          locked_until: nil
         })
         |> Ash.update!(authorize?: false)
 
       {:ok, []} ->
         Ash.Changeset.for_create(Account, :bootstrap_local_account, %{
+          actor_id: Config.admin_actor_id(),
           email: @demo_email,
           hashed_password: hashed_password,
-          status: :active
+          status: :active,
+          temporary_password_expires_at: nil,
+          password_changed_at: DateTime.utc_now()
         })
         |> Ash.create!(authorize?: false)
     end

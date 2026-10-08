@@ -4,14 +4,60 @@
   through D.2c, the bounded D.3 public-session adapter, and the minimal Slice 2.1-B legal-entity
   aggregate have synthetic evidence; ADR 0031 authorizes bounded synthetic Slice 2.1-C1 and ADR
   0033 authorizes append-only Slice 2.1-C2a; C2a focused migration, action, and demo evidence is
-  passing while its complete repository gate remains pending; 2.0-E is a dated deferred condition
-  and L2 remains gated
+  passing while its complete repository gate is blocked by the concurrent web candidate's
+  dependency audit; revised ADR 0021 conditionally accepts the calendar contract for bounded
+  synthetic L1 and its first executable validation/resolution increment passes; 2.0-E is a dated
+  deferred condition and L2 remains gated
 - Owner: Product and platform engineering, with learning-institution domain and security/privacy
   review
 - Start basis: explicit project-owner direction on 2026-09-26
 - Review trigger: entry into another Phase 2 slice or a change to an entry-gate disposition
 
 ## Current boundary
+
+CF-4A adds the private synthetic [people and participation foundation](people-foundation-evidence.md):
+student/staff participation and verified staff-account association without implied permissions.
+CF-4B adds the private synthetic [classroom setup foundation](classroom-foundation-evidence.md):
+class/register, year enrolment, teaching assignment and dated placement. The disabled local
+[classroom preparation workflow](classroom-preparation-workflow-evidence.md) now lets a session-bound
+synthetic administrator create one class and add fictional students through the existing named
+actions, then opens that class in the educator attendance screen. Real identity, representative
+review and release gates remain separate follow-ons. The subsequent disabled local
+[attendance correction and request-recovery workflow](attendance-correction-and-recovery-evidence.md)
+now appends immutable corrections to today's saved register and recovers from an uncertain browser
+response through authoritative reload and exact retry. Backdating, correction policy, Restricted
+consumer delivery and connected use remain outside that proof.
+
+The next bounded identity increment adds the disabled
+[selected OIDC educator sign-in candidate](selected-oidc-educator-sign-in-evidence.md). It carries
+one startup-selected, pre-linked educator through a real authorization-code, S256 PKCE, nonce and
+signed-token protocol path before creating the existing opaque application session. Its local
+provider harness is synthetic. No institution, real provider, credential, subject, environment or
+connected-release decision has been supplied or qualified.
+
+[ADR 0044](../adr/0044-administrator-provisioned-local-credentials.md) subsequently selects
+administrator-provisioned local credentials as the initial authentication direction: an authorized
+administrator chooses an existing staff record, enters an email sign-in name, and receives a random
+temporary password that must be replaced at first login. The database-backed loopback candidate is
+synthetic and does not grant tenant or classroom authority. Its remaining real-staff, administrator
+MFA, HTTPS/session, secure-delivery/recovery, abuse-control, representative-review, and release work
+is recorded in the
+[local authentication production qualification plan](../plans/local-authentication-production-qualification-plan.md).
+OIDC remains an optional independent path rather than a prerequisite or automatic fallback.
+
+CF-1 now supplies private synthetic institutional registration, initial operator assignment,
+publication and an exact authorized read. See the
+[implementation evidence and calendar handoff](institutional-foundation-evidence.md). Connected
+use and real records remain subject to the retained gates.
+
+On 2026-10-03 François approved the
+[classroom-first six-week plan](../plans/classroom-first-six-week-plan.md). It is the active
+delivery order for 5 October–15 November: minimal institutional prerequisites, academic calendar,
+people and class preparation, enrolment, and daily attendance. Further corporate/legal expansion
+is paused. The [first-slice brief](classroom-first-slice-contract.md) defines the calendar-to-classroom
+contract and planned evidence. Existing decisions and release gates below remain binding; this
+course change now includes private synthetic calendar, people and classroom persistence;
+connected educational functionality remains to be delivered.
 
 Phase 2 has started at release level L0. Slice 2.0-B closes the provider-neutral local
 operational-outbox and module-drain foundation contract. Slice 2.0-C completes the neutral temporal
@@ -62,13 +108,16 @@ to a business aggregate.
 On 2026-10-03, the Project Owner directed a best-judgement cross-country legal-structure start.
 ADR 0031 conditionally accepts the closed direct relationship catalogue,
 management-reporting-only parentage, and corporate-unit identity for synthetic L1 Slice 2.1-C1.
-Focused and production-core evidence passes; the complete repository gate remains pending because
-the clean-checkout rehearsal no longer matches the changed Makefile. The C25-02 review and ADR
-index now pass focused document validation. No
+Focused and production-core evidence passes; the complete repository gate is blocked because the
+clean-checkout rehearsal reaches the concurrent web candidate's dependency audit and reports nine
+high-severity transitive advisories. The C25-02 review and ADR index now pass focused document
+validation. No
 qualified reviewer is invented, and external corporate/finance validation remains due before L2,
 real data, migration, external financial reporting, pilot, deployment, or
 jurisdictional/accounting claims. The later ADR 0034 closes C25-03 for synthetic L1 only;
-C25-03-R and C25-04 through C25-06 remain open. No educational implementation is claimed here.
+C25-03-R and C25-05/C25-06 remain open adoption/release concerns; ADR 0035 below subsequently
+closes synthetic C25-04. ADR 0039 later admits only the disabled local synthetic CF-3 engineering
+candidate from official public calendar evidence. No representative approval is claimed here.
 
 The subsequent [ADR 0032](../adr/0032-c25-02-delegated-contract-acceptance.md) and
 [completed corporate/finance review](c25-02-corporate-governance-finance-review.md) close C25-02
@@ -87,9 +136,41 @@ On the same date, [ADR 0034](../adr/0034-c25-03-delegated-educational-structure-
 and the [five-context educational review](c25-03-educational-structure-review.md) close C25-03
 for synthetic L1 under explicit delegated Project Owner authority. Unpublished educational identity,
 initial containment, sites/associations, and terminology become eligible within the existing
-sequence and its other prerequisites. C25-04 still blocks operator persistence and publication.
-Actual external representative validation remains C25-03-R before connected use, real data/import,
-pilot, or deployment; the packet's 2026-12-15 or first-affected-gate deadline is retained.
+sequence and its other prerequisites. ADR 0035 below closes its temporary C25-04 dependency.
+Actual external representative validation remains C25-03-R before real data/import, an
+institutional pilot, deployment, production reliance, or claims of representative correctness.
+ADR 0039 moves it out of the disabled local synthetic CF-3 engineering entry without marking it
+complete.
+
+[ADR 0035](../adr/0035-c25-04-delegated-primary-operator-acceptance.md) and the
+[completed primary-operator review](c25-04-primary-operator-review.md) close C25-04 for synthetic
+L1 on 2026-10-03, disposition `approve`. The compliance/governance owner owns retrospective review
+within 14 calendar days; revoked evidence creates immediate restrictions/case/alert obligations
+and requires human reconciliation within 72 elapsed hours. Bounded operator implementation and
+internal publication become eligible within the authorized sequence, with their own required
+proof. External adoption, connected-use and real-data/deployment gates remain unchanged.
+
+François then instructed the project to start calendar construction. Revised
+[ADR 0021](../adr/0021-academic-calendar-authority-and-template-adoption.md) conditionally accepts
+the exact-unit, multiple-calendar, pinned-publication contract for bounded private synthetic L1.
+`Chimwemwe.AcademicCalendar` now validates and canonicalizes a publication candidate, calculates
+instructional dates, and resolves terms, gaps, weekdays, and closures. This pre-persistence
+increment adds no table, publication action, module activation, public route, or connected screen.
+CF-1's minimal institutional/operator writer remains the next prerequisite for persistent calendar
+publication.
+
+On 2026-10-06, [ADR 0039](../adr/0039-public-calendar-evidence-for-cf-3-engineering-entry.md)
+accepted the [official public calendar source review](cf-3-public-calendar-source-review.md) as
+sufficient external evidence for a disabled local synthetic CF-3 implementation candidate. Public
+documents are not representative testimony. Institution-side validation, representative
+usability, independent review, selected identity/deployment, real data, pilot, and production
+remain later gates.
+
+The [CF-3 connected calendar workflow](connected-calendar-workflow-evidence.md) now passes its
+session, authority, writer, browser, responsive-layout, and automated-accessibility checks. The
+required repository gate passed the full 285-test core stage and then stopped at the retained
+frontend dependency-audit blocker. The bounded local candidate is complete, the repository is not
+green, and this is not an L2 release.
 
 On 2026-09-28, the Project Owner conditionally approved Phase 2.0 at the completed L1 foundation
 boundary. Slice 2.0-E is carried as a dated deferred condition: C25-05's expert/representative
@@ -104,8 +185,8 @@ Selected deployment, real data, pilot, and production release remain later gates
 | Level | Current status | Permitted now | Principal blockers |
 | --- | --- | --- | --- |
 | L0 — paper and prototype | Closed for current entry scope | Slices 2.0-D.2a through D.2c and bounded D.3 engineering are complete; ADR 0025's technical evidence, refreshed prototype, and conditional G6 decision are recorded | Named reviews remain conditions on their first affected later slices, not claims of completed evidence |
-| L1 — synthetic module proof | Closed for the minimal candidate; 2.1-C2a exit pending | Slice 2.0-B outbox/drain, Accepted ADR 0018 temporal evidence, internal Slice 2.0-D foundations, and the Slice 2.1-B `LegalEntity` proof pass; ADRs 0031/0033 permit bounded synthetic 2.1-C1/C2a | Complete repository gate for 2.1-C2a; external finance validation at ADR 0031's later boundary; C25-03-R blocks connected adoption; C25-04 blocks operator persistence/publication; ADR 0034 admits only bounded unpublished synthetic educational work |
-| L2 — connected synthetic workflow | Conditionally deferred; not released | ADRs 0029/0030, D.2a–D.2c, bounded D.3 adapter evidence, and the minimal business aggregate are complete; UI-0/UI-1A remain qualification-only | C25-03-R external five-context validation plus C25-05 expert/representative comprehension and product-experience disposition by 2026-12-15 or the first affected gate, the first complete accessible 2.0-E browser workflow, and deployment-specific D.3 qualification |
+| L1 — synthetic module proof | Closed for the minimal candidate; 2.1-C2a exit blocked at repository integration | Slice 2.0-B outbox/drain, Accepted ADR 0018 temporal evidence, internal Slice 2.0-D foundations, and the Slice 2.1-B `LegalEntity` proof pass; ADRs 0031/0033 permit bounded synthetic 2.1-C1/C2a; ADR 0039 admits CF-3 engineering | Complete repository gate for 2.1-C2a, currently blocked by the concurrent web dependency audit; external finance validation at ADR 0031's later boundary; ADR 0035 closes the synthetic C25-04 operator decision; ADRs 0034/0035 admit bounded educational/operator work subject to implementation proof |
+| L2 — connected synthetic workflow | Engineering candidate authorized; not released | ADRs 0029/0030, D.2a–D.2c, bounded D.3 adapter evidence, the calendar writer, and ADR 0039's source-backed entry are complete enough to build CF-3 locally | CF-3 implementation and accessible technical evidence, deployment-specific D.3 qualification, selected identity/origin, and an explicit L2 release decision; representative and institution-side evidence remains mandatory before real adoption or pilot |
 | L3 — controlled real-data pilot | Blocked | No real institutional or Restricted data | Selected-deployment qualification, independent security/privacy review, learning-institution records ownership, and all lower-level gates |
 | L4 — production release | Blocked | No general availability | Accepted operating envelope, production release decision, and all lower-level gates |
 
@@ -126,12 +207,19 @@ test, owner role, or later slice does not satisfy one of those later gates.
 - [Slice 2.1-B minimal legal-entity foundation evidence](legal-entity-foundation-evidence.md)
 - [Slice 2.1-C1 bounded legal-structure foundation evidence](legal-structure-foundation-evidence.md)
 - [Slice 2.1-C2a append-only lifecycle evidence](legal-structure-lifecycle-evidence.md)
+- [Academic calendar executable-contract evidence](academic-calendar-contract-evidence.md)
+- [CF-3 connected academic-calendar workflow evidence](connected-calendar-workflow-evidence.md)
+- [Classroom preparation workflow evidence](classroom-preparation-workflow-evidence.md)
+- [Local classroom attendance workflow evidence](classroom-attendance-workflow-evidence.md)
+- [Attendance correction and request-recovery evidence](attendance-correction-and-recovery-evidence.md)
+- [Selected OIDC educator sign-in candidate evidence](selected-oidc-educator-sign-in-evidence.md)
 - [Slice 2.0-B operational outbox and module-drain evidence](operational-outbox-and-module-drain-evidence.md)
 - [Slice 2.0-C temporal completion and recovery evidence](temporal-completion-and-recovery-evidence.md)
 - [Temporal retention and recovery runbook](../operations/temporal-retention-and-recovery.md)
 - [Identity, session, and support-access decision review](identity-session-and-support-access-decision-review.md)
 - [Identity, session, and support-access implementation evidence](identity-session-and-support-access-implementation-evidence.md)
 - [ADR 0030: same-origin public session and named-action boundary](../adr/0030-same-origin-public-session-and-named-action-boundary.md)
+- [ADR 0042: selected OIDC educator sign-in candidate](../adr/0042-selected-oidc-educator-sign-in-candidate.md)
 - [Identity, session, and support-access operating runbook](../operations/identity-session-and-support-access.md)
 - [Phase 2 entry and institutional-structure proposal](../plans/phase-2-entry-and-school-structure-proposal.md)
 - [Proposed identity, people, relationships, and access plan](../plans/phase-2-identity-people-relationships-and-access-proposal.md) — companion planning only; it does not expand the authorized Phase 2.0/2.1 implementation scope
@@ -140,3 +228,10 @@ test, owner role, or later slice does not satisfy one of those later gates.
 - [Phase 0 binding later gates](../phase-0/README.md#binding-later-gates)
 - [ADR index](../adr/README.md)
 - [Threat model](../security/threat-model.md)
+
+The local [attendance workflow](classroom-attendance-workflow-evidence.md) and its append-only
+[correction successor](attendance-correction-and-recovery-evidence.md) now complete the disabled
+synthetic screen-to-writer and request-recovery proof governed by ADRs
+[0038](../adr/0038-local-classroom-attendance-workflow.md) and
+[0041](../adr/0041-local-attendance-correction-and-recovery.md). They do not close representative
+policy, Restricted consumer delivery, connected-release or real-data conditions.

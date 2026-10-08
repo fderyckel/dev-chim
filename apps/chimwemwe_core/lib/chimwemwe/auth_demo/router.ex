@@ -6,8 +6,7 @@ defmodule Chimwemwe.AuthDemo.Router do
 
   import Phoenix.LiveView.Router
 
-  alias Chimwemwe.AuthDemo.{AdminController, AuthController}
-  alias Chimwemwe.Identity.Account
+  alias Chimwemwe.AuthDemo.{AdminController, AuthController, FirstLoginController}
 
   pipeline :browser do
     plug(:accepts, ["html"])
@@ -19,15 +18,22 @@ defmodule Chimwemwe.AuthDemo.Router do
   end
 
   scope "/" do
-    pipe_through :browser
+    pipe_through(:browser)
 
-    sign_in_route(path: "/sign-in", auth_routes_prefix: "/auth", resources: [Account])
-    sign_out_route(AuthController, "/sign-out")
-    auth_routes(AuthController, Account, path: "/auth")
+    get("/", AuthController, :home)
+    get("/sign-in", AuthController, :new)
+    post("/sign-in", AuthController, :create)
+    post("/sign-out", AuthController, :sign_out)
 
-    get("/", AdminController, :index)
-    post("/connections", AdminController, :create)
-    post("/connections/:id/activate", AdminController, :activate)
-    post("/connections/:id/disable", AdminController, :disable)
+    get("/first-login/password", FirstLoginController, :edit)
+    post("/first-login/password", FirstLoginController, :update)
+
+    get("/admin", AdminController, :index)
+    post("/admin/accounts", AdminController, :create_account)
+    post("/admin/accounts/:id/reissue", AdminController, :reissue_account)
+    post("/admin/accounts/:id/suspend", AdminController, :suspend_account)
+    post("/admin/connections", AdminController, :create_connection)
+    post("/admin/connections/:id/activate", AdminController, :activate_connection)
+    post("/admin/connections/:id/disable", AdminController, :disable_connection)
   end
 end

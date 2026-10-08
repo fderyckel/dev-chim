@@ -9,6 +9,12 @@
 
 ## Authority, perspective, and evidence
 
+Subsequent operator decision: [ADR 0035](../adr/0035-c25-04-delegated-primary-operator-acceptance.md)
+and the [completed C25-04 review](c25-04-primary-operator-review.md) close synthetic C25-04.
+Their 14-day retrospective completion and immediate revocation controls with human reconciliation
+within 72 hours supersede the Q8–Q10 timing recommendations below for that synthetic contract.
+The original recommendations remain as review history, not competing current deadlines.
+
 François explicitly delegated authority to complete and close C25-02 in the current session:
 
 > I am delegating my power to your expertise to close that C25-02. Go use your best expertise on

@@ -67,6 +67,7 @@ type ActionButtonProps = ActionContentProps &
   Readonly<{
     disabled?: boolean;
     onClick?: MouseEventHandler<HTMLButtonElement>;
+    type?: "button" | "submit";
     variant?: ActionVariant;
   }>;
 
@@ -76,6 +77,7 @@ export function ActionButton({
   icon,
   iconPosition,
   onClick,
+  type = "button",
   variant = "primary",
 }: ActionButtonProps) {
   return (
@@ -83,7 +85,7 @@ export function ActionButton({
       className={`c-button c-button--${variant}`}
       disabled={disabled}
       onClick={onClick}
-      type="button"
+      type={type}
     >
       <ActionContent icon={icon} iconPosition={iconPosition}>
         {children}

@@ -45,8 +45,25 @@ defmodule Chimwemwe.Identity.PublicSessionAdapter do
     :redirect_to,
     :tenant_id
   ]
+  @sign_in_keys [
+    :actor_id,
+    :connection_id,
+    :external_identity_link_id,
+    :locale,
+    :membership_id,
+    :redirect_to,
+    :tenant_id
+  ]
+  @oidc_keys [:code_verifier, :configuration_version, :nonce, :redirect_uri]
   @callback_keys [:code, :state]
   @purpose_names %{
+    calendar_manage: "public.calendar.manage",
+    calendar_read: "public.calendar.read",
+    classroom_prepare: "public.classroom.prepare",
+    classroom_read: "public.classroom.read",
+    classroom_correct: "public.classroom.correct",
+    classroom_submit: "public.classroom.submit",
+    session_start: "public.session.start",
     session_read: "public.session.read",
     session_logout: "public.session.logout",
     support_elevate: "public.support.elevate",
@@ -63,6 +80,31 @@ defmodule Chimwemwe.Identity.PublicSessionAdapter do
     end
   end
 
+  @doc "Starts one startup-selected, pre-linked OIDC sign-in attempt."
+  @spec start_oidc_sign_in(Supervisor.supervisor(), module(), map(), String.t()) ::
+          {:ok, String.t()} | {:error, term()}
+  def start_oidc_sign_in(runtime, verifier, input, redirect_uri) do
+    with true <- oidc_verifier?(verifier),
+         {:ok, intent} <- normalize_sign_in(input),
+         {:ok, redirect_uri} <- callback_redirect(redirect_uri),
+         {:ok, context} <-
+           context(runtime, intent, "preauthentication", :session_start,
+             correlation_id: UUID.generate(),
+             locale: intent.locale
+           ),
+         {:ok, connection} <- sign_in_connection(runtime, context, intent),
+         oidc <- oidc_context(connection, redirect_uri),
+         {:ok, state} <- issue_sign_in_intent(Map.put(intent, :oidc, oidc)),
+         {:ok, url} <- verifier.authorization_url(state, connection, oidc),
+         {:ok, url} <- authorization_redirect(url) do
+      {:ok, url}
+    else
+      {:error, %Error{} = identity_error} -> {:error, identity_error}
+      {:error, error} -> {:error, error}
+      _invalid -> error(:retryable_dependency)
+    end
+  end
+
   @doc "Completes one qualified callback and returns an encrypted application-session cookie."
   @spec complete_callback(Supervisor.supervisor(), module(), map()) ::
           {:ok, PublicCallbackResult.t()} | {:error, term()}
@@ -71,7 +113,7 @@ defmodule Chimwemwe.Identity.PublicSessionAdapter do
          {:ok, callback} <- exact_input(input, @callback_keys),
          {:ok, intent} <- decrypt(callback.state, @intent_salt, @intent_max_age),
          {:ok, intent} <- normalize_intent(intent),
-         {:ok, proof} <- verifier.verify_code(callback.code, intent.connection_id),
+         {:ok, proof} <- verify_callback(runtime, verifier, callback, intent),
          :ok <- VerifiedExternalIdentity.validate(proof),
          :ok <- ensure(proof.connection_id == intent.connection_id, :forbidden),
          {:ok, context} <-
@@ -296,8 +338,50 @@ defmodule Chimwemwe.Identity.PublicSessionAdapter do
     end
   end
 
+  defp verify_callback(_runtime, verifier, callback, %{oidc: nil} = intent) do
+    verifier.verify_code(callback.code, intent.connection_id)
+  end
+
+  defp verify_callback(runtime, verifier, callback, %{oidc: oidc} = intent) do
+    with true <- oidc_verifier?(verifier),
+         {:ok, context} <-
+           context(runtime, intent, "preauthentication", :session_start,
+             correlation_id: UUID.generate(),
+             locale: intent.locale
+           ),
+         {:ok, connection} <- sign_in_connection(runtime, context, intent),
+         :ok <- ensure(connection.configuration_version == oidc.configuration_version, :forbidden) do
+      verifier.verify_code(callback.code, intent.connection_id, %{
+        connection: connection,
+        oidc: Map.put(oidc, :state, callback.state)
+      })
+    else
+      false -> error(:forbidden)
+      {:error, _error} = error_result -> error_result
+    end
+  end
+
+  defp sign_in_connection(runtime, context, intent) do
+    SessionFoundation.authorize_sign_in(runtime, context, %{
+      connection_id: intent.connection_id,
+      external_identity_link_id: intent.external_identity_link_id,
+      membership_id: intent.membership_id
+    })
+  end
+
+  defp normalize_sign_in(input) do
+    with {:ok, input} <- exact_input(input, @sign_in_keys) do
+      input
+      |> Map.merge(%{
+        causation_id: UUID.generate(),
+        idempotency_key: UUID.generate()
+      })
+      |> normalize_intent()
+    end
+  end
+
   defp normalize_intent(input) do
-    with {:ok, input} <- exact_input(input, @intent_keys),
+    with {:ok, input, oidc} <- intent_input(input),
          {:ok, actor_id} <- uuid(input.actor_id),
          {:ok, tenant_id} <- uuid(input.tenant_id),
          {:ok, membership_id} <- uuid(input.membership_id),
@@ -306,7 +390,8 @@ defmodule Chimwemwe.Identity.PublicSessionAdapter do
          {:ok, idempotency_key} <- uuid(input.idempotency_key),
          {:ok, causation_id} <- uuid(input.causation_id),
          {:ok, locale} <- locale(input.locale),
-         {:ok, redirect_to} <- redirect(input.redirect_to) do
+         {:ok, redirect_to} <- redirect(input.redirect_to),
+         {:ok, oidc} <- normalize_oidc(oidc) do
       {:ok,
        %{
          actor_id: actor_id,
@@ -317,8 +402,44 @@ defmodule Chimwemwe.Identity.PublicSessionAdapter do
          idempotency_key: idempotency_key,
          causation_id: causation_id,
          locale: locale,
-         redirect_to: redirect_to
+         redirect_to: redirect_to,
+         oidc: oidc
        }}
+    end
+  end
+
+  defp intent_input(input) do
+    case exact_input(input, @intent_keys) do
+      {:ok, normalized} ->
+        {:ok, normalized, nil}
+
+      {:error, _error} ->
+        with {:ok, normalized} <- exact_input(input, @intent_keys ++ [:oidc]) do
+          {:ok, Map.delete(normalized, :oidc), normalized.oidc}
+        end
+    end
+  end
+
+  defp normalize_oidc(nil), do: {:ok, nil}
+
+  defp normalize_oidc(input) do
+    with {:ok, input} <- exact_input(input, @oidc_keys),
+         {:ok, code_verifier} <- text(input.code_verifier, 200),
+         true <- byte_size(code_verifier) >= 43,
+         true <- is_integer(input.configuration_version) and input.configuration_version > 0,
+         {:ok, nonce} <- text(input.nonce, 500),
+         true <- byte_size(nonce) >= 32,
+         {:ok, redirect_uri} <- callback_redirect(input.redirect_uri) do
+      {:ok,
+       %{
+         code_verifier: code_verifier,
+         configuration_version: input.configuration_version,
+         nonce: nonce,
+         redirect_uri: redirect_uri
+       }}
+    else
+      {:error, _error} = error_result -> error_result
+      _invalid -> error(:forbidden)
     end
   end
 
@@ -410,6 +531,11 @@ defmodule Chimwemwe.Identity.PublicSessionAdapter do
 
   defp callback_verifier?(_verifier), do: false
 
+  defp oidc_verifier?(verifier) do
+    callback_verifier?(verifier) and function_exported?(verifier, :authorization_url, 3) and
+      function_exported?(verifier, :verify_code, 3)
+  end
+
   defp purpose(value) when is_atom(value) do
     case Map.fetch(@purpose_names, value) do
       {:ok, name} -> {:ok, name}
@@ -435,6 +561,42 @@ defmodule Chimwemwe.Identity.PublicSessionAdapter do
   end
 
   defp redirect(_value), do: error(:invalid_input)
+
+  defp callback_redirect(value) when is_binary(value) do
+    with {:ok, uri} <- URI.new(value),
+         true <-
+           uri.scheme == "https" and is_binary(uri.host) and uri.host != "" and
+             uri.path == "/auth/callback" and is_nil(uri.query) and is_nil(uri.fragment) and
+             is_nil(uri.userinfo) do
+      {:ok, URI.to_string(uri)}
+    else
+      _invalid -> error(:invalid_input)
+    end
+  end
+
+  defp callback_redirect(_value), do: error(:invalid_input)
+
+  defp authorization_redirect(value) when is_binary(value) and byte_size(value) <= 16_384 do
+    with {:ok, uri} <- URI.new(value),
+         true <-
+           uri.scheme == "https" and is_binary(uri.host) and uri.host != "" and
+             is_nil(uri.userinfo) and is_nil(uri.fragment) do
+      {:ok, URI.to_string(uri)}
+    else
+      _invalid -> error(:retryable_dependency)
+    end
+  end
+
+  defp authorization_redirect(_value), do: error(:retryable_dependency)
+
+  defp oidc_context(connection, redirect_uri) do
+    %{
+      code_verifier: random_token(96),
+      configuration_version: connection.configuration_version,
+      nonce: random_token(32),
+      redirect_uri: redirect_uri
+    }
+  end
 
   defp exact_input(input, keys) when is_map(input) and not is_struct(input) do
     Enum.reduce_while(input, {:ok, %{}}, fn {key, value}, {:ok, normalized} ->
@@ -478,7 +640,9 @@ defmodule Chimwemwe.Identity.PublicSessionAdapter do
     end
   end
 
-  defp random_token, do: :crypto.strong_rand_bytes(32) |> Base.url_encode64(padding: false)
+  defp random_token(length \\ 32),
+    do: length |> :crypto.strong_rand_bytes() |> Base.url_encode64(padding: false)
+
   defp ensure(true, _code), do: :ok
   defp ensure(false, code), do: error(code)
   defp error(code), do: {:error, %Error{code: code}}
