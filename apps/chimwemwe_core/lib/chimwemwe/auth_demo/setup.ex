@@ -5,7 +5,9 @@ defmodule Chimwemwe.AuthDemo.Setup do
     {20_260_926_202_954, Chimwemwe.Repo.Migrations.IdentityAuthenticationFoundation,
      "20260926202954_identity_authentication_foundation.exs"},
     {20_260_927_175_817, Chimwemwe.Repo.Migrations.ProviderNeutralIdentityConnection,
-     "20260927175817_provider_neutral_identity_connection.exs"}
+     "20260927175817_provider_neutral_identity_connection.exs"},
+    {20_261_008_194_933, Chimwemwe.Repo.Migrations.AddLocalAccountLifecycle,
+     "20261008194933_add_local_account_lifecycle.exs"}
   ]
 
   @spec migrate() :: :ok

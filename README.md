@@ -18,7 +18,10 @@ Slice 2.0-C completes the neutral temporal retention/recovery engineering bounda
 Accepted at the platform level after its 2026-09-27 accountable post-evidence review. Production
 identity architecture is accepted in provider-neutral ADR 0029, including Microsoft Entra ID,
 hybrid/on-premises Active Directory, Google Workspace, generic OIDC, and qualified SAML gateway
-paths. The internal provider-neutral identity/session/support foundations and bounded public
+paths. [ADR 0044](docs/adr/0044-administrator-provisioned-local-credentials.md) now selects
+administrator-provisioned staff credentials as the initial independent login path, with a generated
+temporary password and forced first-login replacement; federation remains optional. The internal
+provider-neutral identity/session/support foundations and bounded public
 session adapter are implemented but not enabled as an L2 release. Conditionally Accepted ADR 0025
 governs the stable institutional-structure direction; ADR 0031 authorizes the bounded synthetic
 `organization.legal` Slice 2.1-C1 start. [ADR 0032](docs/adr/0032-c25-02-delegated-contract-acceptance.md)
@@ -82,6 +85,7 @@ make check-staged
 make test-fast
 make test
 make docs-check
+make auth-demo
 make legal-demo
 make web-dev
 make web-core-dev
@@ -100,6 +104,10 @@ entities, four direct relationships, three management-reporting parentages, and 
 units from the Phase 2.1 review fixture. One relationship is ended and one corporate unit receives
 a second name profile through append-only lifecycle actions. It adds no educational structure, public route, statutory
 consolidation conclusion, or real data.
+`make auth-demo` starts the loopback database-backed account administration proof. It prints a
+fresh bootstrap administrator password, supports prepared synthetic staff account creation,
+one-time temporary passwords, forced first-login replacement, reissue and suspension, and grants
+no school role or permission. It is not a production identity service.
 `make web-dev` starts the explicitly synthetic, local-only UI-0 experience at `http://127.0.0.1:3000`.
 `make web-core-dev` starts the guarded UI-1A qualification at
 `http://127.0.0.1:3000/authority/assignments`, backed by a dedicated local synthetic database
