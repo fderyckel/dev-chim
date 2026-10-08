@@ -106,6 +106,23 @@ export interface paths {
         readonly patch?: never;
         readonly trace?: never;
     };
+    readonly "/api/v1/classroom/correct-attendance": {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header?: never;
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly get?: never;
+        readonly put?: never;
+        /** @description Correct today's saved register through one complete append-only successor. Requires the exact current revision and marking_error reason. No backdating, free text or automatic retry. */
+        readonly post: operations["correctAttendance"];
+        readonly delete?: never;
+        readonly options?: never;
+        readonly head?: never;
+        readonly patch?: never;
+        readonly trace?: never;
+    };
     readonly "/api/v1/classroom/preparation": {
         readonly parameters: {
             readonly query?: never;
@@ -251,6 +268,15 @@ export interface components {
                 readonly local_date: string;
             }[];
         };
+        readonly AttendanceCorrectionReceiptResponse: {
+            readonly data: {
+                /** Format: uuid */
+                readonly correction_id: string;
+                readonly correction_number: number;
+                /** Format: uuid */
+                readonly submission_id: string;
+            };
+        };
         readonly AttendanceReceiptResponse: {
             readonly data: {
                 /** Format: uuid */
@@ -264,9 +290,12 @@ export interface components {
             readonly calendar_revision: string;
             /** Format: uuid */
             readonly class_id: string;
+            readonly correction_number: number;
+            readonly correction_reason: "marking_error" | null;
             readonly label: string;
             /** Format: date */
             readonly local_date: string;
+            readonly revision_id: string | null;
             readonly roster_basis: string;
             readonly students: readonly {
                 /** Format: uuid */
@@ -348,6 +377,26 @@ export interface components {
                 readonly id: string;
                 readonly name: string;
             }[];
+        };
+        readonly CorrectAttendanceRequest: {
+            /** Format: uuid */
+            readonly causation_id: string;
+            /** Format: uuid */
+            readonly class_id: string;
+            /** Format: uuid */
+            readonly expected_revision_id: string;
+            /** Format: uuid */
+            readonly idempotency_key: string;
+            readonly marks: readonly {
+                /** @enum {string} */
+                readonly mark: "present" | "absent" | "late";
+                /** Format: uuid */
+                readonly person_id: string;
+            }[];
+            /** @enum {string} */
+            readonly reason_code: "marking_error";
+            /** Format: uuid */
+            readonly submission_id: string;
         };
         readonly ElevateSupportRequest: {
             /** Format: uuid */
@@ -884,6 +933,87 @@ export interface operations {
                 };
                 content: {
                     readonly "application/json": components["schemas"]["AssignedClassesResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 400: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 401: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 403: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 404: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 409: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Non-disclosing failure */
+            readonly 503: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    readonly correctAttendance: {
+        readonly parameters: {
+            readonly query?: never;
+            readonly header: {
+                readonly Origin: string;
+                readonly "X-CSRF-Token": string;
+            };
+            readonly path?: never;
+            readonly cookie?: never;
+        };
+        readonly requestBody: {
+            readonly content: {
+                readonly "application/json": components["schemas"]["CorrectAttendanceRequest"];
+            };
+        };
+        readonly responses: {
+            /** @description Current writer result */
+            readonly 200: {
+                headers: {
+                    readonly [name: string]: unknown;
+                };
+                content: {
+                    readonly "application/json": components["schemas"]["AttendanceCorrectionReceiptResponse"];
                 };
             };
             /** @description Non-disclosing failure */

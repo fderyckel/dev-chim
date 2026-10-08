@@ -51,6 +51,7 @@ defmodule Chimwemwe.Identity.PublicSessionAdapter do
     calendar_read: "public.calendar.read",
     classroom_prepare: "public.classroom.prepare",
     classroom_read: "public.classroom.read",
+    classroom_correct: "public.classroom.correct",
     classroom_submit: "public.classroom.submit",
     session_read: "public.session.read",
     session_logout: "public.session.logout",

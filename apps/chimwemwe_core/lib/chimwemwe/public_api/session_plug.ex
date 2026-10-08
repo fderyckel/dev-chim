@@ -57,6 +57,7 @@ defmodule Chimwemwe.PublicApi.SessionPlug do
   defp purpose("POST", "/api/v1/classroom/add-student"), do: {:ok, :classroom_prepare}
   defp purpose("POST", "/api/v1/classroom/prepare-attendance"), do: {:ok, :classroom_read}
   defp purpose("POST", "/api/v1/classroom/submit-attendance"), do: {:ok, :classroom_submit}
+  defp purpose("POST", "/api/v1/classroom/correct-attendance"), do: {:ok, :classroom_correct}
   defp purpose("GET", "/api/v1/calendar/preparation"), do: {:ok, :calendar_read}
   defp purpose("POST", "/api/v1/calendar/save-draft"), do: {:ok, :calendar_manage}
   defp purpose("POST", "/api/v1/calendar/publish"), do: {:ok, :calendar_manage}

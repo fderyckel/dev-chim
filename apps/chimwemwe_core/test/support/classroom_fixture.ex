@@ -457,6 +457,7 @@ defmodule Chimwemwe.Classroom.Fixture do
                      "academics.calendar.read",
                      "classroom.attendance.read",
                      "classroom.attendance.submit",
+                     "classroom.attendance.correct",
                      "identity.connections.manage",
                      "identity.invitations.issue"
                    ] do
@@ -537,7 +538,7 @@ defmodule Chimwemwe.Classroom.Fixture do
           {"people.core", "1.0.0"},
           {"academics.calendar", "1.0.0"},
           {"classroom.core", "1.0.0"},
-          {"classroom.attendance", "1.0.0"}
+          {"classroom.attendance", "1.1.0"}
         ] do
       entitlement = UUID.generate()
 
@@ -610,6 +611,7 @@ defmodule Chimwemwe.Classroom.Fixture do
                Repo.query!("""
                TRUNCATE
                  classroom_preparation_workspaces,
+                 classroom_attendance_corrections,
                  classroom_attendance_submissions,
                  classroom_attendance_exposures,
                  classroom_placements,

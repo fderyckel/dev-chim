@@ -70,7 +70,7 @@ end
 {:ok, _} =
   Fixture.query(
     fixture,
-    "DELETE FROM platform_role_capability_grants WHERE tenant_id = $1 AND capability_id NOT IN (SELECT id FROM platform_capabilities WHERE tenant_id = $1 AND key IN ('academics.calendar.definition.manage','academics.calendar.publication.publish','academics.calendar.read','people.core.persons.register','people.core.persons.read','people.core.participations.record_student','classroom.core.classes.create','classroom.core.classes.read','classroom.core.enrolments.record','classroom.core.assignments.record','classroom.core.placements.record','classroom.attendance.read','classroom.attendance.submit'))",
+    "DELETE FROM platform_role_capability_grants WHERE tenant_id = $1 AND capability_id NOT IN (SELECT id FROM platform_capabilities WHERE tenant_id = $1 AND key IN ('academics.calendar.definition.manage','academics.calendar.publication.publish','academics.calendar.read','people.core.persons.register','people.core.persons.read','people.core.participations.record_student','classroom.core.classes.create','classroom.core.classes.read','classroom.core.enrolments.record','classroom.core.assignments.record','classroom.core.placements.record','classroom.attendance.read','classroom.attendance.submit','classroom.attendance.correct'))",
     [Fixture.dump(Chimwemwe.Platform.TrustedActor.tenant_id(Fixture.context_a().actor))]
   )
 

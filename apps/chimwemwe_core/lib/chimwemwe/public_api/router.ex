@@ -28,45 +28,46 @@ defmodule Chimwemwe.PublicApi.Router do
   end
 
   scope "/api/v1/calendar", Chimwemwe.PublicApi do
-    pipe_through [:local_calendar, :authenticated]
+    pipe_through([:local_calendar, :authenticated])
     get("/preparation", CalendarController, :show, log: false)
   end
 
   scope "/api/v1/calendar", Chimwemwe.PublicApi do
-    pipe_through [:local_calendar, :authenticated, :unsafe]
+    pipe_through([:local_calendar, :authenticated, :unsafe])
     post("/save-draft", CalendarController, :save, log: false)
     post("/publish", CalendarController, :publish, log: false)
     post("/resolve", CalendarController, :resolve, log: false)
   end
 
   scope "/api/v1/classroom", Chimwemwe.PublicApi do
-    pipe_through [:local_classroom, :authenticated]
+    pipe_through([:local_classroom, :authenticated])
     get("/classes", ClassroomController, :classes, log: false)
     get("/preparation", ClassroomController, :preparation, log: false)
   end
 
   scope "/api/v1/classroom", Chimwemwe.PublicApi do
-    pipe_through [:local_classroom, :authenticated, :unsafe]
+    pipe_through([:local_classroom, :authenticated, :unsafe])
     post("/prepare-attendance", ClassroomController, :prepare, log: false)
     post("/submit-attendance", ClassroomController, :submit, log: false)
+    post("/correct-attendance", ClassroomController, :correct, log: false)
     post("/prepare-class", ClassroomController, :prepare_class, log: false)
     post("/add-student", ClassroomController, :add_student, log: false)
   end
 
   scope "/auth", Chimwemwe.PublicApi do
-    pipe_through :callback
+    pipe_through(:callback)
 
     get("/callback", CallbackController, :show)
   end
 
   scope "/api/v1", Chimwemwe.PublicApi do
-    pipe_through :authenticated
+    pipe_through(:authenticated)
 
     get("/session", SessionController, :show)
   end
 
   scope "/api/v1", Chimwemwe.PublicApi do
-    pipe_through [:authenticated, :unsafe]
+    pipe_through([:authenticated, :unsafe])
 
     post("/session/logout", SessionController, :logout)
     post("/session/support/elevate", SessionController, :elevate)

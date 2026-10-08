@@ -10,6 +10,7 @@ import { Panel } from "../design-system/components/panel";
 type View = components["schemas"]["AttendanceView"];
 type Classes = components["schemas"]["AssignedClassesResponse"]["data"];
 type Input = Mutable<components["schemas"]["SubmitAttendanceRequest"]>;
+type CorrectionInput = Mutable<components["schemas"]["CorrectAttendanceRequest"]>;
 type Mark = Input["marks"][number]["mark"];
 // openapi-fetch serializes mutable JSON arrays; keep the checked generated contract.
 type Mutable<T> = T extends readonly (infer U)[]
@@ -28,17 +29,21 @@ export function ClassroomAttendance() {
   const [classes, setClasses] = useState<Classes>([]);
   const [view, setView] = useState<View | null>(null);
   const [marks, setMarks] = useState<Record<string, Mark>>({});
+  const [correcting, setCorrecting] = useState(false);
   const [busy, setBusy] = useState(true);
   const [message, setMessage] = useState("Checking your session…");
   const [mustRefresh, setMustRefresh] = useState(false);
   const attempt = useRef<Input | null>(null);
+  const correctionAttempt = useRef<CorrectionInput | null>(null);
 
   function clearSession() {
     setCsrf(null);
     setClasses([]);
     setView(null);
     setMarks({});
+    setCorrecting(false);
     attempt.current = null;
+    correctionAttempt.current = null;
   }
   function failure(status: number, code?: string) {
     if (status === 401 || status === 403) {
@@ -97,7 +102,7 @@ export function ClassroomAttendance() {
       setBusy(false);
     }
   }
-  async function openClass(id: string) {
+  async function openClass(id: string, confirmedCorrection = false) {
     if (!csrf) return;
     const result = await client.POST("/api/v1/classroom/prepare-attendance", {
       body: { class_id: id },
@@ -108,15 +113,51 @@ export function ClassroomAttendance() {
       failure(result.response.status, result.error?.errors[0]?.code);
       return;
     }
-    setView(result.data.data);
-    setMarks({});
+    const loaded = result.data.data;
+    const pendingCorrection = correctionAttempt.current;
+    const pendingMarksAreCurrent =
+      !!pendingCorrection &&
+      loaded.students.every((student) =>
+        pendingCorrection.marks.some(
+          (mark) => mark.person_id === student.id && mark.mark === student.mark,
+        ),
+      );
+    setView(loaded);
     setMustRefresh(false);
     attempt.current = null;
-    setMessage(
-      result.data.data.submission_id
-        ? "Attendance saved. This is the register read back from the school database."
-        : "Mark every student before submitting. No attendance is assumed.",
-    );
+    if (
+      pendingCorrection &&
+      loaded.revision_id === pendingCorrection.expected_revision_id
+    ) {
+      setCorrecting(true);
+      setMarks(
+        Object.fromEntries(
+          pendingCorrection.marks.map((item) => [item.person_id, item.mark]),
+        ),
+      );
+      setMessage(
+        "No correction was saved. Review the marks and retry the same request.",
+      );
+    } else {
+      correctionAttempt.current = null;
+      setCorrecting(false);
+      setMarks({});
+      if (pendingCorrection && !confirmedCorrection) {
+        setMessage(
+          pendingMarksAreCurrent
+            ? `The requested marks are current in attendance correction ${loaded.correction_number}.`
+            : "The register changed before your correction was confirmed. Review the current saved marks before correcting again.",
+        );
+      } else {
+        setMessage(
+          loaded.submission_id
+            ? loaded.correction_number > 0
+              ? `Attendance correction ${loaded.correction_number} saved and read back from the school database.`
+              : "Attendance saved. This is the register read back from the school database."
+            : "Mark every student before submitting. No attendance is assumed.",
+        );
+      }
+    }
   }
   async function submit() {
     if (!view || !csrf) return;
@@ -143,8 +184,58 @@ export function ClassroomAttendance() {
     }
     await openClass(view.class_id);
   }
+  function startCorrection() {
+    if (!view?.submission_id || !view.revision_id) return;
+    correctionAttempt.current = null;
+    setMarks(
+      Object.fromEntries(
+        view.students.flatMap((student) =>
+          student.mark ? [[student.id, student.mark] as const] : [],
+        ),
+      ),
+    );
+    setCorrecting(true);
+    setMessage(
+      "Review the saved marks. Change at least one mark before saving the correction.",
+    );
+  }
+  function cancelCorrection() {
+    correctionAttempt.current = null;
+    setMarks({});
+    setCorrecting(false);
+    setMessage("Correction cancelled. The saved register is unchanged.");
+  }
+  async function correct() {
+    if (!view?.submission_id || !view.revision_id || !csrf) return;
+    const body: CorrectionInput = correctionAttempt.current ?? {
+      class_id: view.class_id,
+      submission_id: view.submission_id,
+      expected_revision_id: view.revision_id,
+      reason_code: "marking_error",
+      idempotency_key: crypto.randomUUID(),
+      causation_id: crypto.randomUUID(),
+      marks: view.students.map((student) => ({
+        person_id: student.id,
+        mark: marks[student.id],
+      })),
+    };
+    correctionAttempt.current = body;
+    const result = await client.POST("/api/v1/classroom/correct-attendance", {
+      body,
+      params: { header: { Origin: window.location.origin, "X-CSRF-Token": csrf } },
+    });
+    if (!result.data) {
+      failure(result.response.status, result.error?.errors[0]?.code);
+      return;
+    }
+    await openClass(view.class_id, true);
+  }
   const saved = !!view?.submission_id;
   const remaining = view?.students.filter((student) => !marks[student.id]).length ?? 0;
+  const changed =
+    !!view &&
+    correcting &&
+    view.students.some((student) => marks[student.id] !== student.mark);
   return (
     <main className="c-classroom">
       <PageHeading
@@ -155,7 +246,8 @@ export function ClassroomAttendance() {
       />
       <p className="c-classroom__notice">
         Fictional people and a prepared class. Real school sign-in is not connected.
-        Submitted attendance cannot yet be corrected.
+        Corrections are limited to today’s assigned class and retain every earlier
+        register.
       </p>
       <div className="c-classroom__actions">
         <ActionLink href="/classroom/setup" variant="secondary" icon="forward">
@@ -231,19 +323,25 @@ export function ClassroomAttendance() {
                 className="c-classroom__register"
                 onSubmit={(event) => {
                   event.preventDefault();
-                  void guarded(submit);
+                  void guarded(correcting ? correct : submit);
                 }}
               >
+                {correcting && (
+                  <p className="c-classroom__correction-note">
+                    Reason: marking error. The submitted register will remain in the
+                    correction history.
+                  </p>
+                )}
                 {view.students.map((student, index) => (
                   <fieldset
                     className="c-classroom__student"
                     key={student.id}
-                    disabled={busy || saved || mustRefresh}
+                    disabled={busy || (saved && !correcting) || mustRefresh}
                   >
                     <legend>
                       {index + 1}. {student.name}
                     </legend>
-                    {saved ? (
+                    {saved && !correcting ? (
                       <p>{student.mark ? markLabels[student.mark] : "Unmarked"}</p>
                     ) : (
                       <div className="c-classroom__marks">
@@ -260,6 +358,7 @@ export function ClassroomAttendance() {
                                   [student.id]: mark,
                                 }));
                                 attempt.current = null;
+                                correctionAttempt.current = null;
                               }}
                             />
                             {markLabels[mark]}
@@ -277,6 +376,33 @@ export function ClassroomAttendance() {
                     >
                       {busy ? "Saving…" : "Submit attendance"}
                     </ActionButton>
+                  )}
+                  {saved && !correcting && (
+                    <ActionButton
+                      type="button"
+                      disabled={busy || mustRefresh || view.correction_number >= 10}
+                      onClick={startCorrection}
+                    >
+                      Correct attendance
+                    </ActionButton>
+                  )}
+                  {correcting && (
+                    <>
+                      <ActionButton
+                        type="submit"
+                        disabled={busy || remaining > 0 || !changed || mustRefresh}
+                      >
+                        {busy ? "Saving…" : "Save correction"}
+                      </ActionButton>
+                      <ActionButton
+                        type="button"
+                        variant="quiet"
+                        disabled={busy}
+                        onClick={cancelCorrection}
+                      >
+                        Cancel correction
+                      </ActionButton>
+                    </>
                   )}
                   <ActionButton
                     variant="secondary"

@@ -104,7 +104,6 @@
     text-align: center;
     text-decoration: none;
     transition:
-      background var(--motion-fast) ease,
       border-color var(--motion-fast) ease,
       transform var(--motion-fast) ease;
   }

@@ -22,7 +22,11 @@ class/register, year enrolment, teaching assignment and dated placement. The dis
 [classroom preparation workflow](classroom-preparation-workflow-evidence.md) now lets a session-bound
 synthetic administrator create one class and add fictional students through the existing named
 actions, then opens that class in the educator attendance screen. Real identity, representative
-review, correction/recovery and release gates remain separate follow-ons.
+review and release gates remain separate follow-ons. The subsequent disabled local
+[attendance correction and request-recovery workflow](attendance-correction-and-recovery-evidence.md)
+now appends immutable corrections to today's saved register and recovers from an uncertain browser
+response through authoritative reload and exact retry. Backdating, correction policy, Restricted
+consumer delivery and connected use remain outside that proof.
 
 CF-1 now supplies private synthetic institutional registration, initial operator assignment,
 publication and an exact authorized read. See the
@@ -189,6 +193,8 @@ test, owner role, or later slice does not satisfy one of those later gates.
 - [Academic calendar executable-contract evidence](academic-calendar-contract-evidence.md)
 - [CF-3 connected academic-calendar workflow evidence](connected-calendar-workflow-evidence.md)
 - [Classroom preparation workflow evidence](classroom-preparation-workflow-evidence.md)
+- [Local classroom attendance workflow evidence](classroom-attendance-workflow-evidence.md)
+- [Attendance correction and request-recovery evidence](attendance-correction-and-recovery-evidence.md)
 - [Slice 2.0-B operational outbox and module-drain evidence](operational-outbox-and-module-drain-evidence.md)
 - [Slice 2.0-C temporal completion and recovery evidence](temporal-completion-and-recovery-evidence.md)
 - [Temporal retention and recovery runbook](../operations/temporal-retention-and-recovery.md)
@@ -204,6 +210,9 @@ test, owner role, or later slice does not satisfy one of those later gates.
 - [ADR index](../adr/README.md)
 - [Threat model](../security/threat-model.md)
 
-The next bounded classroom increment is the [local attendance workflow](classroom-attendance-workflow-evidence.md),
-governed by [ADR 0038](../adr/0038-local-classroom-attendance-workflow.md). Its synthetic
-screen-to-writer proof does not close connected-release or real-data conditions.
+The local [attendance workflow](classroom-attendance-workflow-evidence.md) and its append-only
+[correction successor](attendance-correction-and-recovery-evidence.md) now complete the disabled
+synthetic screen-to-writer and request-recovery proof governed by ADRs
+[0038](../adr/0038-local-classroom-attendance-workflow.md) and
+[0041](../adr/0041-local-attendance-correction-and-recovery.md). They do not close representative
+policy, Restricted consumer delivery, connected-release or real-data conditions.

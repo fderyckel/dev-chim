@@ -50,14 +50,50 @@ test("assigned educator submits explicit marks and reads persisted attendance ac
   await expect(groups.nth(0)).toContainText("Present");
   await expect(groups.nth(1)).toContainText("Absent");
   await expect(groups.nth(2)).toContainText("Late");
+
+  await page.getByRole("button", { name: "Correct attendance" }).click();
+  await expect(page.getByRole("button", { name: "Save correction" })).toBeDisabled();
+  await expect(groups.nth(0).getByRole("radio", { name: "Present" })).toBeChecked();
+  await groups.nth(0).getByRole("radio", { name: "Late" }).check();
+  await expect(page.getByRole("button", { name: "Save correction" })).toBeEnabled();
+  await page.setViewportSize({ width: 320, height: 900 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.getByRole("button", { name: "Save correction" }).click();
+  await expect(page.getByRole("status")).toContainText("Attendance correction 1 saved");
+  await expect(groups.nth(0)).toContainText("Late");
+
+  await page.getByRole("button", { name: "Correct attendance" }).click();
+  await groups.nth(0).getByRole("radio", { name: "Absent" }).check();
+  await page.route("**/api/v1/classroom/correct-attendance", async (route) => {
+    const response = await route.fetch();
+    expect(response.status()).toBe(200);
+    await route.abort("connectionfailed");
+  });
+  await page.getByRole("button", { name: "Save correction" }).click();
+  await expect(page.getByRole("status")).toContainText("Connection interrupted");
+  await page.unroute("**/api/v1/classroom/correct-attendance");
+  await page.getByRole("button", { name: "Reload class" }).click();
+  await expect(page.getByRole("status")).toContainText(
+    "requested marks are current in attendance correction 2",
+  );
+  await expect(groups.nth(0)).toContainText("Absent");
+
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.screenshot({ path: "test-results/classroom-saved.png", fullPage: true });
+  await page.screenshot({
+    path: "test-results/classroom-corrected.png",
+    fullPage: true,
+  });
   await page.getByRole("button", { name: "Sign out", exact: true }).click();
   await expect(page.getByRole("status")).toHaveText("Signed out.");
   expect((await page.request.get("/api/v1/classroom/classes")).status()).toBe(401);
   await page.getByRole("button", { name: "Start synthetic educator session" }).click();
   await page.getByRole("button", { name: "Synthetic class", exact: true }).click();
-  await expect(page.getByRole("status")).toContainText("Attendance saved");
+  await expect(page.getByRole("status")).toContainText("Attendance correction 2 saved");
 });
 
 test("administrator prepares a class and student before the educator opens attendance", async ({

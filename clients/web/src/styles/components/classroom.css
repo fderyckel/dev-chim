@@ -31,6 +31,14 @@
     gap: var(--space-5);
   }
 
+  .c-classroom__correction-note {
+    margin: 0;
+    padding: var(--space-3);
+    border-left: var(--border-width) solid var(--color-attention-text);
+    color: var(--color-text-soft);
+    background: var(--color-surface-subtle);
+  }
+
   .c-classroom__form,
   .c-classroom__prepared {
     display: grid;

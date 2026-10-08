@@ -50,6 +50,7 @@ defmodule Chimwemwe.Platform.TemporalQualificationActionTest do
 
   @tables [
     "classroom_preparation_workspaces",
+    "classroom_attendance_corrections",
     "classroom_attendance_submissions",
     "classroom_attendance_exposures",
     "classroom_placements",

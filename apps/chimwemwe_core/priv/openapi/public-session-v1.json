@@ -60,6 +60,39 @@
         ],
         "type": "object"
       },
+      "AttendanceCorrectionReceiptResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "additionalProperties": false,
+            "properties": {
+              "correction_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "correction_number": {
+                "maximum": 10,
+                "minimum": 1,
+                "type": "integer"
+              },
+              "submission_id": {
+                "format": "uuid",
+                "type": "string"
+              }
+            },
+            "required": [
+              "correction_id",
+              "correction_number",
+              "submission_id"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
       "AttendanceReceiptResponse": {
         "additionalProperties": false,
         "properties": {
@@ -105,12 +138,41 @@
             "format": "uuid",
             "type": "string"
           },
+          "correction_number": {
+            "maximum": 10,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "correction_reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "marking_error"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "label": {
             "type": "string"
           },
           "local_date": {
             "format": "date",
             "type": "string"
+          },
+          "revision_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "roster_basis": {
             "pattern": "^[0-9a-f]{64}$",
@@ -168,8 +230,11 @@
         "required": [
           "calendar_revision",
           "class_id",
+          "correction_number",
+          "correction_reason",
           "label",
           "local_date",
+          "revision_id",
           "roster_basis",
           "students",
           "submission_id"
@@ -515,6 +580,74 @@
           "educator_name",
           "institution_name",
           "students"
+        ],
+        "type": "object"
+      },
+      "CorrectAttendanceRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "causation_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "class_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "expected_revision_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "marks": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "mark": {
+                  "enum": [
+                    "present",
+                    "absent",
+                    "late"
+                  ],
+                  "type": "string"
+                },
+                "person_id": {
+                  "format": "uuid",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "mark",
+                "person_id"
+              ],
+              "type": "object"
+            },
+            "maxItems": 60,
+            "minItems": 1,
+            "type": "array"
+          },
+          "reason_code": {
+            "enum": [
+              "marking_error"
+            ],
+            "type": "string"
+          },
+          "submission_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "causation_id",
+          "class_id",
+          "expected_revision_id",
+          "idempotency_key",
+          "marks",
+          "reason_code",
+          "submission_id"
         ],
         "type": "object"
       },
@@ -1507,6 +1640,117 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AssignedClassesResponse"
+                }
+              }
+            },
+            "description": "Current writer result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        },
+        "security": [
+          {
+            "applicationSession": []
+          }
+        ]
+      }
+    },
+    "/api/v1/classroom/correct-attendance": {
+      "post": {
+        "description": "Correct today's saved register through one complete append-only successor. Requires the exact current revision and marking_error reason. No backdating, free text or automatic retry.",
+        "operationId": "correctAttendance",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "Origin",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "X-CSRF-Token",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CorrectAttendanceRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttendanceCorrectionReceiptResponse"
                 }
               }
             },

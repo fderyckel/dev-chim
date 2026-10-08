@@ -1,5 +1,5 @@
 defmodule Chimwemwe.Classroom.Attendance do
-  @moduledoc "Today's bounded, session-bound classroom register; ADR 0038."
+  @moduledoc "Today's bounded, session-bound classroom register; ADRs 0038 and 0041."
   alias Chimwemwe.Classroom.{Error, Evidence, Foundation, InternalWriter}
   alias Chimwemwe.Identity.{PublicRequestSession, SessionFoundation}
   alias Chimwemwe.Platform.ModuleLifecycle
@@ -8,7 +8,9 @@ defmodule Chimwemwe.Classroom.Attendance do
   alias Ecto.UUID
   @module "classroom.attendance"
   @aggregate "classroom.attendance.submission"
-  @action "classroom.attendance.submit"
+  @submit_action "classroom.attendance.submit"
+  @correct_action "classroom.attendance.correct"
+  @correction_reason "marking_error"
 
   def release_manifest do
     {:ok, manifest} =
@@ -17,7 +19,7 @@ defmodule Chimwemwe.Classroom.Attendance do
           [
             %{
               key: @module,
-              version: "1.0.0",
+              version: "1.1.0",
               owner: "Classroom attendance",
               dependencies: ["classroom.core"]
             }
@@ -81,17 +83,40 @@ defmodule Chimwemwe.Classroom.Attendance do
          do: run(runtime, request, "submit", &submit_current(&1, &2, input))
   end
 
+  def correct(runtime, request, input) do
+    with {:ok, input} <- normalize_correction(input),
+         do: run(runtime, request, "correct", &correct_current(&1, &2, input))
+  end
+
   defp submit_current(actor, session, input) do
     with {:ok, class} <- authorized_class(actor, session, input.class_id),
          true <- input.local_date == Date.to_iso8601(class.date),
          hash = :crypto.hash(:sha256, :erlang.term_to_binary(input, [:deterministic])),
          id = UUID.generate(),
          {:ok, claim} <-
-           Evidence.claim(actor, @action, @aggregate, input.idempotency_key, hash, id) do
+           Evidence.claim(actor, @submit_action, @aggregate, input.idempotency_key, hash, id) do
       submit_claim(claim, actor, class, input, hash, id)
     else
       false -> error(:stale)
       other -> other
+    end
+  end
+
+  defp correct_current(actor, session, input) do
+    with {:ok, class} <- authorized_class(actor, session, input.class_id),
+         {:ok, submission} <- correction_submission(actor, class, input.submission_id),
+         hash = :crypto.hash(:sha256, :erlang.term_to_binary(input, [:deterministic])),
+         correction_id = UUID.generate(),
+         {:ok, claim} <-
+           Evidence.claim(
+             actor,
+             @correct_action,
+             @aggregate,
+             input.idempotency_key,
+             hash,
+             submission.id
+           ) do
+      correct_claim(claim, actor, submission, input, hash, correction_id)
     end
   end
 
@@ -177,10 +202,21 @@ defmodule Chimwemwe.Classroom.Attendance do
 
   defp load_view(actor, class) do
     case Repo.query!(
-           "SELECT id::text, roster, marks, roster_basis FROM classroom_attendance_submissions WHERE tenant_id = $1 AND class_id = $2 AND local_date = $3",
+           """
+           SELECT s.id::text, s.roster, COALESCE(c.marks, s.marks), s.roster_basis,
+             c.id::text, COALESCE(c.correction_number, 0), c.reason_code
+           FROM classroom_attendance_submissions s
+           LEFT JOIN LATERAL (
+             SELECT id, marks, correction_number, reason_code
+             FROM classroom_attendance_corrections
+             WHERE tenant_id = s.tenant_id AND submission_id = s.id
+             ORDER BY correction_number DESC LIMIT 1
+           ) c ON TRUE
+           WHERE s.tenant_id = $1 AND s.class_id = $2 AND s.local_date = $3
+           """,
            [dump(actor.tenant_id), dump(class.id), class.date]
          ).rows do
-      [[id, %{"students" => facts}, marks, basis]] ->
+      [[id, %{"students" => facts}, marks, basis, correction_id, number, reason]] ->
         ids = Enum.map(facts, &hd/1)
 
         names =
@@ -192,16 +228,16 @@ defmodule Chimwemwe.Classroom.Attendance do
         students =
           Enum.map(names, fn [id, name] -> %{id: id, name: name, mark: Map.fetch!(marks, id)} end)
 
-        {:ok, view(class, students, basis, id)}
+        {:ok, view(class, students, basis, id, correction_id || id, number, reason)}
 
       [] ->
         with :ok <- instructional(actor, class), {:ok, facts, students} <- roster(actor, class) do
-          {:ok, view(class, students, basis(class, facts), nil)}
+          {:ok, view(class, students, basis(class, facts), nil, nil, 0, nil)}
         end
     end
   end
 
-  defp view(class, students, basis, id),
+  defp view(class, students, basis, id, revision_id, correction_number, correction_reason),
     do: %{
       class_id: class.id,
       label: class.label,
@@ -209,7 +245,10 @@ defmodule Chimwemwe.Classroom.Attendance do
       calendar_revision: class.revision,
       roster_basis: basis,
       students: students,
-      submission_id: id
+      submission_id: id,
+      revision_id: revision_id,
+      correction_number: correction_number,
+      correction_reason: correction_reason
     }
 
   defp instructional(actor, class) do
@@ -278,7 +317,7 @@ defmodule Chimwemwe.Classroom.Attendance do
          payload = %{"submission_id" => id},
          {:ok, _evidence} <-
            Evidence.record(actor, %{
-             action_name: @action,
+             action_name: @submit_action,
              aggregate_type: @aggregate,
              aggregate_id: id,
              idempotency_key: input.idempotency_key,
@@ -286,7 +325,7 @@ defmodule Chimwemwe.Classroom.Attendance do
              before_version: 0,
              after_version: 1,
              change_summary: %{"action" => "submit"},
-             event_type: @action <> ".completed",
+             event_type: @submit_action <> ".completed",
              event_payload: payload,
              result_payload: payload,
              claim_id: claim
@@ -296,6 +335,112 @@ defmodule Chimwemwe.Classroom.Attendance do
       false -> error(:stale)
       other -> other
     end
+  end
+
+  defp correct_claim({:existing, stored}, actor, _submission, _input, hash, _id) do
+    with {:ok, replay} <- Evidence.replay(stored, actor.actor_id, hash),
+         do: {:ok, replay.result_payload}
+  end
+
+  defp correct_claim({:new, claim}, actor, submission, input, _hash, correction_id) do
+    current = current_correction(actor, submission)
+    current_revision_id = if current, do: current.id, else: submission.id
+    current_marks = if current, do: current.marks, else: submission.marks
+    correction_number = if current, do: current.number + 1, else: 1
+
+    with true <- input.expected_revision_id == current_revision_id,
+         true <- correction_number <= 10,
+         true <- Enum.sort(Map.keys(input.marks)) == Enum.sort(submission.person_ids),
+         true <- input.marks != current_marks,
+         :ok <-
+           insert_correction(
+             actor,
+             submission,
+             current,
+             input,
+             correction_id,
+             correction_number
+           ),
+         payload = %{
+           "submission_id" => submission.id,
+           "correction_id" => correction_id,
+           "correction_number" => correction_number
+         },
+         {:ok, _evidence} <-
+           Evidence.record(actor, %{
+             action_name: @correct_action,
+             aggregate_type: @aggregate,
+             aggregate_id: submission.id,
+             idempotency_key: input.idempotency_key,
+             causation_id: input.causation_id,
+             before_version: correction_number,
+             after_version: correction_number + 1,
+             change_summary: %{"action" => "correct", "reason" => input.reason_code},
+             event_type: @correct_action <> ".completed",
+             event_payload: payload,
+             result_payload: payload,
+             claim_id: claim
+           }) do
+      {:ok, payload}
+    else
+      false -> error(:conflict)
+      other -> other
+    end
+  end
+
+  defp correction_submission(actor, class, submission_id) do
+    case Repo.query!(
+           """
+           SELECT id::text, roster, marks
+           FROM classroom_attendance_submissions
+           WHERE tenant_id = $1 AND id = $2 AND class_id = $3 AND local_date = $4
+           FOR UPDATE
+           """,
+           [dump(actor.tenant_id), dump(submission_id), dump(class.id), class.date]
+         ).rows do
+      [[id, %{"students" => facts}, marks]] ->
+        {:ok, %{id: id, marks: marks, person_ids: Enum.map(facts, &hd/1)}}
+
+      _ ->
+        error(:forbidden)
+    end
+  end
+
+  defp current_correction(actor, submission) do
+    case Repo.query!(
+           """
+           SELECT id::text, correction_number, marks
+           FROM classroom_attendance_corrections
+           WHERE tenant_id = $1 AND submission_id = $2
+           ORDER BY correction_number DESC LIMIT 1
+           """,
+           [dump(actor.tenant_id), dump(submission.id)]
+         ).rows do
+      [[id, number, marks]] -> %{id: id, number: number, marks: marks}
+      [] -> nil
+    end
+  end
+
+  defp insert_correction(actor, submission, current, input, id, number) do
+    Repo.query!(
+      """
+      INSERT INTO classroom_attendance_corrections
+        (id, tenant_id, submission_id, previous_correction_id, correction_number,
+         reason_code, marks, recorded_at)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,(NOW() AT TIME ZONE 'utc'))
+      """,
+      [
+        dump(id),
+        dump(actor.tenant_id),
+        dump(submission.id),
+        if(current, do: dump(current.id), else: nil),
+        number,
+        input.reason_code,
+        input.marks
+      ]
+    )
+
+    :ok
   end
 
   defp insert(actor, class, input, facts, id) do
@@ -379,6 +524,42 @@ defmodule Chimwemwe.Classroom.Attendance do
   end
 
   defp normalize(_), do: error(:invalid_input)
+
+  defp normalize_correction(input) when is_map(input) and not is_struct(input) do
+    keys = [
+      :class_id,
+      :submission_id,
+      :expected_revision_id,
+      :reason_code,
+      :marks,
+      :idempotency_key,
+      :causation_id
+    ]
+
+    with true <- Enum.sort(Map.keys(input)) == Enum.sort(keys),
+         {:ok, class_id} <- uuid(input.class_id),
+         {:ok, submission_id} <- uuid(input.submission_id),
+         {:ok, expected_revision_id} <- uuid(input.expected_revision_id),
+         {:ok, idem} <- uuid(input.idempotency_key),
+         {:ok, cause} <- uuid(input.causation_id),
+         true <- input.reason_code == @correction_reason,
+         {:ok, marks} <- marks(input.marks) do
+      {:ok,
+       %{
+         input
+         | class_id: class_id,
+           submission_id: submission_id,
+           expected_revision_id: expected_revision_id,
+           idempotency_key: idem,
+           causation_id: cause,
+           marks: marks
+       }}
+    else
+      _ -> error(:invalid_input)
+    end
+  end
+
+  defp normalize_correction(_), do: error(:invalid_input)
 
   defp marks(marks) when is_list(marks) and length(marks) in 1..60 do
     Enum.reduce_while(marks, {:ok, %{}}, &add_mark/2)

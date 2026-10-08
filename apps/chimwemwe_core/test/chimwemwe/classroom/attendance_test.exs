@@ -81,6 +81,273 @@ defmodule Chimwemwe.Classroom.AttendanceTest do
              })
   end
 
+  test "correction appends complete successors and authoritative reload resolves the latest", f do
+    assert {:ok, view} = Attendance.prepare(f.persistence, f.request, f.class.id)
+    assert {:ok, _} = Attendance.submit(f.persistence, f.request, input(view))
+    assert {:ok, submitted} = Attendance.prepare(f.persistence, f.request, f.class.id)
+    assert submitted.revision_id == submitted.submission_id
+    assert submitted.correction_number == 0
+    assert submitted.correction_reason == nil
+
+    correction = correction_input(submitted, "absent")
+    assert {:ok, first} = Attendance.correct(f.persistence, f.request, correction)
+    assert {:ok, ^first} = Attendance.correct(f.persistence, f.request, correction)
+    assert first["submission_id"] == submitted.submission_id
+    assert first["correction_number"] == 1
+
+    assert {:ok, corrected} = Attendance.prepare(f.persistence, f.request, f.class.id)
+    assert corrected.revision_id == first["correction_id"]
+    assert corrected.correction_number == 1
+    assert corrected.correction_reason == "marking_error"
+    assert [%{mark: "absent"}] = corrected.students
+
+    assert {:ok, second} =
+             Attendance.correct(
+               f.persistence,
+               f.request,
+               correction_input(corrected, "late")
+             )
+
+    assert second["correction_number"] == 2
+    assert {:ok, current} = Attendance.prepare(f.persistence, f.request, f.class.id)
+    assert current.revision_id == second["correction_id"]
+    assert [%{mark: "late"}] = current.students
+
+    [student] = submitted.students
+    student_id = student.id
+
+    assert {:ok, %{rows: [[%{^student_id => "present"}, 2, 2, 2]]}} =
+             query(f, """
+             SELECT s.marks,
+               (SELECT count(*) FROM classroom_attendance_corrections),
+               (SELECT count(*) FROM platform_authority_audit_events WHERE action_name = 'classroom.attendance.correct'),
+               (SELECT count(*) FROM platform_outbox_events WHERE event_type = 'classroom.attendance.correct.completed' AND classification = 'restricted')
+             FROM classroom_attendance_submissions s
+             """)
+
+    assert {:ok, %{rows: payloads}} =
+             query(f, """
+             SELECT payload FROM platform_outbox_events
+             WHERE event_type = 'classroom.attendance.correct.completed'
+             ORDER BY stream_position
+             """)
+
+    assert Enum.all?(payloads, fn [payload] ->
+             Enum.sort(Map.keys(payload)) ==
+               ["correction_id", "correction_number", "submission_id"]
+           end)
+
+    assert {:error, _} =
+             query(f, "UPDATE classroom_attendance_corrections SET reason_code = 'marking_error'")
+
+    assert {:error, _} = query(f, "DELETE FROM classroom_attendance_corrections")
+  end
+
+  test "stale and concurrent corrections cannot branch the register", f do
+    assert {:ok, view} = Attendance.prepare(f.persistence, f.request, f.class.id)
+    assert {:ok, _} = Attendance.submit(f.persistence, f.request, input(view))
+    assert {:ok, submitted} = Attendance.prepare(f.persistence, f.request, f.class.id)
+
+    outcomes =
+      [correction_input(submitted, "absent"), correction_input(submitted, "late")]
+      |> Task.async_stream(&Attendance.correct(f.persistence, f.request, &1))
+      |> Enum.map(fn {:ok, result} -> result end)
+
+    assert Enum.count(outcomes, &match?({:ok, _}, &1)) == 1
+    assert Enum.count(outcomes, &match?({:error, %Error{code: :conflict}}, &1)) == 1
+
+    assert {:ok, %{rows: [[1]]}} =
+             query(f, "SELECT count(*) FROM classroom_attendance_corrections")
+
+    assert {:error, %Error{code: :conflict}} =
+             Attendance.correct(f.persistence, f.request, correction_input(submitted, "late"))
+  end
+
+  test "correction requires its own current capability and teaching assignment", f do
+    assert {:ok, view} = Attendance.prepare(f.persistence, f.request, f.class.id)
+    assert {:ok, _} = Attendance.submit(f.persistence, f.request, input(view))
+    assert {:ok, submitted} = Attendance.prepare(f.persistence, f.request, f.class.id)
+    correction = correction_input(submitted, "absent")
+
+    assert {:error, %Error{code: :forbidden}} =
+             Attendance.correct(
+               f.persistence,
+               f.request,
+               %{correction | submission_id: UUID.generate()}
+             )
+
+    assert {:error, %Error{code: :forbidden}} =
+             Attendance.correct(
+               f.persistence,
+               %{f.request | context: context_b()},
+               correction
+             )
+
+    {:ok, _} =
+      query(
+        f,
+        "DELETE FROM platform_role_capability_grants WHERE tenant_id = $1 AND capability_id IN (SELECT id FROM platform_capabilities WHERE tenant_id = $1 AND key = 'classroom.attendance.correct')",
+        [dump(f.request.session.tenant_id)]
+      )
+
+    assert {:error, %Error{code: :forbidden}} =
+             Attendance.correct(f.persistence, f.request, correction)
+
+    assert {:ok, _} = Attendance.prepare(f.persistence, f.request, f.class.id)
+  end
+
+  test "ended assignment and revoked session deny correction", f do
+    assert {:ok, view} = Attendance.prepare(f.persistence, f.request, f.class.id)
+    assert {:ok, _} = Attendance.submit(f.persistence, f.request, input(view))
+    assert {:ok, submitted} = Attendance.prepare(f.persistence, f.request, f.class.id)
+    correction = correction_input(submitted, "absent")
+
+    assert {:ok, _} =
+             query(
+               f,
+               "ALTER TABLE classroom_teaching_assignments DISABLE TRIGGER classroom_teaching_assignments_classroom_guard"
+             )
+
+    try do
+      assert {:ok, _} =
+               query(
+                 f,
+                 "UPDATE classroom_teaching_assignments SET effective_from = $3, effective_until = $4 WHERE tenant_id = $1 AND id = $2",
+                 [
+                   dump(f.request.session.tenant_id),
+                   dump(f.assignment.id),
+                   Date.add(Date.utc_today(), -1),
+                   Date.utc_today()
+                 ]
+               )
+    after
+      assert {:ok, _} =
+               query(
+                 f,
+                 "ALTER TABLE classroom_teaching_assignments ENABLE TRIGGER classroom_teaching_assignments_classroom_guard"
+               )
+    end
+
+    assert {:error, %Error{code: :forbidden}} =
+             Attendance.correct(f.persistence, f.request, correction)
+
+    assert {:ok, :logged_out} = PublicSessionAdapter.logout(f.persistence, f.request)
+
+    assert {:error, %Error{code: :forbidden}} =
+             Attendance.correct(f.persistence, f.request, correction)
+  end
+
+  test "correction stays pinned to the submitted roster after a new placement", f do
+    assert {:ok, view} = Attendance.prepare(f.persistence, f.request, f.class.id)
+    assert {:ok, _} = Attendance.submit(f.persistence, f.request, input(view))
+    assert {:ok, submitted} = Attendance.prepare(f.persistence, f.request, f.class.id)
+    student = participation!(f, person!(f), :student)
+    enrolment = enrolment!(%{f | student: student})
+
+    assert {:ok, _} =
+             Foundation.place_student(
+               f.persistence,
+               context_a(),
+               placement_input(enrolment, f.class)
+             )
+
+    assert {:ok, _} =
+             Attendance.correct(
+               f.persistence,
+               f.request,
+               correction_input(submitted, "absent")
+             )
+
+    assert {:ok, corrected} = Attendance.prepare(f.persistence, f.request, f.class.id)
+    assert length(corrected.students) == 1
+    assert [%{mark: "absent"}] = corrected.students
+  end
+
+  test "invalid, no-op, extra and over-limit corrections fail closed", f do
+    assert {:ok, view} = Attendance.prepare(f.persistence, f.request, f.class.id)
+    assert {:ok, _} = Attendance.submit(f.persistence, f.request, input(view))
+    assert {:ok, submitted} = Attendance.prepare(f.persistence, f.request, f.class.id)
+
+    assert {:error, %Error{code: :conflict}} =
+             Attendance.correct(f.persistence, f.request, correction_input(submitted, "present"))
+
+    assert {:error, %Error{code: :invalid_input}} =
+             Attendance.correct(
+               f.persistence,
+               f.request,
+               %{correction_input(submitted, "absent") | reason_code: "other"}
+             )
+
+    extra = correction_input(submitted, "absent")
+
+    assert {:error, %Error{code: :conflict}} =
+             Attendance.correct(f.persistence, f.request, %{
+               extra
+               | marks: extra.marks ++ [%{person_id: UUID.generate(), mark: "present"}]
+             })
+
+    current =
+      Enum.reduce(1..10, submitted, fn number, prior ->
+        mark = if rem(number, 2) == 1, do: "absent", else: "late"
+
+        assert {:ok, _} =
+                 Attendance.correct(f.persistence, f.request, correction_input(prior, mark))
+
+        assert {:ok, next} = Attendance.prepare(f.persistence, f.request, f.class.id)
+        next
+      end)
+
+    assert current.correction_number == 10
+
+    assert {:error, %Error{code: :conflict}} =
+             Attendance.correct(
+               f.persistence,
+               f.request,
+               correction_input(current, "present")
+             )
+  end
+
+  test "late correction evidence failure rolls back state and retry claim", f do
+    assert {:ok, view} = Attendance.prepare(f.persistence, f.request, f.class.id)
+    assert {:ok, _} = Attendance.submit(f.persistence, f.request, input(view))
+    assert {:ok, submitted} = Attendance.prepare(f.persistence, f.request, f.class.id)
+    correction = correction_input(submitted, "absent")
+
+    assert {:ok, _} =
+             query(f, """
+             CREATE FUNCTION test_fail_attendance_correction() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN
+               IF NEW.action_name = 'classroom.attendance.correct' AND NEW.status = 'completed' THEN RAISE EXCEPTION 'synthetic failure'; END IF; RETURN NEW;
+             END $$;
+             """)
+
+    assert {:ok, _} =
+             query(
+               f,
+               "CREATE TRIGGER test_fail_attendance_correction BEFORE UPDATE ON platform_authority_action_idempotency FOR EACH ROW EXECUTE FUNCTION test_fail_attendance_correction()"
+             )
+
+    try do
+      assert {:error, _} = Attendance.correct(f.persistence, f.request, correction)
+
+      assert {:ok, %{rows: [[0, 0, 0, 0]]}} =
+               query(f, """
+               SELECT (SELECT count(*) FROM classroom_attendance_corrections),
+                 (SELECT count(*) FROM platform_authority_audit_events WHERE action_name = 'classroom.attendance.correct'),
+                 (SELECT count(*) FROM platform_outbox_events WHERE event_type = 'classroom.attendance.correct.completed'),
+                 (SELECT count(*) FROM platform_authority_action_idempotency WHERE action_name = 'classroom.attendance.correct')
+               """)
+    after
+      query(
+        f,
+        "DROP TRIGGER test_fail_attendance_correction ON platform_authority_action_idempotency"
+      )
+
+      query(f, "DROP FUNCTION test_fail_attendance_correction()")
+    end
+
+    assert {:ok, _} = Attendance.correct(f.persistence, f.request, correction)
+  end
+
   test "missing, forged and revoked sessions cannot read or write", f do
     assert {:error, _} = Attendance.assigned_classes(f.persistence, nil)
 
@@ -316,6 +583,23 @@ defmodule Chimwemwe.Classroom.AttendanceTest do
     assert Plug.Conn.get_resp_header(conn, "cache-control") == ["no-store"]
     assert {:ok, view} = Attendance.prepare(f.persistence, f.request, f.class.id)
     assert http(f, :post, "/api/v1/classroom/submit-attendance", input(view)).status == 200
+    assert {:ok, saved} = Attendance.prepare(f.persistence, f.request, f.class.id)
+    {cookie, request} = AttendanceFixture.login!(f)
+    current = %{f | cookie: cookie, request: request}
+
+    assert http(
+             current,
+             :post,
+             "/api/v1/classroom/correct-attendance",
+             correction_input(saved, "absent")
+           ).status == 200
+
+    assert http(
+             current,
+             :post,
+             "/api/v1/classroom/correct-attendance",
+             Map.put(correction_input(saved, "late"), :local_date, saved.local_date)
+           ).status == 400
   end
 
   test "published calendar's non-instructional day prevents preparation and submission", f do
@@ -420,5 +704,15 @@ defmodule Chimwemwe.Classroom.AttendanceTest do
         calendar_revision: view.calendar_revision,
         roster_basis: view.roster_basis,
         marks: Enum.map(view.students, &%{person_id: &1.id, mark: "present"})
+      })
+
+  defp correction_input(view, mark),
+    do:
+      Map.merge(keys(), %{
+        class_id: view.class_id,
+        submission_id: view.submission_id,
+        expected_revision_id: view.revision_id,
+        reason_code: "marking_error",
+        marks: Enum.map(view.students, &%{person_id: &1.id, mark: mark})
       })
 end

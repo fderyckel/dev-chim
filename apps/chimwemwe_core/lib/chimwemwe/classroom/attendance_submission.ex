@@ -6,10 +6,16 @@ defmodule Chimwemwe.Classroom.AttendanceSubmission do
     ownership: :tenant_owned
 
   postgres do
-    table "classroom_attendance_submissions"
+    table("classroom_attendance_submissions")
     repo(Chimwemwe.Repo)
 
     custom_indexes do
+      index([:id, :tenant_id],
+        unique: true,
+        all_tenants?: true,
+        name: "classroom_attendance_submissions_id_tenant_idx"
+      )
+
       index([:tenant_id, :class_id, :local_date],
         unique: true,
         all_tenants?: true,
@@ -42,7 +48,7 @@ defmodule Chimwemwe.Classroom.AttendanceSubmission do
 
     custom_statements do
       statement :attendance_immutable do
-        global? true
+        global?(true)
         after_tables(["classroom_attendance_submissions"])
 
         up("""
@@ -64,16 +70,16 @@ defmodule Chimwemwe.Classroom.AttendanceSubmission do
   end
 
   multitenancy do
-    strategy :attribute
-    attribute :tenant_id
-    global? false
+    strategy(:attribute)
+    attribute(:tenant_id)
+    global?(false)
   end
 
   relationships do
     belongs_to :class_register, Chimwemwe.Classroom.ClassRegister do
-      source_attribute :class_id
-      define_attribute? false
-      public? false
+      source_attribute(:class_id)
+      define_attribute?(false)
+      public?(false)
     end
   end
 
@@ -82,48 +88,48 @@ defmodule Chimwemwe.Classroom.AttendanceSubmission do
 
   policies do
     policy always() do
-      forbid_if always()
+      forbid_if(always())
     end
   end
 
   attributes do
-    uuid_primary_key :id
+    uuid_primary_key(:id)
 
     attribute :tenant_id, :uuid do
-      allow_nil? false
-      public? false
+      allow_nil?(false)
+      public?(false)
     end
 
     attribute :class_id, :uuid do
-      allow_nil? false
-      public? false
+      allow_nil?(false)
+      public?(false)
     end
 
     attribute :local_date, :date do
-      allow_nil? false
-      public? false
+      allow_nil?(false)
+      public?(false)
     end
 
     attribute :calendar_revision, :string do
-      allow_nil? false
-      public? false
+      allow_nil?(false)
+      public?(false)
     end
 
     attribute :roster_basis, :string do
-      allow_nil? false
-      public? false
+      allow_nil?(false)
+      public?(false)
     end
 
     attribute :roster, :map do
-      allow_nil? false
-      public? false
+      allow_nil?(false)
+      public?(false)
     end
 
     attribute :marks, :map do
-      allow_nil? false
-      public? false
+      allow_nil?(false)
+      public?(false)
     end
 
-    create_timestamp :inserted_at
+    create_timestamp(:inserted_at)
   end
 end

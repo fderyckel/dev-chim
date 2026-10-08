@@ -96,7 +96,9 @@ synthetic engineering evidence, not representative-user or independent security 
 
 ## Remaining scope
 
-This first submission cannot be corrected or backdated. One disabled local synthetic
+At this slice's verification boundary, the first submission could not be corrected or backdated.
+The subsequent [attendance correction and request-recovery slice](attendance-correction-and-recovery-evidence.md)
+now adds a today-only immutable successor action; backdating remains outside the boundary. One disabled local synthetic
 [classroom preparation workflow](classroom-preparation-workflow-evidence.md) now creates its exact
 class and fictional students without a developer, but multiple-class administration, staff or
 calendar selection, real onboarding, representative attendance policies, cumulative-budget

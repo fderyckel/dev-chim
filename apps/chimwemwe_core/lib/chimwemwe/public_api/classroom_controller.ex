@@ -76,6 +76,26 @@ defmodule Chimwemwe.PublicApi.ClassroomController do
     end
   end
 
+  def correct(conn, params) do
+    keys = [
+      :class_id,
+      :submission_id,
+      :expected_revision_id,
+      :reason_code,
+      :marks,
+      :idempotency_key,
+      :causation_id
+    ]
+
+    if exact_keys?(params, keys) do
+      input = Map.new(keys, &{&1, Map.fetch!(params, Atom.to_string(&1))})
+      marks = if is_list(input.marks), do: Enum.map(input.marks, &mark/1), else: nil
+      execute(conn, &Attendance.correct(&1, &2, %{input | marks: marks}))
+    else
+      invalid(conn)
+    end
+  end
+
   defp mark(%{"person_id" => id, "mark" => mark} = input) when map_size(input) == 2,
     do: %{person_id: id, mark: mark}
 

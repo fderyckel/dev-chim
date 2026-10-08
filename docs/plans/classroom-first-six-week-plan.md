@@ -87,7 +87,7 @@ have an account; staff affiliation and teaching assignment never grant permissio
 | 2 | 12–18 October | An authenticated authorized staff member defines and publishes a small calendar from the browser; refresh reads committed state; audit/outbox and rollback/retry evidence pass |
 | 3 | 19–25 October | Prepare synthetic staff, students, class, teaching assignment, enrolment, and placement using simple screens; date-specific roster is correct |
 | 4 | 26 October–1 November | Assigned educator submits daily attendance and reloads it; denied class/tenant and duplicate request cases pass |
-| 5 | 2–8 November | Correct attendance; resolve concurrent changes; exercise session expiry, ended assignments, roster changes, and interrupted outbox delivery |
+| 5 | 2–8 November | Correct attendance; resolve concurrent changes; exercise session expiry, ended assignments, roster changes, and uncertain browser-response recovery; keep interrupted Restricted outbox delivery as an explicit unmet consumer condition |
 | 6 | 9–15 November | Representative users complete the journey without developer assistance; fix observed issues; complete repository and end-to-end verification; record the achieved release level |
 
 Week two is the first complete browser-to-PostgreSQL write, not the start of interface work after
@@ -106,7 +106,7 @@ real authentication.
 | CF-2 | Reframe ADR 0021 and implement the calendar contract with a small preparation screen | Revised ADR conditionally accepted for synthetic L1; executable pre-persistence validation/resolution is implemented; persistence and the preparation screen follow CF-1 |
 | CF-3 | Qualify one actual identity connection and the first same-origin calendar write | Prepare alongside CF-1/CF-2; connected execution requires the gates below |
 | CF-4 | Minimal people, staff-account association, class, teaching assignment, enrolment, and placement, with preparation screens | CF-4A private synthetic person, dated participation and verified staff-account association implemented; [evidence and enrolment handoff](../phase-2/people-foundation-evidence.md). [CF-4B classroom setup](../phase-2/classroom-foundation-evidence.md) adds class, teaching assignment, enrolment and dated placement. The [disabled local preparation workflow](../phase-2/classroom-preparation-workflow-evidence.md) now creates one exact class and up to 60 fictional students from the browser and hands that class into attendance; real identity, representative review and release gates remain open |
-| CF-5 | Attendance submission, correction, and recovery through the complete UI | First immutable daily submission is implemented and the prepared-class browser handoff passes; named correction, concurrency recovery, interrupted delivery, retained records policy and real-session gates remain next |
+| CF-5 | Attendance submission, correction, and recovery through the complete UI | Immutable daily submission and [append-only correction with request recovery](../phase-2/attendance-correction-and-recovery-evidence.md) pass through the disabled local UI; stale/concurrent writes, session expiry, ended assignments, roster changes and retained migration evidence are covered. Restricted consumer delivery, representative records policy and real-session gates remain open |
 | CF-6 | User evaluation, repair, and final verification | Planned; no user findings or completion results claimed |
 
 ## Entry conditions on the critical path

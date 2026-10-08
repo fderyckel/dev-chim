@@ -8,6 +8,7 @@ const routes = new Set([
   "/api/v1/classroom/preparation", "/api/v1/classroom/prepare-class",
   "/api/v1/classroom/add-student",
   "/api/v1/classroom/prepare-attendance", "/api/v1/classroom/submit-attendance",
+  "/api/v1/classroom/correct-attendance",
   "/api/v1/calendar/preparation", "/api/v1/calendar/save-draft",
   "/api/v1/calendar/publish", "/api/v1/calendar/resolve",
   "/api/v1/classroom-demo/sign-in",

@@ -38,7 +38,15 @@ defmodule Chimwemwe.PublicApi.ClassroomOpenApi do
           "calendar_revision" => digest,
           "roster_basis" => digest,
           "students" => array(student, 60),
-          "submission_id" => %{"anyOf" => [uuid, %{"type" => "null"}]}
+          "submission_id" => %{"anyOf" => [uuid, %{"type" => "null"}]},
+          "revision_id" => %{"anyOf" => [uuid, %{"type" => "null"}]},
+          "correction_number" => %{"type" => "integer", "minimum" => 0, "maximum" => 10},
+          "correction_reason" => %{
+            "anyOf" => [
+              %{"type" => "string", "enum" => ["marking_error"]},
+              %{"type" => "null"}
+            ]
+          }
         }),
       "AttendanceResponse" => object(%{"data" => ref("AttendanceView")}),
       "ClassroomPreparationView" =>
@@ -74,7 +82,27 @@ defmodule Chimwemwe.PublicApi.ClassroomOpenApi do
           "marks" =>
             Map.put(array(object(%{"person_id" => uuid, "mark" => mark}), 60), "minItems", 1)
         }),
-      "AttendanceReceiptResponse" => object(%{"data" => object(%{"submission_id" => uuid})})
+      "CorrectAttendanceRequest" =>
+        object(%{
+          "class_id" => uuid,
+          "submission_id" => uuid,
+          "expected_revision_id" => uuid,
+          "reason_code" => %{"type" => "string", "enum" => ["marking_error"]},
+          "idempotency_key" => uuid,
+          "causation_id" => uuid,
+          "marks" =>
+            Map.put(array(object(%{"person_id" => uuid, "mark" => mark}), 60), "minItems", 1)
+        }),
+      "AttendanceReceiptResponse" => object(%{"data" => object(%{"submission_id" => uuid})}),
+      "AttendanceCorrectionReceiptResponse" =>
+        object(%{
+          "data" =>
+            object(%{
+              "submission_id" => uuid,
+              "correction_id" => uuid,
+              "correction_number" => %{"type" => "integer", "minimum" => 1, "maximum" => 10}
+            })
+        })
     }
   end
 
@@ -116,6 +144,15 @@ defmodule Chimwemwe.PublicApi.ClassroomOpenApi do
       "/api/v1/classroom/submit-attendance" => %{
         "post" =>
           operation("submitAttendance", "SubmitAttendanceRequest", "AttendanceReceiptResponse")
+      },
+      "/api/v1/classroom/correct-attendance" => %{
+        "post" =>
+          operation(
+            "correctAttendance",
+            "CorrectAttendanceRequest",
+            "AttendanceCorrectionReceiptResponse",
+            "Correct today's saved register through one complete append-only successor. Requires the exact current revision and marking_error reason. No backdating, free text or automatic retry."
+          )
       }
     }
   end
