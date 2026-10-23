@@ -261,7 +261,9 @@ export function DemoInstanceView({
                       "educators",
                       `${data.educators.length}`,
                       data.college ? "instructors" : "educators & support staff",
-                      "Register and subject responsibilities",
+                      data.college
+                        ? "Course-section responsibilities"
+                        : "Register and subject responsibilities",
                     ],
                   ].map(([key, count, label, detail]) => (
                     <Link key={key} className="c-demo-stat" href={`/demo/${key}`}>
@@ -426,7 +428,11 @@ export function DemoInstanceView({
                       <h2>{data.college ? "Course sections" : "Subject teaching"}</h2>
                       <DatedList
                         items={educator.sections}
-                        empty="No subject teaching recorded."
+                        empty={
+                          data.college
+                            ? "No course sections recorded."
+                            : "No subject teaching recorded."
+                        }
                       />
                     </div>
                   </details>
