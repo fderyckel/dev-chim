@@ -74,11 +74,20 @@ participant, or substitute itself for a required representative.
 
 ## COMM-0 decisions and remaining conditions
 
+This section retains the initial findings. The subsequent
+[delegated paper review](../phase-2/communications-comm-0-experience-evidence.md#delegated-paper-review--23-october-2026)
+has now resolved the included staff-proof choices. Its
+[COMM-1 proposal](communications-comm-1-staff-announcement-proposal.md) was prepared without
+implementation permission. François subsequently accepted ADR 0045 and authorized that bounded
+proof, starting with [source-fence qualification](../phase-2/communications-comm-1-source-fence-qualification.md)
+and agent review before proceeding. The current decision rules belong to ADR 0045; historical open items
+and trial results below are not instructions to reopen those settled paper choices.
+
 The paper direction is supported: announcement first; authoritative audience; frozen intended
 subjects; current access checks; separate delivered/seen/acknowledged evidence; aggregate-first
 metrics; closed student interaction. Governing
-[ADR 0045](../adr/0045-governed-communications-audiences-and-engagement.md) remains Proposed.
-This is a delegated recommendation to revise, not an ADR acceptance or an implementation permit.
+[ADR 0045](../adr/0045-governed-communications-audiences-and-engagement.md) is now Accepted by
+François. The initial delegated recommendation did not itself grant that acceptance or authority.
 
 | Finding | Paper disposition | Owner / closure evidence |
 | --- | --- | --- |
@@ -90,12 +99,11 @@ This is a delegated recommendation to revise, not an ADR acceptance or an implem
 | Urgent closure and unreachable families | Show exact affected scope and excluded populations; no claim of emergency reachability or family delivery | Both educators + future emergency/safeguarding owner; C-06 |
 | Publish preview could become a wall of explanations | Compact field/value review, clear edit actions, visible exclusions/approval/consequences; secondary provenance in optional details | UI; paper trial now, screenshots and interaction checks on a later authorized candidate |
 
-Before a COMM-1 request, disposition all
-[eight entry questions](../phase-2/communications-comm-0-experience-evidence.md#comm-1-entry-questions):
-source consistency, workload limits, metric fields, acknowledgement, retention, approval, interface
-privacy and interruption/recovery. Do not guess numerical budgets or retention periods. A staff
-foundation is not a ready-made enumeration API. After the necessary named review, request one
-separate green light for the exact-institution, synthetic staff, in-product announcement proof.
+The [eight entry questions](../phase-2/communications-comm-0-experience-evidence.md#comm-1-entry-questions)
+now have explicit paper dispositions and conservative engineering test limits in the proposal;
+none is a measured capacity or legal-retention claim. A staff foundation is not a ready-made
+enumeration API. Source-fence qualification and other executable evidence remain future gates,
+followed by the separate exact-institution, synthetic staff proof authorization if desired.
 Urgent alerts, students, guardians, applicants, external colleges, adapters, messaging, scheduling
 infrastructure and real records do not enter that proof automatically.
 
@@ -160,7 +168,7 @@ qualify credential, classroom or communication journeys.
 | 3. Assemble the LA-1 engineering entry packet | Platform engineering, with educator/UI challenge | Exact action/denial/audit/migration/browser acceptance criteria, dependencies and credential-to-classroom handoff boundary; preparation allowed, implementation authority checked separately |
 | 4. Fill the environment/owner pack and rebook real sessions | François or a named human delegate | Actual selections, named owners, restricted booking/consent evidence, revised forecast; no invented deadlines or bookings |
 | 5. Authorize and qualify the next bounded authentication increment | François + required engineering/security owners | Existing authority reconfirmed by evidence or one explicit new slice authorization; retain applicable LA-1–LA-6 and connected gates |
-| 6. Dispose of ADR 0045 and the COMM-1 entry packet | Named ADR deciders, informed by specialists | Explicit accept/revise decision, all applicable entry questions answered, then a separate COMM-1 authorization if desired |
+| 6. Dispose of ADR 0045 and the COMM-1 entry packet | Named ADR deciders, informed by specialists | Included paper questions resolved and proposal prepared by delegated review; formal ADR disposition and a separate COMM-1 authorization remain distinct |
 | 7. Evaluate actual screens and representative work | UI, educators, school representatives and required independent owners | Candidate screenshots and interaction evidence, uncoached task results, repairs and explicit go/no-go at the applicable level |
 
 Steps 2–3 can progress while step 4 is pending. COMM-0 remains parallel paper work; it does not

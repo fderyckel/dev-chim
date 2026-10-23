@@ -48,6 +48,13 @@ export type DemoCalendarItem = Readonly<{
   scope: string;
 }>;
 export type DemoInstance = Readonly<{
+  packId: string;
+  institutionId: string;
+  academicYearId: string;
+  yearStart: string;
+  yearEnd: string;
+  locale: string;
+  instructionalWeekdays: readonly number[];
   institution: string;
   location: string;
   college: boolean;

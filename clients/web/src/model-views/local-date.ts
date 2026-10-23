@@ -22,11 +22,11 @@ export function parseLocalDate(value: string): number | null {
   return timestamp / millisecondsPerDay;
 }
 
-export function formatLocalDate(value: string): string {
+export function formatLocalDate(value: string, locale = "en-GB"): string {
   const day = parseLocalDate(value);
   if (day === null) return value;
 
-  return new Intl.DateTimeFormat("en-GB", {
+  return new Intl.DateTimeFormat(locale, {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -51,27 +51,30 @@ export function addMonths(value: string, delta: number): string {
   return date.toISOString().slice(0, 7);
 }
 
-export function monthLabel(value: string): string {
+export function monthLabel(value: string, locale = "en-GB"): string {
   const day = parseLocalDate(`${value}-01`);
   if (day === null) return value;
-  return new Intl.DateTimeFormat("en-GB", {
+  return new Intl.DateTimeFormat(locale, {
     month: "long",
     year: "numeric",
     timeZone: "UTC",
   }).format(new Date(day * millisecondsPerDay));
 }
 
-export function monthDays(value: string): ReadonlyArray<number | null> {
+export function monthDays(
+  value: string,
+  weekStartsOn = 1,
+): ReadonlyArray<number | null> {
   const first = parseLocalDate(`${value}-01`);
   if (first === null) return [];
 
   const firstDate = new Date(first * millisecondsPerDay);
-  const mondayOffset = (firstDate.getUTCDay() + 6) % 7;
+  const offset = (firstDate.getUTCDay() - weekStartsOn + 7) % 7;
   const nextMonth = new Date(
     Date.UTC(firstDate.getUTCFullYear(), firstDate.getUTCMonth() + 1, 1),
   );
   const count = Math.round(nextMonth.getTime() / millisecondsPerDay - first);
-  const cells: Array<number | null> = Array.from({ length: mondayOffset }, () => null);
+  const cells: Array<number | null> = Array.from({ length: offset }, () => null);
 
   for (let index = 0; index < count; index += 1) cells.push(first + index);
   while (cells.length % 7 !== 0) cells.push(null);

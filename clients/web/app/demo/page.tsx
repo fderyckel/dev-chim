@@ -1,5 +1,9 @@
-import { DemoPage } from "../../src/server/demo-instance";
+import { DemoPage, type DemoSearchParams } from "../../src/server/demo-instance";
 
-export default function SelectedDemoPage() {
-  return <DemoPage />;
+export default async function SelectedDemoPage({
+  searchParams,
+}: {
+  searchParams: DemoSearchParams;
+}) {
+  return <DemoPage selection={(await searchParams).demo} />;
 }

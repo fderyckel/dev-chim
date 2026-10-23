@@ -4,6 +4,7 @@ import path from "node:path";
 
 import { projectDemo, type DemoPack } from "../lib/demo-instance";
 import type { DemoInstance } from "../ports/demo-instance";
+import { isDemoInstitution } from "../lib/demo-institutions";
 
 type DemoEnvironment = Readonly<Record<string, string | undefined>>;
 type DemoManifest = Readonly<{
@@ -28,6 +29,7 @@ export function loopbackHost(host: string | null) {
 export async function loadDemoInstance(
   host: string | null,
   env: DemoEnvironment = process.env,
+  selection?: unknown,
 ): Promise<DemoInstance> {
   if (
     env.CHIMWEMWE_DEMO_INSTANCE !== "true" ||
@@ -53,9 +55,35 @@ export async function loadDemoInstance(
     instance.catalog_version !== 1
   )
     throw new Error("Invalid demo instance");
-  const entry = manifest.packs.find((p) => p.pack_id === instance.selected_pack_id);
-  if (!entry || env.CHIMWEMWE_DEMO_PACK_ID !== entry.pack_id)
+  const startupEntry = manifest.packs.find(
+    (p) => p.pack_id === instance.selected_pack_id,
+  );
+  if (
+    !startupEntry ||
+    !isDemoInstitution(startupEntry.pack_id) ||
+    env.CHIMWEMWE_DEMO_PACK_ID !== startupEntry.pack_id
+  )
     throw new Error("Unknown demo institution");
+  const startupPack = await readPack(directory, startupEntry);
+  if (startupPack.tenant_id !== instance.selected_tenant_id)
+    throw new Error("Invalid demo tenant context");
+  const selectedId = selection === undefined ? startupEntry.pack_id : selection;
+  if (
+    !isDemoInstitution(selectedId) ||
+    !Array.isArray(instance.pack_ids) ||
+    !instance.pack_ids.includes(selectedId)
+  )
+    throw new Error("Unknown demo institution");
+  const entry = manifest.packs.find((p) => p.pack_id === selectedId);
+  if (!entry) throw new Error("Unknown demo institution");
+  const pack =
+    entry.pack_id === startupEntry.pack_id
+      ? startupPack
+      : await readPack(directory, entry);
+  return projectDemo(pack);
+}
+
+async function readPack(directory: string, entry: DemoManifest["packs"][number]) {
   const content = await readFile(path.join(directory, entry.path), "utf8");
   if (createHash("sha256").update(content).digest("hex") !== entry.sha256)
     throw new Error("Invalid demo digest");
@@ -65,7 +93,8 @@ export async function loadDemoInstance(
     pack.schema_version !== 1 ||
     pack.synthetic !== true ||
     pack.usage !== "local_synthetic_scenarios_only" ||
-    pack.tenant_id !== instance.selected_tenant_id ||
+    typeof pack.tenant_id !== "string" ||
+    !pack.tenant_id ||
     pack.accounts.length ||
     pack.authorization_grants.length ||
     Object.values(pack.records).some((rows) =>
@@ -74,5 +103,5 @@ export async function loadDemoInstance(
   ) {
     throw new Error("Invalid demo tenant context");
   }
-  return projectDemo(pack);
+  return pack;
 }

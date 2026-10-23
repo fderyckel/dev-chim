@@ -4,7 +4,7 @@
 - Date: 2026-10-08
 - Accountable owner: Product experience and platform engineering
 - Deciders: François — Project Owner, with architecture and security/privacy review
-- Implementation authority: The Project Owner's “go ahead” authorizes only the bounded local synthetic MV-1 renderer qualification described below
+- Implementation authority: MV-1 plus the Project Owner's 2026-10-23 instruction authorizing the first MV-2 Month/Agenda increment in the local fictional institution demo; connected and release boundaries remain gated
 - Supersedes: None
 
 ## Context
@@ -81,6 +81,16 @@ MV-1 does not add or modify a core resource, database table, migration, API rout
 stored governed extension, runtime metadata editor, custom field, generic action executor or
 generic mutation. It does not connect the renderer to the Phase 1 governed-extension registry.
 Those steps require separate authorization and evidence.
+
+### MV-2 bounded calendar increment
+
+On 2026-10-23 François authorized the first increment in the
+[calendar view proposal](../plans/calendar-view-proposal.md): shared Month/Agenda presentation in
+the selected local fictional institution demo. Code-owned optional calendar mappings and display
+context provide scope, coverage, locale/week start and reference date. The same reusable workspace
+owns in-memory date, filter and selection state across Calendar/List. Existing MV-1 consumers
+remain compatible. Calendar records retain inclusive local dates; no timed events, generic writes,
+stored definitions, new reads, core resource or release authority is introduced.
 
 ## Plain-English summary
 

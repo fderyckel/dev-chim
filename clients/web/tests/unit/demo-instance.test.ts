@@ -20,6 +20,12 @@ async function prepared(slug: string) {
   const directory = await mkdtemp(path.join(tmpdir(), "chim-demo-loader-"));
   directories.push(directory);
   await mkdir(path.join(directory, "packs"));
+  for (const entry of manifest.packs) {
+    await writeFile(
+      path.join(directory, entry.path),
+      await readFile(path.join(root, "demo-data", entry.path)),
+    );
+  }
   const content = await readFile(
     path.join(root, "demo-data/packs", `${slug}.json`),
     "utf8",
@@ -30,6 +36,7 @@ async function prepared(slug: string) {
     environment: "local-synthetic",
     synthetic: true,
     catalog_version: 1,
+    pack_ids: manifest.packs.map((entry) => entry.pack_id),
     selected_pack_id: slug,
     selected_tenant_id: pack.tenant_id,
   };
@@ -72,6 +79,74 @@ describe("selected local demo context", () => {
     );
     expect(intervalState("2026-10-12", "2026-11-01", "2026-10-12")).toBe("Current");
     expect(intervalState("2026-10-12", "2026-11-01", "2026-11-01")).toBe("Ended");
+  });
+
+  it("switches all four packs in one prepared instance without changing the startup default", async () => {
+    const { env, directory, context } = await prepared("bangkok-international");
+    const institutionIds = new Set<string>();
+    for (const entry of manifest.packs) {
+      const data = await loadDemoInstance("127.0.0.1:3000", env, entry.pack_id);
+      expect(data.packId).toBe(entry.pack_id);
+      expect(data.students).toHaveLength(entry.counts.students);
+      expect(data.educators).toHaveLength(entry.counts.educators);
+      institutionIds.add(data.institutionId);
+    }
+    expect(institutionIds.size).toBe(4);
+    expect(
+      JSON.parse(await readFile(path.join(directory, "instance.json"), "utf8")),
+    ).toEqual(context);
+    expect((await loadDemoInstance("127.0.0.1", env)).packId).toBe(
+      "bangkok-international",
+    );
+  });
+
+  it("refuses invalid, repeated, path-shaped or unprepared choices and still validates startup context", async () => {
+    const { env, directory, context } = await prepared("bangkok-international");
+    for (const selection of [
+      "",
+      "unknown",
+      "../england-independent",
+      context.selected_tenant_id,
+      ["england-independent"],
+      ["england-independent", "us-community-college"],
+    ]) {
+      await expect(loadDemoInstance("127.0.0.1", env, selection)).rejects.toThrow(
+        "institution",
+      );
+    }
+    await expect(
+      loadDemoInstance("school.example", env, "england-independent"),
+    ).rejects.toThrow("disabled");
+    await expect(
+      loadDemoInstance(
+        "127.0.0.1",
+        { ...env, CHIMWEMWE_DEMO_INSTANCE: "false" },
+        "england-independent",
+      ),
+    ).rejects.toThrow("disabled");
+    await writeFile(
+      path.join(directory, "instance.json"),
+      JSON.stringify({ ...context, pack_ids: ["bangkok-international"] }),
+    );
+    await expect(
+      loadDemoInstance("127.0.0.1", env, "england-independent"),
+    ).rejects.toThrow("institution");
+    await writeFile(
+      path.join(directory, "instance.json"),
+      JSON.stringify({ ...context, selected_tenant_id: "wrong" }),
+    );
+    await expect(
+      loadDemoInstance("127.0.0.1", env, "england-independent"),
+    ).rejects.toThrow("tenant");
+    await writeFile(path.join(directory, "instance.json"), JSON.stringify(context));
+    await writeFile(path.join(directory, "packs/england-independent.json"), "{}");
+    await expect(
+      loadDemoInstance("127.0.0.1", env, "england-independent"),
+    ).rejects.toThrow("digest");
+    await rm(path.join(directory, "packs/hong-kong-kindergarten.json"));
+    await expect(
+      loadDemoInstance("127.0.0.1", env, "hong-kong-kindergarten"),
+    ).rejects.toThrow();
   });
 
   it("keeps college contacts and sections distinct and applicant-only people out", async () => {

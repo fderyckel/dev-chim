@@ -26,6 +26,23 @@ export type CalendarViewDefinition = Readonly<{
   startField: string;
   endField?: string;
   statusField?: string;
+  scopeField?: string;
+  contextStatuses?: ReadonlyArray<string>;
+}>;
+
+export type CalendarMode = "month" | "agenda";
+
+/** Supplied by an owned consumer; display context never grants record access. */
+export type CalendarViewContext = Readonly<{
+  sourceKey: string;
+  referenceDate: string;
+  referenceLabel: string;
+  coverageStart: string;
+  coverageEnd: string;
+  scopeLabel: string;
+  timeZone: string;
+  locale?: string;
+  weekStartsOn?: number;
 }>;
 
 export type GanttViewDefinition = Readonly<{
@@ -65,6 +82,7 @@ function referencedFields(view: ModelViewDefinition): ReadonlyArray<string> {
         view.startField,
         ...(view.endField ? [view.endField] : []),
         ...(view.statusField ? [view.statusField] : []),
+        ...(view.scopeField ? [view.scopeField] : []),
       ];
     case "gantt":
       return [
@@ -74,6 +92,7 @@ function referencedFields(view: ModelViewDefinition): ReadonlyArray<string> {
         ...(view.groupField ? [view.groupField] : []),
       ];
   }
+  return [];
 }
 
 export function validateModelViewSet(
@@ -115,6 +134,10 @@ export function validateModelViewSet(
   }
 
   for (const view of definition.views) {
+    if (!["list", "form", "calendar", "gantt"].includes(view.kind)) {
+      issues.push("The view kind is unsupported.");
+      continue;
+    }
     const references = referencedFields(view);
     if (
       references.length === 0 ||
@@ -133,6 +156,9 @@ export function validateModelViewSet(
       if (fields.get(view.endField)?.type !== "date") {
         issues.push("calendar view requires a date-valued end field.");
       }
+    }
+    if (view.kind === "calendar" && view.contextStatuses && !view.statusField) {
+      issues.push("Calendar context labels require a declared status field.");
     }
     if (view.kind === "gantt" && fields.get(view.endField)?.type !== "date") {
       issues.push("gantt view requires a date-valued end field.");

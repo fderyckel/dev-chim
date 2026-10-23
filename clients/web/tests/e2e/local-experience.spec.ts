@@ -136,9 +136,14 @@ test("the calendar preparation screen previews changes without offering save", a
     "aria-selected",
     "true",
   );
-  await expect(page.getByText("Mothers' Day", { exact: true })).toHaveCount(1);
+  await expect(
+    page
+      .getByRole("region", { name: "Calendar entries", exact: true })
+      .getByRole("button", { name: /Mothers' Day/ })
+      .first(),
+  ).toBeVisible();
   await page.getByRole("tab", { name: "Form" }).click();
-  await expect(page.getByText("Mothers' Day", { exact: true })).toHaveCount(2);
+  await expect(page.getByText("Mothers' Day", { exact: true }).first()).toBeVisible();
   await expect(page.getByRole("button", { name: /save|publish/i })).toHaveCount(0);
 
   await page.getByLabel("Term 2 Starts").fill("2026-12-18");

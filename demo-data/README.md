@@ -43,11 +43,16 @@ invoking an older underlying launcher bypasses preparation; use the stable Make 
 four institutions; `make demo DEMO=england-independent` bypasses the menu. Open
 `http://127.0.0.1:3000` for Overview, Students, Families & guardians (college Contacts), Educators
 (college Instructors), and Calendar. `DEMO_PORT=3035` selects a different local port. Stop with
-Control-C and restart to choose another institution; each run gets a fresh retained instance.
+Control-C; each run gets a fresh retained instance. Use **Demo institution** and **Switch** in
+the context bar to change institution in the same tab, keeping the current section.
 
 The app server reads the selected prepared pack, verifies its code-owned digest and tenant,
-and projects only that institution's records. Startup pins the selected pack ID in the process
-environment and tenant in the instance manifest. A URL cannot switch them. Invalid mode, Host,
+and projects only that institution's records. Startup pins the default pack ID in the process
+environment and tenant in the instance manifest. The dedicated `demo` URL parameter can select
+only the four code-owned fictional packs prepared for that instance, after validating startup
+context. It never accepts a tenant ID, path or production route. Links, refresh and Back retain
+the choice; a switch clears institution-specific searches, pages, expansion and calendar state.
+Invalid, repeated or unknown choices fail closed with a Return to demo recovery link. Invalid mode, Host,
 selection, tenant, digest or missing file produces `Demo unavailable`; no other pack is substituted.
 
 Search people by name or visible reference (for example `S003`), filter school year levels and
@@ -200,13 +205,63 @@ tests across all four selected packs. The browser tests cover actual people/rela
 navigation, search, pagination, keyboard, accessibility checks and 1440/768/320-pixel reflow.
 The coordinator also opened the live local app and inspected a student with its actual register
 history and family links. Screenshot copies are retained under `tmp/demo-instance-view-review`.
-The first full gate stopped at an already-held browser verification lock; it was retried after
-the other run ended. The retry passed every required stage: documentation and repository tooling;
+Earlier shared-checkout full-gate evidence recorded every required stage passing: documentation and repository tooling;
 4 documentation-tool tests, 23 data-pack tests and 6 startup tests; core compilation, contracts,
 migrations, lint, dependency audit, type analysis and 309 core tests; both web dependency audits,
 formatting, lint, type checking, 40 unit tests and the production build; 54 browser tests across
 the local, bridge, unavailable-backend, classroom and four selected-pack variants; and shell
-tooling. No required stage was skipped.
+tooling. No required stage was skipped in that recorded run.
+
+An earlier coordinator `make check` on the concurrently changing checkout passed documentation,
+the 23 pack and six startup checks, the core checks and 309 tests, and both web dependency audits.
+It then stopped at `react-hooks/refs` in
+`clients/web/src/model-views/model-calendar-view.tsx:241`, part of concurrent calendar work.
+Later web checks and shell-tooling stages did not run in that attempt. The selected-viewer
+focused checks passed (`make demo-data-check`, `npm run test:unit -- demo-instance`, and
+`npm run test:e2e:demo`); that intermediate checkout did not yet have a whole-repository green
+result.
+Full checks now acquire an integration lock before the existing component locks, preventing
+parallel chats from repeatedly colliding after completing the core suite.
 
 The separate Advisor preflight again reported `parent_runtime_unavailable`; no Advisor sign-off
 is claimed. Existing production, real-data and independent-review gates retain precedence.
+
+## Same-tab institution selector follow-up
+
+On 2026-10-23 François explicitly requested switching all four institutions inside the app.
+The context bar now provides **Demo institution** and **Switch**. Only the dedicated `demo`
+parameter selects a code-owned fictional pack; startup context, digest and tenant validation
+remain required. Navigation keeps the choice and current section. Institution changes reset
+searches, pagination, expanded records and calendar state. Native form autocomplete is disabled
+so Back cannot restore an unsent choice over a different institution's displayed data.
+
+The UI specialist approved the source and exact wide and final 320-pixel screenshots. The
+coordinator accepts that recommendation: the final mobile layout shows the complete option
+label above Switch, and all interaction conditions passed. This is AI source/screenshot review;
+interaction results below are the implementer's executed evidence, with no human-usability or
+independent security assurance implied. Both Advisor preflights were unavailable because parent
+runtime evidence could not be verified; no Advisor approval is claimed.
+
+Executed checks for this follow-up:
+
+- `npm run test:unit -- tests/unit/demo-instance.test.ts tests/unit/calendar-views.test.tsx`:
+  21 tests passed, including all four packs in one instance and invalid/path/repeated choices,
+  disabled mode, remote Host, wrong startup tenant, corrupt selected digest and missing files.
+- `npm run test:e2e:demo -- --output=playwright-report/demo-selector-final-results` with
+  `CHIMWEMWE_WEB_BUILD_DIR=.next-demo`: 24 tests passed across all four startup contexts.
+  These cover same-tab switching, pending selection, institution-state reset, navigation,
+  refresh/Back, keyboard submission, failure recovery, calendar interactions and accessible
+  1440/768/320-pixel reflow. The first browser attempt exposed the native Back restoration issue;
+  the final strengthened run passed after its repair.
+- `npm run lint`, `npm run typecheck`, and the synthetic `.next-demo` `npm run build`: passed.
+- Scoped `npx prettier --check` for the three demo pages, demo catalogue, projection/port, loader,
+  server page, viewer, demo CSS and both changed test files: passed.
+- `make check-docs` and `git diff --check`: passed.
+
+The selector-focused owner did not rerun the full gate, following François's earlier instruction.
+The final coordinator integration subsequently ran
+`CHIMWEMWE_TEST_DATABASE=chimwemwe_commit_final8_20261023 make check` on the combined checkout.
+It passed documentation and repository tooling, 335 core tests, both web dependency audits,
+formatting/lint/types, 52 web unit tests, the production build, all 70 browser tests and shell
+tooling. No required stage was skipped. The live demo is available on loopback port 3035; review
+screenshots are retained under `tmp/demo-institution-selector-review`.

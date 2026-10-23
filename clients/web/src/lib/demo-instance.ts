@@ -1,6 +1,6 @@
 import type { DemoDatedItem, DemoInstance, DemoState } from "../ports/demo-instance";
 
-type Row = Record<string, string | number | boolean | null>;
+type Row = Record<string, string | number | boolean | readonly number[] | null>;
 export type DemoPack = {
   schema_version: number;
   pack_id: string;
@@ -107,6 +107,15 @@ export function projectDemo(pack: DemoPack): DemoInstance {
     };
   });
   return {
+    packId: pack.pack_id,
+    institutionId: text(institution, "id"),
+    academicYearId: text(year, "id"),
+    yearStart: text(year, "start_on"),
+    yearEnd: text(year, "end_on"),
+    locale: text(institution, "locale"),
+    instructionalWeekdays: Array.isArray(year.instructional_weekdays)
+      ? year.instructional_weekdays
+      : [],
     institution: text(institution, "name"),
     location: `${text(institution, "city")} · ${text(institution, "country")}`,
     college,
@@ -157,14 +166,14 @@ export function projectDemo(pack: DemoPack): DemoInstance {
       label: text(row, "label"),
       from: text(row, "start_on"),
       through: text(row, "end_on"),
-      scope: "Teaching period",
+      scope: text(year, "label"),
     })),
     closures: r.closures.map((row) => ({
       id: text(row, "id"),
       label: text(row, "label"),
       from: text(row, "start_on"),
       through: text(row, "end_on"),
-      scope: text(row, "scope").replaceAll("_", " "),
+      scope: `${text(row, "scope").replaceAll("_", " ")} · ${text(row, "effect").replaceAll("_", " ")}`,
     })),
     events: r.events.map((row) => ({
       id: text(row, "id"),

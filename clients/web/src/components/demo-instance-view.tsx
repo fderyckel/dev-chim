@@ -8,6 +8,8 @@ import { PageHeading } from "../design-system/components/page-heading";
 import { Panel } from "../design-system/components/panel";
 import { StatusBadge } from "../design-system/components/status-badge";
 import { dateLabel, intervalLabel } from "../lib/demo-instance";
+import { demoHref, demoInstitutions } from "../lib/demo-institutions";
+import { DemoCalendar } from "./demo-calendar";
 import type {
   DemoCalendarItem,
   DemoDatedItem,
@@ -185,6 +187,7 @@ export function DemoInstanceView({
   const navigation = titles(data.college);
   const title = navigation.find(([key]) => key === section)?.[1] ?? "Overview";
   const contactLabel = data.college ? "contacts" : "family contacts";
+  const selectedHref = (path: string) => demoHref(path, data.packId);
   return (
     <div className="l-app-shell c-demo-shell">
       <a className="c-skip-link" href="#main-content">
@@ -192,7 +195,11 @@ export function DemoInstanceView({
       </a>
       <header className="c-product-header">
         <div className="l-header-inner">
-          <Link href="/" className="c-brand" aria-label="Chimwemwe home">
+          <Link
+            href={selectedHref("/")}
+            className="c-brand"
+            aria-label="Chimwemwe home"
+          >
             <span className="c-brand__mark" aria-hidden="true">
               C
             </span>
@@ -205,6 +212,26 @@ export function DemoInstanceView({
       </header>
       <aside className="l-context-bar" aria-label="Institution">
         <div className="l-context-bar__inner">
+          <form
+            action={navigation.find(([key]) => key === section)?.[2] ?? "/"}
+            method="get"
+            autoComplete="off"
+            className="c-demo-institution-choice"
+          >
+            <label>
+              Demo institution
+              <select name="demo" defaultValue={data.packId}>
+                {demoInstitutions.map((institution) => (
+                  <option key={institution.id} value={institution.id}>
+                    {institution.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <ActionButton type="submit" variant="secondary">
+              Switch
+            </ActionButton>
+          </form>
           <div className="c-context-summary">
             <strong className="c-context-summary__name">{data.institution}</strong>
             <span>{data.location}</span>
@@ -220,7 +247,7 @@ export function DemoInstanceView({
             {navigation.map(([key, label, href]) => (
               <li className="c-primary-nav__item" key={key}>
                 <Link
-                  href={href}
+                  href={selectedHref(href)}
                   className={`c-primary-nav__link${section === key ? " is-selected" : ""}`}
                   aria-current={section === key ? "page" : undefined}
                 >
@@ -266,7 +293,11 @@ export function DemoInstanceView({
                         : "Register and subject responsibilities",
                     ],
                   ].map(([key, count, label, detail]) => (
-                    <Link key={key} className="c-demo-stat" href={`/demo/${key}`}>
+                    <Link
+                      key={key}
+                      className="c-demo-stat"
+                      href={selectedHref(`/demo/${key}`)}
+                    >
                       <strong>{count}</strong>
                       <span>{label}</span>
                       <span className="c-demo-muted">{detail}</span>
@@ -278,7 +309,10 @@ export function DemoInstanceView({
                   titleId="demo-year"
                   eyebrow={data.timeZone}
                   footer={
-                    <ActionLink href="/demo/calendar" variant="secondary">
+                    <ActionLink
+                      href={selectedHref("/demo/calendar")}
+                      variant="secondary"
+                    >
                       View calendar
                     </ActionLink>
                   }
@@ -439,39 +473,13 @@ export function DemoInstanceView({
                 )}
               />
             ) : null}
-            {section === "calendar" ? (
-              <>
-                <Panel
-                  title="Teaching periods"
-                  titleId="demo-terms"
-                  eyebrow={data.yearLabel}
-                >
-                  <CalendarList items={data.terms} />
-                </Panel>
-                <Panel
-                  title="Student closures"
-                  titleId="demo-closures"
-                  eyebrow="No instruction"
-                >
-                  <CalendarList items={data.closures} />
-                </Panel>
-                <Panel
-                  title="Events"
-                  titleId="demo-events"
-                  eyebrow="Information only"
-                  description="Events do not change teaching days."
-                >
-                  <CalendarList items={data.events} />
-                </Panel>
-              </>
-            ) : null}
+            {section === "calendar" ? <DemoCalendar data={data} /> : null}
           </div>
         </main>
       </div>
       <footer className="c-product-footer">
         <p className="c-product-footer__copy">
-          Fictional demo · fixed example dates · restart the demo to choose another
-          institution
+          Fictional demo · fixed example dates · read only
         </p>
       </footer>
     </div>

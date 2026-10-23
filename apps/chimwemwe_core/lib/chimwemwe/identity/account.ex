@@ -18,6 +18,99 @@ defmodule Chimwemwe.Identity.Account do
     table("identity_accounts")
     repo(Chimwemwe.Repo)
 
+    custom_statements do
+      statement :identity_account_source_lock_function do
+        global? true
+        after_tables(["identity_accounts"])
+
+        up("""
+        CREATE FUNCTION identity_account_source_lock(actor_ids uuid[]) RETURNS void
+        LANGUAGE plpgsql AS $$
+        DECLARE source_actor uuid;
+        BEGIN
+          IF actor_ids IS NULL OR cardinality(actor_ids) > 25
+             OR array_position(actor_ids, NULL) IS NOT NULL THEN
+            RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'invalid account source fence';
+          END IF;
+          FOR source_actor IN SELECT DISTINCT unnest(actor_ids) ORDER BY 1 LOOP
+            PERFORM pg_advisory_xact_lock(
+              hashtextextended('identity-account-source:' || source_actor::text, 0)
+            );
+          END LOOP;
+        END;
+        $$;
+        """)
+
+        down("DROP FUNCTION identity_account_source_lock(uuid[]);")
+      end
+
+      statement :identity_accounts_source_guard_function do
+        global? true
+        after_tables(["identity_accounts"])
+
+        up("""
+        CREATE FUNCTION identity_accounts_source_guard() RETURNS trigger
+        LANGUAGE plpgsql AS $$
+        BEGIN
+          IF TG_OP = 'TRUNCATE' THEN
+            RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'account source fencing forbids truncate';
+          ELSIF TG_OP = 'INSERT' THEN
+            PERFORM identity_account_source_lock(ARRAY[NEW.actor_id]);
+          ELSIF TG_OP = 'DELETE' THEN
+            PERFORM identity_account_source_lock(ARRAY[OLD.actor_id]);
+            RETURN OLD;
+          ELSE
+            PERFORM identity_account_source_lock(ARRAY[OLD.actor_id, NEW.actor_id]);
+          END IF;
+          RETURN NEW;
+        END;
+        $$;
+        """)
+
+        down("DROP FUNCTION identity_accounts_source_guard();")
+      end
+
+      statement :identity_accounts_source_guard_trigger do
+        global? true
+        after_tables(["identity_accounts"])
+
+        up("""
+        CREATE TRIGGER identity_accounts_source_guard
+        BEFORE INSERT OR UPDATE OR DELETE ON identity_accounts
+        FOR EACH ROW EXECUTE FUNCTION identity_accounts_source_guard();
+        """)
+
+        down("""
+        DO $$ BEGIN
+          IF EXISTS (SELECT 1 FROM identity_accounts) THEN
+            RAISE EXCEPTION 'retained accounts require forward repair';
+          END IF;
+          DROP TRIGGER identity_accounts_source_guard ON identity_accounts;
+        END $$;
+        """)
+      end
+
+      statement :identity_accounts_source_truncate_trigger do
+        global? true
+        after_tables(["identity_accounts"])
+
+        up("""
+        CREATE TRIGGER identity_accounts_source_truncate
+        BEFORE TRUNCATE ON identity_accounts
+        FOR EACH STATEMENT EXECUTE FUNCTION identity_accounts_source_guard();
+        """)
+
+        down("""
+        DO $$ BEGIN
+          IF EXISTS (SELECT 1 FROM identity_accounts) THEN
+            RAISE EXCEPTION 'retained accounts require forward repair';
+          END IF;
+          DROP TRIGGER identity_accounts_source_truncate ON identity_accounts;
+        END $$;
+        """)
+      end
+    end
+
     check_constraints do
       check_constraint(:status, "identity_accounts_status_allowed",
         check: "status IN ('pending_first_login', 'active', 'suspended')"

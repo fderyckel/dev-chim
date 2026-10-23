@@ -1,6 +1,6 @@
 # Governed model and workflow views
 
-- Status: MV-1 local synthetic renderer implemented; wider architecture remains Proposed
+- Status: MV-1 and the MV-2 local synthetic Month/Agenda increment implemented; wider architecture remains Proposed
 - Owner: Product experience and platform engineering
 - Governing record: [ADR 0043](../adr/0043-governed-model-and-workflow-views.md)
 - Related authority boundary: [ADR 0019](../adr/0019-domain-model-authoring-and-governed-metadata.md)
@@ -66,6 +66,27 @@ ranges cover every local date inclusively. Date selection may notify the owning 
 no fetch or mutation authority. Local dates are parsed as calendar dates, not JavaScript UTC
 timestamps, avoiding timezone-dependent day shifts.
 
+The shared renderer now provides Month and Agenda modes. `scopeField` optionally supplies explicit
+record scope; `contextStatuses` identifies long ranges displayed as quiet context instead of
+repeating full cards on every date. Both are code-owned mappings, independent of school vocabulary.
+
+A consumer may supply a `CalendarViewContext`: stable source key, coverage, explicit reference date
+and label, scope label, zone, locale and display week start. Coverage is separate from event bounds,
+so an empty loaded month remains navigable. This context grants no read or mutation authority.
+Without context, existing MV-1 definitions retain their bounded-record date range and formatting.
+
+The workspace retains visible month, selected date, mode, type filter and record identity across
+Calendar/List. List compares source records overlapping that month; Agenda groups the same entries
+by date and displays continuing ranges separately. Explicit mode choice persists for the mounted
+workspace; otherwise narrow layouts choose Agenda. Switching source keys resets local state.
+Invalid identity/date/range/display data produces an unavailable state rather than silently
+omitting records. Event details use only supplied title, dates, type and optional scope.
+
+To adopt Calendar for another source, declare its title/start/optional end mappings, opt into
+`calendar` in its view set, and pass an already-authorized bounded dataset to `ModelViewWorkspace`.
+Add context only when the source owns exact coverage/reference semantics. The non-school project
+milestone unit fixture exercises different field names, leap-day ranges and shared selection.
+
 ### Gantt
 
 Displays supplied inclusive date ranges on a proportional read-only timeline. Exact textual dates
@@ -100,9 +121,11 @@ authorize class enumeration.
 
 ## Expansion sequence
 
-The [calendar view proposal](../plans/calendar-view-proposal.md) describes the proposed next local
-presentation increment, including Month/Agenda and the later timed-calendar and timeline sequence.
-It grants no implementation or release authority.
+The [calendar view plan](../plans/calendar-view-proposal.md) records the authorized local MV-2
+increment and the later timed-calendar and timeline sequence. Later increments and release remain
+separately gated.
+The [Month/Agenda evidence](../phase-2/calendar-month-agenda-evidence.md) records technical checks
+and specialist dispositions for that increment.
 
 1. Qualify MV-1 locally with Academic Calendar and the neutral second contract.
 2. Review whether a second real workflow removes enough duplication to retain the abstraction.

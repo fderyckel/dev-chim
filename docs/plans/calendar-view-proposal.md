@@ -1,6 +1,6 @@
 # Reusable calendar view proposal
 
-- Status: Proposed; paper design only, implementation awaits François's green light
+- Status: MV-2 Month/Agenda implemented and locally qualified on 2026-10-23; later increments remain proposed
 - Date: 2026-10-23
 - Owner: Product experience and client engineering
 - Governing direction: [ADR 0043](../adr/0043-governed-model-and-workflow-views.md)
@@ -14,9 +14,10 @@ model-view renderer and use it in the institution demo's Calendar page. Start wi
 calendar and an accessible agenda. Keep List as an alternative presentation of the same records.
 Develop timed Week/Day, Gantt and other timeline experiences in subsequent bounded increments.
 
-This is a proposal for the next local synthetic increment, called MV-2 here. It does not authorize
-implementation or change an Accepted architectural boundary. ADR 0043 remains Proposed; its
-existing MV-1 authority and all connected, real-data and release gates remain unchanged.
+François authorized the first local synthetic increment, called MV-2 here, on 2026-10-23.
+Implementation evidence is [recorded separately](../phase-2/calendar-month-agenda-evidence.md).
+ADR 0043 remains Proposed; this authorization
+does not change an Accepted architectural boundary or any connected, real-data or release gate.
 
 ## Current checkout evidence
 
@@ -143,7 +144,7 @@ Recurrence, recurrence exceptions and timetable publication require separate dom
 
 | Increment | Deliverable | Admission |
 | --- | --- | --- |
-| MV-2: proposed next | Shared Month/Agenda calendar in the selected fictional institution demo; Calendar/List switching, navigation, range/closure/event distinction, overflow and details | François's green light for this bounded local presentation increment; relevant specialist conditions and focused verification |
+| MV-2: authorized on 23 October | Shared Month/Agenda calendar in the selected fictional institution demo; Calendar/List switching, navigation, range/closure/event distinction, overflow and details | Bounded local presentation only; relevant specialist conditions and focused verification |
 | Subsequent timed-calendar increment | Week/Day modes for a workflow that actually owns timed records | Explicit workflow authorization and reviewed date-time/zone contract; no timetable or admissions module inferred |
 | Subsequent Gantt increment | Improve the existing read-only range chart with appropriate grouping and scale for an authorized consumer | Evidence from a real workflow need and explicit per-source eligibility; dependency links, critical path and scheduling remain separate |
 | Subsequent timeline increment | A separately declared timeline view for meaningful milestones/ranges | Reviewed view-kind/schema extension and source mapping; shared selection and source contract retained |
@@ -202,12 +203,32 @@ All reviews below were completed on 2026-10-23 against the bounded proposal and 
 | UI and interaction | Approve with conditions: improve the existing renderer instead of a parallel framework | Example date label; no nested controls or duplicate tab systems; complete day agenda below month; shared state; concise invalid/empty recovery; keyboard/focus/zoom checks; product experience, frontend and accessibility functions | Accept; use the simpler below-calendar agenda/details first and defer popovers/direct chips |
 
 The UI tradeoff is extra vertical space in exchange for simpler reading, focus and touch behaviour.
-These reviews support the paper direction; they do not close implementation conditions. The
-observable trials are the acceptance packet above; every future MV-2 trial remains `not run`.
-No live UI trial, representative school session or independent security review has been run for
-this proposal. Advisor consultation was unavailable because the parent runtime was not verifiable.
+These paper reviews supported the direction; the implemented technical and AI visual trials are
+recorded in the linked Month/Agenda evidence. Representative school sessions and independent
+security review remain `not run`. Advisor consultation was unavailable because the parent runtime
+was not verifiable.
 
-## Proposal verification
+## Proposal-stage verification
 
-Documentation and repository verification will be recorded after the proposal is finalized.
-Future MV-2 acceptance tests above are planned checks, not implementation evidence.
+Historical results on 2026-10-23 before MV-2 implementation:
+
+| Exact check | Result |
+| --- | --- |
+| `make check` (initial run and one retry) | Blocked at `check-core`: another chat owned the `core-test` verification lock on both attempts; outer exit 2, lock refusal 75 |
+| `CHIMWEMWE_TEST_DATABASE=chimwemwe_commit_final6_20261023 make check` (final integration-locked run) | Passed every required stage: documentation and repository tooling; 309 core tests; both web dependency audits; formatting, lint, types, 40 unit tests and production build; 54 browser tests; shell tooling |
+| `make check` -> `check-docs` | Passed repository documentation validation on both attempts |
+| `make check` -> `check-repository-tools` | Passed Ruff format/lint, 4 documentation-tool tests, all four demo-pack validations, 23 demo-data tests and 6 demo-instance tests on both attempts |
+| Earlier blocked attempts -> `check-core`, `check-web`, `check-tooling` | Those attempts did not reach all stages because the existing locks were preserved; the final integration-locked run completed them |
+| `make docs-check` | Passed after recording the proposal and specialist dispositions |
+| `git diff --check` | Passed |
+
+The existing locks were preserved and no competing suite was forced. That proposal-stage gate
+passed before MV-2 implementation. Current implementation checks and the remaining representative
+review are recorded in the linked Month/Agenda evidence; these historical results do not certify
+the later patch.
+
+Final integration on the combined checkout used
+`CHIMWEMWE_TEST_DATABASE=chimwemwe_commit_final8_20261023 make check` and passed every required
+stage: 335 core tests, 52 web unit tests, 70 browser tests, both dependency audits, the production
+build, documentation/repository tooling and shell tooling. This verifies the local implementation;
+it does not satisfy the retained representative, connected-use or release gates.

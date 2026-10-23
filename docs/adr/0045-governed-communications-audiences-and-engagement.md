@@ -1,14 +1,19 @@
 # ADR 0045: Governed communications, audiences, and engagement evidence
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-10-09
+- Accepted: 2026-10-23 by François — Project Owner; bounded COMM-1 authorized with
+  source-fence qualification and delegated checkpoint review before proceeding
+- Paper decision review: 2026-10-23; four delegated AI specialists approve the bounded choices below;
+  this paper review preceded the Project Owner's acceptance and implementation authorization
 - Accountable owner: Product experience, platform engineering, and security/privacy ownership
 - Deciders: François — Project Owner, product experience, platform engineering, security/privacy,
   safeguarding ownership, and representative learning-institution users before connected use
-- Implementation authority: The Project Owner's instruction to start COMM-0 authorizes this paper
-  contract, five synthetic experience walkthroughs, and threat-model updates only. It does not
-  authorize a module declaration, resource, migration, public route, delivery adapter, real data,
-  or change to the classroom-first implementation priority.
+- Implementation authority: COMM-0 remains a paper-design slice. On 2026-10-23 the Project Owner
+  separately authorized only the [bounded COMM-1 proof](../plans/communications-comm-1-staff-announcement-proposal.md),
+  starting with audience source-fence qualification and specialist checkpoint review before
+  proceeding. Its stop conditions remain binding. No wider communications slice, public route,
+  delivery adapter, real data or release is authorized. Do not run `make check` yet, as instructed.
 - Supersedes: None
 
 ## Context
@@ -69,15 +74,17 @@ contracts.
 3. Add a bounded `communications.core` module direction centred on revisioned announcements,
    frozen audience manifests, explicit interaction policy, and classified engagement evidence.
    Later adapters may add channels, communities, structured responses, and campaigns. This is the
-   proposed option.
+   selected option.
 4. Use email, SMS, or an external collaboration product as the authoritative communication store.
    This makes provider groups and delivery state an authorization and records boundary and cannot
    preserve Chimwemwe's tenant, correction, retention, and audience semantics.
 
 ## Decision
 
-Propose option 3. COMM-0 fixes the logical contract and experience questions only. A separately
-authorized COMM-1 slice may later test the smallest private synthetic implementation.
+Accept option 3 as the governed direction. COMM-0 fixes the logical contract and experience
+questions only. The separately authorized bounded COMM-1 tests the smallest private synthetic
+implementation, beginning with its source-fence checkpoint. Acceptance does not authorize the
+wider future capabilities described here.
 
 ### Module and ownership boundary
 
@@ -317,11 +324,71 @@ audience review, scheduling, approval, correction, moderation, and aggregate-fir
 must provide keyboard and screen-reader semantics, visible focus, text scaling, non-colour status,
 clear errors, and authoritative confirmation after uncertain responses.
 
+### COMM-0 paper disposition for the first proof
+
+On 2026-10-23, François requested specialist review and resolution of the remaining COMM-0 paper
+decisions, with a bounded COMM-1 proposal and no implementation. The secondary, primary, admissions
+and UI agents approve the following choices within their delegated paper-review remit. The
+[review evidence](../phase-2/communications-comm-0-experience-evidence.md#delegated-paper-review--23-october-2026)
+records their reasoning and fictional trials. These decisions settle the included proof's product
+policy. The subsequent Project Owner acceptance and bounded implementation authorization are
+recorded above; the paper review itself did not grant implementation authority.
+
+1. **Exact staff audience only.** One exact institution's current synthetic staff participation
+   supplies intended subjects. Verified staff/account/membership identities supply initial account
+   admission. No descendants, named-person picker, role-label inference, student/family/applicant
+   targeting or external-college disclosure is included. Other statuses do not disqualify an
+   independently eligible staff person or grant any additional relationship access.
+2. **Frozen correction audience and admission.** Preserve the original intended set and denominator.
+   Every read/action rechecks current eligibility, association, membership, session and authority.
+   New people and newly provisioned/replacement account associations or memberships require a new
+   publication for admission; rejoin never restores old-chain access automatically. Credential
+   rotation with unchanged identities still follows ordinary session revocation. Corrections never
+   silently add recipients or erase an ended recipient's historical facts.
+3. **Exact receipt semantics.** Optional receipt request defaults off and is chosen before original
+   publication, unchanged through its correction chain. The fixed statement is `I acknowledge
+   receipt of this notice.` Each required successor needs a fresh explicit receipt bound to its
+   exact revision and statement. No minor-edit exemption, inferred reading, carried-forward
+   completion, consent, agreement or custom acceptance statement is included. Superseded and
+   withdrawn revisions reject new receipt actions.
+4. **Independent approval.** A different currently authorized actor approves publication,
+   correction and withdrawal against the exact action/content/audience/eligibility/receipt basis.
+   Changes invalidate approval. There is no self-approval or unavailable-approver exception in the
+   proof. Staff or institutional position alone supplies none of these capabilities.
+5. **Immediate, closed, writer-backed access.** Comments and reactions are closed. No scheduling,
+   expiry timer, urgent flag, quiet-hour bypass or external delivery exists. In-product content is
+   read from the authorized writer; Restricted outbox facts are stored atomically but not consumed
+   by the current Internal-only dispatcher. No Queued or Delivered outcome is asserted.
+6. **Aggregate publication snapshots.** Show exact revision, original intended count N, eligible
+   when that revision was published, no eligible account at publication, no current access at
+   publication, distinct opened S of N and optional receipt-confirmed A of N. Eligibility
+   categories are disjoint and total N; later changes do not rewrite them. Openings and receipts
+   remain independent; no intersection is inferred by subtraction. Named non-viewer lists,
+   exports, nudges, cross-notice profiling and generic directories are excluded. A currently
+   authorized recipient may inspect only their own exact receipt through session-derived identity;
+   revocation creates no separate receipt-access entitlement.
+7. **Restricted custody.** Inherit Restricted classification from the people sources, even for
+   synthetic data and aggregate metrics. Preserve linked proof state and evidence through review;
+   close ordinary use at review closure, without automatic purge or per-record deletion. Any
+   whole-environment decommission requires separate authorization. This is proof custody, not a
+   legal retention schedule or permission to process real records.
+8. **Withdrawal and uncertainty.** Approved withdrawal stops ordinary body presentation and new
+   confirmations, preserving governed history. Check uncertain operations against the authoritative
+   actor-bound result under current authority; a permitted retry reuses the exact operation identity.
+   Never infer a new receipt, publication or delivery from an interrupted response.
+
+The [bounded COMM-1 proposal](../plans/communications-comm-1-staff-announcement-proposal.md)
+settles source-consistency requirements, explicit test limits, lifecycle custody, private action
+surface and exit criteria. Source-fence/race qualification is the first technical checkpoint;
+current people reads are not a ready-made audience API. The wider future contracts above remain
+proposed directions and cannot expand this proof. Real emergency fallback, new audience ownership,
+production retention, representative reviews and release remain outside this paper disposition.
+
 ### COMM-0 boundary and later sequence
 
 COMM-0 contains only:
 
-- this Proposed ADR;
+- this ADR's paper-design contract;
 - the five synthetic user-journey walkthroughs and common experience contract;
 - the communication-specific threat and abuse-case additions; and
 - navigation/status updates that distinguish proposed direction from implementation.
@@ -330,10 +397,11 @@ COMM-0 adds no module manifest entry, capability, database resource, migration, 
 generated client, browser page, mobile application, job, consumer, notification, file, translation,
 search, analytics, external processor, real identity, or real data.
 
-Potential later slices remain separately authorized:
+Implementation sequence (only bounded COMM-1 is now authorized):
 
-- **COMM-1:** private synthetic exact-institution staff announcement, in-product only, comments
-  closed or reactions only, optional acknowledgement, revision/manifest/outbox evidence;
+- **COMM-1:** authorized private synthetic exact-institution staff announcement under the bounded
+  disposition above: closed interactions, optional exact-revision receipt, independent approval,
+  direct in-product reads, Restricted revision/manifest/outbox evidence and aggregate-only metrics;
 - **COMM-2:** accepted class, cohort/year-level, dedicated educational-group, and student-account
   recipient contracts with no guardian inference;
 - **COMM-3:** moderated comments, communication communities, attachments, reviewed translations,
@@ -341,8 +409,8 @@ Potential later slices remain separately authorized:
 - **COMM-4:** urgent multi-channel delivery, controlled SMS, structured responses, campaigns,
   content calendar, and privacy-preserving longitudinal analytics.
 
-This sequence does not amend the active classroom-first implementation order. COMM-1 does not
-become eligible merely because COMM-0 documents it.
+This sequence does not displace the active classroom-first implementation order. COMM-1's
+authority comes from the explicit Project Owner instruction, not from its inclusion in COMM-0.
 
 ## Plain-English summary
 
@@ -445,12 +513,17 @@ communication resource, audience resolver, recipient endpoint, Restricted consum
 channel, notification provider, comment moderator, attachment pipeline, translation processor,
 search index, analytics dataset, public client, or production operating model.
 
-Before COMM-1, accountable review must disposition the proposed staff audience and acknowledgement
+COMM-1 entry review must disposition the staff audience and acknowledgement
 semantics, the first classification/retention policy, precise source-version contract, manifest
 size and preparation limits, aggregate and recipient-level metric fields, and COMM-1 negative-test
 matrix. Before connected student use, representative students and staff plus safeguarding,
 records, accessibility, and independent security/privacy reviewers must disposition the affected
 journeys.
+
+The 2026-10-23 delegated review settles those paper choices for the narrowed proof as recorded
+above. François subsequently accepted this ADR and authorized bounded COMM-1. Physical
+implementation, complete source-fence qualification, measurements and migration/storage review
+remain required evidence; acceptance and authorization are not claims that those checks passed.
 
 ## Fallback and exit cost
 
@@ -488,6 +561,7 @@ retention verification, and accountable review.
 ## Related records
 
 - [COMM-0 experience evidence](../phase-2/communications-comm-0-experience-evidence.md)
+- [Bounded COMM-1 staff-announcement proposal](../plans/communications-comm-1-staff-announcement-proposal.md)
 - [Classroom-first plan](../plans/classroom-first-six-week-plan.md)
 - [ADR 0001](0001-modular-monolith-and-service-boundaries.md)
 - [ADR 0003](0003-tenant-model-and-optional-postgresql-rls.md)

@@ -63,10 +63,13 @@ preparation screens, actual provider sign-in and production release remain separ
 
 The Project Owner's 2026-10-09 instruction starts
 [COMM-0](docs/phase-2/communications-comm-0-experience-evidence.md) as a parallel paper-only
-communications track. Proposed [ADR 0045](docs/adr/0045-governed-communications-audiences-and-engagement.md)
+communications track. Accepted [ADR 0045](docs/adr/0045-governed-communications-audiences-and-engagement.md)
 defines revisioned announcements, frozen audience manifests, optional interaction, and
 aggregate-first engagement evidence. COMM-0 adds no module, data model, route, delivery adapter,
 real data, or implementation authority and does not replace the classroom-first priority.
+On 2026-10-23 the Project Owner separately authorized the
+[bounded COMM-1 proof](docs/plans/communications-comm-1-staff-announcement-proposal.md), starting
+with audience source-fence qualification and specialist checkpoint review before proceeding.
 
 1. Read [the Phase 0 outcome](docs/phase-0/README.md) and its binding later gates.
 2. Read [the Phase 1 core scope](docs/phase-1/README.md).
@@ -84,9 +87,10 @@ and [Phase 1 handover](docs/phase-1/handover-evidence.md). Current work follows 
 
 Four [fictional institution demo packs](demo-data/README.md) cover a Bangkok international
 school, US community college, Hong Kong kindergarten and English independent school.
-`make demo` lets you choose an institution and opens its students, family contacts, educators
-and calendar in the local browser app. Use `make demo DEMO=bangkok-international` for direct
-selection. `make demo-data` prepares files only; existing core-backed qualification demos
+`make demo` lets you choose an initial institution and opens its students, family contacts,
+educators and calendar in the local browser app. The in-app Demo institution selector switches
+all four in the same tab. Use `make demo DEMO=bangkok-international` for the startup default.
+`make demo-data` prepares files only; existing core-backed qualification demos
 remain separate from this read-only institution viewer.
 
 ```sh

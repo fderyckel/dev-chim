@@ -54,12 +54,26 @@ test("selected institution loads its people, relationships and calendar", async 
       exact: true,
     })
     .click();
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: college ? "Contacts" : "Families & guardians",
+      exact: true,
+    }),
+  ).toBeVisible();
   await page.locator("summary").first().click();
   await expect(page.getByRole("heading", { name: "Linked students" })).toBeVisible();
   await page
     .getByRole("navigation", { name: "Primary navigation" })
     .getByRole("link", { name: college ? "Instructors" : "Educators", exact: true })
     .click();
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: college ? "Instructors" : "Educators",
+      exact: true,
+    }),
+  ).toBeVisible();
   await page.locator("summary").first().click();
   await expect(
     page.getByRole("heading", {
@@ -71,11 +85,13 @@ test("selected institution loads its people, relationships and calendar", async 
     .getByRole("navigation", { name: "Primary navigation" })
     .getByRole("link", { name: "Calendar", exact: true })
     .click();
-  for (const heading of ["Teaching periods", "Student closures", "Events"])
-    await expect(
-      page.getByRole("heading", { name: heading, exact: true }),
-    ).toBeVisible();
-  await expect(page.getByText("Events do not change teaching days.")).toBeVisible();
+  await expect(
+    page.getByRole("tab", { name: "Calendar", exact: true }),
+  ).toHaveAttribute("aria-selected", "true");
+  await expect(
+    page.getByRole("heading", { name: "October 2026", exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText(/Events do not change teaching days/)).toBeVisible();
   await page.goto("/demo/students?institution=other&tenant_id=other");
   await expect(page.getByText(names[info.project.name], { exact: true })).toBeVisible();
   const denied = await request.get("/demo", { headers: { Host: "school.example" } });

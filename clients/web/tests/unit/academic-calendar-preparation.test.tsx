@@ -67,9 +67,9 @@ describe("the academic-calendar preparation screen", () => {
       "aria-selected",
       "true",
     );
-    expect(screen.getByRole("button", { name: /15 Oct 2026/ })).toBeVisible();
+    expect(screen.getByRole("button", { name: /^15 Oct 2026,/ })).toBeVisible();
     expect(screen.getByText("Named closure")).toBeVisible();
-    expect(screen.getByText("Mothers' Day")).toBeVisible();
+    expect(screen.getAllByText("Mothers' Day").length).toBeGreaterThan(0);
 
     await user.click(screen.getByRole("tab", { name: "Form" }));
     expect(screen.getAllByText("Mothers' Day")).toHaveLength(2);

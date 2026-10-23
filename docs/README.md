@@ -27,6 +27,14 @@ Documentation is part of the platform contract and changes with the code or deci
 - Plans: the accepted [Phase 2 entry sequence and revised institutional-structure proposal](plans/phase-2-entry-and-school-structure-proposal.md), the proposed [local browser experience foundation](plans/local-browser-experience-foundation-proposal.md), and the proposed [GitHub Actions CI-readiness path](plans/github-actions-ci-readiness-proposal.md).
 - [Specialist review next steps](plans/specialist-review-next-steps.md): current authentication and
   COMM-0 decisions, delegated paper trials, owners, and retained gates.
+- [Bounded COMM-1 proposal](plans/communications-comm-1-staff-announcement-proposal.md): resolved
+  COMM-0 paper choices and the authorized synthetic staff-announcement proof, starting with the
+  source-fence qualification and agent-review checkpoint.
+- [COMM-1 source-fence checkpoint](phase-2/communications-comm-1-source-fence-qualification.md):
+  executable counterexamples, partial controls and the smaller prerequisite decision before publication.
+- [Account source-fence prerequisite](phase-2/identity-account-source-fence-evidence.md): scoped
+  implementation, focused concurrency/migration results and four-agent checkpoint review;
+  remaining audience qualification stays separate from publication readiness.
 
 ## Documentation conventions
 

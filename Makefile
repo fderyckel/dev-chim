@@ -156,6 +156,10 @@ web-demo-e2e: web-check
 	cd clients/web && mise exec -- npm run test:e2e:demo
 
 check:
+	./bin/with-verification-lock --resource integration -- $(MAKE) check-boundaries
+
+.PHONY: check-boundaries
+check-boundaries:
 	$(MAKE) check-docs
 	$(MAKE) check-repository-tools
 	$(MAKE) check-core

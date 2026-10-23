@@ -1,8 +1,9 @@
 # COMM-0 governed communications experience evidence
 
-- Status: Technical paper walkthrough complete; Proposed ADR and all implementation/release gates
-  remain open
+- Status: Walkthroughs and delegated first-proof paper decisions complete; ADR 0045 subsequently
+  accepted and bounded COMM-1 authorized on 2026-10-23; release remains closed
 - Date: 2026-10-09
+- Delegated decision review: 2026-10-23
 - Scope: Five synthetic communication journeys plus common audience, interaction, receipt, metric,
   correction, accessibility, and failure-state contracts
 - Authority: François's instruction to start COMM-0 authorizes this evidence work only
@@ -28,6 +29,11 @@ COMM-0 adds no module declaration, database resource, migration, capability, rou
 job, consumer, notification, attachment, translation, analytics, or real data. The current
 [classroom-first plan](../plans/classroom-first-six-week-plan.md) remains the implementation
 priority.
+
+The [23 October specialist review](#delegated-paper-review--23-october-2026) resolves the narrowed
+first-proof policy. The [COMM-1 proposal](../plans/communications-comm-1-staff-announcement-proposal.md)
+is prepared for a separate implementation decision. Broader journeys below remain future paper
+scenarios; their channels, audiences, timing and interaction controls are not first-proof options.
 
 ## Product evidence used
 
@@ -83,7 +89,8 @@ scripts, caller-selected storage, or a provider template as authority.
 ### Audience
 
 The publisher chooses only target kinds allowed by current scope. The preview names the meaning,
-not just a label:
+not just a label. This 84-person vocabulary example is broader than the proposed 25-person
+COMM-1 limit; it is not a claimed implementation capacity:
 
 ```text
 Audience: Staff participating in Riverside Secondary on 9 October 2026
@@ -122,7 +129,9 @@ Student audiences default to `Closed`. The UI cannot enable comments without an 
 moderator coverage, and the required capability.
 
 This illustrative statement records receipt only. It does not attest to reading, comprehension,
-agreement or consent; the exact statement and receipt fields still require COMM-1 disposition.
+agreement or consent. The delegated paper decision fixes this statement and exact-revision
+binding for the first proof. Its receipt-required choice defaults off and stays unchanged across
+corrections; required successors need fresh confirmation without a minor-edit exception.
 
 ### Delivery and timing
 
@@ -162,24 +171,30 @@ access authority.
 
 ## Common publisher metrics
 
-The aggregate dashboard displays both number and denominator:
+For the bounded staff proof, the aggregate dashboard labels the exact revision and uses its
+original intended denominator throughout. This smaller fictional example fits the proposed cap:
 
 ```text
-Intended                         84
-Reachable                        79 of 84
-Delivered in product             79 of 79 reachable
-Seen                             61 of 79 reachable
-Acknowledged                     55 of 79 reachable
-Not yet seen                     18
-No eligible account               5
-Delivery failed                   0
+Version                                                1
+Audience                                              20
+Eligible when this version was published               15
+No eligible account at publication                      5
+No current access at publication                        0
+Opened                                          11 of 20
+Receipt confirmed                                9 of 20
 ```
 
-The dashboard never merges unreachable people into `not yet seen`. It explains that delivery is
-not viewing and viewing is not acknowledgement.
+The three eligibility categories sum to the original intended count and remain publication-time
+snapshots. Later grants or revocation do not rewrite them or grant access through history.
+Openings and confirmations are independent exact-version facts. Never subtract one from the other
+to invent a people intersection, label unlinked people inattentive, or show Queued/Delivered without
+a qualified delivery capability. Direct writer-backed availability is not a delivery receipt.
 
-The recipient-level follow-up is a separate, audited action with a distinct capability and purpose.
-It is bounded to this one audience manifest and returns only the fields needed to follow up:
+### Deferred recipient-level follow-up
+
+Recipient-level non-viewers, reminders and exports are excluded from COMM-1. A later separately
+authorized task would require a distinct capability, purpose and audit, limited to one exact
+manifest. The following is a future minimization example, not an included route or screen:
 
 ```text
 Status: Not yet seen | No eligible account | Delivery failed | Access ended
@@ -196,36 +211,39 @@ manifest statuses and records its own outcome; it does not reconstruct another a
 
 ### User outcome
 
-An authorized institutional publisher sends a policy update to current staff at one exact
-institution, keeps discussion closed, requires acknowledgement, and follows up accurately without
-accessing a general staff directory.
+An authorized institutional author prepares a staff policy notice for one exact institution. A
+different authorized actor publishes it; discussion is closed, receipt is explicit, and the
+publisher sees aggregates without a staff directory or named non-viewer list. Receipt of this
+notice is not acceptance of the policy.
 
 ### Actors and sources
 
 - Author: actor with draft capability.
-- Approver/publisher: actor with exact-institution scoped publication capability; may be a separate
-  actor under tenant policy.
+- Approver/publisher: different actor with exact-institution scoped approval/publication capability;
+  no self-approval or unavailable-approver bypass in this proof.
 - Recipients: current `staff` participation at the exact published institution and effective time,
   resolved to verified staff-account associations.
-- Evidence viewer: actor with aggregate metric capability; recipient-level follow-up requires a
-  separate capability and purpose.
+- Evidence viewer: actor with aggregate metric capability. Named follow-up is excluded.
 
 No job title, email domain, role label, teaching assignment, ancestor unit, or external-provider
 group selects the staff audience.
 
 ### Happy path
 
-1. The author creates the draft and selects classification `Confidential`.
+1. The author creates a plain-text draft. Classification is fixed `Restricted`, inherited from
+   the synthetic people source; no downgrade or classification dropdown is available.
 2. The author selects `Staff at Riverside Secondary`, not `all staff in tenant`.
 3. Audience preparation resolves current staff participation, deduplicates people, and separates
    five staff without eligible accounts.
 4. Interaction is `Closed`; acknowledgement is required with the exact statement shown.
-5. The approver reviews the content, audience, unreachable count, schedule, expiry, and policy.
+5. A different approver reviews exact content, intended/eligible counts, exclusions, receipt
+   requirement, classification and current source basis. Publication is immediate, not scheduled.
 6. Publication freezes the revision and audience manifest, commits its evidence, and creates the
-   minimal outbox fact.
-7. Reachable staff open and explicitly acknowledge the communication.
-8. The publisher first sees aggregates, then invokes the separately authorized bounded follow-up
-   for `not yet seen` and `no eligible account`.
+   minimal Restricted outbox fact. The existing Internal-only consumer does not consume it.
+7. Originally admitted staff with current access deliberately open the writer-backed notice and
+   explicitly confirm its exact receipt statement. No provider or Delivered outcome is inferred.
+8. The publisher sees revision-scoped aggregates only; each authorized recipient may inspect
+   their own exact receipt. No non-viewer list, reminder or export is available.
 
 ### Failure and denial cases
 
@@ -236,15 +254,15 @@ group selects the staff audience.
 - A role named `Teacher` with no current staff participation does not enter the audience.
 - A stale prepared audience blocks publication after a participation or association change.
 - Changed idempotency-key reuse cannot produce a second publication.
-- Retrying a delivery event cannot produce a second acknowledgement requirement.
-- A recipient-level metrics actor cannot export or browse other staff records.
+- Exact command retry cannot create a duplicate logical publication or confirmation.
+- Named recipient metrics, delivery consumers, export and staff-directory traversal remain absent.
 
 ### Evidence disposition
 
-This is the recommended COMM-1 candidate because its audience owner and staff-account association
-already have bounded synthetic foundations. It still needs accepted classification/retention,
-manifest limits, metric fields, public/session boundary, user research, and executable proof. No
-COMM-1 implementation is authorized here.
+This is the COMM-1 candidate under the resolved paper decisions and explicit limits in the
+[bounded proposal](../plans/communications-comm-1-staff-announcement-proposal.md). Existing staff
+foundations supply meanings, not a ready-made list/audience API or source fence. Source-consistency
+qualification, implementation permission, executable evidence and later human/release gates remain.
 
 ## Journey 2: Year-level student notice
 
@@ -465,19 +483,19 @@ All five journeys use the same correction rule:
 2. `correct_communication` requires a reason and expected current revision;
 3. the successor retains the stable communication identity and names the corrected revision;
 4. the original audience manifest remains preserved;
-5. the correction declares whether it targets the original manifest, a newly prepared manifest,
-   or both through an accepted policy;
+5. the first proof retains the original intended set and admitted account identities, rechecks
+   current access and independently approves the exact successor; a changed audience needs a
+   new publication;
 6. recipients see an understandable corrected status and the current revision; and
 7. downstream delivery and search projections reconcile without deleting the original evidence.
 
-The exact correction-audience rule remains an open COMM-1 decision. COMM-0 rejects silent reuse or
-silent recomputation because each choice changes who receives the correction and the metric
-denominator.
-
-An acknowledgement of the original statement is not a fresh acknowledgement of corrected
-instructions. Before COMM-1, disposition exact receipt-to-statement/revision binding, whether a
-material correction requires a new acknowledgement, and how that requirement is shown. Existing
-receipts remain attributable to their original action; COMM-0 does not choose the renewal policy.
+The delegated review now resolves correction audience and receipt renewal for the bounded proof
+under [ADR 0045](../adr/0045-governed-communications-audiences-and-engagement.md#comm-0-paper-disposition-for-the-first-proof).
+Newcomers and new/replacement account associations do not enter an old correction chain. Retain
+the original receipt-required choice; every required successor needs a fresh exact-revision
+receipt. An old receipt or minor-edit label never completes a new version. Superseded or withdrawn
+versions reject new confirmations while preserving previously committed facts. Broader correction
+audiences, restoration and emergency/channel policies require a separate later decision.
 
 `nudge_non_viewers` is likewise a distinct action. It operates on an exact manifest and safe status
 set, requires current authority and purpose, respects channel preference and quiet-hour policy,
@@ -530,6 +548,10 @@ human-tested that prototype.
 
 ## COMM-0 decisions and open conditions
 
+The table below preserves the original 9 October disposition. The included first-proof policy
+questions are now settled by the 23 October review below; broader audience/channel/release items
+remain outside the proof.
+
 | Item | Disposition on 2026-10-09 |
 | --- | --- |
 | Announcement-first direction | Proposed and supported by the five paper walkthroughs |
@@ -551,22 +573,85 @@ human-tested that prototype.
 
 ## COMM-1 entry questions
 
-Before requesting COMM-1 implementation authority, settle:
+The eight original entry questions have these bounded paper dispositions, subsequently accepted
+by François with the bounded COMM-1 authorization. None is treated as implemented, measured,
+approved by additional deciders, or representative-validated.
 
-1. Which exact-institution staff source versions or locks make a prepared manifest safe to publish?
-2. What maximum staff-audience size, preparation duration, transaction budget, and mixed-load target
-   apply to the first proof?
-3. What fields may appear in aggregate and recipient-level metrics, and for how long?
-4. What exact statement, receipt fields and revision binding define acknowledgement without
-   implying consent, and what correction audience and renewed-acknowledgement policy applies?
-5. What content, manifest, receipt, audit, idempotency, and outbox retention policy applies to the
-   synthetic proof and later real staff data?
-6. Does COMM-1 require a separate approver, and what explicit single-controller exception is
-   acceptable for the synthetic proof?
-7. Which routes and generated-client methods remain private, and how will adversarial enumeration
-   be proven absent?
-8. What recovery outcome applies when publication commits but audience preparation, delivery, view
-   receipt, or acknowledgement confirmation is interrupted?
+| Entry question | Resolved first-proof choice | Required later proof |
+| --- | --- | --- |
+| Staff source consistency | Private owner-controlled exact-institution projection, canonical versions/effective-date basis, five-minute preparation maximum, writer fence and full recomputation through commit; stale or missing basis refuses publication | Qualify phantom insert, ending, revocation, account/grant and date-boundary races first; current exact-ID reads do not supply this adapter automatically |
+| Size/time/mixed load | 25 intended people, 5 communication identities/run, 2 published revisions/identity, two-second write budget and inherited API targets; explicit mixed-classroom test in the proposal | Measure stated local limits; reject overflow without truncation or weakening targets |
+| Metric fields/access | Exact-revision Restricted aggregates with stable original N and publication-time eligibility categories; only session-derived own exact receipt, no named publisher follow-up | Verify count semantics, current access and no alternate enumeration/export route |
+| Receipt/correction | Fixed receipt-only statement, original optional requirement unchanged, fresh exact-version receipt for every required successor; frozen original intended/admitted set, no new/rejoined account admission | Race superseded/withdrawn confirmation, reissue/revocation, lost responses and correction approval |
+| Classification/custody | Uniformly Restricted synthetic proof; preserve linked evidence through review, stop ordinary use at closure, no automatic/per-record deletion; separately authorize whole-environment decommission | Review run custodian/evidence and future storage/migrations; production retention and erasure remain excluded |
+| Approval | Two distinct currently authorized actors for publish/correct/withdraw, exact basis-bound approval, no single-controller exception | Self-approval, changed/stale basis, revoked approver and concurrent action denials |
+| Interfaces | Loopback synthetic purpose-built named actions; counts-only audience preview, no people picker/directory or generic generated query/write; exact authorized own receipt/outcome | Current session/origin/CSRF, capability/module gates, cross-tenant and cumulative traversal negatives |
+| Interrupted operation | Authoritative actor-bound outcome lookup and exact same-identity retry under current authority; prior facts retained, no new action on superseded/withdrawn content | Inject rollback/commit-response loss, changed replay, conflict and module drain; no delivery/consumer result claimed |
+
+The [COMM-1 proposal](../plans/communications-comm-1-staff-announcement-proposal.md) owns the exact
+engineering envelope and ordered qualification plan. It requests no silent source-writer expansion
+or implementation permission. If the source fence cannot be qualified within that boundary, stop
+and return that smaller technical decision before a publication path is built.
+
+## Delegated paper review — 23 October 2026
+
+François expressly requested these agents to review the revised ADR, resolve remaining COMM-0
+paper choices and prepare COMM-1 without implementation or `make check`. The coordinator adopts
+the conservative included-proof decisions in ADR 0045; formal ADR status remains Proposed.
+
+| Specialist | Final domain paper verdict | Coordinator disposition |
+| --- | --- | --- |
+| Primary education | Approve frozen original audience, fixed receipt requirement, fresh per-version confirmations and withdrawal stopping outstanding actions | Accept; no minor-edit bypass, historical receipt reuse or automatic access restoration |
+| Secondary education | Approve exact-institution ordinary staff proof, closed interaction, separate approver and direct writer-backed access | Accept; the deliberate approval/confirmation overhead is a proof choice, not school-wide operating evidence |
+| School/college admissions | Approve staff-only targeting and own-receipt minimization; reject Confidential downgrade and inferred applicant/family/college disclosure | Accept Restricted inheritance and event-based evidence custody; no real retention duration or disclosure authority invented |
+| UI and interaction | Approve compact author/approver/recipient flows, stable N and independent openings/receipts, clear correction/withdrawal/uncertain states | Accept; no Queued/Delivered or named non-viewers, and no screenshot/human-usability claim for these paper flows |
+
+The specialists exchanged and resolved correction/receipt/withdrawal challenges. The coordinator
+chooses publication-time eligibility snapshots, rather than a live changing reachability count,
+to avoid rewriting historical meaning. A no-account subject remains in N; later provisioning does
+not admit a new association to that old chain in this deliberately conservative proof. Source
+mechanics and workload measurements are future technical evidence, not invented AI approvals.
+
+All four specialists then re-read the prepared proposal and revised paper disposition and returned
+`approve`, with no blocking correction in their remits. Admissions explicitly accepted the final
+publication-snapshot choice instead of its earlier live-current-count suggestion. The numerical
+limits are unmeasured engineering bounds; no reviewer claims technical qualification or human
+operating evidence.
+
+### AI paper trials performed
+
+These are actual specialist reasoning exercises against the selected paper rules, not executed
+software, benchmark measurements, screenshots or participant observations. Large-count examples
+exercise metric meaning only and do not override the proposed 25-person implementation cap.
+
+| Fictional case | Observed paper outcome |
+| --- | --- |
+| Staff meeting notice with receipt off | Different authorized approval publishes; ordinary recipient has no confirmation task |
+| Author is the only available approver | Deny self-approval; remain awaiting approval, without an emergency bypass |
+| Version 1 confirmed, version 2 changes 15:00 to 12:00 | Preserve old fact; version 2 begins with zero confirmations and requires its own explicit receipt |
+| Publisher labels that correction minor | Reject confirmation bypass; original required mode remains binding |
+| Original receipt mode off, correction tries to enable it | Reject mode change in chain; create a separate publication |
+| New staff or replacement association after original publication | No inferred access to old chain; new publication required |
+| Staff ends/revokes or rejoins | Current access denied under ended/revoked basis; historical denominator/receipts retained; no automatic restoration |
+| Old confirmation arrives after successor/withdrawal | Reject a fresh obsolete action; reconcile any earlier committed receipt without inventing a new one |
+| N=84, eligible=79, opened=61, confirmed=55 | Separate counts of original N; do not infer six opened-but-unconfirmed people |
+| Opened=54, confirmed=55 | Independent receipt capture is coherent; no assumed subset or fabricated reading |
+| Correction N=84, eligible=76, no account=5, no current access=3 | Categories total N; original membership and historical snapshots remain unchanged |
+| Guardian who is also staff / offered applicant / external reference | Only independent staff notice allowed; applicant inference, family disclosure and college reference remain unsupported |
+| Publisher requests named non-viewers, reminder or export | Unsupported in COMM-1, regardless of publishing authority |
+| Restricted publication fact reaches current Internal-only consumer | Consumer must refuse; atomic storage does not establish delivery |
+| Review ends and deletion is requested | Stop ordinary use and preserve evidence pending separate whole-environment authorization |
+
+No included product-policy disagreement remains. Real emergency fallback, wider restoration,
+new audience owners, Restricted consumption, actual records/retention, human reviews and release
+remain explicitly unavailable or later-gated. The isolated Advisor preflight remains unavailable
+(`parent_runtime_unavailable`); these delegated AI reviews do not claim that missing assurance.
+
+### Verification of this paper revision
+
+Documentation links/structure and whitespace are checked after the final draft. No implementation,
+communication runtime tests or benchmark was run. `make check` is deliberately not run under
+François's explicit instruction; this is not a repository-green or readiness claim.
 
 ## Verification required for this paper slice
 
@@ -580,6 +665,7 @@ Before requesting COMM-1 implementation authority, settle:
 ## Related records
 
 - [ADR 0045](../adr/0045-governed-communications-audiences-and-engagement.md)
+- [Bounded COMM-1 staff-announcement proposal](../plans/communications-comm-1-staff-announcement-proposal.md)
 - [ADR 0020](../adr/0020-human-interface-experience-and-client-platform-boundary.md)
 - [ADR 0023](../adr/0023-sensitive-collection-enumeration-and-bulk-export-boundary.md)
 - [ADR 0036](../adr/0036-minimal-people-participation-and-staff-account-association.md)

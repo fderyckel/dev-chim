@@ -14,6 +14,7 @@ import {
   validateModelViewSet,
   viewDefinition,
   type CalendarViewDefinition,
+  type CalendarViewContext,
   type FormViewDefinition,
   type GanttViewDefinition,
   type ListViewDefinition,
@@ -25,12 +26,21 @@ import {
 import {
   addMonths,
   formatLocalDate,
-  monthDays,
-  monthKey,
   monthLabel,
   parseLocalDate,
   toIsoLocalDate,
 } from "./local-date";
+
+import {
+  calendarEntries,
+  calendarContextIssues,
+  entriesInMonth,
+} from "./calendar-data";
+import {
+  CalendarNavigation,
+  ModelCalendarView,
+  type CalendarState,
+} from "./model-calendar-view";
 
 type WorkspaceProps = Readonly<{
   definition: ModelViewSetDefinition;
@@ -39,6 +49,7 @@ type WorkspaceProps = Readonly<{
   supplements?: Partial<Record<ModelViewKind, ReactNode>>;
   selectedDate?: string;
   onSelectDate?: (value: string) => void;
+  calendarContext?: CalendarViewContext;
 }>;
 
 type DatedRecord = Readonly<{
@@ -182,107 +193,6 @@ function ModelFormView({
   );
 }
 
-function ModelCalendarView({
-  definition,
-  records,
-  view,
-  selectedDate,
-  onSelectDate,
-}: Readonly<{
-  definition: ModelViewSetDefinition;
-  records: ReadonlyArray<ModelViewRecord>;
-  view: CalendarViewDefinition;
-  selectedDate?: string;
-  onSelectDate?: (value: string) => void;
-}>) {
-  const events = useMemo(
-    () => datedRecords(definition, records, view),
-    [definition, records, view],
-  );
-  const earliest =
-    events.length > 0 ? Math.min(...events.map((item) => item.start)) : null;
-  const latest = events.length > 0 ? Math.max(...events.map((item) => item.end)) : null;
-  const initialMonth =
-    (selectedDate && monthKey(selectedDate)) ||
-    (earliest === null ? null : monthKey(toIsoLocalDate(earliest))) ||
-    "2026-01";
-  const [visibleMonth, setVisibleMonth] = useState(initialMonth);
-  const cells = monthDays(visibleMonth);
-  const earliestMonth =
-    earliest === null ? visibleMonth : toIsoLocalDate(earliest).slice(0, 7);
-  const latestMonth =
-    latest === null ? visibleMonth : toIsoLocalDate(latest).slice(0, 7);
-
-  return (
-    <section className="c-model-calendar" aria-label={`${definition.title} calendar`}>
-      <header className="c-model-calendar__header">
-        <button
-          className="c-model-view-control"
-          disabled={visibleMonth <= earliestMonth}
-          onClick={() => setVisibleMonth(addMonths(visibleMonth, -1))}
-          type="button"
-        >
-          Previous month
-        </button>
-        <h2>{monthLabel(visibleMonth)}</h2>
-        <button
-          className="c-model-view-control"
-          disabled={visibleMonth >= latestMonth}
-          onClick={() => setVisibleMonth(addMonths(visibleMonth, 1))}
-          type="button"
-        >
-          Next month
-        </button>
-      </header>
-
-      <div className="c-model-calendar__weekdays" aria-hidden="true">
-        {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((day) => (
-          <span key={day}>{day}</span>
-        ))}
-      </div>
-      <div className="c-model-calendar__grid">
-        {cells.map((day, index) => {
-          if (day === null) {
-            return <span className="c-model-calendar__blank" key={`blank-${index}`} />;
-          }
-
-          const value = toIsoLocalDate(day);
-          const dayEvents = events.filter(
-            (event) => event.start <= day && event.end >= day,
-          );
-          const announcedEvents = dayEvents.map((event) => event.title).join(", ");
-          const visibleEvents = dayEvents.filter(
-            (event) =>
-              event.start === day ||
-              event.end === event.start ||
-              value === selectedDate,
-          );
-
-          return (
-            <button
-              aria-label={`${formatLocalDate(value)}${announcedEvents ? `, ${announcedEvents}` : ""}`}
-              aria-pressed={value === selectedDate}
-              className="c-model-calendar__day"
-              data-has-events={dayEvents.length > 0 ? "true" : "false"}
-              key={value}
-              onClick={() => onSelectDate?.(value)}
-              type="button"
-            >
-              <span className="c-model-calendar__date">{Number(value.slice(-2))}</span>
-              {visibleEvents.slice(0, 2).map((event) => (
-                <span className="c-model-calendar__event" key={event.id}>
-                  {event.title}
-                  {event.status ? ` · ${event.status}` : ""}
-                </span>
-              ))}
-            </button>
-          );
-        })}
-      </div>
-    </section>
-  );
-}
-
 function monthTicks(minimum: number, maximum: number): ReadonlyArray<number> {
   const ticks: number[] = [];
   let current = toIsoLocalDate(minimum).slice(0, 7);
@@ -398,14 +308,10 @@ function DefaultView({
   definition,
   records,
   kind,
-  selectedDate,
-  onSelectDate,
 }: Readonly<{
   definition: ModelViewSetDefinition;
   records: ReadonlyArray<ModelViewRecord>;
   kind: ModelViewKind;
-  selectedDate?: string;
-  onSelectDate?: (value: string) => void;
 }>) {
   const view = viewDefinition(definition, kind);
   if (!view) return <p className="c-model-view-empty">This view is unavailable.</p>;
@@ -416,31 +322,67 @@ function DefaultView({
     case "form":
       return <ModelFormView definition={definition} records={records} view={view} />;
     case "calendar":
-      return (
-        <ModelCalendarView
-          definition={definition}
-          key={selectedDate ?? "calendar"}
-          records={records}
-          view={view}
-          selectedDate={selectedDate}
-          onSelectDate={onSelectDate}
-        />
-      );
+      return null;
     case "gantt":
       return <ModelGanttView definition={definition} records={records} view={view} />;
   }
 }
 
-export function ModelViewWorkspace({
+function ValidatedWorkspace({
   definition,
   records,
   overrides = {},
   supplements = {},
   selectedDate,
   onSelectDate,
+  calendarContext,
 }: WorkspaceProps) {
-  const issues = validateModelViewSet(definition);
   const [activeView, setActiveView] = useState<ModelViewKind>(definition.defaultView);
+  const datedView = definition.views.find(
+    (view): view is CalendarViewDefinition => view.kind === "calendar",
+  );
+  const parsed = useMemo(
+    () =>
+      datedView
+        ? calendarEntries(definition, records, datedView)
+        : { entries: [], issues: [] },
+    [definition, records, datedView],
+  );
+  const allEntries = parsed.entries;
+  const issues = [
+    ...parsed.issues,
+    ...calendarContextIssues(calendarContext),
+    ...(selectedDate && parseLocalDate(selectedDate) === null
+      ? ["The selected calendar date is invalid."]
+      : []),
+  ];
+  const initialDate =
+    selectedDate ?? calendarContext?.referenceDate ?? allEntries[0]?.from ?? "";
+  const [calendarState, setCalendarState] = useState<CalendarState>({
+    date: initialDate,
+    month: initialDate.slice(0, 7),
+    status: "",
+    selectedId: null,
+    mode: null,
+  });
+  const [previousSelectedDate, setPreviousSelectedDate] = useState(selectedDate);
+  // A controlled workflow can resolve another date; ordinary view switches keep local context.
+  if (previousSelectedDate !== selectedDate) {
+    setPreviousSelectedDate(selectedDate);
+    if (selectedDate && parseLocalDate(selectedDate) !== null) {
+      setCalendarState((old) => ({
+        ...old,
+        date: selectedDate,
+        month: selectedDate.slice(0, 7),
+        selectedId: null,
+      }));
+    }
+  }
+  const visibleEntries = entriesInMonth(
+    allEntries,
+    calendarState.month,
+    calendarState.status,
+  );
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const id = useId();
 
@@ -460,19 +402,6 @@ export function ModelViewWorkspace({
     event.preventDefault();
     setActiveView(definition.views[nextIndex].kind);
     tabRefs.current[nextIndex]?.focus();
-  }
-
-  if (issues.length > 0) {
-    return (
-      <div className="c-model-view-error" role="alert">
-        <strong>This view definition is unavailable.</strong>
-        <ul>
-          {issues.map((issue) => (
-            <li key={issue}>{issue}</li>
-          ))}
-        </ul>
-      </div>
-    );
   }
 
   return (
@@ -504,17 +433,98 @@ export function ModelViewWorkspace({
         id={`${id}-panel`}
         role="tabpanel"
       >
-        {overrides[activeView] ?? (
-          <DefaultView
-            definition={definition}
-            records={records}
-            kind={activeView}
-            selectedDate={selectedDate}
+        {!issues.length &&
+        datedView &&
+        (activeView === "calendar" || activeView === "list") ? (
+          <CalendarNavigation
+            entries={allEntries}
+            state={calendarState}
+            setState={setCalendarState}
+            context={calendarContext}
             onSelectDate={onSelectDate}
+            calendar={activeView === "calendar"}
           />
+        ) : null}
+        {!issues.length &&
+        datedView &&
+        activeView === "list" &&
+        !visibleEntries.length ? (
+          <div className="c-date-navigation">
+            <p role="status">
+              {calendarState.status
+                ? "No matching entries in this month."
+                : "No entries in the supplied month."}
+            </p>
+            {calendarState.status ? (
+              <button
+                className="c-model-view-control"
+                type="button"
+                onClick={() =>
+                  setCalendarState((old) => ({ ...old, status: "", selectedId: null }))
+                }
+              >
+                Clear filters
+              </button>
+            ) : null}
+          </div>
+        ) : null}
+        {issues.length && (activeView === "calendar" || activeView === "list") ? (
+          <div className="c-model-view-error" role="alert">
+            <strong>Calendar data unavailable.</strong>
+            <p>{issues[0]}</p>
+            <button
+              className="c-model-view-control"
+              type="button"
+              onClick={() => window.location.reload()}
+            >
+              Reload view
+            </button>
+          </div>
+        ) : (
+          (overrides[activeView] ??
+          (activeView === "calendar" ? (
+            <ModelCalendarView
+              entries={visibleEntries}
+              state={calendarState}
+              setState={setCalendarState}
+              context={calendarContext}
+              onSelectDate={onSelectDate}
+            />
+          ) : (
+            <DefaultView
+              definition={definition}
+              records={
+                activeView === "list" && datedView
+                  ? visibleEntries.map((entry) => entry.record)
+                  : records
+              }
+              kind={activeView}
+            />
+          )))
         )}
         {supplements[activeView]}
       </div>
     </section>
+  );
+}
+
+export function ModelViewWorkspace(props: WorkspaceProps) {
+  const issues = validateModelViewSet(props.definition);
+  if (issues.length)
+    return (
+      <div className="c-model-view-error" role="alert">
+        <strong>This view definition is unavailable.</strong>
+        <ul>
+          {issues.map((issue) => (
+            <li key={issue}>{issue}</li>
+          ))}
+        </ul>
+      </div>
+    );
+  return (
+    <ValidatedWorkspace
+      key={`${props.definition.sourceRef}:${props.calendarContext?.sourceKey ?? ""}`}
+      {...props}
+    />
   );
 }

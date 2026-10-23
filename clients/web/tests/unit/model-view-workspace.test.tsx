@@ -113,7 +113,10 @@ describe("the governed model-view workspace", () => {
     expect(
       screen.getByRole("table", { name: "Academic calendar entries" }),
     ).toBeVisible();
-    expect(screen.getByRole("cell", { name: "Founders' Day" })).toBeVisible();
+    expect(screen.getByRole("cell", { name: "Term 1" })).toBeVisible();
+    expect(
+      screen.queryByRole("cell", { name: "Founders' Day" }),
+    ).not.toBeInTheDocument();
 
     await user.click(screen.getByRole("tab", { name: "Gantt" }));
     expect(

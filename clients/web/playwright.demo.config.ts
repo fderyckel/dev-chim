@@ -8,6 +8,10 @@ const packs = [
   "hong-kong-kindergarten",
   "england-independent",
 ];
+const basePort = Number(process.env.CHIMWEMWE_DEMO_E2E_PORT ?? 3025);
+if (!Number.isInteger(basePort) || basePort < 1024 || basePort > 65532) {
+  throw new Error("CHIMWEMWE_DEMO_E2E_PORT must leave four valid local test ports.");
+}
 const instances = packs.map((slug) =>
   execFileSync(
     "mise",
@@ -37,13 +41,13 @@ export default defineConfig({
   projects: packs.map((slug, i) => ({
     name: slug,
     use: {
-      baseURL: `http://127.0.0.1:${3025 + i}`,
+      baseURL: `http://127.0.0.1:${basePort + i}`,
       viewport: { width: 1440, height: 900 },
     },
   })),
   webServer: packs.map((slug, i) => ({
     command: "npm run start",
-    url: `http://127.0.0.1:${3025 + i}`,
+    url: `http://127.0.0.1:${basePort + i}`,
     reuseExistingServer: false,
     timeout: 30000,
     env: {
@@ -51,7 +55,7 @@ export default defineConfig({
       CHIMWEMWE_DEMO_INSTANCE: "true",
       CHIMWEMWE_DEMO_PACK_ID: slug,
       CHIMWEMWE_DEMO_DATA_DIRECTORY: instances[i],
-      PORT: String(3025 + i),
+      PORT: String(basePort + i),
     },
   })),
 });

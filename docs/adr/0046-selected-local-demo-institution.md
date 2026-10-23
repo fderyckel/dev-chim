@@ -1,10 +1,10 @@
-# ADR 0046: Startup-selected local demo institution
+# ADR 0046: Local demo institution selection
 
 - Status: Proposed
 - Date: 2026-10-23
 - Accountable owner: Product experience and platform engineering
 - Deciders: François — Project Owner
-- Implementation authority: François explicitly requested loading the demo sets, choosing an institution at startup, and viewing its students, guardians, educators and calendar
+- Implementation authority: François explicitly requested loading the demo sets and, on 2026-10-23, an in-app selector for switching all four institutions in one tab
 - Supersedes: None
 
 ## Context
@@ -16,30 +16,40 @@ Guardian and college course-registration production contracts do not yet exist.
 ## Decision drivers
 
 - Make each institution's related records visible in the existing browser app.
-- Keep the selected synthetic institution fixed for the process lifetime.
+- Keep exactly one selected fictional institution in each rendered page.
 - Preserve production domain, identity, authorization and calendar writer boundaries.
 
 ## Considered options
 
 1. Import every fixture field into core tables: rejected because it invents unsupported domains.
 2. A server-loaded, startup-selected synthetic view adapter: selected for this authorized demo.
-3. A browser tenant switcher with arbitrary file paths: rejected because the startup context must
-   remain explicit and file access must not depend on request input.
+3. A browser tenant switcher with arbitrary file paths: rejected because file access must not
+   depend on request-supplied paths or tenant identifiers.
+4. An allowlisted local demo selector: added under the Project Owner's explicit follow-up;
+   the browser selects only one of four code-owned fictional pack IDs.
 
 ## Decision
 
 Add `make demo` with an interactive institution menu and `make demo DEMO=<allowlisted-pack>` for
 direct startup. It prepares all four packs, pins one institution and tenant in an isolated
-instance manifest, and starts the existing loopback Next.js app with explicit synthetic flags.
+instance manifest as the default, and starts the existing loopback Next.js app with explicit synthetic flags.
 The selected pack becomes the app's home and its Students, Families & guardians (college
 Contacts), Educators (college Instructors) and Calendar views. These are read-only demo views.
 
 The server checks local mode, loopback Host, instance metadata, selected-pack allowlist, the
 code-owned manifest digest and every row's tenant before rendering a projected view. Request
-parameters never select tenant, pack or file. Missing/corrupt context fails closed with concise
+parameters cannot select tenant or file. The dedicated `demo` query parameter may select one of
+the four code-owned fictional pack IDs only, after startup context validation. A labelled native
+selector and explicit Switch button navigate within the same tab and section. Demo links retain
+the selection; switching remounts institution-specific searches, expansion, pagination and calendar
+state. Browser history and refresh retain the URL's selection. Missing/corrupt context fails closed with concise
 recovery; no fallback institution is silently substituted. Rendering is request-time, so build
 output and shared static caches cannot pin one institution into another process. No source
-paths, other institution payloads, credentials or raw fixture files are sent to the browser.
+paths, unselected institution record payloads, credentials or raw fixture files are sent to the browser.
+The four short selector labels are public synthetic catalogue metadata. Invalid, repeated or
+unknown selections are refused; they never silently fall back to another institution. Both the
+startup pack and selected pack retain digest, identity and row-tenant validation. This query
+parameter is never consulted by the core, authentication, placement or qualification adapters.
 
 The fixed example date and calendar zone remain visible. Enrolment, contact, placement and
 assignment state uses its own half-open interval. Applicants stay outside student results.
@@ -61,7 +71,7 @@ All four settings become inspectable through one consistent, audience-specific a
 ### Negative
 
 The demo cannot prove production persistence, record policies or operational workflow fitness.
-Changing institution requires a new process and prepared instance.
+The selector is for fictional walkthroughs only; it provides no production tenant switching.
 
 ## Security, privacy, operability, and migration effects
 
@@ -74,9 +84,11 @@ is invented. Relevant threats are TM-01, TM-02, TM-04, TM-09, TM-16, TM-17 and T
 ## Validation evidence
 
 Required: all four startup selections; missing/invalid context, wrong tenant/hash/Host denial;
-no request-selected institution; applicant exclusion; dates and joins; duplicate-name/shared-email
+only allowlisted demo selection, with no request-selected tenant/path; same-tab switching,
+navigation retention, refresh/back and institution-state reset; applicant exclusion; dates and joins; duplicate-name/shared-email
 identity handling; calendar scopes; mobile reflow, keyboard, accessibility and screenshots;
-specialist review; and the full `make check`. Actual results belong in
+specialist review; and the applicable repository checks. The Project Owner explicitly excluded
+rerunning `make check` during this follow-up, so targeted results cannot establish repository-wide green status. Actual results belong in
 [demo-data documentation](../../demo-data/README.md); planned checks are not executed evidence.
 
 ## Fallback and exit cost
@@ -86,7 +98,7 @@ qualification remain independently runnable. No database rollback or data migrat
 
 ## Review triggers
 
-Any write, real record, deployed origin, runtime institution switching, production import,
+Any write, real record, deployed origin, selection outside the four fictional packs, production import,
 guardian authority, or claim of operational readiness requires its applicable later decision.
 
 ## Related records

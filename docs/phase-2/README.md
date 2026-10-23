@@ -15,14 +15,29 @@
 
 ## Current boundary
 
-On 2026-10-09 the Project Owner instructed the project to start COMM-0. Proposed
+On 2026-10-09 the Project Owner instructed the project to start COMM-0.
 [ADR 0045](../adr/0045-governed-communications-audiences-and-engagement.md) and the
 [five synthetic experience walkthroughs](communications-comm-0-experience-evidence.md) now record
 the paper-only communication boundary: immutable publication revisions, frozen audience manifests,
 optional interaction, distinct delivery/view/acknowledgement evidence, and aggregate-first metrics.
 COMM-0 adds no module declaration, resource, migration, route, client screen, job, consumer,
 delivery adapter, real identity or real data. It runs alongside and does not displace the active
-classroom-first implementation order. COMM-1 remains unauthorized.
+classroom-first implementation order. That paper slice did not authorize COMM-1.
+
+On 2026-10-23 the four delegated specialists completed the
+[COMM-0 paper decision review](communications-comm-0-experience-evidence.md#delegated-paper-review--23-october-2026).
+The included staff-proof choices are resolved, including corrections, exact-version receipts,
+independent approval, Restricted custody and aggregate-only evidence. The
+[bounded COMM-1 proposal](../plans/communications-comm-1-staff-announcement-proposal.md) defines
+source-fence qualification as its first checkpoint. François subsequently accepted ADR 0045 and
+authorized exactly that proof on 2026-10-23, requiring agent review of the checkpoint before
+proceeding and deferring `make check`. No wider slice, Restricted consumer or release is authorized.
+The [first source-fence checkpoint](communications-comm-1-source-fence-qualification.md) rejected
+the initial account-absence protection. François subsequently authorized the scoped prerequisite;
+[ADR 0047](../adr/0047-private-identity-account-source-fence.md) and its
+[focused evidence and four-agent review](identity-account-source-fence-evidence.md) now qualify
+that account fence locally. Remaining audience source qualification may resume; complete audience
+qualification and publication implementation remain gated. `make check` remains deferred.
 
 CF-4A adds the private synthetic [people and participation foundation](people-foundation-evidence.md):
 student/staff participation and verified staff-account association without implied permissions.

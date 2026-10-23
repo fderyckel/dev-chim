@@ -21,6 +21,22 @@
     gap: var(--space-4);
   }
 
+  .c-demo-institution-choice {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: var(--space-2);
+    min-width: 0;
+  }
+
+  .c-demo-institution-choice label {
+    display: grid;
+    gap: var(--space-1);
+    min-width: 0;
+    font-size: var(--font-size-sm);
+  }
+
+  .c-demo-institution-choice select,
   .c-demo-filters input,
   .c-demo-filters select {
     width: 100%;
@@ -119,6 +135,15 @@
   }
 
   @media (width <= 44rem) {
+    .c-demo-institution-choice {
+      width: 100%;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .c-demo-institution-choice .c-button {
+      justify-self: start;
+    }
+
     .c-demo-record summary {
       align-items: flex-start;
       flex-wrap: wrap;
