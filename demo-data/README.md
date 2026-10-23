@@ -39,15 +39,28 @@ print the directory and pass it to the process as `CHIMWEMWE_DEMO_DATA_DIRECTORY
 invoking an older underlying launcher bypasses preparation; use the stable Make commands or
 `bin/with-demo-data command ...`.
 
-**Prepared means the files are available to the local instance. The existing screens and database
-fixtures do not consume these packs yet.** Future consumers must map the supported subset through
-named actions and retain tenant, calendar, permission and module gates. Preparation grants no
-guardian, admissions, course-registration, boarding or production feature authority.
+**`make demo` loads the chosen institution into the browser app.** The startup menu offers the
+four institutions; `make demo DEMO=england-independent` bypasses the menu. Open
+`http://127.0.0.1:3000` for Overview, Students, Families & guardians (college Contacts), Educators
+(college Instructors), and Calendar. `DEMO_PORT=3035` selects a different local port. Stop with
+Control-C and restart to choose another institution; each run gets a fresh retained instance.
 
-`make demo` writes only the allowlisted selected pack and tenant identifiers into the fresh
-instance manifest before starting the loopback UI shell. Selection is process-owned, not request
-input. Until the proposed ADR 0046 browser projection is implemented, the existing screens remain
-their current fixtures and do not claim to display the selected pack.
+The app server reads the selected prepared pack, verifies its code-owned digest and tenant,
+and projects only that institution's records. Startup pins the selected pack ID in the process
+environment and tenant in the instance manifest. A URL cannot switch them. Invalid mode, Host,
+selection, tenant, digest or missing file produces `Demo unavailable`; no other pack is substituted.
+
+Search people by name or visible reference (for example `S003`), filter school year levels and
+page through all records. Expand a student for dated enrolment, daily register, subject/course
+groups and actual contact links. Expand a contact for its explicit linked learners, or an educator
+for dated register and subject responsibilities. Calendar shows teaching periods, student closures
+and scoped events separately. Reference dates and time zone stay visible; these are fixed examples.
+
+This is an actual fixture-backed browser demo, with no database import or operational write.
+The earlier `make web-dev`, bridge, authentication, legal and classroom-writer qualification
+commands retain their existing fixtures. Future operational consumers must use named actions
+and applicable tenant, permission and module gates. No production guardian, admissions,
+course-registration, boarding, messaging or account feature is authorized by viewing the fixtures.
 
 For a deliberately named, new destination:
 

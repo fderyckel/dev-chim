@@ -84,10 +84,10 @@ and [Phase 1 handover](docs/phase-1/handover-evidence.md). Current work follows 
 
 Four [fictional institution demo packs](demo-data/README.md) cover a Bangkok international
 school, US community college, Hong Kong kindergarten and English independent school.
-`make demo-data` prepares all four in a fresh local directory; `make demo` selects one pack in an
-isolated instance manifest and starts the local UI shell. The standard local demo launch commands
-also prepare the catalogue automatically. These are available fixture files; existing screens and
-database fixtures do not import the catalogue yet.
+`make demo` lets you choose an institution and opens its students, family contacts, educators
+and calendar in the local browser app. Use `make demo DEMO=bangkok-international` for direct
+selection. `make demo-data` prepares files only; existing core-backed qualification demos
+remain separate from this read-only institution viewer.
 
 ```sh
 make bootstrap

@@ -10,6 +10,7 @@ const names: Record<string, string> = {
 
 test("selected institution loads its people, relationships and calendar", async ({
   page,
+  request,
 }, info) => {
   const college = info.project.name === "us-community-college";
   await page.goto("/");
@@ -77,6 +78,10 @@ test("selected institution loads its people, relationships and calendar", async 
   await expect(page.getByText("Events do not change teaching days.")).toBeVisible();
   await page.goto("/demo/students?institution=other&tenant_id=other");
   await expect(page.getByText(names[info.project.name], { exact: true })).toBeVisible();
+  const denied = await request.get("/demo", { headers: { Host: "school.example" } });
+  const deniedBody = await denied.text();
+  expect(deniedBody).toContain("Demo unavailable");
+  expect(deniedBody).not.toContain(names[info.project.name]);
 });
 
 test("demo navigation, keyboard and reflow stay accessible across screen sizes", async ({

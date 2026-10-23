@@ -88,12 +88,17 @@ the management-reporting parent is not a statutory or accounting-framework conso
 conclusion. The demo adds no browser route, educational structure, primary-operator workflow,
 production identity, or real record. The command is non-destructive.
 
-## Troubleshooting
+## Selected institution demo
 
-The four [fictional institution packs](../../demo-data/README.md) are included in the checkout.
-`make demo-data` prepares a fresh copy of every pack. The standard local demo Make commands do
-the same before startup and print the directory; they preserve existing instance copies. This
-prepares files only and does not populate the current database or screens.
+Run `make demo` and choose an institution, or `make demo DEMO=bangkok-international`. Open
+`http://127.0.0.1:3000` for its students, family contacts, educators and academic calendar.
+The other pack IDs are `us-community-college`, `hong-kong-kindergarten` and `england-independent`.
+Use `DEMO_PORT=3035` for another local port. Stop with Control-C and restart to change institution.
+Each run retains a fresh instance directory, consumes only its selected fictional pack and
+offers read-only views. Details and remaining operational boundaries are in the
+[demo-data guide](../../demo-data/README.md).
+
+## Troubleshooting
 
 - Run `mise doctor` when a pinned runtime is not selected.
 - Run `brew bundle check` to identify missing macOS dependencies.
