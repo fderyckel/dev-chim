@@ -28,7 +28,9 @@
     ".next-check/types/**/*.ts",
     ".next-check/dev/types/**/*.ts",
     ".next-classroom/types/**/*.ts",
-    ".next-classroom/dev/types/**/*.ts"
+    ".next-classroom/dev/types/**/*.ts",
+    ".next-demo/types/**/*.ts",
+    ".next-demo/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules", "playwright-report", "test-results"]
 }

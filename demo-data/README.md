@@ -25,6 +25,8 @@ not unique guardians or qualified recipients. Applicant-only people are never en
 ```sh
 make demo-data
 make demo-data-check
+make demo                         # interactive selection
+make demo DEMO=england-independent
 ```
 
 The first command validates the shipped catalogue and creates a fresh directory under
@@ -41,6 +43,11 @@ invoking an older underlying launcher bypasses preparation; use the stable Make 
 fixtures do not consume these packs yet.** Future consumers must map the supported subset through
 named actions and retain tenant, calendar, permission and module gates. Preparation grants no
 guardian, admissions, course-registration, boarding or production feature authority.
+
+`make demo` writes only the allowlisted selected pack and tenant identifiers into the fresh
+instance manifest before starting the loopback UI shell. Selection is process-owned, not request
+input. Until the proposed ADR 0046 browser projection is implemented, the existing screens remain
+their current fixtures and do not claim to display the selected pack.
 
 For a deliberately named, new destination:
 

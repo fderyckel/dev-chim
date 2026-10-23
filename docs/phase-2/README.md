@@ -15,6 +15,15 @@
 
 ## Current boundary
 
+On 2026-10-09 the Project Owner instructed the project to start COMM-0. Proposed
+[ADR 0045](../adr/0045-governed-communications-audiences-and-engagement.md) and the
+[five synthetic experience walkthroughs](communications-comm-0-experience-evidence.md) now record
+the paper-only communication boundary: immutable publication revisions, frozen audience manifests,
+optional interaction, distinct delivery/view/acknowledgement evidence, and aggregate-first metrics.
+COMM-0 adds no module declaration, resource, migration, route, client screen, job, consumer,
+delivery adapter, real identity or real data. It runs alongside and does not displace the active
+classroom-first implementation order. COMM-1 remains unauthorized.
+
 CF-4A adds the private synthetic [people and participation foundation](people-foundation-evidence.md):
 student/staff participation and verified staff-account association without implied permissions.
 CF-4B adds the private synthetic [classroom setup foundation](classroom-foundation-evidence.md):
@@ -199,6 +208,8 @@ test, owner role, or later slice does not satisfy one of those later gates.
 
 ## Navigation
 
+- [COMM-0 governed communications experience evidence](communications-comm-0-experience-evidence.md)
+- [ADR 0045: governed communications, audiences, and engagement evidence](../adr/0045-governed-communications-audiences-and-engagement.md)
 - [Entry decision register](entry-decision-register.md)
 - [Institutional-structure decision evidence plan](institutional-structure-decision-evidence.md)
 - [Institutional-structure scenario and vocabulary review](institutional-structure-scenario-review.md)

@@ -13,6 +13,8 @@ Documentation is part of the platform contract and changes with the code or deci
   - [Production-core migration discipline](development/migrations.md)
   - [Code conventions](development/code-conventions.md)
   - [Git and push conventions](development/git-workflow.md)
+  - [Delegated specialist review team](development/specialist-review-team.md): primary, secondary,
+    school/college admissions, and concise audience-specific UI reviews.
 - [Phase 0 archive](phase-0/README.md): what was decided, how it was tested, why it mattered,
   and the consolidated handover evidence.
 - [Phase 1 archive](phase-1/README.md): what was implemented, how it was verified, why it
@@ -23,6 +25,8 @@ Documentation is part of the platform contract and changes with the code or deci
 - [Operations](operations/README.md): bounded dispatch, replay, drain, temporal retention, and
   recovery runbooks.
 - Plans: the accepted [Phase 2 entry sequence and revised institutional-structure proposal](plans/phase-2-entry-and-school-structure-proposal.md), the proposed [local browser experience foundation](plans/local-browser-experience-foundation-proposal.md), and the proposed [GitHub Actions CI-readiness path](plans/github-actions-ci-readiness-proposal.md).
+- [Specialist review next steps](plans/specialist-review-next-steps.md): current authentication and
+  COMM-0 decisions, delegated paper trials, owners, and retained gates.
 
 ## Documentation conventions
 

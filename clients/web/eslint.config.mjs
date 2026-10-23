@@ -9,6 +9,7 @@ export default defineConfig([
     ".next/**",
     ".next-check/**",
     ".next-classroom/**",
+    ".next-demo/**",
     "playwright-report/**",
     "test-results/**",
     "vendor/**",

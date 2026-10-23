@@ -39,6 +39,15 @@ Read `README.md`, `docs/phase-0/README.md`, `docs/phase-1/README.md`, `docs/arch
 - Treat partitioning as evidence-driven and review its effect on compound uniqueness, foreign keys, migration locks, retention, and stable identifiers.
 - Do not introduce Kafka, Kubernetes, Valkey, a dedicated search engine, a vector database, GraphQL, or another service without the evidence and ADR required by `docs/architecture/deferred-choices.md`.
 
+## Delegated specialist reviews
+
+- Use the four reusable profiles in `docs/development/specialist-review-team.md` for material education, admissions, audience-language, and UI decisions. François authorized this AI review team on 2026-10-23.
+- Delegate a bounded, read-only review to the relevant profiles; use both education profiles for shared classroom or student-communication decisions, and the UI profile for material interface decisions. Do not launch the full team for mechanical changes.
+- Specialists may approve choices within an already authorized slice, attach conditions, or challenge a proposal. Record their reasons and evidence; unresolved material challenges return to François with a concrete recommendation.
+- AI approval is delegated design review. It cannot fabricate representative testimony, satisfy required independent security/privacy or safeguarding review, name real-world owners, authorize a new slice such as COMM-1, or grant connected, real-data, pilot, or production release.
+- Keep the UI concise and audience-specific. Use optional question-mark help for secondary detail, accessible by focus and touch as well as hover. Keep necessary labels, action consequences, errors, and saved/blocked states visible.
+- Follow `docs/plans/specialist-review-next-steps.md` for the initial authentication and COMM-0 assignments; existing ADR and release gates retain precedence.
+
 ## Required verification
 
 Run `make check` before declaring work complete. Report the exact checks run and any skipped check. Never claim the repository is green when a required command failed or was not run.

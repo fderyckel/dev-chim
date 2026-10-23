@@ -149,7 +149,10 @@ export function AcademicCalendarPreparation({
   const [draft, setDraft] = useState(viewData.calendar);
   const [preview, setPreview] = useState(() => initialPreview(viewData.calendar));
   const [resolutionDate, setResolutionDate] = useState(viewData.initialResolutionDate);
-  const [resolutionError, setResolutionError] = useState<string | null>(null);
+  const [resolutionError, setResolutionError] = useState<{
+    message: string;
+    invalidDate: boolean;
+  } | null>(null);
   const [errors, setErrors] = useState<ReadonlyArray<string>>([]);
   const [dirty, setDirty] = useState(false);
   const [announcement, setAnnouncement] = useState(
@@ -465,20 +468,29 @@ export function AcademicCalendarPreparation({
           connectedFailure(status, code);
           return;
         }
-        setResolutionError(
-          code === "not_found" || code === "outside_year"
-            ? "Choose a date within this academic year."
-            : code === "invalid_input"
-              ? "Enter a valid date."
-              : "Date could not be checked. Try again.",
-        );
+        setResolutionError({
+          message:
+            code === "not_found" || code === "outside_year"
+              ? "Choose a date within this academic year."
+              : code === "invalid_input"
+                ? "Enter a valid date."
+                : "Date could not be checked. Try again.",
+          invalidDate:
+            status === 400 &&
+            (code === "not_found" ||
+              code === "outside_year" ||
+              code === "invalid_input"),
+        });
         setAnnouncement("Date not checked.");
         return;
       }
       setWriterResolution(response.data.data);
       setAnnouncement("Date resolved from the published calendar in the database.");
     } catch {
-      setResolutionError("Date could not be checked. Try again.");
+      setResolutionError({
+        message: "Date could not be checked. Try again.",
+        invalidDate: false,
+      });
       setAnnouncement("Date not checked.");
     }
   }
@@ -506,7 +518,7 @@ export function AcademicCalendarPreparation({
           className="c-input"
           id="resolution-date"
           type="date"
-          aria-invalid={Boolean(resolutionError)}
+          aria-invalid={resolutionError?.invalidDate ?? false}
           aria-describedby={resolutionError ? "resolution-date-error" : undefined}
           value={resolutionDate}
           onChange={(event) => {
@@ -515,12 +527,12 @@ export function AcademicCalendarPreparation({
             setWriterResolution(null);
           }}
         />
-        {resolutionError ? (
-          <span className="c-field__error" id="resolution-date-error" role="alert">
-            {resolutionError}
-          </span>
-        ) : null}
       </label>
+      {resolutionError ? (
+        <span className="c-field__error" id="resolution-date-error" role="alert">
+          {resolutionError.message}
+        </span>
+      ) : null}
       {connected && writerView?.status === "published" ? (
         <ActionButton
           disabled={busy}

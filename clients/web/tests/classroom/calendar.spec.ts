@@ -43,7 +43,9 @@ test("calendar owner saves, reloads, publishes and resolves one server-selected 
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.getByRole("tab", { name: "Form" }).click();
   await expect(page.getByLabel("Academic year label")).toHaveValue("Synthetic year");
-  await page.getByLabel("Year starts").fill("2027-11-01");
+  const afterYear = new Date(`${loadedDefinition.end_on}T12:00:00Z`);
+  afterYear.setUTCDate(afterYear.getUTCDate() + 1);
+  await page.getByLabel("Year starts").fill(afterYear.toISOString().slice(0, 10));
   await page.getByRole("button", { name: "Save draft" }).click();
   await expect(page.locator(".c-calendar-errors")).toContainText(
     "The academic year must end on or after its start date.",
@@ -127,6 +129,7 @@ test("calendar owner saves, reloads, publishes and resolves one server-selected 
   );
   await expect(status).toHaveText("Date not checked.");
   await expect(localDate).toHaveAttribute("aria-invalid", "true");
+  await expect(localDate).toHaveAccessibleName("Local calendar date");
   await expect(localDate).toHaveAccessibleDescription(
     "Choose a date within this academic year.",
   );
@@ -156,6 +159,7 @@ test("calendar owner saves, reloads, publishes and resolves one server-selected 
   await expect(localDate).toHaveAccessibleDescription(
     "Date could not be checked. Try again.",
   );
+  await expect(localDate).toHaveAttribute("aria-invalid", "false");
   await expect(resolve).toBeEnabled();
   await page.unroute("**/api/v1/calendar/resolve");
   await resolve.press("Enter");

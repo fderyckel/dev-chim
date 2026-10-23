@@ -13,5 +13,11 @@
 
 Classification travels with records, events, jobs, files, projections, exports, telemetry, and AI tools. A derivative cannot silently receive a lower classification than its source. Unknown data defaults to Restricted until classified by an accountable owner.
 
-Production data is never copied to development or generic AI evaluation. Phase 0 uses synthetic records only.
+Communication content receives an accountable classification. Audience definitions, resolved
+recipient manifests, delivery attempts, comments, reactions, moderation facts, view receipts,
+acknowledgements, notifications, search documents, exports, and telemetry inherit the highest
+applicable content, audience, relationship, and source classification. Learner-targeted manifests
+and named learner engagement evidence default to Restricted even when the message text itself has a
+lower classification. Aggregation does not declassify evidence automatically.
 
+Production data is never copied to development or generic AI evaluation. Phase 0 uses synthetic records only.

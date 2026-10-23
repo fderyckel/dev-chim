@@ -13,6 +13,9 @@
   affiliation, site, ownership/control, consolidation, and structure history;
 - child, safeguarding, education, employment, and operational records;
 - uploaded files, derivatives, reports, exports, evidence, and audit history;
+- communication drafts and publication revisions, audience definitions and manifests, delivery
+  endpoints and attempts, view and acknowledgement receipts, comments, reactions, moderation
+  evidence, reminders, and engagement metrics;
 - resource descriptors, view and report definitions, and tenant-owned experience metadata;
 - outbox events, jobs, projections, search documents, caches, and telemetry; and
 - AI prompts, retrieved context, tool inputs/results, and provider traces.
@@ -34,6 +37,9 @@ See [data classification](data-classification.md).
 11. Tenant-owned corporate/legal and educational structures to explicit authorization scopes,
     reporting and finance datasets, workflow/configuration adoption, sites, and downstream domain
     references.
+12. Authoritative communication publications and frozen audience manifests to in-product delivery,
+    notifications, email, SMS, realtime, search, translation, attachments, provider callbacks,
+    recipient engagement evidence, moderation, and analytics.
 
 Every boundary authenticates the caller or service, propagates tenant and correlation context, minimizes data, and records safe evidence. No projection, cache, solver, renderer, provider, or interface grants authority independently.
 
@@ -61,6 +67,8 @@ Every boundary authenticates the caller or service, propagates tenant and correl
 | TM-18 | Legal hold is bypassed, erasure leaves an unauthorized copy, import invents history, or restore resurrects redacted content | Critical | Separate retention/hold/erasure capabilities; receipt-backed one-way redaction; immutable source-digest provenance; disposable projections; retained rollback refusal; post-restore erasure replay and convergence before reopening | [Slice 2.0-C action, alternate-write, rollback, dump/restore, and projection-convergence evidence](../phase-2/temporal-completion-and-recovery-evidence.md); real propagation adapters, domain policy, backup expiry, and selected-environment recovery remain open | Platform engineering, operations, records ownership, and security/privacy review |
 | TM-19 | A forged, replayed, fixed, expired, cross-tenant, or leaked callback/session/CSRF value establishes or continues authority | Critical | Qualified provider-neutral callback; short-lived encrypted state with S256 PKCE and nonce; encrypted host-only cookie; exact origin and session-bound CSRF; startup-owned placement; current writer connection/link/session/membership/grant validation; rotation, logout, revocation, redaction, and stable errors | Accepted [ADR 0030](../adr/0030-same-origin-public-session-and-named-action-boundary.md), proposed [ADR 0042](../adr/0042-selected-oidc-educator-sign-in-candidate.md), [D.3 implementation evidence](../phase-2/identity-session-and-support-access-implementation-evidence.md), and the [selected OIDC candidate evidence](../phase-2/selected-oidc-educator-sign-in-evidence.md) prove the bounded callback/session controls and a locally signed OIDC protocol harness; actual provider, edge/TLS, rate, key rotation, recovery, credential, privacy and deployment qualification remain open | Security architecture with platform and web engineering |
 | TM-20 | A guessed, disclosed, replayed, stale, misdelivered, or administrator-abused local credential establishes a session or prevents legitimate access | Critical | Administrator-provisioned existing staff only; random hash-only 24-hour temporary credential; restricted lock-version-bound first-login state; length/blocklist policy; generic denial; lockout; named reissue/suspend; token revocation; no public registration/reset | Accepted [ADR 0044](../adr/0044-administrator-provisioned-local-credentials.md) and [local candidate evidence](../phase-2/local-credential-administration-evidence.md) cover the database-backed loopback lifecycle; real staff association/capability, administrator MFA, public-edge rate control, protected delivery, recovery and independent review remain production gates | Security architecture with platform, product and operations |
+| TM-21 | A forged, over-broad, stale, ambiguous, or duplicated communication audience discloses content to an unauthorized recipient, omits an intended recipient, or creates contradictory delivery and acknowledgement evidence | Critical | Code-owned target kinds; authoritative writer-side resolution; exact publishing scope; frozen classified audience manifest with source-version evidence and deduplication; broad/urgent preview and approval; stale-preparation refusal; current access re-authorization; idempotent bounded fan-out and reconciliation | Proposed [ADR 0045](../adr/0045-governed-communications-audiences-and-engagement.md) and the [COMM-0 walkthroughs](../phase-2/communications-comm-0-experience-evidence.md) define the contract and negative scenarios only; executable manifest, race, overlap, fan-out, provider, movement, recovery, and mixed-load proof remain required before implementation or release | Product experience, platform engineering, and security/privacy ownership |
+| TM-22 | Communication receipts, named non-viewer evidence, audience reasons, comments, reactions, reminders, search, or analytics expose a sensitive directory, enable surveillance or pressure, misstate engagement, or create learner safeguarding harm | Critical | Distinct intended/reachable/delivered/seen/acknowledged semantics; transparent receipt collection; aggregate-first metrics; separate purpose-bound recipient-metric capability; one-manifest bounded reads; no generic export or engagement ranking; student comments closed by default; attributable interaction, moderator coverage, reporting, escalation, retention, and cache/search removal | Proposed [ADR 0045](../adr/0045-governed-communications-audiences-and-engagement.md), [COMM-0 walkthroughs](../phase-2/communications-comm-0-experience-evidence.md), and AC-21 identify controls; representative safeguarding/privacy review and executable enumeration, prefetch, multi-device, moderation, reminder, retention, and removal proof remain open | Safeguarding and security/privacy ownership with product and platform engineering |
 
 ## Assumptions and scope limits
 
@@ -72,6 +80,10 @@ Every boundary authenticates the caller or service, propagates tenant and correl
 - The administrator-provisioned local credential path is implemented only in a loopback harness
   with prepared synthetic staff records. It is not a real staff association, tenant authorization,
   protected delivery, recovery ceremony, public edge, or production account service.
+- COMM-0 is paper evidence only. There is no communications module, audience resolver, recipient
+  manifest, Restricted delivery consumer, notification provider, comment system, engagement
+  dataset, or production communication operating model. Year-level, dedicated student-group,
+  student-account/endpoint, and guardian/family audience contracts remain unresolved or absent.
 - Application policy is the accepted authorization layer. RLS remains an evidence-driven backstop decision.
 - The five-school topology and attendance calculations are planning hypotheses, not accepted production sizing or placement evidence.
 - The placement registry and module lifecycle are Phase 0 contracts only; production implementations are outside this phase.
@@ -99,6 +111,8 @@ François accepts the bounded Phase 0 residual risk as interim Security/Privacy 
 - [ADR 0017](../adr/0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md)
 - [ADR 0019](../adr/0019-domain-model-authoring-and-governed-metadata.md)
 - [ADR 0025](../adr/0025-learning-institution-operating-system-and-institutional-structure.md)
+- [ADR 0045](../adr/0045-governed-communications-audiences-and-engagement.md)
+- [COMM-0 governed communications experience evidence](../phase-2/communications-comm-0-experience-evidence.md)
 - [Institutional-structure decision evidence plan](../phase-2/institutional-structure-decision-evidence.md)
 - [Tenant placement and workload capacity](../architecture/tenant-placement-and-capacity.md)
 - [PostgreSQL availability, recovery, and read routing](../architecture/postgresql-availability-recovery-and-read-routing.md)

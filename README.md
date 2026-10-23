@@ -61,6 +61,13 @@ registers, enrolment, teaching assignments and dated placements, tested against 
 an assigned synthetic educator to today’s register and an atomic attendance submission. Routine
 preparation screens, actual provider sign-in and production release remain separate work.
 
+The Project Owner's 2026-10-09 instruction starts
+[COMM-0](docs/phase-2/communications-comm-0-experience-evidence.md) as a parallel paper-only
+communications track. Proposed [ADR 0045](docs/adr/0045-governed-communications-audiences-and-engagement.md)
+defines revisioned announcements, frozen audience manifests, optional interaction, and
+aggregate-first engagement evidence. COMM-0 adds no module, data model, route, delivery adapter,
+real data, or implementation authority and does not replace the classroom-first priority.
+
 1. Read [the Phase 0 outcome](docs/phase-0/README.md) and its binding later gates.
 2. Read [the Phase 1 core scope](docs/phase-1/README.md).
 3. Read [the Phase 2 entry status](docs/phase-2/README.md) before proposing a learning-institution
@@ -75,6 +82,13 @@ and [Phase 1 handover](docs/phase-1/handover-evidence.md). Current work follows 
 
 ## Stable commands
 
+Four [fictional institution demo packs](demo-data/README.md) cover a Bangkok international
+school, US community college, Hong Kong kindergarten and English independent school.
+`make demo-data` prepares all four in a fresh local directory; `make demo` selects one pack in an
+isolated instance manifest and starts the local UI shell. The standard local demo launch commands
+also prepare the catalogue automatically. These are available fixture files; existing screens and
+database fixtures do not import the catalogue yet.
+
 ```sh
 make bootstrap
 make fix
@@ -85,6 +99,7 @@ make check-staged
 make test-fast
 make test
 make docs-check
+make demo
 make auth-demo
 make legal-demo
 make web-dev
@@ -117,7 +132,8 @@ and a server-owned ephemeral session. It is read-only and is not production auth
 
 - Phoenix/PostgreSQL and the modular-monolith shape are the firm base.
 - Ash is conditionally accepted as the default production-core framework; every retained exception has a production gate, verification method, and fallback.
-- The production core and Foundation Lab use the reviewed Ash 3.33.11 security-patch baseline.
+- The production core uses the reviewed Ash 3.34.6 security-patch baseline. The archived Foundation
+  Lab retains its historical Ash 3.33.11 exit baseline and is outside routine Phase 2 verification.
 - The accepted authoring model keeps Ash resources, actions, policies, and migrations authoritative while derived metadata may configure views and reports; it does not add a second runtime ORM.
 - Roles and access scopes are tenant-defined data, never a fixed list of institutional job titles.
 - Conditionally Accepted ADRs 0025 and 0031 separate tenant-owned legal entities and corporate units from educational

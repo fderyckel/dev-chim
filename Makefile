@@ -1,8 +1,9 @@
 .DEFAULT_GOAL := help
 
-.PHONY: demo-data demo-data-build demo-data-check
+export DEMO DEMO_PORT
+.PHONY: demo demo-data demo-data-build demo-data-check
 
-.PHONY: help bootstrap fix format lint check-changed check-staged test-fast test docs-check check-docs check-archive-phase0 check-repository-tools check-core check-web check-tooling check-clean auth-demo legal-demo classroom-demo web-dev web-core-dev web-check web-e2e web-core-e2e web-classroom-e2e check
+.PHONY: help bootstrap fix format lint check-changed check-staged test-fast test docs-check check-docs check-archive-phase0 check-repository-tools check-core check-web check-tooling check-clean auth-demo legal-demo classroom-demo web-dev web-core-dev web-check web-e2e web-core-e2e web-classroom-e2e web-demo-e2e check
 
 help:
 	@echo "bootstrap  Install and prepare local workspace dependencies"
@@ -20,6 +21,7 @@ help:
 	@echo "legal-demo Seed the local synthetic Phase 2.1-C2a legal-structure demonstration"
 	@echo "classroom-demo Start the synthetic HTTPS attendance and calendar workflows"
 	@echo "demo-data  Prepare all four fictional institution packs in a fresh local directory"
+	@echo "demo       Choose and launch an institution (or DEMO=<pack>)"
 	@echo "web-dev    Start the local synthetic UI-0 browser workspace"
 	@echo "web-core-dev Start the local read-only UI-1A core connection"
 	@echo "web-check  Verify UI-0 formatting, styles, types, tests, and build"
@@ -40,7 +42,7 @@ format:
 	cd clients/web && mise exec -- npm exec -- prettier --write .
 
 lint:
-	shellcheck bin/with-demo-data
+	shellcheck bin/with-demo-data bin/demo-instance
 	mise exec -- uv run ruff format --check tools tests/tools
 	mise exec -- uv run ruff check tools tests/tools
 	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/classroom-demo bin/bootstrap bin/check-changed bin/core-check bin/format-staged-elixir bin/organization-legal-demo bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
@@ -95,10 +97,10 @@ check-core:
 	./bin/with-verification-lock --resource core-test -- ./bin/core-check
 
 check-web:
-	./bin/with-verification-lock --resource web-qualification -- $(MAKE) web-e2e web-core-e2e web-classroom-e2e
+	./bin/with-verification-lock --resource web-qualification -- $(MAKE) web-e2e web-core-e2e web-classroom-e2e web-demo-e2e
 
 check-tooling:
-	shellcheck bin/with-demo-data
+	shellcheck bin/with-demo-data bin/demo-instance
 	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/classroom-demo bin/bootstrap bin/check-changed bin/core-check bin/format-staged-elixir bin/organization-legal-demo bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
 	$(MAKE) -n check-changed check-staged
 
@@ -117,12 +119,16 @@ classroom-demo:
 demo-data:
 	mise exec -- uv run python tools/demo_data.py prepare --environment local-synthetic
 
+demo:
+	./bin/demo-instance
+
 demo-data-build:
 	mise exec -- uv run python tools/demo_data.py build
 
 demo-data-check:
 	mise exec -- uv run python tools/demo_data.py check
 	mise exec -- uv run pytest tests/tools/test_demo_data.py
+	mise exec -- uv run pytest tests/tools/test_demo_instance.py
 
 web-dev:
 	cd clients/web && ../../bin/with-demo-data env CHIMWEMWE_UI0_SYNTHETIC=true mise exec -- npm run dev
@@ -145,6 +151,9 @@ web-core-e2e: web-check
 
 web-classroom-e2e: web-check
 	cd clients/web && mise exec -- npm exec playwright -- test --config playwright.classroom.config.ts
+
+web-demo-e2e: web-check
+	cd clients/web && mise exec -- npm run test:e2e:demo
 
 check:
 	$(MAKE) check-docs
