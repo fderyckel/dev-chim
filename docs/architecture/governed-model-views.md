@@ -100,6 +100,10 @@ authorize class enumeration.
 
 ## Expansion sequence
 
+The [calendar view proposal](../plans/calendar-view-proposal.md) describes the proposed next local
+presentation increment, including Month/Agenda and the later timed-calendar and timeline sequence.
+It grants no implementation or release authority.
+
 1. Qualify MV-1 locally with Academic Calendar and the neutral second contract.
 2. Review whether a second real workflow removes enough duplication to retain the abstraction.
 3. If authorized, design a server-owned compatible definition adapter over the governed resource
