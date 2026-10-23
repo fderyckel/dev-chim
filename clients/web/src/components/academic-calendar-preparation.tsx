@@ -149,6 +149,7 @@ export function AcademicCalendarPreparation({
   const [draft, setDraft] = useState(viewData.calendar);
   const [preview, setPreview] = useState(() => initialPreview(viewData.calendar));
   const [resolutionDate, setResolutionDate] = useState(viewData.initialResolutionDate);
+  const [resolutionError, setResolutionError] = useState<string | null>(null);
   const [errors, setErrors] = useState<ReadonlyArray<string>>([]);
   const [dirty, setDirty] = useState(false);
   const [announcement, setAnnouncement] = useState(
@@ -208,6 +209,7 @@ export function AcademicCalendarPreparation({
         ? nextDraft.startOn
         : current,
     );
+    setResolutionError(null);
     setErrors([]);
     setDirty(false);
     setMustReload(false);
@@ -221,6 +223,7 @@ export function AcademicCalendarPreparation({
     setCsrf(null);
     setWriterView(null);
     setWriterResolution(null);
+    setResolutionError(null);
     setMustReload(false);
     setAnnouncement(message);
   }
@@ -446,18 +449,38 @@ export function AcademicCalendarPreparation({
 
   async function resolveWriterDate() {
     if (!csrf || writerView?.status !== "published") return;
-    const response = await client.POST("/api/v1/calendar/resolve", {
-      body: { local_date: resolutionDate },
-      params: {
-        header: { Origin: window.location.origin, "X-CSRF-Token": csrf },
-      },
-    });
-    if (!response.data) {
-      connectedFailure(response.response.status, response.error?.errors[0]?.code);
-      return;
+    setResolutionError(null);
+    setWriterResolution(null);
+    try {
+      const response = await client.POST("/api/v1/calendar/resolve", {
+        body: { local_date: resolutionDate },
+        params: {
+          header: { Origin: window.location.origin, "X-CSRF-Token": csrf },
+        },
+      });
+      if (!response.data) {
+        const status = response.response.status;
+        const code = response.error?.errors[0]?.code;
+        if (status === 401 || status === 403 || status === 409) {
+          connectedFailure(status, code);
+          return;
+        }
+        setResolutionError(
+          code === "not_found" || code === "outside_year"
+            ? "Choose a date within this academic year."
+            : code === "invalid_input"
+              ? "Enter a valid date."
+              : "Date could not be checked. Try again.",
+        );
+        setAnnouncement("Date not checked.");
+        return;
+      }
+      setWriterResolution(response.data.data);
+      setAnnouncement("Date resolved from the published calendar in the database.");
+    } catch {
+      setResolutionError("Date could not be checked. Try again.");
+      setAnnouncement("Date not checked.");
     }
-    setWriterResolution(response.data.data);
-    setAnnouncement("Date resolved from the published calendar in the database.");
   }
 
   const dateResolutionPanel = (
@@ -483,12 +506,20 @@ export function AcademicCalendarPreparation({
           className="c-input"
           id="resolution-date"
           type="date"
+          aria-invalid={Boolean(resolutionError)}
+          aria-describedby={resolutionError ? "resolution-date-error" : undefined}
           value={resolutionDate}
           onChange={(event) => {
             setResolutionDate(event.target.value);
+            setResolutionError(null);
             setWriterResolution(null);
           }}
         />
+        {resolutionError ? (
+          <span className="c-field__error" id="resolution-date-error" role="alert">
+            {resolutionError}
+          </span>
+        ) : null}
       </label>
       {connected && writerView?.status === "published" ? (
         <ActionButton
@@ -618,6 +649,7 @@ export function AcademicCalendarPreparation({
           selectedDate={resolutionDate}
           onSelectDate={(value) => {
             setResolutionDate(value);
+            setResolutionError(null);
             setWriterResolution(null);
           }}
           overrides={{

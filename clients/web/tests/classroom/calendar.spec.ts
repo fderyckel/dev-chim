@@ -93,11 +93,14 @@ test("calendar owner saves, reloads, publishes and resolves one server-selected 
   });
   expect(rejected.status()).toBe(400);
 
+  const localDate = page.getByLabel("Local calendar date");
+  await localDate.fill(loadedDefinition.end_on);
   const publish = page.getByRole("button", { name: "Publish academic year" });
   await publish.press("Enter");
   await expect(status).toContainText("Academic year published and read back");
   await expect(page.getByText("Published", { exact: true }).first()).toBeVisible();
   await expect(page.getByLabel("Academic year label")).toBeDisabled();
+  await expect(localDate).toHaveValue(loadedDefinition.end_on);
   const resolve = page.getByRole("button", { name: "Resolve date from database" });
   await resolve.press("Enter");
   await expect(status).toContainText("Date resolved from the published calendar");
@@ -107,4 +110,57 @@ test("calendar owner saves, reloads, publishes and resolves one server-selected 
     path: "test-results/calendar-published.png",
     fullPage: true,
   });
+
+  const beforeYear = new Date(`${loadedDefinition.start_on}T12:00:00Z`);
+  beforeYear.setUTCDate(beforeYear.getUTCDate() - 1);
+  await localDate.fill(beforeYear.toISOString().slice(0, 10));
+  const invalidResolution = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/v1/calendar/resolve") &&
+      response.request().method() === "POST",
+  );
+  await resolve.press("Enter");
+  const invalidResponse = await invalidResolution;
+  expect(invalidResponse.status()).toBe(400);
+  expect(["not_found", "outside_year"]).toContain(
+    (await invalidResponse.json()).errors[0].code,
+  );
+  await expect(status).toHaveText("Date not checked.");
+  await expect(localDate).toHaveAttribute("aria-invalid", "true");
+  await expect(localDate).toHaveAccessibleDescription(
+    "Choose a date within this academic year.",
+  );
+  await expect(page.getByText("Published", { exact: true }).first()).toBeVisible();
+  await expect(page.getByLabel("Academic year label")).toBeDisabled();
+  await expect(page.locator(".c-calendar-errors")).toHaveCount(0);
+
+  for (const width of [1440, 320]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+    await page.screenshot({
+      path: `test-results/calendar-date-error-${width}.png`,
+      fullPage: true,
+    });
+  }
+
+  await localDate.fill("");
+  await resolve.press("Enter");
+  await expect(localDate).toHaveAccessibleDescription("Enter a valid date.");
+
+  await localDate.fill(loadedDefinition.start_on);
+  await expect(localDate).toHaveAttribute("aria-invalid", "false");
+  await expect(page.locator("#resolution-date-error")).toHaveCount(0);
+  await page.route("**/api/v1/calendar/resolve", (route) => route.abort());
+  await resolve.press("Enter");
+  await expect(status).toHaveText("Date not checked.");
+  await expect(localDate).toHaveAccessibleDescription(
+    "Date could not be checked. Try again.",
+  );
+  await expect(resolve).toBeEnabled();
+  await page.unroute("**/api/v1/calendar/resolve");
+  await resolve.press("Enter");
+  await expect(status).toContainText("Date resolved from the published calendar");
+  await expect(localDate).toHaveAttribute("aria-invalid", "false");
+  await expect(page.locator("#resolution-date-error")).toHaveCount(0);
+  await expect(page.getByText("Instructional", { exact: true })).toBeVisible();
 });
