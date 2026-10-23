@@ -19,7 +19,11 @@ test("calendar owner saves, reloads, publishes and resolves one server-selected 
     "aria-selected",
     "true",
   );
-  await expect(page.getByRole("button", { name: /15 Oct 2026/ })).toBeVisible();
+  const loadedPreparation = await page.request.get("/api/v1/calendar/preparation");
+  const loadedDefinition = (await loadedPreparation.json()).data.definition;
+  const selectedDate = await page.getByLabel("Local calendar date").inputValue();
+  expect(selectedDate >= loadedDefinition.start_on).toBe(true);
+  expect(selectedDate <= loadedDefinition.end_on).toBe(true);
 
   for (const width of [1440, 768, 320]) {
     await page.setViewportSize({ width, height: 900 });

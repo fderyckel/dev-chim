@@ -132,6 +132,12 @@ test("the calendar preparation screen previews changes without offering save", a
   ).toBeVisible();
   await expect(page.getByText("Not saved")).toBeVisible();
   await expect(page.getByText("Named closure", { exact: true })).toBeVisible();
+  await expect(page.getByRole("tab", { name: "Calendar" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  await expect(page.getByText("Mothers' Day", { exact: true })).toHaveCount(1);
+  await page.getByRole("tab", { name: "Form" }).click();
   await expect(page.getByText("Mothers' Day", { exact: true })).toHaveCount(2);
   await expect(page.getByRole("button", { name: /save|publish/i })).toHaveCount(0);
 

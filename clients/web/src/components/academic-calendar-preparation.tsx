@@ -203,6 +203,11 @@ export function AcademicCalendarPreparation({
     setWriterView(view);
     setDraft(nextDraft);
     setPreview(previewFromWriter(view));
+    setResolutionDate((current) =>
+      current < nextDraft.startOn || current > nextDraft.endOn
+        ? nextDraft.startOn
+        : current,
+    );
     setErrors([]);
     setDirty(false);
     setMustReload(false);

@@ -11,6 +11,7 @@ export default defineConfig([
     ".next-classroom/**",
     "playwright-report/**",
     "test-results/**",
+    "vendor/**",
     "next-env.d.ts",
   ]),
 ]);
