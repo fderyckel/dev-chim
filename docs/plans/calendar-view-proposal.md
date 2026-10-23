@@ -69,11 +69,14 @@ that all staff are off duty. Calendar visibility never creates learner or family
 ### Interaction and concise language
 
 - A date control selects a day; a separate entry control selects an event. No nested buttons.
-- The month grid uses one documented keyboard pattern with visible focus, arrow-key date movement,
-  an announced selected date, and a labelled route into the day agenda. View-tab arrows remain
-  separate from date navigation. Agenda provides equivalent access without operating the grid.
-- Details appear beside/below the calendar on wide screens and as a dismissible panel on phones.
-  Opening, closing and returning focus have explicit keyboard and touch behaviour.
+- Initially, day selection reveals the full agenda below the calendar; event detail actions live
+  there. Use ordinary semantic controls with visible focus, full date labels and concise changed
+  month/result announcements. Any ARIA grid must implement and verify its complete documented
+  keyboard pattern. View-tab arrows remain separate from date navigation. Agenda provides
+  equivalent access without operating the grid; its mode control is not a second tab interface.
+- Read-only details appear in/below that agenda with an explicit close/back action. Opening,
+  closing and returning focus have explicit keyboard and touch behaviour. Compact popovers and
+  directly interactive month chips can wait until their additional behaviour is justified.
 - Type, scope, selected state, exact dates, errors and empty states are visible in words. Colour
   is redundant. Secondary explanations may use labelled question-mark help with focus/tap/hover
   access and a dismiss path; necessary consequences stay visible.
@@ -81,6 +84,9 @@ that all staff are off duty. Calendar visibility never creates learner or family
   A later live workflow would resolve Today in its explicit calendar zone.
 - Week headings and date formatting come from a code-owned consumer locale configuration. Do not
   hard-code Monday or English into the reusable component or equate a weekend with a closure.
+- Empty filtered results offer Clear filters; outside-range navigation offers the example-date
+  action. Invalid/unavailable data offers a safe reload of the same local demo, without silently
+  substituting a record, pack or institution.
 
 ## Reusable view contract
 
@@ -187,15 +193,17 @@ calendar filters, counts and detail panels cannot widen the validated pack's con
 
 ## Specialist paper review
 
-The 2026-10-23 primary and secondary education reviewers approve the paper direction with
-conditions. The coordinator accepts their recommendations: preserve inclusive ranges and exact
-scope/identity, separate closures from information/staff events, retain explicit weekdays and
-institution vocabulary, disclose busy-day overflow, and label the fixed date honestly. These
-conditions are incorporated above. Their owner functions are education product, the local
-fixture-adapter owner and frontend engineering. The observable trials are the acceptance packet
-above; every future MV-2 trial remains `not run`.
+All reviews below were completed on 2026-10-23 against the bounded proposal and current source.
 
-UI review is in progress; its final disposition will be recorded before handoff.
+| Profile | Paper disposition and reasons | Conditions and owner functions | Coordinator response |
+| --- | --- | --- | --- |
+| Primary education | Approve with conditions: supports class-teacher preparation and next-closure comprehension | Inclusive continuing closures, quiet period context, explicit weekdays independent of display week start, exact institution/year identity, no invented kindergarten timetable; education product, fixture-adapter owner and frontend engineering | Accept; requirements and non-Monday-Friday/kindergarten trials incorporated |
+| Secondary education | Approve with conditions: supports multi-calendar secondary and college planning without conflating meanings | Keep staff information distinct from student closure; preserve two session-specific deadlines even with identical titles/dates; exact scope, vocabulary and inclusive ends; education product and frontend engineering | Accept; same-day closure/staff event and distinct college-session trials incorporated |
+| UI and interaction | Approve with conditions: improve the existing renderer instead of a parallel framework | Example date label; no nested controls or duplicate tab systems; complete day agenda below month; shared state; concise invalid/empty recovery; keyboard/focus/zoom checks; product experience, frontend and accessibility functions | Accept; use the simpler below-calendar agenda/details first and defer popovers/direct chips |
+
+The UI tradeoff is extra vertical space in exchange for simpler reading, focus and touch behaviour.
+These reviews support the paper direction; they do not close implementation conditions. The
+observable trials are the acceptance packet above; every future MV-2 trial remains `not run`.
 No live UI trial, representative school session or independent security review has been run for
 this proposal. Advisor consultation was unavailable because the parent runtime was not verifiable.
 

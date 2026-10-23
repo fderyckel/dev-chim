@@ -179,3 +179,34 @@ analysis, 309 core tests, web formatting/lint/types/build/dependency checks, 31 
 shell tooling. No required stage was skipped. Documentation and whitespace checks were repeated
 after recording this result. Real-data, independent review, adoption and production gates remain
 unchanged.
+
+## Selected browser demo follow-up
+
+The Project Owner subsequently authorized actual selected-pack browser loading, recorded in
+[ADR 0046](../docs/adr/0046-selected-local-demo-institution.md). The selected pack now supplies
+the app's home and its people/calendar views. This supersedes the earlier file-preparation-only
+limitation for `make demo`, while the existing operational qualification fixtures remain separate.
+
+All four specialists approved the implemented viewer on 2026-10-23. Primary and secondary review
+confirmed separate enrolment/register/subject meanings, dated family links and fixed-date status.
+Admissions confirmed college vocabulary and exclusion of applicant-only people. UI review
+inspected actual wide and narrow screenshots, identity references, expansion, navigation,
+contacts and pagination. The coordinator accepts all recommendations; no material condition is
+open. Optional wording polish for college responsibilities and empty sections was applied.
+These are AI source/screenshot reviews, not independent safeguarding or human usability evidence.
+
+Executed focused evidence: six startup tests, nine loader/projection tests and eight browser
+tests across all four selected packs. The browser tests cover actual people/relationship/calendar
+navigation, search, pagination, keyboard, accessibility checks and 1440/768/320-pixel reflow.
+The coordinator also opened the live local app and inspected a student with its actual register
+history and family links. Screenshot copies are retained under `tmp/demo-instance-view-review`.
+The first full gate stopped at an already-held browser verification lock; it was retried after
+the other run ended. The retry passed every required stage: documentation and repository tooling;
+4 documentation-tool tests, 23 data-pack tests and 6 startup tests; core compilation, contracts,
+migrations, lint, dependency audit, type analysis and 309 core tests; both web dependency audits,
+formatting, lint, type checking, 40 unit tests and the production build; 54 browser tests across
+the local, bridge, unavailable-backend, classroom and four selected-pack variants; and shell
+tooling. No required stage was skipped.
+
+The separate Advisor preflight again reported `parent_runtime_unavailable`; no Advisor sign-off
+is claimed. Existing production, real-data and independent-review gates retain precedence.
