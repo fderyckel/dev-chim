@@ -93,7 +93,7 @@ while IFS= read -r path; do
     tools/check_ash_dependency_warnings.py|tests/tools/test_check_ash_dependency_warnings.py|tools/measure_phase0_*.py|bin/phase0-check)
       needs_archive_phase0=true
       ;;
-    tools/*|tests/tools/*|pyproject.toml|uv.lock)
+    tools/*|tests/tools/*|demo-data/*|pyproject.toml|uv.lock)
       needs_repository_tools=true
       ;;
     apps/chimwemwe_core/*|config/*|lib/*|test/*)

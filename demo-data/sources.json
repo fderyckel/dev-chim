@@ -1,0 +1,61 @@
+{
+  "retrieved_on": "2026-10-23",
+  "purpose": "Public structural inspiration only. No identities or operational school datasets copied.",
+  "date_policy": "All fixture dates are illustrative fixed 2026-27 examples. Coincidence with published dates does not establish policy, completeness or an imported institutional calendar.",
+  "sources": {
+    "isb-curriculum": {
+      "title": "International School Bangkok: curriculum",
+      "url": "https://www.isb.ac.th/curriculum-academics-learning/the-isb-curriculum",
+      "influence": "Early childhood and elementary, Grades 6-8 middle, Grades 9-12 high; distinct AP and IB senior pathways.",
+      "limits": "Fictional subjects and choices; no accreditation or affiliation claimed."
+    },
+    "isb-calendar": {
+      "title": "International School Bangkok: public calendar",
+      "url": "https://www.isb.ac.th/calendar",
+      "influence": "Separate teaching dates, closures, family conferences and division-specific events.",
+      "limits": "No event feed, personal event text or operational calendar imported."
+    },
+    "smc-calendar": {
+      "title": "Santa Monica College: dates and deadlines",
+      "url": "https://www.smc.edu/academics/classes/dates-deadlines.php",
+      "influence": "Fall and spring semesters, winter and summer sessions, overlapping full, eight-week and twelve-week blocks.",
+      "limits": "Demo dates, deadlines and course combinations do not define college registration rules."
+    },
+    "smc-programmes": {
+      "title": "Santa Monica College: degrees and certificates",
+      "url": "https://www.smc.edu/student-support/academic-support/transfer-center/areas-of-study/associate-degrees/",
+      "influence": "Associate/transfer, certificate and noncredit learning goals.",
+      "limits": "No degree completion, financial aid, transfer eligibility or policy calculation."
+    },
+    "edb-kindergarten": {
+      "title": "Hong Kong Education Bureau: kindergarten overview",
+      "url": "https://www.edb.gov.hk/en/edu-system/preprimary-kindergarten/overview/",
+      "influence": "Nursery, lower and upper kindergarten, approximately ages 3-6; half-day and whole-day contexts.",
+      "limits": "K1/K2/K3 is the generic EDB pattern; AM/PM fixture cohorts are disjoint. Whole-day scheduling is not implemented."
+    },
+    "esf-kindergarten": {
+      "title": "ESF Tsing Yi International Kindergarten: school profile",
+      "url": "https://join-us.esf.edu.hk/schools/esf-tsing-yi-international-kindergarten/",
+      "influence": "Play/inquiry and early-years learning context.",
+      "limits": "ESF is a two-year K1/K2 example, not the source of the demo's K3 pattern. No ESF admissions or progression guarantee copied."
+    },
+    "esf-calendar": {
+      "title": "ESF: 2026-27 school calendar, version 1",
+      "url": "https://www.esf.edu.hk/wp-content/uploads/2025/10/ESF-Calendar-2026-2027_V1.pdf",
+      "influence": "Three terms and explicit breaks.",
+      "limits": "Public version is provisional evidence. Fixture dates are fictional; no kindergarten-specific adoption established."
+    },
+    "sevenoaks-curriculum": {
+      "title": "Sevenoaks School: curriculum overview",
+      "url": "https://www.sevenoaksschool.org/academic/our-curriculum/overview/",
+      "influence": "Lower/Middle School, Sixth Form and IB senior study with distinct subject choices.",
+      "limits": "Fictional subjects and programmes; no reproduction of the school's course catalogue."
+    },
+    "sevenoaks-calendar": {
+      "title": "Sevenoaks School: 2026-27 term and key dates",
+      "url": "https://www.sevenoaksschool.org/wp-content/uploads/2025/09/2026_27-Term-Key-Dates2.pdf",
+      "influence": "Michaelmas/Lent/Summer terms, half terms, staff preparation and separate boarding movements.",
+      "limits": "No published boarding, partial-day or admissions event becomes an automatic school closure."
+    }
+  }
+}

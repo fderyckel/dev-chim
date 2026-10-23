@@ -90,6 +90,11 @@ production identity, or real record. The command is non-destructive.
 
 ## Troubleshooting
 
+The four [fictional institution packs](../../demo-data/README.md) are included in the checkout.
+`make demo-data` prepares a fresh copy of every pack. The standard local demo Make commands do
+the same before startup and print the directory; they preserve existing instance copies. This
+prepares files only and does not populate the current database or screens.
+
 - Run `mise doctor` when a pinned runtime is not selected.
 - Run `brew bundle check` to identify missing macOS dependencies.
 - Run `uv sync --group dev --locked` if `.venv` is missing.

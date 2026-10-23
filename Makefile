@@ -1,5 +1,7 @@
 .DEFAULT_GOAL := help
 
+.PHONY: demo-data demo-data-build demo-data-check
+
 .PHONY: help bootstrap fix format lint check-changed check-staged test-fast test docs-check check-docs check-archive-phase0 check-repository-tools check-core check-web check-tooling check-clean auth-demo legal-demo classroom-demo web-dev web-core-dev web-check web-e2e web-core-e2e web-classroom-e2e check
 
 help:
@@ -17,6 +19,7 @@ help:
 	@echo "auth-demo  Start the local database-backed authentication administration proof"
 	@echo "legal-demo Seed the local synthetic Phase 2.1-C2a legal-structure demonstration"
 	@echo "classroom-demo Start the synthetic HTTPS attendance and calendar workflows"
+	@echo "demo-data  Prepare all four fictional institution packs in a fresh local directory"
 	@echo "web-dev    Start the local synthetic UI-0 browser workspace"
 	@echo "web-core-dev Start the local read-only UI-1A core connection"
 	@echo "web-check  Verify UI-0 formatting, styles, types, tests, and build"
@@ -37,6 +40,7 @@ format:
 	cd clients/web && mise exec -- npm exec -- prettier --write .
 
 lint:
+	shellcheck bin/with-demo-data
 	mise exec -- uv run ruff format --check tools tests/tools
 	mise exec -- uv run ruff check tools tests/tools
 	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/classroom-demo bin/bootstrap bin/check-changed bin/core-check bin/format-staged-elixir bin/organization-legal-demo bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
@@ -66,6 +70,7 @@ test-fast:
 	mise exec -- env MIX_ENV=test mix test
 
 test:
+	$(MAKE) demo-data-check
 	mise exec -- uv run pytest tests/tools/test_check_docs.py
 	mise exec -- env MIX_ENV=test mix ecto.create --quiet
 	mise exec -- env MIX_ENV=test mix ecto.migrate --quiet
@@ -84,6 +89,7 @@ check-repository-tools:
 	mise exec -- uv run ruff format --check tools tests/tools
 	mise exec -- uv run ruff check tools tests/tools
 	mise exec -- uv run pytest tests/tools/test_check_docs.py
+	$(MAKE) demo-data-check
 
 check-core:
 	./bin/with-verification-lock --resource core-test -- ./bin/core-check
@@ -92,6 +98,7 @@ check-web:
 	./bin/with-verification-lock --resource web-qualification -- $(MAKE) web-e2e web-core-e2e web-classroom-e2e
 
 check-tooling:
+	shellcheck bin/with-demo-data
 	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/classroom-demo bin/bootstrap bin/check-changed bin/core-check bin/format-staged-elixir bin/organization-legal-demo bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
 	$(MAKE) -n check-changed check-staged
 
@@ -99,19 +106,29 @@ check-clean:
 	./bin/with-verification-lock --resource clean-checkout -- mise exec -- uv run python tools/rehearse_clean_checkout.py
 
 auth-demo:
-	./bin/auth-demo
+	./bin/with-demo-data ./bin/auth-demo
 
 legal-demo:
-	./bin/organization-legal-demo
+	./bin/with-demo-data ./bin/organization-legal-demo
 
 classroom-demo:
-	./bin/classroom-demo
+	./bin/with-demo-data ./bin/classroom-demo
+
+demo-data:
+	mise exec -- uv run python tools/demo_data.py prepare --environment local-synthetic
+
+demo-data-build:
+	mise exec -- uv run python tools/demo_data.py build
+
+demo-data-check:
+	mise exec -- uv run python tools/demo_data.py check
+	mise exec -- uv run pytest tests/tools/test_demo_data.py
 
 web-dev:
-	cd clients/web && CHIMWEMWE_UI0_SYNTHETIC=true mise exec -- npm run dev
+	cd clients/web && ../../bin/with-demo-data env CHIMWEMWE_UI0_SYNTHETIC=true mise exec -- npm run dev
 
 web-core-dev:
-	./bin/ui1-local
+	./bin/with-demo-data ./bin/ui1-local
 
 web-check:
 	cd clients/web/openapi-client-generator && mise exec -- npm run generate:check
