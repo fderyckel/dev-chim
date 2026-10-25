@@ -17,7 +17,8 @@ defmodule Chimwemwe.Identity.PublicSessionAdapter do
     SessionView,
     SupportFoundation,
     SupportGrantResult,
-    VerifiedExternalIdentity
+    VerifiedExternalIdentity,
+    VerifiedLocalCredential
   }
 
   alias Chimwemwe.Platform.{
@@ -67,7 +68,10 @@ defmodule Chimwemwe.Identity.PublicSessionAdapter do
     session_read: "public.session.read",
     session_logout: "public.session.logout",
     support_elevate: "public.support.elevate",
-    support_use: "public.support.use"
+    support_use: "public.support.use",
+    staff_accounts_read: "public.staff_accounts.read",
+    staff_accounts_manage: "public.staff_accounts.manage",
+    staff_preferences: "public.staff.preferences"
   }
   @locales MapSet.new(["en", "en-MW", "fr"])
 
@@ -141,6 +145,32 @@ defmodule Chimwemwe.Identity.PublicSessionAdapter do
       {:error, %Error{} = identity_error} -> {:error, identity_error}
       {:error, error} -> {:error, error}
       _invalid -> error(:forbidden)
+    end
+  end
+
+  @doc "Creates an opaque session from verified permanent credentials and a server-selected staff target."
+  @spec complete_local_sign_in(Supervisor.supervisor(), VerifiedLocalCredential.t(), map()) ::
+          {:ok, String.t()} | {:error, term()}
+  def complete_local_sign_in(runtime, proof, target) do
+    with :ok <- VerifiedLocalCredential.validate(proof),
+         {:ok, target} <- normalize_local_target(target),
+         candidate <- Map.put(target, :actor_id, proof.actor_id),
+         {:ok, context} <-
+           context(runtime, candidate, proof.assurance, :session_start,
+             correlation_id: UUID.generate(),
+             locale: target.locale
+           ),
+         {:ok, session} <-
+           SessionFoundation.create_local(runtime, context, %{
+             proof: proof,
+             membership_id: target.membership_id,
+             idempotency_key: proof.id,
+             causation_id: proof.id
+           }),
+         {:ok, cookie_value} <- session_cookie(session, nil) do
+      {:ok, cookie_value}
+    else
+      {:error, _error} = failed -> failed
     end
   end
 
@@ -377,6 +407,15 @@ defmodule Chimwemwe.Identity.PublicSessionAdapter do
         idempotency_key: UUID.generate()
       })
       |> normalize_intent()
+    end
+  end
+
+  defp normalize_local_target(input) do
+    with {:ok, input} <- exact_input(input, [:tenant_id, :membership_id, :locale]),
+         {:ok, tenant_id} <- uuid(input.tenant_id),
+         {:ok, membership_id} <- uuid(input.membership_id),
+         {:ok, locale} <- locale(input.locale) do
+      {:ok, %{tenant_id: tenant_id, membership_id: membership_id, locale: locale}}
     end
   end
 

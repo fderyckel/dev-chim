@@ -23,10 +23,14 @@ statuses; these guides explain their detailed contracts without granting impleme
 
 ## Related decisions and review evidence
 
+- [Application navigation and workspaces proposal](../plans/application-navigation-and-workspaces-proposal.md) — proposed product architecture with a first local synthetic Home, Apps and workspace shell under ADR 0048
 - [Learning-institution operating system with separated corporate/legal and educational structure](../adr/0025-learning-institution-operating-system-and-institutional-structure.md)
 - [Assurance proportionality and module evolution](../adr/0024-assurance-proportionality-and-module-evolution.md)
 - [Experience design system and governed personalization](../adr/0028-experience-design-system-and-governed-personalization.md)
 - [Governed communications, audiences, and engagement evidence](../adr/0045-governed-communications-audiences-and-engagement.md)
+- [Private staff-audience source candidate](../adr/0052-private-staff-audience-source-capture.md) — complete qualification blocked, publication unavailable
+- [People-owned source write fence](../adr/0053-people-owned-source-write-fence.md) — correctness/migration controls and foundation impact pass; actual attendance admission remains blocked
+- [Private account principal-binding marker](../adr/0051-private-account-principal-binding-marker.md)
 - [Identity, session, and support-access decision review](../phase-2/identity-session-and-support-access-decision-review.md)
 - [Institutional-structure scenario and vocabulary review](../phase-2/institutional-structure-scenario-review.md)
 - [Institutional-structure security, migration, and temporal review](../phase-2/institutional-structure-security-migration-review.md)

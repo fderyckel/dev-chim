@@ -4,7 +4,7 @@ defmodule Chimwemwe.AuthDemo.Bootstrap do
   use GenServer
 
   alias Chimwemwe.AuthDemo.Config
-  alias Chimwemwe.Identity.{Account, SsoConnection}
+  alias Chimwemwe.Identity.{Account, PasswordHash, SsoConnection}
 
   @demo_email "identity-admin@northstar-school.test"
 
@@ -23,7 +23,7 @@ defmodule Chimwemwe.AuthDemo.Bootstrap do
   end
 
   defp seed_account(password) do
-    {:ok, hashed_password} = AshAuthentication.BcryptProvider.hash(password)
+    {:ok, hashed_password} = PasswordHash.hash(password)
 
     case Account
          |> Ash.Query.for_read(:lookup_local_demo_account, %{email: @demo_email})

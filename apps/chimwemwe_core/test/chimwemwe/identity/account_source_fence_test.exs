@@ -2,6 +2,7 @@ defmodule Chimwemwe.Identity.AccountSourceFenceTest do
   use ExUnit.Case, async: false
 
   import ExUnit.CaptureLog
+  alias Ash.Resource.Info, as: ResourceInfo
   alias AshAuthentication.BcryptProvider
   alias Chimwemwe.Classroom.Fixture
   alias Chimwemwe.Identity.{Account, AccountSourceFence, LocalCredentials}
@@ -13,6 +14,210 @@ defmodule Chimwemwe.Identity.AccountSourceFenceTest do
   setup_all do
     persistence = start_supervised!({PersistenceRuntime, Fixture.runtime_options()})
     Fixture.seed!(persistence)
+  end
+
+  test "named credential lifecycle preserves the generated principal binding", f do
+    actor = member!(f)
+    {:ok, {:ok, pending}} = run(f, fn -> provision(actor) end)
+    assert is_integer(pending.principal_binding_id) and pending.principal_binding_id > 0
+
+    final =
+      Enum.reduce([:activate, :reissue, :activate, :suspend], pending, fn operation, before ->
+        {:ok, {:ok, after_account}} = run(f, fn -> transition(actor, before, operation) end)
+        assert after_account.principal_binding_id == pending.principal_binding_id
+        assert snapshot(f, actor) == after_account
+        after_account
+      end)
+
+    {:ok, {:ok, rotated}} = run(f, fn -> bootstrap_rebind(final.id, actor) end)
+    assert rotated.principal_binding_id == pending.principal_binding_id
+  end
+
+  test "named bootstrap reassignment never restores an earlier principal binding", f do
+    original_actor = member!(f)
+    other_actor = member!(f)
+    {:ok, {:ok, original}} = run(f, fn -> bootstrap(original_actor) end)
+    {:ok, {:ok, other}} = run(f, fn -> bootstrap_rebind(original.id, other_actor) end)
+    {:ok, {:ok, returned}} = run(f, fn -> bootstrap_rebind(original.id, original_actor) end)
+
+    assert original.id == other.id and other.id == returned.id
+    assert returned.actor_id == original.actor_id
+    assert original.principal_binding_id < other.principal_binding_id
+    assert other.principal_binding_id < returned.principal_binding_id
+    assert snapshot(f, original_actor) == returned
+  end
+
+  test "lockout and denial bookkeeping preserve binding identity", f do
+    actor = member!(f)
+    {:ok, {:ok, original}} = run(f, fn -> bootstrap(actor) end)
+
+    for action <-
+          List.duplicate(:record_failed_password_attempt, 5) ++
+            [:clear_failed_password_attempts] do
+      {:ok, {:ok, changed}} = run(f, fn -> account_action(original.id, action) end)
+      assert changed.principal_binding_id == original.principal_binding_id
+      assert snapshot(f, actor) == changed
+    end
+  end
+
+  test "binding attribute is private and ordinary action input cannot select it", f do
+    attribute = ResourceInfo.attribute(Account, :principal_binding_id)
+    refute attribute.public?
+    refute attribute.writable?
+    assert attribute.generated? and attribute.sensitive?
+
+    actor = member!(f)
+    {:ok, {:ok, original}} = run(f, fn -> bootstrap(actor) end)
+
+    assert {:ok, false} =
+             run(f, fn ->
+               account = get_account!(original.id)
+
+               Ash.Changeset.for_update(account, :rotate_local_demo_password, %{
+                 principal_binding_id: original.principal_binding_id + 1
+               }).valid?
+             end)
+
+    assert snapshot(f, actor) == original
+  end
+
+  test "SQL cannot reset a marker, including during actor changes", f do
+    actor = member!(f)
+    other_actor = member!(f)
+    {:ok, {:ok, original}} = run(f, fn -> bootstrap(actor) end)
+
+    for submitted <- [nil, 0, -1, original.principal_binding_id + 1] do
+      assert {:ok, _} =
+               run(f, fn ->
+                 Repo.query!(
+                   "UPDATE identity_accounts SET principal_binding_id = $2 WHERE id = $1",
+                   [
+                     UUID.dump!(original.id),
+                     submitted
+                   ]
+                 )
+               end)
+
+      assert snapshot(f, actor) == original
+    end
+
+    for next_actor <- [other_actor, actor] do
+      assert {:ok, _} =
+               run(f, fn ->
+                 Repo.query!(
+                   "UPDATE identity_accounts SET actor_id = $2, principal_binding_id = $3 WHERE id = $1",
+                   [
+                     UUID.dump!(original.id),
+                     UUID.dump!(next_actor),
+                     original.principal_binding_id
+                   ]
+                 )
+               end)
+
+      assert snapshot(f, next_actor).principal_binding_id > original.principal_binding_id
+    end
+  end
+
+  test "SQL insert ignores copied, null and invalid submitted markers", f do
+    actor = member!(f)
+    {:ok, {:ok, original}} = run(f, fn -> bootstrap(actor) end)
+
+    for submitted <- [nil, 0, -1, original.principal_binding_id] do
+      other_actor = member!(f)
+
+      assert {:ok, _} =
+               run(f, fn ->
+                 Repo.query!(
+                   """
+                   INSERT INTO identity_accounts
+                     (id, actor_id, email, hashed_password, status, lock_version,
+                      inserted_at, updated_at, principal_binding_id)
+                   SELECT $2, $3, $4, hashed_password, status, 1, NOW(), NOW(), $5::bigint
+                   FROM identity_accounts WHERE id = $1
+                   """,
+                   [
+                     UUID.dump!(original.id),
+                     UUID.dump!(UUID.generate()),
+                     UUID.dump!(other_actor),
+                     "copy-#{other_actor}@example.test",
+                     submitted
+                   ]
+                 )
+               end)
+
+      assert snapshot(f, other_actor).principal_binding_id > original.principal_binding_id
+    end
+
+    assert snapshot(f, actor) == original
+  end
+
+  test "SQL deletion and recreation with the same account ID allocates a new binding", f do
+    actor = member!(f)
+    {:ok, {:ok, original}} = run(f, fn -> bootstrap(actor) end)
+
+    assert {:ok, _} =
+             run(f, fn ->
+               Repo.query!(
+                 """
+                 WITH removed AS (DELETE FROM identity_accounts WHERE id = $1 RETURNING *)
+                 INSERT INTO identity_accounts
+                   (id, actor_id, email, hashed_password, status, lock_version,
+                    inserted_at, updated_at, principal_binding_id)
+                 SELECT id, actor_id, email, hashed_password, status, 1,
+                        NOW(), NOW(), principal_binding_id FROM removed
+                 """,
+                 [UUID.dump!(original.id)]
+               )
+             end)
+
+    recreated = snapshot(f, actor)
+    assert recreated.id == original.id
+    assert recreated.principal_binding_id > original.principal_binding_id
+  end
+
+  test "same-actor marker reset SQL waits behind the source fence", f do
+    actor = member!(f)
+    {:ok, {:ok, original}} = run(f, fn -> bootstrap(actor) end)
+    {holder, backend} = hold(f, [actor])
+
+    writer =
+      writer(f, fn ->
+        Repo.query!("UPDATE identity_accounts SET principal_binding_id = NULL WHERE id = $1", [
+          UUID.dump!(original.id)
+        ])
+
+        :written
+      end)
+
+    assert_blocked(f, writer, backend)
+    assert snapshot(f, actor) == original
+    release(holder)
+    assert {:ok, :written} = Task.await(writer)
+    assert snapshot(f, actor) == original
+  end
+
+  test "whole-transaction rollback preserves binding but never returns an allocated marker", f do
+    actor = member!(f)
+    other_actor = member!(f)
+    {:ok, {:ok, original}} = run(f, fn -> bootstrap(actor) end)
+
+    assert {:ok, {:error, :injected}} =
+             run(f, fn ->
+               {:ok, changed} = bootstrap_rebind(original.id, other_actor)
+               assert changed.principal_binding_id > original.principal_binding_id
+               {:error, :injected}
+             end)
+
+    assert snapshot(f, actor) == original
+    assert snapshot(f, other_actor) == nil
+
+    {:ok, %{rows: [[allocated]]}} =
+      run(f, fn ->
+        Repo.query!("SELECT last_value FROM identity_account_principal_binding_sequence")
+      end)
+
+    {:ok, {:ok, changed}} = run(f, fn -> bootstrap_rebind(original.id, other_actor) end)
+    assert changed.principal_binding_id > allocated
   end
 
   for operation <- [:provision, :activate, :reissue, :suspend, :bootstrap] do
@@ -56,6 +261,7 @@ defmodule Chimwemwe.Identity.AccountSourceFenceTest do
       assert {:ok, {:ok, changed}} = Task.await(writer)
       assert changed.id == account.id
       assert changed.actor_id == new
+      assert changed.principal_binding_id != account.principal_binding_id
       assert snapshot(f, old) == nil
     end
   end
@@ -167,9 +373,17 @@ defmodule Chimwemwe.Identity.AccountSourceFenceTest do
     end
   end
 
-  test "database guard refuses truncate and rejects malformed lock sets", f do
+  test "database refuses truncate before any account can be removed", f do
+    assert {:ok, {:error, %Postgrex.Error{postgres: %{code: code}}}} =
+             run(f, fn -> Repo.query("TRUNCATE identity_accounts") end)
+
+    # Referencing directory/session tables can reject the statement before the
+    # truncate trigger runs. The isolated no-FK proof still exercises the trigger.
+    assert code in [:check_violation, :feature_not_supported]
+  end
+
+  test "database guard rejects malformed lock sets with check violation", f do
     for sql <- [
-          "TRUNCATE identity_accounts",
           "SELECT identity_account_source_lock(ARRAY[NULL]::uuid[])",
           "SELECT identity_account_source_lock(NULL::uuid[])"
         ] do
@@ -347,13 +561,26 @@ defmodule Chimwemwe.Identity.AccountSourceFenceTest do
   end
 
   defp bootstrap_rebind(id, actor) do
+    account = get_account!(id)
+
+    account
+    |> Ash.Changeset.for_update(:rotate_local_demo_password, %{actor_id: actor})
+    |> Ash.update(authorize?: false)
+    |> summarize()
+  end
+
+  defp get_account!(id) do
     {:ok, account} =
       Account
       |> Ash.Query.for_read(:get_local_account, %{id: id})
       |> Ash.read_one(authorize?: false)
 
     account
-    |> Ash.Changeset.for_update(:rotate_local_demo_password, %{actor_id: actor})
+  end
+
+  defp account_action(id, action) do
+    get_account!(id)
+    |> Ash.Changeset.for_update(action, %{})
     |> Ash.update(authorize?: false)
     |> summarize()
   end
@@ -365,6 +592,7 @@ defmodule Chimwemwe.Identity.AccountSourceFenceTest do
     do: %{
       id: account.id,
       actor_id: account.actor_id,
+      principal_binding_id: account.principal_binding_id,
       status: to_string(account.status),
       lock_version: account.lock_version
     }
@@ -413,7 +641,7 @@ defmodule Chimwemwe.Identity.AccountSourceFenceTest do
     {:ok, %{rows: rows}} =
       run(f, fn ->
         Repo.query!(
-          "SELECT id::text, actor_id::text, status, lock_version FROM identity_accounts WHERE actor_id = $1",
+          "SELECT id::text, actor_id::text, principal_binding_id, status, lock_version FROM identity_accounts WHERE actor_id = $1",
           [UUID.dump!(actor)]
         )
       end)
@@ -422,8 +650,14 @@ defmodule Chimwemwe.Identity.AccountSourceFenceTest do
       [] ->
         nil
 
-      [[id, actor, status, version]] ->
-        %{id: id, actor_id: actor, status: status, lock_version: version}
+      [[id, actor, binding, status, version]] ->
+        %{
+          id: id,
+          actor_id: actor,
+          principal_binding_id: binding,
+          status: status,
+          lock_version: version
+        }
     end
   end
 

@@ -19,5 +19,6 @@ defmodule Chimwemwe.Identity do
     resource Chimwemwe.Identity.Invitation
     resource Chimwemwe.Identity.ApplicationSession
     resource Chimwemwe.Identity.SupportAccessGrant
+    resource Chimwemwe.Identity.StaffDirectoryEntry
   end
 end

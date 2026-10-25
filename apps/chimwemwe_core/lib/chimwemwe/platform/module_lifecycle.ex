@@ -128,6 +128,32 @@ defmodule Chimwemwe.Platform.ModuleLifecycle do
   end
 
   @doc false
+  @spec available_current_transaction(ReleaseManifest.t(), term(), term()) ::
+          :ok | {:error, term()}
+  def available_current_transaction(manifest, context, module_key) do
+    ExecutionContext.with_validated(context, fn validated_context ->
+      with true <- Repo.in_transaction?(),
+           {:ok, validated_manifest} <- validate_manifest(manifest),
+           {:ok, module_key} <- normalize_module_key(module_key),
+           {:ok, declaration} <- fetch_release(validated_manifest, module_key),
+           tenant_id = TrustedActor.tenant_id(validated_context.actor),
+           :ok <- lock_lifecycle(tenant_id, module_key),
+           :ok <- require_entitlement(tenant_id, declaration.key),
+           :ok <- require_active_version(tenant_id, declaration),
+           :ok <- require_active_dependencies(tenant_id, validated_manifest, declaration) do
+        :ok
+      else
+        false -> lifecycle_error(:retryable_dependency)
+        {:error, %ModuleLifecycleError{}} = error -> error
+      end
+    end)
+  rescue
+    _error -> lifecycle_error(:retryable_dependency)
+  catch
+    :exit, _reason -> lifecycle_error(:retryable_dependency)
+  end
+
+  @doc false
   @spec authorize_current_transaction(ReleaseManifest.t(), term(), term(), term()) ::
           :ok | {:error, term()}
   def authorize_current_transaction(manifest, context, module_key, capability) do

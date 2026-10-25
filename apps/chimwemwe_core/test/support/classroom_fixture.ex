@@ -618,6 +618,7 @@ defmodule Chimwemwe.Classroom.Fixture do
                  classroom_teaching_assignments,
                  classroom_enrolments,
                  classroom_classes,
+                 identity_staff_directory_entries,
                  people_staff_account_associations,
                  people_participations,
                  people_persons,

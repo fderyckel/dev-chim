@@ -1,8 +1,9 @@
 defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
   use ExUnit.Case, async: false
 
+  alias AshAuthentication.BcryptProvider
   alias Chimwemwe.Classroom.Fixture
-  alias Chimwemwe.Identity.{AccountSourceFence, LocalCredentials}
+  alias Chimwemwe.Identity.{Account, AccountSourceFence, LocalCredentials}
   alias Chimwemwe.People.{Foundation, Runtime, TestVerifier}
   alias Chimwemwe.Platform.{ModuleLifecycle, Persistence, PersistenceRuntime, TrustedActor}
   alias Chimwemwe.Repo
@@ -134,6 +135,118 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
     assert {:ok, _association} = read_link_while_held(f, holder, membership)
     release(holder)
     assert {:ok, {:ok, _account_id}} = Task.await(writer)
+  end
+
+  test "principal binding distinguishes credential rotations from an account actor round trip",
+       f do
+    {_person, _part, membership, actor} = linked_staff!(f)
+    other_actor = UUID.generate()
+    tenant = TrustedActor.tenant_id(Fixture.context_a().actor)
+
+    assert {:ok, _} =
+             Fixture.query(
+               f,
+               "INSERT INTO platform_tenant_memberships (id, tenant_id, actor_id, inserted_at, updated_at) VALUES ($1, $2, $3, NOW(), NOW())",
+               Enum.map([UUID.generate(), tenant, other_actor], &UUID.dump!/1)
+             )
+
+    assert {:ok, {:ok, account_id}} =
+             Persistence.with_writer(f.persistence, Fixture.context_a(), fn ->
+               provision(actor)
+             end)
+
+    password = Base.url_encode64(:crypto.strong_rand_bytes(24))
+
+    assert {:ok, {:ok, _account}} =
+             Persistence.with_writer(f.persistence, Fixture.context_a(), fn ->
+               LocalCredentials.complete_first_login(account_id, 1, password, password)
+             end)
+
+    original = fenced_binding(f, membership, actor)
+    assert original.account == {account_id, actor, "active"}
+
+    rotate_binding!(f, account_id, actor)
+    rotate_binding!(f, account_id, actor)
+    credential_rotation = fenced_binding(f, membership, actor)
+    assert credential_rotation.account == original.account
+    assert credential_rotation.association == original.association
+    assert credential_rotation.version == original.version + 2
+    assert credential_rotation.binding == original.binding
+
+    rotate_binding!(f, account_id, other_actor)
+    rebound = fenced_binding(f, membership, actor)
+    assert rebound.account == nil
+    assert rebound.association == original.association
+
+    rotate_binding!(f, account_id, actor)
+    returned = fenced_binding(f, membership, actor)
+    assert returned.account == original.account
+    assert returned.association == original.association
+    assert returned.version == credential_rotation.version + 2
+    assert returned.binding != original.binding
+
+    # This observes the current source records, not notice-read authorization.
+    # Both paths advance the generic version twice. The selected B marker preserves
+    # credential continuity and prevents the round trip matching original admission.
+  end
+
+  defp rotate_binding!(f, account_id, actor) do
+    assert {:ok, :rotated} =
+             Persistence.with_writer(f.persistence, Fixture.context_a(), fn ->
+               {:ok, account} =
+                 Account
+                 |> Ash.Query.for_read(:get_local_account, %{id: account_id})
+                 |> Ash.read_one(authorize?: false)
+
+               {:ok, hash} = BcryptProvider.hash(Base.url_encode64(:crypto.strong_rand_bytes(24)))
+
+               account
+               |> Ash.Changeset.for_update(:rotate_local_demo_password, %{
+                 actor_id: actor,
+                 hashed_password: hash
+               })
+               |> Ash.update(authorize?: false)
+               |> case do
+                 {:ok, _account} -> :rotated
+                 {:error, _error} -> :rotation_failed
+               end
+             end)
+  end
+
+  defp fenced_binding(f, membership, actor) do
+    assert {:ok, {:ok, binding}} =
+             Persistence.with_writer(f.persistence, Fixture.context_a(), fn ->
+               Repo.transaction(fn -> capture_binding(f, membership, actor) end)
+             end)
+
+    binding
+  end
+
+  defp capture_binding(f, membership, actor) do
+    lock_people()
+    :ok = AccountSourceFence.lock_current_transaction(Fixture.context_a(), [actor])
+
+    {:ok, association} =
+      Foundation.current_staff_account(f.runtime, Fixture.context_a(), membership)
+
+    %{rows: rows} =
+      Repo.query!(
+        "SELECT id::text, actor_id::text, status, lock_version, principal_binding_id FROM identity_accounts WHERE actor_id = $1",
+        [UUID.dump!(actor)]
+      )
+
+    {account, version, binding} =
+      case rows do
+        [] -> {nil, nil, nil}
+        [[id, actor_id, status, version, binding]] -> {{id, actor_id, status}, version, binding}
+      end
+
+    %{
+      account: account,
+      version: version,
+      binding: binding,
+      association: Map.take(association, [:id, :person_id, :participation_id, :membership_id])
+    }
   end
 
   defp linked_staff!(f) do

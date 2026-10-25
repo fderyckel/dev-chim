@@ -26,6 +26,7 @@ defmodule ChimwemweCore.MixProject do
 
   defp deps do
     [
+      {:argon2_elixir, "== 4.1.3"},
       {:ash, "== 3.34.6"},
       {:ash_authentication, "~> 5.0.0-rc.14"},
       {:ash_authentication_phoenix, "~> 3.0.0-rc.11"},

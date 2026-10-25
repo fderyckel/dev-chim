@@ -49,6 +49,21 @@ defmodule Chimwemwe.PublicApi.SessionPlug do
   end
 
   defp purpose("GET", "/api/v1/session"), do: {:ok, :session_read}
+  defp purpose("GET", "/api/v1/staff-accounts"), do: {:ok, :staff_accounts_read}
+  defp purpose("GET", "/api/v1/staff-preferences"), do: {:ok, :staff_preferences}
+  defp purpose("POST", "/api/v1/staff-preferences"), do: {:ok, :staff_preferences}
+
+  defp purpose("POST", "/api/v1/staff-accounts/" <> action)
+       when action in [
+              "provision",
+              "revise-details",
+              "set-access",
+              "revoke-access-profile",
+              "suspend-access",
+              "reissue"
+            ],
+       do: {:ok, :staff_accounts_manage}
+
   defp purpose("POST", "/api/v1/session/logout"), do: {:ok, :session_logout}
   defp purpose("POST", "/api/v1/session/support/elevate"), do: {:ok, :support_elevate}
   defp purpose("GET", "/api/v1/classroom/classes"), do: {:ok, :classroom_read}

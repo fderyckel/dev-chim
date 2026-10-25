@@ -127,6 +127,13 @@ consolidation conclusion, or real data.
 fresh bootstrap administrator password, supports prepared synthetic staff account creation,
 one-time temporary passwords, forced first-login replacement, reissue and suspension, and grants
 no school role or permission. It is not a production identity service.
+`make staff-demo` starts the authorized fictional staff account directory and connected local
+sign-in at `https://localhost:3015/sign-in`, using a fresh isolated database and a generated
+operator password. It supports account creation, required first-login password replacement,
+separate role-profile changes, language preferences and tenant-only access suspension. See the
+[synthetic staff runbook](docs/operations/synthetic-staff-directory.md) and
+[slice evidence](docs/phase-2/staff-directory-connected-login-evidence.md). Real identity,
+MFA/recovery/delivery qualification and production release remain separately gated.
 `make web-dev` starts the explicitly synthetic, local-only UI-0 experience at `http://127.0.0.1:3000`.
 `make web-core-dev` starts the guarded UI-1A qualification at
 `http://127.0.0.1:3000/authority/assignments`, backed by a dedicated local synthetic database

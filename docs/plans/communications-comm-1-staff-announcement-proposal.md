@@ -12,8 +12,21 @@
 - Review evidence: [COMM-0 decisions and specialist review](../phase-2/communications-comm-0-experience-evidence.md#delegated-paper-review--23-october-2026)
 - Current checkpoint: [source fence not qualified](../phase-2/communications-comm-1-source-fence-qualification.md);
   [authorized account prerequisite](../phase-2/identity-account-source-fence-evidence.md) implemented,
-  focused-tested and reviewed by all four agents; remaining audience qualification may resume;
-  publication implementation remains blocked
+  focused-tested and reviewed by all four agents. Renewed qualification on 2026-10-24 returns a
+  [bounded account-binding decision](communications-audience-source-qualification.md), subsequently
+  selected as B and implemented under [ADR 0051](../adr/0051-private-account-principal-binding-marker.md)
+  with its [separate checkpoint](../phase-2/account-principal-binding-evidence.md);
+  publication implementation remains blocked and `make check` is currently deferred
+
+The subsequent [composed source candidate](../phase-2/staff-audience-source-evidence.md) passes
+41 source checks but fails the retained classroom p95-impact criterion in all three
+initial measured repeats. The source is **not qualified** and publication remains unimplemented.
+François subsequently authorized the [scoped contention follow-up](communications-source-lock-contention-proposal.md).
+Its [ADR 0053 checkpoint](../phase-2/people-source-write-fence-evidence.md) removes the measured
+People-row blocking and passes all three unchanged foundation comparisons within 20%. Actual
+attendance cannot qualify because requests are rejected at the unchanged admission limit even
+without source captures. The next nested-admission proposal is not implemented; publication and
+`make check` remain explicitly deferred for this increment.
 
 ## Proposed outcome
 

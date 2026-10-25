@@ -11,9 +11,11 @@
   "scripts": {
     "generate": "openapi-typescript ../../../apps/chimwemwe_core/priv/openapi/ui1-local-v1.json --output ../src/generated/ui1/schema.d.ts --alphabetize --immutable",
     "generate:public": "openapi-typescript ../../../apps/chimwemwe_core/priv/openapi/public-session-v1.json --output ../src/generated/public/session-schema.d.ts --alphabetize --immutable",
-    "generate:check": "npm run generate:check:ui1 && npm run generate:check:public",
+    "generate:check": "npm run generate:check:ui1 && npm run generate:check:public && npm run generate:check:staff",
     "generate:check:public": "openapi-typescript ../../../apps/chimwemwe_core/priv/openapi/public-session-v1.json --output ../src/generated/public/session-schema.d.ts --alphabetize --immutable --check",
-    "generate:check:ui1": "openapi-typescript ../../../apps/chimwemwe_core/priv/openapi/ui1-local-v1.json --output ../src/generated/ui1/schema.d.ts --alphabetize --immutable --check"
+    "generate:check:ui1": "openapi-typescript ../../../apps/chimwemwe_core/priv/openapi/ui1-local-v1.json --output ../src/generated/ui1/schema.d.ts --alphabetize --immutable --check",
+    "generate:staff": "openapi-typescript ../../../apps/chimwemwe_core/priv/openapi/staff-accounts-v1.json --output ../src/generated/public/staff-schema.d.ts --alphabetize --immutable",
+    "generate:check:staff": "openapi-typescript ../../../apps/chimwemwe_core/priv/openapi/staff-accounts-v1.json --output ../src/generated/public/staff-schema.d.ts --alphabetize --immutable --check"
   },
   "devDependencies": {
     "openapi-typescript": "7.13.0",

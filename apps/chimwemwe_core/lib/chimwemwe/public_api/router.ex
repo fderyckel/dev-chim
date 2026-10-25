@@ -27,6 +27,39 @@ defmodule Chimwemwe.PublicApi.Router do
     plug(Chimwemwe.PublicApi.CalendarPlug)
   end
 
+  pipeline :local_staff do
+    plug(Chimwemwe.PublicApi.StaffGuard)
+  end
+
+  scope "/api/v1", Chimwemwe.PublicApi do
+    pipe_through([:callback, :local_staff])
+    get("/staff-login", StaffLoginController, :show, log: false)
+    post("/staff-login", StaffLoginController, :create, log: false)
+    post("/staff-login/cancel", StaffLoginController, :cancel, log: false)
+    post("/staff-login/replace-password", StaffLoginController, :replace_password, log: false)
+  end
+
+  scope "/api/v1", Chimwemwe.PublicApi do
+    pipe_through([:local_staff, :authenticated])
+    get("/staff-accounts", StaffAccountsController, :index, log: false)
+    get("/staff-preferences", StaffAccountsController, :preferences, log: false)
+  end
+
+  scope "/api/v1", Chimwemwe.PublicApi do
+    pipe_through([:local_staff, :authenticated, :unsafe])
+    post("/staff-accounts/provision", StaffAccountsController, :provision, log: false)
+    post("/staff-accounts/revise-details", StaffAccountsController, :revise_details, log: false)
+    post("/staff-accounts/set-access", StaffAccountsController, :set_access, log: false)
+
+    post("/staff-accounts/revoke-access-profile", StaffAccountsController, :revoke_access_profile,
+      log: false
+    )
+
+    post("/staff-accounts/suspend-access", StaffAccountsController, :suspend_access, log: false)
+    post("/staff-accounts/reissue", StaffAccountsController, :reissue, log: false)
+    post("/staff-preferences", StaffAccountsController, :set_preferences, log: false)
+  end
+
   scope "/api/v1/calendar", Chimwemwe.PublicApi do
     pipe_through([:local_calendar, :authenticated])
     get("/preparation", CalendarController, :show, log: false)

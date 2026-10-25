@@ -8,3 +8,5 @@ provider or qualify an unselected production environment.
 
 - [Outbox dispatch, drain, replay, and recovery](outbox-dispatch-and-recovery.md)
 - [Temporal retention, migration, and recovery](temporal-retention-and-recovery.md)
+
+- [Synthetic staff directory and connected sign-in](synthetic-staff-directory.md) — isolated fictional account administration; current evidence and retained release gates.

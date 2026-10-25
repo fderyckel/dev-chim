@@ -4,8 +4,8 @@
   through D.2c, the bounded D.3 public-session adapter, and the minimal Slice 2.1-B legal-entity
   aggregate have synthetic evidence; ADR 0031 authorizes bounded synthetic Slice 2.1-C1 and ADR
   0033 authorizes append-only Slice 2.1-C2a; C2a focused migration, action, and demo evidence is
-  passing while its complete repository gate is blocked by the concurrent web candidate's
-  dependency audit; revised ADR 0021 conditionally accepts the calendar contract for bounded
+  passing and the combined repository gate passed on 2026-10-25; revised ADR 0021 conditionally
+  accepts the calendar contract for bounded
   synthetic L1 and its first executable validation/resolution increment passes; 2.0-E is a dated
   deferred condition and L2 remains gated
 - Owner: Product and platform engineering, with learning-institution domain and security/privacy
@@ -14,6 +14,14 @@
 - Review trigger: entry into another Phase 2 slice or a change to an entry-gate disposition
 
 ## Current boundary
+
+The private [staff-audience source candidate](staff-audience-source-evidence.md) composes the
+implemented account binding with current recipient eligibility checks. The subsequently authorized
+[People write-fence checkpoint](people-source-write-fence-evidence.md) removes measured People-row
+blocking and passes three unchanged foundation workload comparisons within the retained 20% limit.
+Actual attendance rejects concurrent work at the existing admission limit even in baseline, so
+the complete source remains **not qualified** and publication unimplemented. A bounded same-writer
+nested-admission decision is proposed; no capacity or session contract is changed here.
 
 On 2026-10-09 the Project Owner instructed the project to start COMM-0.
 [ADR 0045](../adr/0045-governed-communications-audiences-and-engagement.md) and the
@@ -36,8 +44,11 @@ The [first source-fence checkpoint](communications-comm-1-source-fence-qualifica
 the initial account-absence protection. François subsequently authorized the scoped prerequisite;
 [ADR 0047](../adr/0047-private-identity-account-source-fence.md) and its
 [focused evidence and four-agent review](identity-account-source-fence-evidence.md) now qualify
-that account fence locally. Remaining audience source qualification may resume; complete audience
-qualification and publication implementation remain gated. `make check` remains deferred.
+that account fence locally. Renewed qualification on 2026-10-24 records a passing 69-test focused
+run and returned the [account-binding decision](../plans/communications-audience-source-qualification.md).
+François selected B and authorized [ADR 0051's private binding prerequisite](../adr/0051-private-account-principal-binding-marker.md).
+Its [focused checkpoint](account-principal-binding-evidence.md) remains distinct from complete
+audience qualification and publication implementation. `make check` remains deferred.
 
 CF-4A adds the private synthetic [people and participation foundation](people-foundation-evidence.md):
 student/staff participation and verified staff-account association without implied permissions.
@@ -132,10 +143,9 @@ to a business aggregate.
 On 2026-10-03, the Project Owner directed a best-judgement cross-country legal-structure start.
 ADR 0031 conditionally accepts the closed direct relationship catalogue,
 management-reporting-only parentage, and corporate-unit identity for synthetic L1 Slice 2.1-C1.
-Focused and production-core evidence passes; the complete repository gate is blocked because the
-clean-checkout rehearsal reaches the concurrent web candidate's dependency audit and reports nine
-high-severity transitive advisories. The C25-02 review and ADR index now pass focused document
-validation. No
+Focused and production-core evidence passes. The combined repository gate later passed on
+2026-10-25 with zero findings from both npm audits; older clean-checkout dependency-audit failures
+remain historical evidence. The C25-02 review and ADR index pass document validation. No
 qualified reviewer is invented, and external corporate/finance validation remains due before L2,
 real data, migration, external financial reporting, pilot, deployment, or
 jurisdictional/accounting claims. The later ADR 0034 closes C25-03 for synthetic L1 only;
@@ -209,7 +219,7 @@ Selected deployment, real data, pilot, and production release remain later gates
 | Level | Current status | Permitted now | Principal blockers |
 | --- | --- | --- | --- |
 | L0 — paper and prototype | Closed for current entry scope | Slices 2.0-D.2a through D.2c and bounded D.3 engineering are complete; ADR 0025's technical evidence, refreshed prototype, and conditional G6 decision are recorded | Named reviews remain conditions on their first affected later slices, not claims of completed evidence |
-| L1 — synthetic module proof | Closed for the minimal candidate; 2.1-C2a exit blocked at repository integration | Slice 2.0-B outbox/drain, Accepted ADR 0018 temporal evidence, internal Slice 2.0-D foundations, and the Slice 2.1-B `LegalEntity` proof pass; ADRs 0031/0033 permit bounded synthetic 2.1-C1/C2a; ADR 0039 admits CF-3 engineering | Complete repository gate for 2.1-C2a, currently blocked by the concurrent web dependency audit; external finance validation at ADR 0031's later boundary; ADR 0035 closes the synthetic C25-04 operator decision; ADRs 0034/0035 admit bounded educational/operator work subject to implementation proof |
+| L1 — synthetic module proof | Closed for the minimal candidate; combined repository integration passes | Slice 2.0-B outbox/drain, Accepted ADR 0018 temporal evidence, internal Slice 2.0-D foundations, and the Slice 2.1-B `LegalEntity` proof pass; ADRs 0031/0033 permit bounded synthetic 2.1-C1/C2a; ADR 0039 admits CF-3 engineering | External finance validation at ADR 0031's later boundary; ADR 0035 closes the synthetic C25-04 operator decision; ADRs 0034/0035 admit bounded educational/operator work subject to implementation proof; later connected/release gates remain separate |
 | L2 — connected synthetic workflow | Engineering candidate authorized; not released | ADRs 0029/0030, D.2a–D.2c, bounded D.3 adapter evidence, the calendar writer, and ADR 0039's source-backed entry are complete enough to build CF-3 locally | CF-3 implementation and accessible technical evidence, deployment-specific D.3 qualification, selected identity/origin, and an explicit L2 release decision; representative and institution-side evidence remains mandatory before real adoption or pilot |
 | L3 — controlled real-data pilot | Blocked | No real institutional or Restricted data | Selected-deployment qualification, independent security/privacy review, learning-institution records ownership, and all lower-level gates |
 | L4 — production release | Blocked | No general availability | Accepted operating envelope, production release decision, and all lower-level gates |
@@ -261,3 +271,5 @@ synthetic screen-to-writer and request-recovery proof governed by ADRs
 [0038](../adr/0038-local-classroom-attendance-workflow.md) and
 [0041](../adr/0041-local-attendance-correction-and-recovery.md). They do not close representative
 policy, Restricted consumer delivery, connected-release or real-data conditions.
+
+- [Synthetic staff directory and connected sign-in](../operations/synthetic-staff-directory.md) — isolated fictional account administration; current evidence and retained release gates.

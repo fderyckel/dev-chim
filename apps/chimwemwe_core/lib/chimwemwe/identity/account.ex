@@ -17,6 +17,7 @@ defmodule Chimwemwe.Identity.Account do
   postgres do
     table("identity_accounts")
     repo(Chimwemwe.Repo)
+    migration_defaults(principal_binding_id: "0")
 
     custom_statements do
       statement :identity_account_source_lock_function do
@@ -109,6 +110,58 @@ defmodule Chimwemwe.Identity.Account do
         END $$;
         """)
       end
+
+      statement :identity_account_principal_binding do
+        global? true
+        after_tables(["identity_accounts"])
+
+        up("""
+        DO $binding_install$ BEGIN
+        CREATE SEQUENCE identity_account_principal_binding_sequence AS bigint NO CYCLE;
+
+        UPDATE identity_accounts
+        SET principal_binding_id = nextval('identity_account_principal_binding_sequence');
+
+        CREATE FUNCTION identity_accounts_principal_binding_guard() RETURNS trigger
+        LANGUAGE plpgsql AS $$
+        BEGIN
+          IF TG_OP = 'INSERT' THEN
+            PERFORM identity_account_source_lock(ARRAY[NEW.actor_id]);
+            NEW.principal_binding_id := nextval('identity_account_principal_binding_sequence');
+          ELSE
+            PERFORM identity_account_source_lock(ARRAY[OLD.actor_id, NEW.actor_id]);
+            IF NEW.actor_id IS DISTINCT FROM OLD.actor_id THEN
+              NEW.principal_binding_id := nextval('identity_account_principal_binding_sequence');
+            ELSE
+              NEW.principal_binding_id := OLD.principal_binding_id;
+            END IF;
+          END IF;
+          RETURN NEW;
+        END;
+        $$;
+
+        CREATE TRIGGER identity_accounts_principal_binding_guard
+        BEFORE INSERT OR UPDATE ON identity_accounts
+        FOR EACH ROW EXECUTE FUNCTION identity_accounts_principal_binding_guard();
+
+        ALTER TABLE identity_accounts ADD CONSTRAINT identity_accounts_principal_binding_positive
+          CHECK (principal_binding_id > 0);
+        END $binding_install$;
+        """)
+
+        down("""
+        DO $$ BEGIN
+          IF EXISTS (SELECT 1 FROM identity_accounts)
+             OR (SELECT is_called FROM identity_account_principal_binding_sequence) THEN
+            RAISE EXCEPTION 'issued principal bindings require forward repair';
+          END IF;
+          DROP TRIGGER identity_accounts_principal_binding_guard ON identity_accounts;
+          ALTER TABLE identity_accounts DROP CONSTRAINT identity_accounts_principal_binding_positive;
+          DROP FUNCTION identity_accounts_principal_binding_guard();
+          DROP SEQUENCE identity_account_principal_binding_sequence;
+        END $$;
+        """)
+      end
     end
 
     check_constraints do
@@ -152,6 +205,7 @@ defmodule Chimwemwe.Identity.Account do
       password :local_demo do
         identity_field(:email)
         hashed_password_field(:hashed_password)
+        hash_provider(Chimwemwe.Identity.PasswordHash)
         registration_enabled?(false)
         confirmation_required?(false)
       end
@@ -246,6 +300,7 @@ defmodule Chimwemwe.Identity.Account do
       argument :password, :string do
         allow_nil?(false)
         sensitive?(true)
+        constraints(trim?: false)
       end
 
       prepare(build(filter: [status: :active]))
@@ -287,6 +342,11 @@ defmodule Chimwemwe.Identity.Account do
       ])
 
       change(optimistic_lock(:lock_version))
+      # Include the trigger-owned value in UPDATE RETURNING after an actor change.
+      change(
+        atomic_update(:principal_binding_id, expr(principal_binding_id), cast_atomic?: false)
+      )
+
       require_atomic?(false)
     end
 
@@ -383,6 +443,15 @@ defmodule Chimwemwe.Identity.Account do
     attribute :actor_id, :uuid do
       allow_nil?(false)
       public?(false)
+    end
+
+    attribute :principal_binding_id, :integer do
+      allow_nil?(false)
+      generated?(true)
+      writable?(false)
+      public?(false)
+      sensitive?(true)
+      constraints(min: 1)
     end
 
     attribute :email, :string do

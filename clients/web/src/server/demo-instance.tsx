@@ -3,6 +3,7 @@ import "server-only";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { DemoInstanceView } from "../components/demo-instance-view";
+import type { DemoSection } from "../lib/demo-navigation";
 import { loadDemoInstance } from "./demo-instance-loader";
 
 export type DemoSearchParams = Promise<{
@@ -13,7 +14,7 @@ export async function DemoPage({
   section = "overview",
   selection,
 }: {
-  section?: string;
+  section?: DemoSection;
   selection?: string | string[];
 }) {
   const requestHeaders = await headers();

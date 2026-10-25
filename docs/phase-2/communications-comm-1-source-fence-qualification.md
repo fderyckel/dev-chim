@@ -1,18 +1,28 @@
 # COMM-1 audience source-fence checkpoint
 
 - Status: **Not qualified — publication implementation blocked at this checkpoint**
+- Latest composed source result: [People-owned write-fence evidence](people-source-write-fence-evidence.md).
+  The authorized ADR 0053 fence passes correctness/migration controls and the unchanged foundation
+  workload passes three repeats within 20%. Actual attendance comparisons reject work under the
+  existing admission contract even in baseline. Complete qualification remains blocked; a bounded
+  same-writer nested-admission decision is proposed, with no implementation or capacity increase.
 - Account prerequisite: subsequently authorized, implemented and focused-tested under
   [ADR 0047](../adr/0047-private-identity-account-source-fence.md);
   [new evidence and review](identity-account-source-fence-evidence.md) distinguish it from
   the initial counterexample and complete audience qualification
-- Date: 2026-10-23
+- Date: 2026-10-24 (renewed qualification; initial evidence below is dated 2026-10-23)
+- Current binding decision: François selected [option B](../plans/communications-audience-source-qualification.md#decision-returned-to-françois)
+  and authorized [ADR 0051's prerequisite](account-principal-binding-evidence.md);
+  the complete source checkpoint remains not qualified
 - Authority: François accepted [ADR 0045](../adr/0045-governed-communications-audiences-and-engagement.md)
   and authorized the [bounded COMM-1 proof](../plans/communications-comm-1-staff-announcement-proposal.md),
   requiring agent review of this checkpoint before proceeding; `make check` is deferred
 - Engineering custodian: Coordinator in this local Codex chat; François remains accountable owner
 - Run references: `chimwemwe_comm1_fence_20261023_01` (initial harness failures),
   `chimwemwe_comm1_fence_20261023_02` (corrected four-probe run),
-  `chimwemwe_comm1_fence_20261023_03` (focused source regression run)
+  `chimwemwe_comm1_fence_20261023_03` (focused source regression run),
+  `chimwemwe_comm1_sources_20261024_01` (initial renewed run),
+  `chimwemwe_comm1_sources_20261024_02` (final renewed run)
 - Scope: isolated local PostgreSQL tests with fictional people, institutions, memberships and
   generated credential material; no browser, publication path, communications storage or consumer
 - Custody checkpoint: retain the isolated test databases through this review and unresolved
@@ -177,5 +187,143 @@ The final coordinator integration later ran
 `CHIMWEMWE_TEST_DATABASE=chimwemwe_commit_final8_20261023 make check` on the combined checkout.
 Every required stage passed: 335 core tests, 52 web unit tests, 70 browser tests, both dependency
 audits, the production build, documentation/repository tooling and shell tooling. That integration
-result protects the current repository state; it does not qualify the remaining audience fence or
+result verified the checkout tested on 23 October; it does not qualify the remaining audience fence or
 authorize publication work.
+
+## Renewed qualification — 24 October 2026
+
+François authorized the remaining audience-source qualification and four-agent review of the
+complete checkpoint before publication work, again explicitly deferring `make check`. The account
+absence fence remains in place. No new production behavior or migration is added in this increment.
+
+The new named-action probe uses one verified exact-institution staff association, an actual
+active credential account and two existing tenant actors. It changes passwords through
+`Account.rotate_local_demo_password`, the existing bootstrap action that also accepts actor
+changes. It captures current associations and account records under the People lifecycle lock
+and ADR 0047 actor fence. Account reads after that fence are ordinary MVCC reads, not row locks.
+The association is a synthetic verifier assertion, not human identity assurance.
+
+| Executed sequence | Observed source result |
+| --- | --- |
+| Same actor A, two password rotations | Original account/actor and association/participation/membership remain; generic account version advances by two |
+| Rebind that account A → B | A's account lookup is empty; original People association remains but does not establish a matching account |
+| Rebind the same account B → A | Original current account/actor and association/participation/membership tuple matches again; generic version advances by two across the round trip |
+
+This proves neither restored notice eligibility nor an unauthorized read. No communications
+manifest or notice-read implementation exists. The current generic version changes for both
+credential updates and actor changes, so it cannot serve as a distinct principal-binding marker.
+Holding a consistent source snapshot cannot decide the meaning of that historical round trip.
+
+ADR 0045's replacement/rejoin rules and ADR 0047's different-actor rule do not explicitly settle
+whether returning A may regain eligibility on the original notice. The specialists' initial
+interpretations differed; the strongest alternative permits the original exact tuple to regain
+eligibility under current gates, without claiming uninterrupted binding. Permanent denial across
+the round trip would be a new rule requiring identity-owned evidence. This is an unresolved
+contract, not a demonstrated violation of an already settled permanent-denial requirement.
+
+The [bounded decision and recommendation](../plans/communications-audience-source-qualification.md#decision-returned-to-françois)
+compare those choices and specify a private binding-marker prerequisite if François selects it.
+No marker or new succession policy has been implemented. The unfinished source-adapter draft
+was removed; only the executable probe and documentation remain from this increment. Publication
+work has not started. This follows the original proposal's stable-boundary stop condition.
+
+### Executed verification
+
+Fresh database `chimwemwe_comm1_sources_20261024_02`, under `core-test`, with generated passwords
+kept in process memory and no account rows, hashes or tokens printed or committed:
+
+```sh
+mise exec -- mix format apps/chimwemwe_core/test/chimwemwe/people/communications_source_fence_qualification_test.exs
+mise exec -- env MIX_ENV=test mix compile --warnings-as-errors
+mise exec -- env MIX_ENV=test mix ecto.create --quiet
+mise exec -- env MIX_ENV=test mix ecto.migrate --quiet
+mise exec -- env MIX_ENV=test mix test apps/chimwemwe_core/test/chimwemwe/identity/account_source_fence_test.exs apps/chimwemwe_core/test/chimwemwe/people/communications_source_fence_qualification_test.exs apps/chimwemwe_core/test/chimwemwe/identity/local_credentials_test.exs apps/chimwemwe_core/test/chimwemwe/people/foundation_test.exs apps/chimwemwe_core/test/chimwemwe/platform/persistence_test.exs apps/chimwemwe_core/test/chimwemwe/auth_demo/config_test.exs --seed 29
+```
+
+Result: **69 passed**, including six People source probes and the existing account-fence,
+credentials, People, persistence and local-auth configuration regressions. The expected
+transaction-timeout disconnection belongs to the existing rollback negative control. Passing
+counterexample/observation tests do not qualify the complete audience fence.
+
+The first `_01` run also passed 69 tests. Strict Credo then identified excessive helper nesting;
+the extraction's first replay failed test compilation because a fixture argument was missing.
+That harness error was corrected before the fresh `_02` final run above. No runtime or source
+writer was changed. Targeted format verification and strict Credo passed after the correction.
+
+Additional final checks passed:
+
+```sh
+mise exec -- mix format --check-formatted apps/chimwemwe_core/test/chimwemwe/people/communications_source_fence_qualification_test.exs
+cd apps/chimwemwe_core
+mise exec -- mix credo --strict
+cd ../..
+mise exec -- uv run python tools/check_docs.py
+git diff --check
+```
+
+Scoped structure/link validation of the four changed communications Markdown files also passed.
+The first full documentation attempt encountered a missing evidence link in concurrent ADR 0048
+work. That other work remained untouched; after its evidence appeared, the final full documentation
+validation passed. No browser or web checks were run for this test/documentation increment.
+
+Still unimplemented/unexecuted in this increment: the complete private source projection;
+institution/effective-date/midnight and five-minute preparation expiry; full membership,
+assignment, role inclusion, grant, module and current acting-session fencing; canonical draft
+binding and immutable preparation; complete 0/1/25/26/traversal-bound/race/denial matrix; composed
+deadline/rollback/unknown-outcome behavior; and source/classroom mixed-load measurements. The
+account primitive's existing timeout and 0/1/25/26 tests do not stand in for these combined tests.
+Actual publication/correction/receipt workload, UI/accessibility/browser evidence and all
+publication atomicity remain later work. Recipients may be offline; only the acting request
+requires a current session, and no local-credential-to-public-session handoff is introduced.
+
+`make check` was **not run in this increment**, as instructed. The historical 23 October
+integration result above is not a verification of this new patch or the complete source fence.
+Retain the isolated database through the unresolved decision; no cleanup was performed.
+
+### Renewed delegated review
+
+All four existing AI profiles completed bounded read-only reviews of the full not-qualified
+checkpoint, new probe and returned decision. They reviewed source and the coordinator's reported
+results; they did not reproduce tests or edit files. No screen exists for visual review.
+
+| Profile | Final disposition and evidence | Coordinator response |
+| --- | --- | --- |
+| Primary education | Approve the not-qualified checkpoint and stop; recommend B as a new decision. Generic version changes do not distinguish credential rotation from principal reassignment. | Accept. Return the explicit choice to François; preserve offline recipient eligibility and test marker non-reuse/baseline if B is authorized. |
+| Secondary education | Approve stopping and recommend B. Withdraw the initial interpretation that permanent ABA denial was already explicit; A remains a valid choice under current gates. | Accept the corrected interpretation. No settled-rule violation is alleged; exact date, future/ended staff, deduplication, authority/session races and classroom impact remain open. |
+| School/college admissions | Approve the record and returned decision, not the fence. A restored tuple is an observation, not notice access. Recommend B while retaining A as an explicit alternative. | Accept. Preserve exact-institution staff-only scope, no retrospective absent/pending admission, and all applicant/family/referee/external-college exclusions. Binding markers grant no permission, session, receipt or delivery authority. |
+| UI | Approve the evidence record and stop; no blocking correction. Support B with its stated migration/test cost. No implemented interface, outcome types or runtime usability exists. | Accept. Current status: “Audience qualification incomplete. Publication remains unavailable.” Keep binding-marker details in engineering evidence, with essential future states visible and optional detail accessible by focus, touch and hover. |
+
+There is no remaining disagreement about the stop or about the need for an explicit contract
+choice. Agreement does not authorize B. Only François can select that stable identity boundary.
+No specialist approves the complete audience fence, publication, representative testimony,
+independent security/privacy assurance or release.
+
+The isolated Advisor preflight returned `parent_runtime_unavailable` both before the design and
+at completion; no consultation process or isolated Advisor assurance is claimed. That unavailable
+route is separate from these completed delegated AI reviews.
+
+## Selected B: binding prerequisite — 24 October 2026
+
+François selected B and authorized the scoped ADR, implementation, focused tests and another
+four-agent checkpoint review before COMM-1 resumption. [ADR 0051](../adr/0051-private-account-principal-binding-marker.md)
+and its [binding evidence](account-principal-binding-evidence.md) now record a private
+database-managed marker that survives same-principal credential changes and changes on actual
+actor reassignment or account recreation. It grants no notice or session authority.
+
+The isolated prerequisite passed 78 focused regression tests, a subsequent 30-test account
+replay with expanded SQL input cases, generated drift/static checks and five dedicated migration
+trials. All four specialists approved only this prerequisite and continuation of already
+authorized remaining audience-source qualification. The evidence records the exact baseline,
+source fingerprint and exclusions for concurrent directory/session/password/browser work.
+These are not combined-checkout or complete-fence passing results.
+
+The previously undefined B choice is now selected and the marker prerequisite's review is
+complete. Remaining composed source qualification must bind the original marker with tenant,
+account, actor, association, participation and membership and independently recheck current
+eligibility, effective date, module/capability and acting session. Initially absent/pending
+admission cannot be filled retrospectively; recipients may be offline until acting.
+
+The complete audience fence remains not qualified and publication work remains stopped pending
+its own executed checkpoint and specialist review. `make check` was not run for the binding
+increment, as expressly instructed. The historical integration run and isolated prerequisite
+results cannot stand in for that deferred gate or later publication evidence.

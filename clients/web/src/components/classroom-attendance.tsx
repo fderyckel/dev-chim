@@ -25,7 +25,9 @@ const client = createClient<Mutable<paths>>({
 const markLabels = { present: "Present", absent: "Absent", late: "Late" } as const;
 const oidcSignInEnabled = process.env.NEXT_PUBLIC_CHIMWEMWE_OIDC_SIGN_IN === "true";
 
-export function ClassroomAttendance() {
+export function ClassroomAttendance({
+  staffSignIn = false,
+}: { staffSignIn?: boolean } = {}) {
   const [csrf, setCsrf] = useState<string | null>(null);
   const [classes, setClasses] = useState<Classes>([]);
   const [view, setView] = useState<View | null>(null);
@@ -68,9 +70,11 @@ export function ClassroomAttendance() {
     if (!result.data) {
       clearSession();
       setMessage(
-        oidcSignInEnabled
-          ? "Sign in with your school account to open your classes."
-          : "Start a synthetic educator session to open your classes.",
+        staffSignIn
+          ? "Sign in with your individual staff account to open your classes."
+          : oidcSignInEnabled
+            ? "Sign in with your school account to open your classes."
+            : "Start a synthetic educator session to open your classes.",
       );
       return;
     }
@@ -96,6 +100,19 @@ export function ClassroomAttendance() {
     // Only check the session on first arrival. Actions explicitly refresh current authority.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  useEffect(() => {
+    if (!staffSignIn) return;
+    const resume = (event: PageTransitionEvent) => {
+      if (event.persisted) window.location.reload();
+    };
+    const leave = () => clearSession();
+    window.addEventListener("pageshow", resume);
+    window.addEventListener("pagehide", leave);
+    return () => {
+      window.removeEventListener("pageshow", resume);
+      window.removeEventListener("pagehide", leave);
+    };
+  }, [staffSignIn]);
   async function guarded(action: () => Promise<void>) {
     setBusy(true);
     try {
@@ -249,29 +266,48 @@ export function ClassroomAttendance() {
         description="Open your class, mark each student, and save the register."
         aside={
           <p>
-            {oidcSignInEnabled
-              ? "Educator · school account"
-              : "Synthetic educator · local evaluation"}
+            {staffSignIn
+              ? "Fictional staff · local evaluation"
+              : oidcSignInEnabled
+                ? "Educator · school account"
+                : "Synthetic educator · local evaluation"}
           </p>
         }
       />
       <p className="c-classroom__notice">
-        {oidcSignInEnabled
-          ? "School account sign-in is available for the pre-linked educator configured by this deployment. "
-          : "Fictional people and a prepared class. Real school sign-in is not connected. "}
+        {staffSignIn
+          ? "Fictional people and a prepared class, using connected local staff sign-in. "
+          : oidcSignInEnabled
+            ? "School account sign-in is available for the pre-linked educator configured by this deployment. "
+            : "Fictional people and a prepared class. Real school sign-in is not connected. "}
         Corrections are limited to today’s assigned class and retain every earlier
         register.
       </p>
       <div className="c-classroom__actions">
-        <ActionLink href="/classroom/setup" variant="secondary" icon="forward">
-          Prepare a class
-        </ActionLink>
+        {staffSignIn ? (
+          csrf && (
+            <>
+              <ActionLink href="/accounts" variant="quiet">
+                Accounts
+              </ActionLink>
+              <ActionLink href="/my-preferences" variant="quiet">
+                My preferences
+              </ActionLink>
+            </>
+          )
+        ) : (
+          <ActionLink href="/classroom/setup" variant="secondary" icon="forward">
+            Prepare a class
+          </ActionLink>
+        )}
       </div>
       <p className="c-classroom__message" role="status" aria-live="polite">
         {message}
       </p>
       {!csrf ? (
-        oidcSignInEnabled ? (
+        staffSignIn ? (
+          <ActionLink href="/sign-in">Sign in</ActionLink>
+        ) : oidcSignInEnabled ? (
           <ActionLink href="/auth/sign-in">Sign in with your school account</ActionLink>
         ) : (
           <ActionButton

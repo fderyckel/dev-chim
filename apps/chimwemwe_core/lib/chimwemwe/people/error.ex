@@ -18,6 +18,7 @@ defmodule Chimwemwe.People.Error do
           | :module_unavailable
           | :not_found
           | :retryable_dependency
+          | :scope_limit
           | :stale
 
   @type t :: %__MODULE__{code: code()}

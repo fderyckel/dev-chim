@@ -7,8 +7,8 @@ defmodule Chimwemwe.Identity.LocalCredentials do
   PostgreSQL receives only the slow password hash.
   """
 
-  alias AshAuthentication.{BcryptProvider, Info, Strategy}
-  alias Chimwemwe.Identity.{Account, PasswordPolicy}
+  alias AshAuthentication.{Info, Strategy}
+  alias Chimwemwe.Identity.{Account, PasswordHash, PasswordPolicy}
   alias Ecto.UUID
 
   @temporary_lifetime_seconds 24 * 60 * 60
@@ -72,16 +72,24 @@ defmodule Chimwemwe.Identity.LocalCredentials do
   @doc "Authenticates an active password or establishes restricted first-login state."
   @spec authenticate(String.t(), String.t()) ::
           {:ok, {:active, Account.t()} | {:first_login, Account.t()}} | {:error, :invalid_login}
-  def authenticate(email, password) do
+  def authenticate(email, password), do: authenticate_with(email, password, :demonstration_token)
+
+  @doc "Verifies local credentials for the opaque application-session boundary without minting an Ash token."
+  @spec authenticate_for_application(String.t(), String.t()) ::
+          {:ok, {:active, Account.t()} | {:first_login, Account.t()}} | {:error, :invalid_login}
+  def authenticate_for_application(email, password),
+    do: authenticate_with(email, password, :application)
+
+  defp authenticate_with(email, password, mode) do
     with {:ok, email} <- normalize_email(email),
          true <- is_binary(password),
          {:ok, account} <- lookup(email),
          false <- locked?(account),
-         result <- authenticate_account(account, email, password) do
+         result <- authenticate_account(account, email, password, mode) do
       finish_attempt(account, result)
     else
       _invalid ->
-        BcryptProvider.simulate()
+        PasswordHash.simulate()
         {:error, :invalid_login}
     end
   end
@@ -89,14 +97,16 @@ defmodule Chimwemwe.Identity.LocalCredentials do
   @spec complete_first_login(String.t(), pos_integer(), String.t(), String.t()) ::
           {:ok, Account.t()} | {:error, term()}
   def complete_first_login(account_id, expected_lock_version, password, confirmation) do
-    with true <- password == confirmation,
+    with {:ok, normalized} <- PasswordPolicy.normalize(password),
+         {:ok, normalized_confirmation} <- PasswordPolicy.normalize(confirmation),
+         true <- normalized == normalized_confirmation,
          {:ok, account} <- get(account_id),
          true <- account.status == :pending_first_login,
          true <- account.lock_version == expected_lock_version,
          true <- future?(account.temporary_password_expires_at),
-         false <- BcryptProvider.valid?(password, account.hashed_password),
+         false <- PasswordHash.valid?(password, account.hashed_password),
          :ok <- PasswordPolicy.validate(password, account.email),
-         {:ok, hashed_password} <- BcryptProvider.hash(password),
+         {:ok, hashed_password} <- PasswordHash.hash(password),
          {:ok, active} <-
            account
            |> Ash.Changeset.for_update(:activate_permanent_password, %{
@@ -116,16 +126,27 @@ defmodule Chimwemwe.Identity.LocalCredentials do
   @spec first_login_session_seconds() :: pos_integer()
   def first_login_session_seconds, do: @first_login_session_seconds
 
-  defp authenticate_account(%Account{status: :pending_first_login} = account, _email, password) do
+  defp authenticate_account(
+         %Account{status: :pending_first_login} = account,
+         _email,
+         password,
+         _mode
+       ) do
     if future?(account.temporary_password_expires_at) and
-         BcryptProvider.valid?(password, account.hashed_password) do
+         PasswordHash.valid?(password, account.hashed_password) do
       {:ok, {:first_login, account}}
     else
       {:error, :invalid_login}
     end
   end
 
-  defp authenticate_account(%Account{status: :active}, email, password) do
+  defp authenticate_account(%Account{status: :active} = account, _email, password, :application) do
+    if PasswordHash.valid?(password, account.hashed_password),
+      do: {:ok, {:active, account}},
+      else: {:error, :invalid_login}
+  end
+
+  defp authenticate_account(%Account{status: :active}, email, password, :demonstration_token) do
     Account
     |> Ash.Query.for_read(:sign_in_with_password, %{email: email, password: password})
     |> Ash.read(authorize?: false)
@@ -135,7 +156,7 @@ defmodule Chimwemwe.Identity.LocalCredentials do
     end
   end
 
-  defp authenticate_account(_account, _email, _password), do: {:error, :invalid_login}
+  defp authenticate_account(_account, _email, _password, _mode), do: {:error, :invalid_login}
 
   defp finish_attempt(account, {:ok, _result} = success) do
     reset_attempts(account.id)
@@ -201,7 +222,7 @@ defmodule Chimwemwe.Identity.LocalCredentials do
   defp generated_password do
     password = :crypto.strong_rand_bytes(24) |> Base.url_encode64(padding: false)
 
-    case BcryptProvider.hash(password) do
+    case PasswordHash.hash(password) do
       {:ok, hashed_password} -> {:ok, password, hashed_password}
       :error -> {:error, :password_hash_unavailable}
     end

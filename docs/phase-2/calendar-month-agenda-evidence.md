@@ -69,6 +69,34 @@ navigation condition above; the selector owner repaired it and the final combine
 The Playwright demo configuration now accepts a validated
 `CHIMWEMWE_DEMO_E2E_PORT` base port so four test servers can avoid another chat's occupied ports.
 
+### 2026-10-24 institution history follow-up
+
+François requested closing the four previously reported selector Back-navigation failures and
+explicitly excluded another full-check run. The current checkout already contained the selector
+repair (`autoComplete="off"` on the institution form and institution-keyed viewer state). All four
+original regression cases passed before further changes, so no additional runtime change was
+needed.
+
+The selector regression now checks the URL, dropdown, institution name, calendar year/zone and
+teaching-period content together after switching, refresh, Back and Forward. It also verifies
+that the other institution's teaching period is absent. A separate case covers selecting an
+institution without pressing Switch, navigating to another section, then going Back and Forward;
+the unsubmitted choice must not replace the institution supplied by the URL.
+
+Executed against a fresh build of the current source:
+
+- `CHIMWEMWE_UI0_SYNTHETIC=true npm run build`: passed.
+- `CHIMWEMWE_DEMO_E2E_PORT=3060 npm run test:e2e:demo -- institution-selector.spec.ts calendar.spec.ts`:
+  all 20 focused browser tests passed across the four startup institutions. This includes the
+  four previously failing paths, calendar state reset, failure recovery, Month/Agenda/List,
+  fixed all-day dates and accessible reflow.
+- `npx eslint tests/demo/institution-selector.spec.ts` and scoped Prettier verification: passed.
+- `git diff --check`: passed.
+
+`make check`, `make web-check`, other browser suites and the full unit suite were not rerun, as
+requested. These focused results supersede the earlier four-failure status for the selector and
+calendar paths; they do not establish a new repository-wide result.
+
 ## Specialist disposition
 
 All three profiles reviewed the implementation read-only on 2026-10-23. The coordinator accepts
