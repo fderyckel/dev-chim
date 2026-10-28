@@ -48,6 +48,23 @@ defmodule Chimwemwe.PublicApi.SessionPlug do
     |> halt()
   end
 
+  defp purpose("GET", "/api/v1/communications/" <> task)
+       when task in ["workspace", "draft", "review", "status", "metrics", "receipt"],
+       do: {:ok, :communications}
+
+  defp purpose("POST", "/api/v1/communications/" <> task)
+       when task in [
+              "create-draft",
+              "revise-draft",
+              "prepare-operation",
+              "submit-for-approval",
+              "approve-operation",
+              "open-notice",
+              "confirm-receipt",
+              "command-outcome"
+            ],
+       do: {:ok, :communications}
+
   defp purpose("GET", "/api/v1/session"), do: {:ok, :session_read}
   defp purpose("GET", "/api/v1/staff-accounts"), do: {:ok, :staff_accounts_read}
   defp purpose("GET", "/api/v1/staff-preferences"), do: {:ok, :staff_preferences}

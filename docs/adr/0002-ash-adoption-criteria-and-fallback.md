@@ -93,6 +93,19 @@ On 2026-09-16, refreshed Hex metadata reported [EEF-CVE-2026-86338](https://osv.
 
 On 2026-09-25, refreshed Hex metadata reported [EEF-CVE-2026-93477](https://osv.dev/vulnerability/EEF-CVE-2026-93477) against Ash 3.33.4. The same coordinated [security-patch review](../phase-0/handover-evidence.md) moves both locks to the first fixed release, Ash 3.33.11, and adds focused bulk update/destroy regressions proving untrusted parameters cannot set private action arguments while trusted server options still can. This patch preserves the conditional adoption boundary and does not authorize direct public exposure of generic bulk actions.
 
+On 2026-10-26, François authorized the maintained-core dependency advisory repair. The
+[upgrade evidence](../phase-2/staff-review-presentation-evidence.md#dependency-remediation-follow-up--2026-10-26)
+records Ash 3.37.2, Bandit 1.14.0 and the transitive JOSE 1.11.13 security updates, focused
+PostgreSQL upsert/HTTP/cryptographic regressions and the coordinated full-check disposition.
+AshPostgres 2.15.2 and AshSql 0.8.4 remain unchanged. This does not modify the conditional-adoption
+decision, expose a new upsert action, update the archived lab, or extend release authority.
+
+On 2026-10-28, refreshed Hex metadata reported
+[CVE-2026-116078](https://github.com/mtrudel/bandit/security/advisories/GHSA-pxjf-g536-7r93)
+against Bandit 1.14.0. The maintained core now pins the first fixed release, Bandit 1.14.1,
+retains the bounded HTTP parser controls and asserts the patched-version floor in the focused
+dependency suite. The archive and the broader conditional-adoption decision remain unchanged.
+
 ## Fallback and exit cost
 
 Fallback is Phoenix/Ecto with explicit action modules, policy services, schemas, and thin interface adapters. The code-owned ownership and named-action rules survive that replacement even though the Ash base resource and audit are removed. Select the fallback before school modules depend on Ash if any critical criterion fails or requires pervasive escape hatches.

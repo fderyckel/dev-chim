@@ -102,4 +102,70 @@
     height: 1.125rem;
     accent-color: var(--color-action);
   }
+
+  .c-classroom__tasks > button {
+    display: none;
+  }
+
+  .c-classroom__task-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    border-bottom: var(--border-width) solid var(--color-border);
+    padding-block: var(--space-3);
+  }
+
+  .c-classroom__task-items button {
+    min-height: 2.75rem;
+    padding: var(--space-2) var(--space-4);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  .c-classroom__task-items [aria-current] {
+    font-weight: 800;
+    border-color: var(--color-action);
+  }
+
+  .c-classroom__class-choice {
+    display: grid;
+    gap: var(--space-2);
+  }
+
+  .c-classroom__class-choice p {
+    margin: 0;
+    color: var(--color-text-soft);
+    font-size: var(--font-size-sm);
+  }
+
+  .c-classroom__departure {
+    max-width: min(32rem, calc(100% - 2rem));
+    padding: var(--space-5);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .c-classroom__departure::backdrop {
+    background: var(--color-surface-subtle);
+    opacity: 0.9;
+  }
+
+  @media (width <= 36rem) {
+    .c-classroom {
+      padding: var(--space-4);
+    }
+
+    .c-classroom__tasks > button {
+      display: inline-flex;
+    }
+
+    .c-classroom__task-items[data-open="false"] {
+      display: none;
+    }
+  }
 }

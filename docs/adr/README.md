@@ -80,8 +80,16 @@ Short summaries may aid readers, but must not become separately maintained decis
 
 | [0051](0051-private-account-principal-binding-marker.md) | Private account principal-binding marker | Proposed | Identity and platform engineering | François selected option B and authorized this scoped prerequisite; [focused binding evidence](../phase-2/account-principal-binding-evidence.md) remains separate from complete audience qualification and release |
 
-| [0052](0052-private-staff-audience-source-capture.md) | Private staff-audience source capture | Proposed | People and platform engineering | Authorized private source candidate; [functional and failed classroom-impact evidence](../phase-2/staff-audience-source-evidence.md) keeps publication unavailable |
+| [0052](0052-private-staff-audience-source-capture.md) | Private staff-audience source capture | Proposed | People and platform engineering | [Historical source evidence](../phase-2/staff-audience-source-evidence.md) and the [locally qualified successor](../phase-2/same-writer-admission-evidence.md); publication is recorded in the [local synthetic successor](../phase-2/communications-comm-1-publication-evidence.md) |
 
 | [0053](0053-people-owned-source-write-fence.md) | People-owned source write fence | Proposed | People and platform engineering | François authorized the scoped write-boundary change and unchanged 20% trials; [checkpoint](../phase-2/people-source-write-fence-evidence.md) records actual qualification and review separately from publication |
+
+| [0054](0054-same-writer-nested-admission.md) | Same-writer nested admission | Proposed | Platform engineering | [Completed local source qualification](../phase-2/same-writer-admission-evidence.md): bounded permit correction, unchanged impact gates, four-profile review and final full check; publication and release remain separate |
+
+| [0055](0055-staff-self-presentation-and-navigation.md) | Staff self presentation and navigation | Proposed | Identity and product experience engineering | François authorized the four reviewer repairs and another local-login review; [scoped evidence](../phase-2/staff-review-presentation-evidence.md) distinguishes executed checks from human validation |
+
+| [0056](0056-local-synthetic-communications-publication.md) | Local synthetic communications publication | Proposed | Communications, platform and product engineering | François authorized this bounded proof; [implementation evidence](../phase-2/communications-comm-1-publication-evidence.md) records current qualification and review separately from connected use or release |
+
+| [0057](0057-local-classroom-workspace-navigation.md) | Local Classroom workspace navigation | Proposed | Product experience and classroom/client engineering | François authorized CW-1 on 27 October; [implementation evidence](../phase-2/classroom-workspace-evidence.md) records the protected staff entrances, flexible composition and attendance recovery qualification |
 
 Allowed decision statuses are Proposed, Accepted, Conditionally Accepted, Rejected, Superseded, and Deferred. `Template` is reserved for ADR 0000.

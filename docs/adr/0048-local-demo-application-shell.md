@@ -4,7 +4,7 @@
 - Date: 2026-10-24
 - Accountable owner: Product experience and client engineering
 - Deciders: François — Project Owner
-- Implementation authority: François authorized the first synthetic Home, Apps and workspace shell on 24 October 2026, retaining existing pages, all four institutions and phone usability
+- Implementation authority: François authorized the first synthetic shell on 24 October 2026 and the in-memory app-group/personal Home editors on 25 October 2026; all four institutions, existing pages and phone navigation remain required
 - Supersedes: None
 
 ## Context
@@ -58,7 +58,8 @@ startup and row-tenant checks remain in the existing server adapter under ADR 00
 No catalogue field is an authority assertion. A later connected navigation consumer requires a
 separate contract referencing current server-owned module gates and actor authorization. This
 demo does not implement that contract or attach the local catalogue to the platform registry.
-There is no persistence, menu designer, global record search or generic domain renderer.
+There is no persistence, global record search or generic domain renderer. The later authorized
+memory-only presentation editor is bounded below.
 
 ### Navigation agility amendment on 25 October 2026
 
@@ -68,11 +69,35 @@ separates stable product destinations, institutional navigation profiles and per
 Teaching & learning and Students & support are editable default labels, not permanent domain
 boundaries. Moving or aliasing a destination never changes its record scope or authorization.
 
-The code-owned grouping above records the implemented first proof only. A next proposed
-memory-only editor would arrange the same approved destinations with explicit Apply layout,
-Cancel and Reset semantics, while preserving all four institutions and direct routes. This
-amendment changes documentation only; it does not implement the editor or expand the original
-shell authorization into preference persistence, account integration or connected navigation.
+The code-owned grouping above records the implemented first proof only. The amendment initially
+changed documentation only; François subsequently authorized the memory-only editor below.
+
+### Authorized memory-only editor
+
+Organize apps changes a local institution-layout preview; Customize my Home changes a separate
+personal landing arrangement. Both use short plain-text section names and ordered references
+to only Students, Contacts/Families, Educators/Instructors and Calendar. A reference may appear
+in several sections; search retains one canonical result per destination. An All available
+pages fallback remains accessible even when a customized catalogue is empty.
+
+The shared section editor provides add/remove, rename, move up/down, move to section, preview,
+Apply layout and Cancel. A scoped reset confirmation changes only its current layout. A small
+set of named Home layouts and a chosen starting layout are presentation preferences only.
+Institution app-group changes never overwrite personal Home layouts or change school data.
+
+A demo-only React provider in the root layout retains these references across client-side
+page navigation. Its URL-derived scope key discards presentation state when selection changes;
+the server adapter remains the sole source of validated demo data. The rendered pack must match
+the provider's scope. Reload, institution switch and restored full-page history discard the
+temporary arrangements. No cookie, browser storage, file, API write or global server store is
+used. A clear preview-only/reset notice remains visible beside the editors.
+
+Labels and layout references are bounded and validated before application. Layouts carry no
+record payload, learner/class identifier, capability or URL supplied by the editor. They cannot
+create a workflow, broaden a read, change a named action or imply a teaching assignment. Existing
+institution summary, calendar, record distinctions, local guards and qualification clients are
+preserved. This authorization does not add durable preferences, account integration, sharing,
+new views, authentication or connected navigation.
 
 ## Plain-English summary
 
@@ -129,6 +154,10 @@ routes; Home/Apps/workspace navigation; switch/refresh/Back/Forward; invalid sel
 search isolation; keyboard/disclosure behaviour; 320-pixel phone reflow; automated accessibility;
 screenshots and the required repository checks. Planned or AI-reviewed trials do not constitute
 human usability evidence.
+
+The subsequent [layout editor evidence](../phase-2/local-demo-layout-editor-evidence.md) records
+draft/apply/reset, alias/search, state lifetime, named Home layouts and rendered keyboard/phone
+qualification independently of the original shell's historical results.
 
 ## Fallback and exit cost
 

@@ -70,6 +70,11 @@ real data, or implementation authority and does not replace the classroom-first 
 On 2026-10-23 the Project Owner separately authorized the
 [bounded COMM-1 proof](docs/plans/communications-comm-1-staff-announcement-proposal.md), starting
 with audience source-fence qualification and specialist checkpoint review before proceeding.
+The [local source prerequisite](docs/phase-2/same-writer-admission-evidence.md) now passes its
+unchanged attendance-impact gate and final review. The authorized [local synthetic publication
+implementation](docs/phase-2/communications-comm-1-publication-evidence.md) adds independent approval,
+explicit opening, exact-version optional receipt, correction and withdrawal. Its bounded attendance
+qualification, four-specialist review and full integration check now pass locally.
 
 1. Read [the Phase 0 outcome](docs/phase-0/README.md) and its binding later gates.
 2. Read [the Phase 1 core scope](docs/phase-1/README.md).
@@ -143,7 +148,8 @@ and a server-owned ephemeral session. It is read-only and is not production auth
 
 - Phoenix/PostgreSQL and the modular-monolith shape are the firm base.
 - Ash is conditionally accepted as the default production-core framework; every retained exception has a production gate, verification method, and fallback.
-- The production core uses the reviewed Ash 3.34.6 security-patch baseline. The archived Foundation
+- The production core pins the security-fixed Ash 3.37.1 and AshPostgres 2.15.2 baseline, with
+  [local verification evidence](docs/phase-2/same-writer-admission-evidence.md). The archived Foundation
   Lab retains its historical Ash 3.33.11 exit baseline and is outside routine Phase 2 verification.
 - The accepted authoring model keeps Ash resources, actions, policies, and migrations authoritative while derived metadata may configure views and reports; it does not add a second runtime ORM.
 - Roles and access scopes are tenant-defined data, never a fixed list of institutional job titles.

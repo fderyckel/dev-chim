@@ -12,6 +12,7 @@ import { demoHref } from "../lib/demo-institutions";
 import { demoNavigation, type DemoSection } from "../lib/demo-navigation";
 import { DemoShell } from "./demo-shell";
 import { DemoApps } from "./demo-apps";
+import { DemoPersonalHome } from "./demo-personal-home";
 import { DemoCalendar } from "./demo-calendar";
 import type {
   DemoCalendarItem,
@@ -209,6 +210,10 @@ export function DemoInstanceView({
         ) : null}
         {section === "overview" ? (
           <>
+            <DemoPersonalHome
+              packId={data.packId}
+              destinations={navigation.apps.flatMap((app) => app.destinations)}
+            />
             <div className="c-demo-stats">
               {[
                 [

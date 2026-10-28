@@ -3,6 +3,7 @@
 .next-classroom/
 .next-demo/
 .next-staff/
+.next-comm/
 node_modules/
 playwright-report/
 test-results/

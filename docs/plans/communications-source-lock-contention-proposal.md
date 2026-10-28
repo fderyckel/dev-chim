@@ -1,6 +1,6 @@
 # COMM-1 source-lock contention follow-up
 
-- Status: Scoped fence authorized, implemented and tested under ADR 0053; complete checkpoint remains not qualified
+- Status: Scoped fence implemented; subsequent ADR 0054 completes the bounded local source prerequisite
 - Date: 2026-10-25
 - Owner: People and platform engineering; François retains the implementation decision
 - Trigger: the composed source candidate exceeded the retained classroom p95-impact limit
@@ -11,10 +11,13 @@
 François authorized this follow-up on 2026-10-25. [ADR 0053](../adr/0053-people-owned-source-write-fence.md)
 and its [executed checkpoint](../phase-2/people-source-write-fence-evidence.md) record the new
 write fence, before/after blocking observations, tests and migration trials. The unchanged
-foundation workload passes all three repeats. Actual attendance comparisons reject operations
-even in baseline at the existing six-slot limit; the complete checkpoint remains not qualified.
-Keep publication stopped. The next recommended decision is a separately scoped same-writer
-nested-admission contract, described in that checkpoint; no such change is implemented here.
+foundation workload passed all three repeats. At that checkpoint, actual attendance rejected
+operations even in baseline at the existing six-slot limit, and qualification correctly stopped.
+François subsequently asked to address that blocker. The separately scoped
+[ADR 0054 successor](../phase-2/same-writer-admission-evidence.md) implements exact-writer permit
+reuse, passes both unchanged workloads in six comparisons each, and completes specialist/full
+verification. That result qualifies only the recorded local source prerequisite; publication
+remains unimplemented. The original failed results below remain historical evidence.
 
 The original recommendation was to identify the classroom-conflicting source locks and qualify
 a People-owned write-boundary fence if that was the measured cause.

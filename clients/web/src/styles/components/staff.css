@@ -150,6 +150,19 @@
     user-select: all;
   }
 
+  .c-staff__workspace-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: var(--space-5);
+  }
+
+  .c-staff__workspace-entries {
+    display: grid;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    overflow-wrap: anywhere;
+  }
+
   @media (width <= 36rem) {
     .c-staff {
       padding: var(--space-4);

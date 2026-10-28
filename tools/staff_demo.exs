@@ -31,7 +31,7 @@ Application.put_env(:chimwemwe_core, :public_session_cookie_keys, [
   Base.encode64(:crypto.strong_rand_bytes(48))
 ])
 
-{:ok, fixture} = StaffDirectoryFixture.seed!(runtime)
+{:ok, fixture} = StaffDirectoryFixture.seed!(runtime, review_rosters: true)
 password = Base.url_encode64(:crypto.strong_rand_bytes(32), padding: false)
 fixture = StaffDirectoryFixture.bootstrap!(fixture, password)
 context = Fixture.context_a()

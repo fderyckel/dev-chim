@@ -62,6 +62,14 @@ Slice 1E turns the earlier admission and routing contracts into one bounded Post
 
 The runtime accepts route and pool configuration only at startup. The operation API has no repository, database, tenant, placement, routing, or raw Ecto option. Unknown tenants and stale or forged placement details return the same non-disclosing route failure. Missing runtime components fail closed as a retryable dependency. A spawned process inherits neither the dynamic repository nor permission to use it; asynchronous work must establish and validate its own context.
 
+[ADR 0054](../adr/0054-same-writer-nested-admission.md) adds bounded synchronous nesting: the same
+process can reuse its held admission permit only inside the selected writer's active transaction,
+with the exact same execution context and supervised runtime/repository processes. Every inner
+call still validates context and resolves the current route; mismatches fail before the callback.
+The outer operation retains/reclaims the permit, and repository/scope state is restored on every
+exit. Session validation, refresh, authorization and transaction rollback are unchanged. This is
+connection accounting, not authority; spawned work must acquire its own permit.
+
 The repository module and migration baseline are production code. Slice 1F adds the authority graph tables, Slice 1G-A adds the three closed write-evidence tables, ADR 0018 T1-A adds the synthetic temporal-qualification tables, Slice 1H-A adds tenant-qualified entitlement and activation tables, Slice 1H-B expands the activation aggregate plus closed tenant-qualified modeled work, Slice 1I-A adds tenant-qualified governed extension definitions, and Slice 1J-A adds tenant-qualified delivery leases with retained-state rollback refusal. Slice 1J-B adds tenant-qualified consumer receipts, handler/event contract pins, replay-cycle state, and retained-evidence rollback refusal. T1-B changes no table. T1-C adds fact-operation and consumer-basis tables, same-scope operation guards, a tenant-qualified consumer chain, and retained-state rollback refusal. Slice 2.0-C adds tenant-qualified projection, import, retention-control, receipt, and redaction references; it validates expanded constraints separately and refuses removal after evidence is retained. Slice 1I-A reuses the closed safe-write evidence tables and refuses schema rollback once definition or publication evidence is retained. No runtime is installed under `Chimwemwe.Application` until a later deployment slice provides trusted route data, credentials, and measured explicit limits. The placement registry remains an immutable integration seam rather than the durable movement control plane required before production movement.
 
 ## Tenant-authority boundary

@@ -1,0 +1,58 @@
+@layer components {
+  html:has(.c-communications) {
+    min-width: 0;
+  }
+
+  .c-communications {
+    overflow-wrap: anywhere;
+  }
+
+  .c-communications .c-button {
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .c-communications__content {
+    display: grid;
+    gap: var(--space-4);
+    justify-items: start;
+    min-width: 0;
+    padding: var(--space-5);
+  }
+
+  .c-communications__content article {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .c-communications textarea {
+    min-width: 0;
+    max-width: 100%;
+    padding: var(--space-3);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+  }
+
+  .c-communications__body {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .c-communications__counts {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-2) var(--space-4);
+  }
+
+  .c-communications__counts dd {
+    margin: 0;
+    font-weight: 700;
+  }
+
+  .c-communications__content .c-communications__counts {
+    justify-self: stretch;
+  }
+}

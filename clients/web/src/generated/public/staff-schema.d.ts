@@ -288,6 +288,10 @@ export interface components {
                 /** @enum {string} */
                 readonly locale: "en" | "fr" | "en-MW";
                 readonly lock_version: number;
+                readonly navigation: {
+                    readonly accounts: boolean;
+                    readonly classroom: boolean;
+                };
             };
         };
         readonly StaffProvisionRequest: {

@@ -19,9 +19,11 @@ The private [staff-audience source candidate](staff-audience-source-evidence.md)
 implemented account binding with current recipient eligibility checks. The subsequently authorized
 [People write-fence checkpoint](people-source-write-fence-evidence.md) removes measured People-row
 blocking and passes three unchanged foundation workload comparisons within the retained 20% limit.
-Actual attendance rejects concurrent work at the existing admission limit even in baseline, so
-the complete source remains **not qualified** and publication unimplemented. A bounded same-writer
-nested-admission decision is proposed; no capacity or session contract is changed here.
+The [same-writer admission successor](same-writer-admission-evidence.md) corrects duplicate permit
+accounting while retaining current session/routing checks, all limits and rollback. Both unchanged
+workloads pass six comparisons each in the recorded isolated local environment; the final full
+check passes 462 core, 59 web unit and 107 browser tests. The bounded source prerequisite is now
+**locally qualified**. Publication is unimplemented and its later workflow/release gates remain.
 
 On 2026-10-09 the Project Owner instructed the project to start COMM-0.
 [ADR 0045](../adr/0045-governed-communications-audiences-and-engagement.md) and the
@@ -48,7 +50,11 @@ that account fence locally. Renewed qualification on 2026-10-24 records a passin
 run and returned the [account-binding decision](../plans/communications-audience-source-qualification.md).
 François selected B and authorized [ADR 0051's private binding prerequisite](../adr/0051-private-account-principal-binding-marker.md).
 Its [focused checkpoint](account-principal-binding-evidence.md) remains distinct from complete
-audience qualification and publication implementation. `make check` remains deferred.
+audience qualification and publication implementation. The [ADR 0054 successor](same-writer-admission-evidence.md)
+now completes the local source prerequisite and final full check. François subsequently authorized
+the [bounded local synthetic publication implementation](communications-comm-1-publication-evidence.md),
+now qualified locally with four-profile review, actual mixed attendance qualification and a
+passing full integration gate (559 core, 82 web unit, 108 browser tests).
 
 CF-4A adds the private synthetic [people and participation foundation](people-foundation-evidence.md):
 student/staff participation and verified staff-account association without implied permissions.
@@ -273,3 +279,4 @@ synthetic screen-to-writer and request-recovery proof governed by ADRs
 policy, Restricted consumer delivery, connected-release or real-data conditions.
 
 - [Synthetic staff directory and connected sign-in](../operations/synthetic-staff-directory.md) — isolated fictional account administration; current evidence and retained release gates.
+- [CW-1 Classroom workspace](classroom-workspace-evidence.md) — staff-owned Home/Apps, flexible code-owned labels and guarded attendance navigation; local synthetic qualification only.

@@ -58,6 +58,7 @@ defmodule Chimwemwe.Identity.PublicSessionAdapter do
   @oidc_keys [:code_verifier, :configuration_version, :nonce, :redirect_uri]
   @callback_keys [:code, :state]
   @purpose_names %{
+    communications: "communications.staff_audience",
     calendar_manage: "public.calendar.manage",
     calendar_read: "public.calendar.read",
     classroom_prepare: "public.classroom.prepare",

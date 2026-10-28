@@ -1624,6 +1624,10 @@ defmodule Chimwemwe.OrganizationLegal.FoundationTest do
              Persistence.with_writer(runtime, context_a(), fn ->
                Repo.query!("""
                TRUNCATE
+                 communications_engagements,
+                 communications_revisions,
+                 communications_preparations,
+                 communications_notices,
                  classroom_preparation_workspaces,
                  classroom_attendance_corrections,
                  classroom_attendance_submissions,

@@ -371,6 +371,90 @@ defmodule Chimwemwe.Identity.StaffDirectoryTest do
              )
   end
 
+  test "self presentation contains only the caller identity and fixed navigation hints", f do
+    assert {:ok, self} = StaffDirectory.preferences(f.persistence, Fixture.context_a())
+    assert self.display_name == "Synthetic Account Administrator"
+    assert self.navigation == %{accounts: true, classroom: true}
+
+    assert Enum.sort(Map.keys(self)) ==
+             Enum.sort([
+               :id,
+               :given_name,
+               :family_name,
+               :display_name,
+               :locale,
+               :lock_version,
+               :navigation
+             ])
+
+    assert {:error, _} = StaffDirectory.preferences(f.persistence, nil)
+    assert {:error, _} = StaffDirectory.preferences(f.persistence, Fixture.context_b())
+    assert {:error, _} = StaffDirectory.preferences(f.persistence, f.teacher_context)
+  end
+
+  test "staff labels do not grant destinations and hints track profile grant and revocation", f do
+    result = provision!(f)
+
+    assert {:ok,
+            %{display_name: "Synthetic Teacher", navigation: %{accounts: false, classroom: false}}} =
+             StaffDirectory.preferences(f.persistence, f.teacher_context)
+
+    assert {:error, %Error{code: :forbidden}} =
+             StaffDirectory.inventory(f.persistence, f.teacher_context)
+
+    assert {:ok, granted} =
+             StaffDirectory.set_access(
+               f.persistence,
+               Fixture.context_a(),
+               access_input(f, result)
+             )
+
+    assert {:ok, %{navigation: %{accounts: false, classroom: true}}} =
+             StaffDirectory.preferences(f.persistence, f.teacher_context)
+
+    assert {:ok, _} =
+             StaffDirectory.revoke_access_profile(
+               f.persistence,
+               Fixture.context_a(),
+               access_input(f, granted)
+             )
+
+    assert {:ok, %{navigation: %{accounts: false, classroom: false}}} =
+             StaffDirectory.preferences(f.persistence, f.teacher_context)
+  end
+
+  test "navigation follows module and current capability gates without allowing submitted hints",
+       f do
+    provision!(f)
+
+    forged =
+      Map.merge(Fixture.keys(), %{
+        locale: "en",
+        expected_version: 1,
+        navigation: %{accounts: true, classroom: true}
+      })
+
+    assert {:error, %Error{code: :invalid_input}} =
+             StaffDirectory.set_preferences(f.persistence, f.teacher_context, forged)
+
+    deny(f, "identity.staff_accounts.read")
+
+    assert {:ok, %{navigation: %{accounts: false, classroom: true}}} =
+             StaffDirectory.preferences(f.persistence, Fixture.context_a())
+
+    assert {:error, %Error{code: :forbidden}} =
+             StaffDirectory.inventory(f.persistence, Fixture.context_a())
+
+    query(
+      f,
+      "UPDATE platform_module_activations a SET state='inactive',replay_from_cursor=0,projection_ready=false,reconciliation_required=true,deactivated_at=NOW() FROM platform_module_entitlements e WHERE a.entitlement_id=e.id AND e.tenant_id=$1 AND e.module_key='classroom.attendance'",
+      [dump(tenant())]
+    )
+
+    assert {:ok, %{navigation: %{accounts: false, classroom: false}}} =
+             StaffDirectory.preferences(f.persistence, Fixture.context_a())
+  end
+
   test "personal language preference requires exact self eligibility and current modules, no directory permission",
        f do
     result = provision!(f)

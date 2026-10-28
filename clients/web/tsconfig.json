@@ -32,7 +32,9 @@
     ".next-demo/types/**/*.ts",
     ".next-demo/dev/types/**/*.ts",
     ".next-staff/types/**/*.ts",
-    ".next-staff/dev/types/**/*.ts"
+    ".next-staff/dev/types/**/*.ts",
+    ".next-comm/types/**/*.ts",
+    ".next-comm/dev/types/**/*.ts"
   ],
   "exclude": ["node_modules", "playwright-report", "test-results"]
 }

@@ -1,10 +1,10 @@
 # Private staff-audience source checkpoint
 
-- Successor: [People-owned write-fence checkpoint](people-source-write-fence-evidence.md),
-  authorized under ADR 0053 on 2026-10-25. Its foundation comparisons pass within 20%; actual
-  attendance admission failures leave complete qualification blocked. Historical results below
-  precede that fence and remain unchanged.
-- Status: **Not qualified — functional candidate implemented; classroom-impact acceptance failed**
+- Current successor: [same-writer admission and impact checkpoint](same-writer-admission-evidence.md)
+  completes the bounded local source prerequisite after ADR 0053's People fence. Both unchanged
+  workloads pass six comparisons each on the final dependency set, all four review conditions
+  and the full check are complete. Publication remains unimplemented.
+- Status: **Historical failed source candidate — retained unchanged; see qualified successor**
 - Updated: 2026-10-25
 - Authority: François selected the binding approach and authorized its prerequisite, remaining
   source qualification and specialist review before publication. Coordination with the binding

@@ -16,7 +16,6 @@ export type DemoDestination = Readonly<{
 export type DemoApp = Readonly<{
   id: "students" | "educators" | "calendar";
   label: string;
-  group: string;
   description: string;
   destinations: readonly DemoDestination[];
 }>;
@@ -44,7 +43,6 @@ export function demoNavigation(college: boolean) {
     {
       id: "students",
       label: "Students",
-      group: "Students & support",
       description: college ? "Students and contacts" : "Students and family contacts",
       destinations: [
         {
@@ -64,7 +62,6 @@ export function demoNavigation(college: boolean) {
     {
       id: "educators",
       label: college ? "Instructors" : "Educators",
-      group: "Teaching & learning",
       description: college
         ? "Instructors and support staff"
         : "Educators and support staff",
@@ -81,7 +78,6 @@ export function demoNavigation(college: boolean) {
     {
       id: "calendar",
       label: "Calendar",
-      group: "Teaching & learning",
       description: "Academic periods, closures and events",
       destinations: [
         {
@@ -101,13 +97,19 @@ export function demoNavigation(college: boolean) {
   };
 }
 
-export function findDemoDestinations(apps: readonly DemoApp[], query: string) {
+export function findDemoDestinations(
+  apps: readonly DemoApp[],
+  query: string,
+  groups: readonly { label: string; items: readonly string[] }[] = [],
+) {
   const words = query.trim().toLocaleLowerCase().split(/\s+/).filter(Boolean);
   return apps.flatMap((app) =>
     app.destinations
       .filter((destination) => {
-        const text =
-          `${destination.label} ${destination.keywords} ${app.label}`.toLocaleLowerCase();
+        const text = `${destination.label} ${destination.keywords} ${app.label} ${groups
+          .filter((group) => group.items.includes(destination.id))
+          .map((group) => group.label)
+          .join(" ")}`.toLocaleLowerCase();
         return words.every((word) => text.includes(word));
       })
       .map((destination) => ({ app, destination })),

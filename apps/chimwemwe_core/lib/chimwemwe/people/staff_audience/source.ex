@@ -1,6 +1,6 @@
 defmodule Chimwemwe.People.StaffAudience.Source do
   @moduledoc false
-  alias Chimwemwe.Identity.AccountSourceFence
+  alias Chimwemwe.Identity.{AccountSourceFence, SessionFoundation}
   alias Chimwemwe.People.{Error, Foundation}
   alias Chimwemwe.People.StaffAudience.{AuthorityFence, Clock}
   alias Chimwemwe.Platform.{Authority, ModuleLifecycle, TrustedActor}
@@ -10,7 +10,10 @@ defmodule Chimwemwe.People.StaffAudience.Source do
 
   @capability "people.core.audiences.prepare_staff"
 
-  def session(request, actor) do
+  def session(runtime, request, actor) do
+    observed_deadline = observe_session_deadline(request, actor)
+    validate_session!(runtime, request, actor)
+
     rows =
       Repo.query!(
         """
@@ -18,7 +21,6 @@ defmodule Chimwemwe.People.StaffAudience.Source do
           LEAST(idle_expires_at, absolute_expires_at)
         FROM identity_application_sessions
         WHERE tenant_id = $1 AND actor_id = $2 AND token_digest = $3 AND status = 'active'
-          AND local_account_id IS NULL
           AND idle_expires_at > (clock_timestamp() AT TIME ZONE 'UTC')
           AND absolute_expires_at > (clock_timestamp() AT TIME ZONE 'UTC')
         FOR UPDATE
@@ -37,15 +39,53 @@ defmodule Chimwemwe.People.StaffAudience.Source do
              request.session.tenant_id != actor.tenant_id,
            do: fail(:forbidden)
 
-        origin(link, actor.actor_id)
-        %{id: id, membership_id: member, deadline: deadline}
+        if link, do: origin(link, actor.actor_id)
+        %{id: id, membership_id: member, deadline: Clock.earlier(observed_deadline, deadline)}
 
       _ ->
         fail(:forbidden)
     end
   end
 
-  def capture(context, institution, session) do
+  # Idle refresh may extend a later request, never this already-started operation.
+  # This observation grants no authority: ordinary validation then locks and
+  # rechecks the current session, origin and membership on the same writer.
+  def observe_session_deadline(request, actor) do
+    case Repo.query!(
+           """
+           SELECT LEAST(idle_expires_at,absolute_expires_at) FROM identity_application_sessions
+           WHERE tenant_id=$1 AND actor_id=$2 AND token_digest=$3 AND status='active'
+             AND idle_expires_at > (clock_timestamp() AT TIME ZONE 'UTC')
+             AND absolute_expires_at > (clock_timestamp() AT TIME ZONE 'UTC')
+           """,
+           [
+             dump(actor.tenant_id),
+             dump(actor.actor_id),
+             :crypto.hash(:sha256, request.session_token)
+           ]
+         ).rows do
+      [[deadline]] -> deadline
+      _ -> fail(:forbidden)
+    end
+  end
+
+  defp validate_session!(runtime, request, actor) do
+    case SessionFoundation.validate(runtime, request.context, %{token: request.session_token}) do
+      {:ok, current}
+      when current.id == request.session.id and
+             current.membership_id == request.session.membership_id and
+             current.actor_id == actor.actor_id and current.tenant_id == actor.tenant_id ->
+        :ok
+
+      {:error, %{code: :retryable_dependency}} ->
+        fail(:retryable_dependency)
+
+      _ ->
+        fail(:forbidden)
+    end
+  end
+
+  def capture(context, institution, session, additional_memberships \\ []) do
     actor = context.actor
     tenant = TrustedActor.tenant_id(actor)
     module_basis = modules(context)
@@ -68,7 +108,10 @@ defmodule Chimwemwe.People.StaffAudience.Source do
       end)
 
     memberships =
-      [session.membership_id | Enum.map(current_associations, &Enum.at(&1, 3))]
+      [
+        session.membership_id
+        | additional_memberships ++ Enum.map(current_associations, &Enum.at(&1, 3))
+      ]
       |> Enum.uniq()
       |> Enum.sort()
 
@@ -98,7 +141,11 @@ defmodule Chimwemwe.People.StaffAudience.Source do
     Clock.current_before(session.deadline)
     subjects = subjects(parts, associations, authority, accounts, current.date, tenant)
     if map_size(subjects) > 25, do: fail(:scope_limit)
-    basis = {unit, parts, people, associations, authority, accounts, current.date, module_basis}
+    population_authority = AuthorityFence.audience_basis(authority, source_members)
+
+    basis =
+      {unit, parts, people, associations, population_authority, accounts, current.date,
+       module_basis}
 
     %{
       subjects: subjects,
@@ -106,6 +153,61 @@ defmodule Chimwemwe.People.StaffAudience.Source do
       time: current,
       deadline: Clock.earlier(current.midnight, session.deadline)
     }
+  end
+
+  def recipient(context, institution, session, original) do
+    tenant = TrustedActor.tenant_id(context.actor)
+    actor = TrustedActor.actor_id(context.actor)
+    modules(context, "communications.core.notices.read")
+    unit = institution(tenant, institution)
+    time = Clock.basis(unit.zone)
+    deadline = Clock.earlier(time.midnight, session.deadline)
+    Clock.bound(deadline)
+    authority = AuthorityFence.capture(tenant, [session.membership_id])
+
+    unless [session.membership_id, actor] in authority.memberships and
+             original.actor_id == actor and original.membership_id == session.membership_id,
+           do: fail(:forbidden)
+
+    case AccountSourceFence.lock_current_transaction(context, [actor]) do
+      :ok -> :ok
+      {:error, reason} -> fail(reason)
+    end
+
+    rows =
+      Repo.query!(
+        """
+        SELECT p.id FROM people_participations p
+        JOIN people_staff_account_associations a ON a.participation_id = p.id AND a.tenant_id = p.tenant_id
+        WHERE p.tenant_id = $1 AND p.id = $2 AND p.person_id = $3 AND p.institutional_unit_id = $4
+          AND p.kind = 'staff' AND p.effective_from <= $8 AND (p.effective_until IS NULL OR p.effective_until > $8)
+          AND a.id = $5 AND a.person_id = p.person_id AND a.membership_id = $6
+          AND a.verification->>'actor_id' = $7 AND a.revoked_at IS NULL
+        FOR SHARE OF p, a
+        """,
+        [
+          dump(tenant),
+          dump(original.participation_id),
+          dump(original.person_id),
+          dump(institution),
+          dump(original.association_id),
+          dump(session.membership_id),
+          actor,
+          time.date
+        ]
+      ).rows
+
+    admitted = account_matches?(original, accounts([actor]))
+
+    unless rows != [] and admitted and notice_capability?(tenant, actor), do: fail(:forbidden)
+    %{person_id: original.person_id, deadline: deadline}
+  end
+
+  defp account_matches?(original, accounts) do
+    Enum.any?(accounts, fn [id, actor, binding, status, _version] ->
+      id == original.account_id and actor == original.actor_id and
+        binding == original.principal_binding_id and status == "active"
+    end)
   end
 
   defp origin(link, actor) do
@@ -125,7 +227,7 @@ defmodule Chimwemwe.People.StaffAudience.Source do
     if rows == [], do: fail(:forbidden)
   end
 
-  defp modules(context) do
+  defp modules(context, capability \\ @capability) do
     manifest = Foundation.release_manifest()
     # People first follows its existing named writers; explicitly fence every
     # dependency, whose ordinary availability check alone takes no dependency lock.
@@ -141,7 +243,7 @@ defmodule Chimwemwe.People.StaffAudience.Source do
       end
     end)
 
-    authorize(context)
+    authorize(context, capability)
 
     Repo.query!(
       """
@@ -155,12 +257,12 @@ defmodule Chimwemwe.People.StaffAudience.Source do
     ).rows
   end
 
-  defp authorize(context) do
+  defp authorize(context, capability \\ @capability) do
     case ModuleLifecycle.authorize_current_transaction(
            Foundation.release_manifest(),
            context,
            "people.core",
-           @capability
+           capability
          ) do
       :ok -> :ok
       _ -> fail(:forbidden)

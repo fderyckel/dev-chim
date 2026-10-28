@@ -15,6 +15,7 @@ defmodule Chimwemwe.PublicApi.StaffOpenApi do
 
   defp schemas do
     text = %{"type" => "string"}
+    boolean = %{"type" => "boolean"}
     uuid = %{"type" => "string", "format" => "uuid"}
     version = %{"type" => "integer", "minimum" => 1}
     locale = %{"type" => "string", "enum" => ["en", "fr", "en-MW"]}
@@ -105,7 +106,15 @@ defmodule Chimwemwe.PublicApi.StaffOpenApi do
         ),
       "StaffAccountActionResponse" => response(receipt),
       "StaffPreferencesResponse" =>
-        response(object(Map.merge(details, %{"id" => uuid, "lock_version" => version}))),
+        response(
+          object(
+            Map.merge(details, %{
+              "id" => uuid,
+              "lock_version" => version,
+              "navigation" => object(%{"accounts" => boolean, "classroom" => boolean})
+            })
+          )
+        ),
       "StaffCancelLoginRequest" => object(%{"csrf_token" => text}),
       "StaffLoginRequest" =>
         object(%{"email" => text, "password" => text, "csrf_token" => text, "locale" => locale}),

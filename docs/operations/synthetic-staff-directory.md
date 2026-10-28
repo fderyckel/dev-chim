@@ -2,7 +2,8 @@
 
 - Status: Local fictional evaluation only
 - Governing decisions: [ADR 0049](../adr/0049-privileged-synthetic-staff-account-directory.md) and [ADR 0050](../adr/0050-local-credential-application-session.md)
-- Evidence: [Current slice checks and reviews](../phase-2/staff-directory-connected-login-evidence.md)
+- Evidence: [Current slice checks and reviews](../phase-2/staff-directory-connected-login-evidence.md),
+  [staff presentation repairs](../phase-2/staff-review-presentation-evidence.md)
 
 ## Start
 
@@ -16,6 +17,13 @@ servers; the fictional database is retained for inspection. Previous databases a
 The ordinary fictional institution viewer (`make demo`), old credential proof (`make auth-demo`)
 and classroom qualification (`make classroom-demo`) remain separate. This candidate has no
 passwordless classroom-demo login endpoint and no external identity-provider connection.
+
+The signed-in staff name appears in the header. Links follow current server-checked availability;
+ordinary staff without classroom/account-administration access land on My preferences. Direct or
+stale links still require the original server checks. New staff account is available near the top
+of Accounts and focuses the existing identity selector. The staff-demo teacher has two distinct
+fictional daily registers with four named pupils each; these are review fixtures, not school
+capacity or year/subject-group evidence. Unsaved class switching asks before discarding marks.
 
 ## Try the staff lifecycle
 

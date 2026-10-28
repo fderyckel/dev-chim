@@ -1,15 +1,21 @@
 defmodule Chimwemwe.Classroom.AttendanceTest do
   use ExUnit.Case, async: false
   import Chimwemwe.Classroom.Fixture
-  alias Chimwemwe.Classroom.{Attendance, AttendanceFixture, Error, Foundation}
-  alias Chimwemwe.Identity.PublicSessionAdapter
+  alias Chimwemwe.Classroom.{Attendance, AttendanceFixture, Error, Foundation, InternalWriter}
+  alias Chimwemwe.Identity.{PublicSessionAdapter, SessionFoundation}
   alias Chimwemwe.People.Foundation, as: People
-  alias Chimwemwe.Platform.PersistenceRuntime
+  alias Chimwemwe.Platform.{AdmissionError, DatabaseAdmission, Persistence, PersistenceRuntime}
   alias Chimwemwe.PublicApi.{ClassroomPlug, Router}
+  alias Chimwemwe.Repo
   alias Ecto.UUID
 
-  setup do
-    persistence = start_supervised!({PersistenceRuntime, runtime_options()})
+  setup tags do
+    options =
+      if tags[:single_writer],
+        do: Keyword.put(runtime_options(), :per_tenant_limit, 1),
+        else: runtime_options()
+
+    persistence = start_supervised!({PersistenceRuntime, options})
     {:ok, f} = seed!(persistence)
 
     on_exit(fn ->
@@ -49,6 +55,52 @@ defmodule Chimwemwe.Classroom.AttendanceTest do
       request: request,
       cookie: cookie
     })
+  end
+
+  @tag single_writer: true
+  test "attendance rechecks its session using one permit and retains outer capacity errors", f do
+    {:ok, admission} = PersistenceRuntime.child_pid(f.persistence, DatabaseAdmission)
+    before_session = session_basis(f)
+    before = DatabaseAdmission.statistics(admission)
+    assert {:ok, _} = Attendance.prepare(f.persistence, f.request, f.class.id)
+    after_read = DatabaseAdmission.statistics(admission)
+    assert after_read.admitted == before.admitted + 1
+    assert after_read.tenant_rejections == before.tenant_rejections
+    assert after_read.active_permits == 0
+    {version, idle} = session_basis(f)
+    assert version > elem(before_session, 0)
+    assert NaiveDateTime.compare(idle, elem(before_session, 1)) != :lt
+
+    assert {:ok, {:error, %AdmissionError{code: :rate_limited}}} =
+             Persistence.with_writer(f.persistence, f.request.context, fn ->
+               Task.async(fn -> Attendance.prepare(f.persistence, f.request, f.class.id) end)
+               |> Task.await()
+             end)
+  end
+
+  @tag single_writer: true
+  test "nested session refresh rolls back with a failed attendance owner", f do
+    before = session_basis(f)
+
+    assert {:error, %Error{code: :stale}} =
+             InternalWriter.run(f.persistence, f.request.context, fn _, context ->
+               assert {:ok, _} =
+                        SessionFoundation.validate(f.persistence, context, %{
+                          token: f.request.session_token
+                        })
+
+               assert [[version, _idle]] =
+                        Repo.query!(
+                          "SELECT lock_version, idle_expires_at FROM identity_application_sessions WHERE id = $1",
+                          [UUID.dump!(f.request.session.id)]
+                        ).rows
+
+               assert version > elem(before, 0)
+               {:error, %Error{code: :stale}}
+             end)
+
+    assert session_basis(f) == before
+    assert {:ok, _} = Attendance.prepare(f.persistence, f.request, f.class.id)
   end
 
   test "session-bound assigned class, explicit marks, atomic receipt and authoritative reload",
@@ -326,8 +378,11 @@ defmodule Chimwemwe.Classroom.AttendanceTest do
                "CREATE TRIGGER test_fail_attendance_correction BEFORE UPDATE ON platform_authority_action_idempotency FOR EACH ROW EXECUTE FUNCTION test_fail_attendance_correction()"
              )
 
+    before_session = session_basis(f)
+
     try do
       assert {:error, _} = Attendance.correct(f.persistence, f.request, correction)
+      assert session_basis(f) == before_session
 
       assert {:ok, %{rows: [[0, 0, 0, 0]]}} =
                query(f, """
@@ -694,6 +749,17 @@ defmodule Chimwemwe.Classroom.AttendanceTest do
       )
 
     Router.call(conn, Router.init([]))
+  end
+
+  defp session_basis(f) do
+    {:ok, %{rows: [[version, idle]]}} =
+      query(
+        f,
+        "SELECT lock_version, idle_expires_at FROM identity_application_sessions WHERE id = $1",
+        [UUID.dump!(f.request.session.id)]
+      )
+
+    {version, idle}
   end
 
   defp input(view),

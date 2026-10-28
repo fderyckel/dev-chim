@@ -1,6 +1,6 @@
 # COMM-1: bounded synthetic staff-announcement proof
 
-- Status: Authorized bounded proof; source-fence qualification is the first checkpoint
+- Status: Authorized bounded proof; [local synthetic publication checkpoint qualified](../phase-2/communications-comm-1-publication-evidence.md)
 - Date: 2026-10-23
 - Authorization: François accepted ADR 0045 and authorized exactly this proof on 2026-10-23;
   agents must review the source-fence checkpoint before further implementation; the initial
@@ -10,23 +10,27 @@
 - Review trigger: implementation authorization, failed source-consistency qualification, scope change or new representative evidence
 - Governing paper contract: [ADR 0045](../adr/0045-governed-communications-audiences-and-engagement.md)
 - Review evidence: [COMM-0 decisions and specialist review](../phase-2/communications-comm-0-experience-evidence.md#delegated-paper-review--23-october-2026)
-- Current checkpoint: [source fence not qualified](../phase-2/communications-comm-1-source-fence-qualification.md);
+- Current checkpoint: [local source prerequisite qualified](../phase-2/communications-comm-1-source-fence-qualification.md);
   [authorized account prerequisite](../phase-2/identity-account-source-fence-evidence.md) implemented,
   focused-tested and reviewed by all four agents. Renewed qualification on 2026-10-24 returns a
   [bounded account-binding decision](communications-audience-source-qualification.md), subsequently
   selected as B and implemented under [ADR 0051](../adr/0051-private-account-principal-binding-marker.md)
   with its [separate checkpoint](../phase-2/account-principal-binding-evidence.md);
-  publication implementation remains blocked and `make check` is currently deferred
+  the final [admission/impact successor](../phase-2/same-writer-admission-evidence.md) now completes
+  local source qualification, four-specialist review and its full check; the publication successor above owns later implementation evidence
 
 The subsequent [composed source candidate](../phase-2/staff-audience-source-evidence.md) passes
 41 source checks but fails the retained classroom p95-impact criterion in all three
-initial measured repeats. The source is **not qualified** and publication remains unimplemented.
+initial measured repeats. At that initial checkpoint the source was **not qualified** and publication was unimplemented.
 François subsequently authorized the [scoped contention follow-up](communications-source-lock-contention-proposal.md).
 Its [ADR 0053 checkpoint](../phase-2/people-source-write-fence-evidence.md) removes the measured
 People-row blocking and passes all three unchanged foundation comparisons within 20%. Actual
-attendance cannot qualify because requests are rejected at the unchanged admission limit even
-without source captures. The next nested-admission proposal is not implemented; publication and
-`make check` remain explicitly deferred for this increment.
+attendance initially could not qualify because requests were rejected at the unchanged admission
+limit even without source captures. The subsequent ADR 0054 exact-writer admission correction
+removes duplicate accounting, and both original workloads pass six comparisons each in a recorded
+isolated local environment. Current attendance impact remains within the unchanged 20% limit;
+four-specialist review and final integration are complete. These are source-stage results only;
+the publication successor above records the subsequent workflow implementation.
 
 ## Proposed outcome
 
@@ -244,7 +248,8 @@ retry, consumer replay, fan-out completion, delivery success or reminder is infe
    Supply actual screenshots for UI review; record human observations only if actually gathered.
 8. Measure the bounded and mixed workload; report exact checks, including the then-required
    repository gate at implementation exit when authorized to run it. The current instruction
-   explicitly defers `make check`; focused checkpoint checks do not establish a green repository.
+   previously deferred `make check` for the source checkpoint. François explicitly authorized it
+   for publication implementation exit; focused checks do not establish a green repository.
 
 The smallest demonstration uses one fictional author, a distinct approver, an eligible recipient,
 one staff member without an account, one ended staff record and a newcomer after publication.

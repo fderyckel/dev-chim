@@ -20,6 +20,7 @@ import {
   type StaffActionInput,
   type StaffInventory,
   type StaffLocale,
+  type StaffPreference,
   type StaffReceipt,
 } from "./staff-shared";
 
@@ -154,8 +155,14 @@ function AccountStatus({
 }
 
 export function StaffDirectory({ accountId }: { accountId?: string }) {
+  // A new account must not inherit the previous route's loaded editing state.
+  return <StaffDirectoryPage key={accountId ?? "inventory"} accountId={accountId} />;
+}
+
+function StaffDirectoryPage({ accountId }: { accountId?: string }) {
   const [locale, setLocale] = useState<StaffLocale>("en");
   const [inventory, setInventory] = useState<StaffInventory | null>(null);
+  const [presentation, setPresentation] = useState<StaffPreference | null>(null);
   const [csrf, setCsrf] = useState<string | null>(null);
   const [actorId, setActorId] = useState<string | null>(null);
   const [busy, setBusy] = useState(true);
@@ -177,21 +184,35 @@ export function StaffDirectory({ accountId }: { accountId?: string }) {
   } | null>(null);
   const [copied, setCopied] = useState(false);
   const secretHeading = useRef<HTMLSpanElement>(null);
+  const createStaffSelect = useRef<HTMLSelectElement>(null);
+  const requestGeneration = useRef(0);
+  const departed = useRef(false);
   const t = translate(locale);
   const account = inventory?.accounts.find((item) => item.id === accountId);
   const candidate = inventory?.eligible_staff.find(
     (item) => item.association_id === selected,
   );
 
-  async function load(success?: string) {
+  async function load(success?: string, generation = ++requestGeneration.current) {
+    const currentLoad = () =>
+      !departed.current && generation === requestGeneration.current;
+    if (!currentLoad()) return false;
     setBusy(true);
+    setPresentation(null);
     let authenticated = false;
     try {
       const session = await staffSession();
+      if (!currentLoad()) return false;
       authenticated = true;
       setCsrf(session.csrf_token);
-      setActorId(session.actor_id);
+      const currentPresentation = await staffRequest<StaffPreference>(
+        "/api/v1/staff-preferences",
+      );
+      if (!currentLoad()) return false;
       const loaded = await staffRequest<StaffInventory>("/api/v1/staff-accounts");
+      if (!currentLoad()) return false;
+      setActorId(session.actor_id);
+      setPresentation(currentPresentation);
       setInventory(loaded);
       setLocale(staffLocale(loaded.locale));
       const current = loaded.accounts.find((item) => item.id === accountId);
@@ -214,28 +235,47 @@ export function StaffDirectory({ accountId }: { accountId?: string }) {
           ),
       );
     } catch (error) {
+      if (!currentLoad()) return false;
       setInventory(null);
       if (
         !authenticated ||
         (error instanceof StaffRequestError && error.status === 401)
       )
         setCsrf(null);
+      setActorId(null);
+      setPresentation(null);
       setSecret(null);
       setMessage(staffActionMessage(error, locale));
       return false;
     } finally {
-      setBusy(false);
+      if (currentLoad()) setBusy(false);
     }
   }
 
   useEffect(() => {
-    void Promise.resolve().then(() => load());
+    departed.current = false;
+    const arrival = ++requestGeneration.current;
+    void Promise.resolve().then(() => {
+      if (!departed.current && arrival === requestGeneration.current) return load();
+    });
+    return () => {
+      departed.current = true;
+      requestGeneration.current += 1;
+    };
     // Each route arrival gets a fresh writer-authorized inventory; no browser cache.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [accountId]);
 
   useEffect(() => {
-    const clearSecret = () => setSecret(null);
+    const clearSecret = () => {
+      departed.current = true;
+      requestGeneration.current += 1;
+      setSecret(null);
+      setPresentation(null);
+      setInventory(null);
+      setCsrf(null);
+      setActorId(null);
+    };
     window.addEventListener("pagehide", clearSecret);
     return () => window.removeEventListener("pagehide", clearSecret);
   }, []);
@@ -254,7 +294,10 @@ export function StaffDirectory({ accountId }: { accountId?: string }) {
     success: string,
     identity?: { name: string; email: string },
   ) {
-    if (!csrf) return;
+    if (!csrf || departed.current) return;
+    const generation = ++requestGeneration.current;
+    const currentRequest = () =>
+      !departed.current && generation === requestGeneration.current;
     setBusy(true);
     setSecret(null);
     setCopied(false);
@@ -264,8 +307,9 @@ export function StaffDirectory({ accountId }: { accountId?: string }) {
         { ...body, ...actionReferences() },
         csrf,
       );
-      const confirmed = await load(success);
-      if (confirmed === false) return;
+      if (!currentRequest()) return;
+      const confirmed = await load(success, generation);
+      if (confirmed === false || !currentRequest()) return;
       if (result.temporary_password && identity)
         setSecret({
           password: result.temporary_password,
@@ -291,6 +335,7 @@ export function StaffDirectory({ accountId }: { accountId?: string }) {
         setDetails(emptyDetails);
       }
     } catch (error) {
+      if (!currentRequest()) return;
       setMessage(staffActionMessage(error, locale));
       setUncertain(true);
       if (
@@ -301,7 +346,7 @@ export function StaffDirectory({ accountId }: { accountId?: string }) {
         if (error.status === 401) setCsrf(null);
       }
     } finally {
-      setBusy(false);
+      if (currentRequest()) setBusy(false);
     }
   }
 
@@ -346,10 +391,14 @@ export function StaffDirectory({ accountId }: { accountId?: string }) {
       )}
       institution={inventory?.institution_label}
       csrf={csrf}
+      presentation={presentation}
       onSignedOut={() => {
+        departed.current = true;
+        requestGeneration.current += 1;
         setSecret(null);
         setInventory(null);
         setCsrf(null);
+        setPresentation(null);
       }}
     >
       <p
@@ -362,6 +411,16 @@ export function StaffDirectory({ accountId }: { accountId?: string }) {
       </p>
       {csrf && (
         <div className="c-staff__actions">
+          {!accountId && inventory && (
+            <ActionButton
+              disabled={disabled || !inventory.eligible_staff.length}
+              onClick={() => {
+                createStaffSelect.current?.focus();
+              }}
+            >
+              {t("New staff account", "Nouveau compte du personnel")}
+            </ActionButton>
+          )}
           <ActionButton
             variant="secondary"
             disabled={busy}
@@ -517,6 +576,7 @@ export function StaffDirectory({ accountId }: { accountId?: string }) {
                 )}
                 title={t("Create staff account", "Créer un compte du personnel")}
                 titleId="staff-create-title"
+                id="staff-create"
               >
                 <form
                   className="c-staff__form"
@@ -526,6 +586,7 @@ export function StaffDirectory({ accountId }: { accountId?: string }) {
                   <label>
                     {t("Staff member", "Membre du personnel")}
                     <select
+                      ref={createStaffSelect}
                       value={selected}
                       required
                       disabled={disabled || !inventory.eligible_staff.length}

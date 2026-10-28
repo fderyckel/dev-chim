@@ -27,8 +27,34 @@ defmodule Chimwemwe.PublicApi.Router do
     plug(Chimwemwe.PublicApi.CalendarPlug)
   end
 
+  pipeline :local_communications do
+    plug(Chimwemwe.PublicApi.CommunicationsPlug)
+  end
+
   pipeline :local_staff do
     plug(Chimwemwe.PublicApi.StaffGuard)
+  end
+
+  scope "/api/v1/communications", Chimwemwe.PublicApi do
+    pipe_through([:local_communications, :authenticated])
+    get("/workspace", CommunicationsController, :workspace, log: false)
+    get("/draft", CommunicationsController, :inspect_draft, log: false)
+    get("/review", CommunicationsController, :review_operation, log: false)
+    get("/status", CommunicationsController, :recipient_status, log: false)
+    get("/metrics", CommunicationsController, :metrics, log: false)
+    get("/receipt", CommunicationsController, :receipt, log: false)
+  end
+
+  scope "/api/v1/communications", Chimwemwe.PublicApi do
+    pipe_through([:local_communications, :authenticated, :unsafe])
+    post("/create-draft", CommunicationsController, :create_draft, log: false)
+    post("/revise-draft", CommunicationsController, :revise_draft, log: false)
+    post("/prepare-operation", CommunicationsController, :prepare_operation, log: false)
+    post("/submit-for-approval", CommunicationsController, :submit_for_approval, log: false)
+    post("/approve-operation", CommunicationsController, :approve_operation, log: false)
+    post("/open-notice", CommunicationsController, :open_notice, log: false)
+    post("/confirm-receipt", CommunicationsController, :confirm_receipt, log: false)
+    post("/command-outcome", CommunicationsController, :command_outcome, log: false)
   end
 
   scope "/api/v1", Chimwemwe.PublicApi do

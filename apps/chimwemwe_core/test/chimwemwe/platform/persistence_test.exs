@@ -4,6 +4,7 @@ defmodule Chimwemwe.Platform.PersistenceTest do
   alias Chimwemwe.Platform.{
     AdmissionError,
     ContextError,
+    DatabaseAdmission,
     ExecutionContext,
     Persistence,
     PersistenceError,
@@ -146,6 +147,161 @@ defmodule Chimwemwe.Platform.PersistenceTest do
              end)
   end
 
+  test "same-scope transaction nesting uses one permit, backend and transaction" do
+    runtime = start_runtime(per_tenant_limit: 1)
+    {:ok, admission} = PersistenceRuntime.child_pid(runtime, DatabaseAdmission)
+    context = context_a()
+
+    assert {:ok, {:ok, :complete}} =
+             in_writer_transaction(runtime, context, fn ->
+               before = DatabaseAdmission.statistics(admission)
+               backend = Repo.query!("SELECT pg_backend_pid(), txid_current()").rows
+
+               assert {:ok, ^backend} =
+                        Persistence.with_writer(runtime, context, fn ->
+                          Repo.query!("SELECT pg_backend_pid(), txid_current()").rows
+                        end)
+
+               assert DatabaseAdmission.statistics(admission) == before
+               assert before.active_permits == 1 and before.admitted == 1
+               :complete
+             end)
+
+    assert %{active_permits: 0, admitted: 1, tenant_rejections: 0} =
+             DatabaseAdmission.statistics(admission)
+  end
+
+  test "nested calls outside a transaction cannot acquire or borrow another permit" do
+    runtime = start_runtime()
+    {:ok, admission} = PersistenceRuntime.child_pid(runtime, DatabaseAdmission)
+
+    assert {:ok, :checked} =
+             Persistence.with_writer(runtime, context_a(), fn ->
+               assert_nested_refused(runtime, context_a())
+               assert %{active_permits: 1, admitted: 1} = DatabaseAdmission.statistics(admission)
+               :checked
+             end)
+  end
+
+  test "nested reuse refuses every changed execution-context field" do
+    runtime = start_runtime()
+    context = context_a()
+
+    {:ok, actor} =
+      TrustedActor.establish(actor_id: @actor_b, tenant_id: @tenant_a, assurance: "mfa")
+
+    different_contexts = [
+      %{context | actor: actor},
+      context_b(),
+      context_c(),
+      %{context | purpose: "another.purpose"},
+      %{context | correlation_id: Ecto.UUID.generate()},
+      %{context | locale: "fr"}
+    ]
+
+    assert {:ok, {:ok, :checked}} =
+             in_writer_transaction(runtime, context, fn ->
+               for different <- different_contexts, do: assert_nested_refused(runtime, different)
+               :checked
+             end)
+  end
+
+  test "nested reuse revalidates the current route before entering the operation" do
+    runtime = start_runtime()
+    {:ok, registry} = PersistenceRuntime.child_pid(runtime, Chimwemwe.Platform.PlacementRegistry)
+
+    assert {:ok, {:ok, :checked}} =
+             in_writer_transaction(runtime, context_a(), fn ->
+               :sys.replace_state(registry, fn routes ->
+                 put_in(routes, [@tenant_a, :placement, Access.key(:routing_version)], 8)
+               end)
+
+               assert {:error, %PersistenceError{code: :route_not_available}} =
+                        Persistence.with_writer(runtime, context_a(), &never_called/0)
+
+               :checked
+             end)
+  end
+
+  test "nested reuse refuses another supervised runtime or a changed dynamic repository" do
+    runtime = start_runtime()
+
+    other =
+      start_supervised!(
+        Supervisor.child_spec({PersistenceRuntime, runtime_options()}, id: :other_runtime)
+      )
+
+    {:ok, admission} = PersistenceRuntime.child_pid(other, DatabaseAdmission)
+    {:ok, dedicated} = PersistenceRuntime.child_pid(runtime, {:repository, :dedicated})
+
+    assert {:ok, {:ok, :checked}} =
+             in_writer_transaction(runtime, context_a(), fn ->
+               assert_nested_refused(other, context_a())
+               assert %{active_permits: 0, admitted: 0} = DatabaseAdmission.statistics(admission)
+               previous = Repo.put_dynamic_repo(dedicated)
+
+               try do
+                 assert_nested_refused(runtime, context_a())
+               after
+                 Repo.put_dynamic_repo(previous)
+               end
+
+               :checked
+             end)
+  end
+
+  test "spawned work cannot borrow the parent's writer permit" do
+    runtime = start_runtime(per_tenant_limit: 1)
+
+    assert {:ok, {:ok, :checked}} =
+             in_writer_transaction(runtime, context_a(), fn ->
+               task =
+                 Task.async(fn ->
+                   Persistence.with_writer(runtime, context_a(), &never_called/0)
+                 end)
+
+               assert {:error, %AdmissionError{code: :rate_limited}} = Task.await(task)
+               :checked
+             end)
+  end
+
+  test "outer rollback undoes both outer and nested writes and releases admission" do
+    runtime = start_runtime(per_tenant_limit: 1)
+    {:ok, admission} = PersistenceRuntime.child_pid(runtime, DatabaseAdmission)
+
+    assert {:ok, :checked} =
+             Persistence.with_writer(runtime, context_a(), fn ->
+               Repo.checkout(fn -> rollback_nested_writes(runtime) end)
+             end)
+
+    assert %{active_permits: 0, admitted: 1} = DatabaseAdmission.statistics(admission)
+    assert {:ok, {:ok, :fresh}} = in_writer_transaction(runtime, context_a(), fn -> :fresh end)
+    assert %{active_permits: 0, admitted: 2} = DatabaseAdmission.statistics(admission)
+  end
+
+  test "exception and exit restore scope and release the outer permit" do
+    runtime = start_runtime(per_tenant_limit: 1)
+    {:ok, admission} = PersistenceRuntime.child_pid(runtime, DatabaseAdmission)
+    previous = Repo.get_dynamic_repo()
+
+    assert_raise RuntimeError, "synthetic nested failure", fn ->
+      in_writer_transaction(runtime, context_a(), fn ->
+        Persistence.with_writer(runtime, context_a(), fn -> raise "synthetic nested failure" end)
+      end)
+    end
+
+    assert Repo.get_dynamic_repo() == previous
+    assert %{active_permits: 0, admitted: 1} = DatabaseAdmission.statistics(admission)
+
+    assert catch_exit(
+             in_writer_transaction(runtime, context_a(), fn -> exit(:synthetic_exit) end)
+           ) == :synthetic_exit
+
+    assert Repo.get_dynamic_repo() == previous
+    assert %{active_permits: 0, admitted: 2} = DatabaseAdmission.statistics(admission)
+    assert {:ok, {:ok, :fresh}} = in_writer_transaction(runtime, context_a(), fn -> :fresh end)
+  end
+
   test "requires explicit repositories, placements, and positive admission limits" do
     assert {:error, _reason} =
              start_supervised(
@@ -202,6 +358,36 @@ defmodule Chimwemwe.Platform.PersistenceTest do
                {PersistenceRuntime, Keyword.put(runtime_options(), :repositories, [:malformed])}
              )
   end
+
+  defp rollback_nested_writes(runtime) do
+    Repo.query!("CREATE TEMP TABLE nested_admission_marker (value integer)")
+
+    assert {:error, :synthetic_rollback} =
+             Repo.transaction(fn ->
+               Repo.query!("INSERT INTO nested_admission_marker VALUES (1)")
+
+               assert {:ok, :written} =
+                        Persistence.with_writer(runtime, context_a(), fn ->
+                          Repo.query!("INSERT INTO nested_admission_marker VALUES (2)")
+                          :written
+                        end)
+
+               Repo.rollback(:synthetic_rollback)
+             end)
+
+    assert [[0]] = Repo.query!("SELECT count(*) FROM nested_admission_marker").rows
+    :checked
+  end
+
+  defp in_writer_transaction(runtime, context, operation),
+    do: Persistence.with_writer(runtime, context, fn -> Repo.transaction(operation) end)
+
+  defp assert_nested_refused(runtime, context) do
+    assert {:error, %PersistenceError{code: :retryable_dependency}} =
+             Persistence.with_writer(runtime, context, &never_called/0)
+  end
+
+  defp never_called, do: flunk("a mismatched writer must fail before its callback")
 
   defp start_runtime(overrides \\ []) do
     options = Keyword.merge(runtime_options(), overrides)

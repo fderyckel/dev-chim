@@ -1,5 +1,6 @@
 defmodule Chimwemwe.Identity.StaffDirectory do
   @moduledoc "Privileged, tenant-qualified synthetic staff account administration under ADR 0049."
+  alias Chimwemwe.Classroom.Attendance
   alias Chimwemwe.Identity.{Error, InternalWriter, LocalCredentials, StaffDirectoryEvidence}
   alias Chimwemwe.People.Foundation, as: People
   alias Chimwemwe.Platform.{Authority, ModuleLifecycle}
@@ -85,17 +86,47 @@ defmodule Chimwemwe.Identity.StaffDirectory do
   def preferences(runtime, context) do
     run(runtime, context, nil, fn actor ->
       with {:ok, entry} <- own_entry(actor),
-           do:
-             {:ok,
-              Map.take(entry, [
-                :id,
-                :given_name,
-                :family_name,
-                :display_name,
-                :locale,
-                :lock_version
-              ])}
+           {:ok, navigation} <- navigation(context) do
+        {:ok,
+         entry
+         |> Map.take([
+           :id,
+           :given_name,
+           :family_name,
+           :display_name,
+           :locale,
+           :lock_version
+         ])
+         |> Map.put(:navigation, navigation)}
+      end
     end)
+  end
+
+  defp navigation(context) do
+    with {:ok, accounts} <-
+           destination_available(
+             People.release_manifest(),
+             context,
+             "people.core",
+             "identity.staff_accounts.read"
+           ),
+         {:ok, classroom} <-
+           destination_available(
+             Attendance.release_manifest(),
+             context,
+             "classroom.attendance",
+             "classroom.attendance.read"
+           ) do
+      {:ok, %{accounts: accounts, classroom: classroom}}
+    end
+  end
+
+  defp destination_available(manifest, context, module, capability) do
+    case ModuleLifecycle.authorize_current_transaction(manifest, context, module, capability) do
+      :ok -> {:ok, true}
+      {:error, %{code: :retryable_dependency}} -> error(:retryable_dependency)
+      _denied -> {:ok, false}
+    end
   end
 
   for operation <- Map.keys(@actions) do

@@ -28,8 +28,10 @@ statuses; these guides explain their detailed contracts without granting impleme
 - [Assurance proportionality and module evolution](../adr/0024-assurance-proportionality-and-module-evolution.md)
 - [Experience design system and governed personalization](../adr/0028-experience-design-system-and-governed-personalization.md)
 - [Governed communications, audiences, and engagement evidence](../adr/0045-governed-communications-audiences-and-engagement.md)
-- [Private staff-audience source candidate](../adr/0052-private-staff-audience-source-capture.md) — complete qualification blocked, publication unavailable
-- [People-owned source write fence](../adr/0053-people-owned-source-write-fence.md) — correctness/migration controls and foundation impact pass; actual attendance admission remains blocked
+- [Private staff-audience source candidate](../adr/0052-private-staff-audience-source-capture.md) — locally qualified source prerequisite; [publication successor](../phase-2/communications-comm-1-publication-evidence.md)
+- [People-owned source write fence](../adr/0053-people-owned-source-write-fence.md) — correctness/migration controls retained; the admission successor completes local impact qualification
+- [Same-writer nested admission](../adr/0054-same-writer-nested-admission.md) — exact active-writer permit reuse, unchanged capacity/session/routing/rollback guarantees and completed local impact evidence
+- [Local synthetic communications publication](../adr/0056-local-synthetic-communications-publication.md) — bounded named actions, original admission, independent approval, safe recovery and local admission policy
 - [Private account principal-binding marker](../adr/0051-private-account-principal-binding-marker.md)
 - [Identity, session, and support-access decision review](../phase-2/identity-session-and-support-access-decision-review.md)
 - [Institutional-structure scenario and vocabulary review](../phase-2/institutional-structure-scenario-review.md)

@@ -1,22 +1,25 @@
 # COMM-1 audience source-fence checkpoint
 
-- Status: **Not qualified — publication implementation blocked at this checkpoint**
-- Latest composed source result: [People-owned write-fence evidence](people-source-write-fence-evidence.md).
-  The authorized ADR 0053 fence passes correctness/migration controls and the unchanged foundation
-  workload passes three repeats within 20%. Actual attendance comparisons reject work under the
-  existing admission contract even in baseline. Complete qualification remains blocked; a bounded
-  same-writer nested-admission decision is proposed, with no implementation or capacity increase.
+- Status: **Qualified for the bounded local staff-source prerequisite; publication unimplemented**
+- Latest composed source result: [same-writer admission and attendance-impact evidence](same-writer-admission-evidence.md).
+  ADR 0053 removes the conflicting People-row locks; ADR 0054 corrects duplicate nested admission.
+  Both unchanged workloads pass all six comparisons each on the final dependency set, with zero
+  failed operations and stable checkpoint counters in the recorded isolated local environment.
+  Maximum actual attendance p95 impact is +8.10% reads / +14.23% writes, within the unchanged 20%.
+  Four specialist conditions and the final full check are complete. This is source-stage proof,
+  not a publication, sustained-load, checkpoint-period or production claim.
 - Account prerequisite: subsequently authorized, implemented and focused-tested under
   [ADR 0047](../adr/0047-private-identity-account-source-fence.md);
   [new evidence and review](identity-account-source-fence-evidence.md) distinguish it from
   the initial counterexample and complete audience qualification
-- Date: 2026-10-24 (renewed qualification; initial evidence below is dated 2026-10-23)
+- Date: 2026-10-25 (final local prerequisite; historical checkpoints retain their original dates)
 - Current binding decision: François selected [option B](../plans/communications-audience-source-qualification.md#decision-returned-to-françois)
   and authorized [ADR 0051's prerequisite](account-principal-binding-evidence.md);
-  the complete source checkpoint remains not qualified
+  the complete source prerequisite is now locally qualified by the successor linked above
 - Authority: François accepted [ADR 0045](../adr/0045-governed-communications-audiences-and-engagement.md)
   and authorized the [bounded COMM-1 proof](../plans/communications-comm-1-staff-announcement-proposal.md),
-  requiring agent review of this checkpoint before proceeding; `make check` is deferred
+  requiring agent review of this checkpoint before proceeding; the initial `make check` deferral
+  was followed by the final passing integration recorded in the successor
 - Engineering custodian: Coordinator in this local Codex chat; François remains accountable owner
 - Run references: `chimwemwe_comm1_fence_20261023_01` (initial harness failures),
   `chimwemwe_comm1_fence_20261023_02` (corrected four-probe run),
@@ -27,6 +30,9 @@
   generated credential material; no browser, publication path, communications storage or consumer
 - Custody checkpoint: retain the isolated test databases through this review and unresolved
   findings; no decommission or per-record cleanup was performed after these runs
+
+The records below retain the initial counterexamples, failed attempts and returned decisions.
+They are historical evidence; the successor above owns the current qualification disposition.
 
 ## Initial checkpoint decision and evidence
 

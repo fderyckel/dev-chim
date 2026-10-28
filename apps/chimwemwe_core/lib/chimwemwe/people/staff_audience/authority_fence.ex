@@ -42,6 +42,31 @@ defmodule Chimwemwe.People.StaffAudience.AuthorityFence do
     }
   end
 
+  # The caller is locked and authorized independently. Only the audience-reachable
+  # graph belongs to the stable population basis compared by distinct approvers.
+  def audience_basis(fence, membership_ids) do
+    assignments = Enum.filter(fence.assignments, &(Enum.at(&1, 1) in membership_ids))
+    roots = assignments |> Enum.map(&Enum.at(&1, 2)) |> Enum.uniq()
+    roles = reachable(fence.edges, roots)
+    grants = Enum.filter(fence.grants, &(Enum.at(&1, 1) in roles))
+    caps = Enum.map(grants, &Enum.at(&1, 2))
+
+    %{
+      memberships: Enum.filter(fence.memberships, &(hd(&1) in membership_ids)),
+      assignments: assignments,
+      roles: Enum.filter(fence.roles, &(hd(&1) in roles)),
+      edges: Enum.filter(fence.edges, &(Enum.at(&1, 1) in roles)),
+      grants: grants,
+      capabilities: Enum.filter(fence.capabilities, &(hd(&1) in caps))
+    }
+  end
+
+  defp reachable(edges, roles) do
+    next = edges |> Enum.filter(&(Enum.at(&1, 1) in roles)) |> Enum.map(&Enum.at(&1, 2))
+    expanded = Enum.uniq(roles ++ next)
+    if length(expanded) == length(roles), do: roles, else: reachable(edges, expanded)
+  end
+
   defp walk(_tenant, [], roles, edges, grants, caps),
     do: {Enum.sort(roles), Enum.sort(edges), Enum.sort(grants), Enum.sort(Enum.uniq(caps))}
 

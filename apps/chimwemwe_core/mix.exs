@@ -27,11 +27,11 @@ defmodule ChimwemweCore.MixProject do
   defp deps do
     [
       {:argon2_elixir, "== 4.1.3"},
-      {:ash, "== 3.34.6"},
+      {:ash, "== 3.37.2"},
       {:ash_authentication, "~> 5.0.0-rc.14"},
       {:ash_authentication_phoenix, "~> 3.0.0-rc.11"},
-      {:ash_postgres, "== 2.13.1"},
-      {:bandit, "== 1.13.1"},
+      {:ash_postgres, "== 2.15.2"},
+      {:bandit, "== 1.14.1"},
       {:jason, "~> 1.4"},
       {:picosat_elixir, "~> 0.2.3"},
       {:phoenix, "== 1.8.14"},

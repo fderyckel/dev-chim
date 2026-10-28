@@ -1,16 +1,15 @@
 # COMM-1 remaining audience-source qualification
 
-- Status: François selected B; binding prerequisite implemented, focused-tested and reviewed;
-  complete audience qualification and publication remain gated
-- Latest source checkpoint: [People-owned write-fence evidence](../phase-2/people-source-write-fence-evidence.md).
-  François authorized ADR 0053 and the scoped fence. Correctness/migration controls and three
-  unchanged foundation comparisons pass within 20%; actual attendance rejects concurrent work
-  under the existing admission contract, including baseline. The complete checkpoint remains
-  not qualified and publication stopped. A same-writer nested-admission decision is proposed,
-  not implemented; no limit or independent session protection is weakened.
-- Date: 2026-10-24
+- Status: Binding and complete private staff-source prerequisite locally qualified; [publication successor](../phase-2/communications-comm-1-publication-evidence.md) records the later authorized implementation
+- Latest source checkpoint: [same-writer admission and impact evidence](../phase-2/same-writer-admission-evidence.md).
+  The ADR 0053 People fence and ADR 0054 exact-writer admission correction preserve all source,
+  session, routing and rollback requirements. Both unchanged workloads pass six comparisons each
+  on the final dependency set in the recorded isolated environment. All four specialist conditions
+  and the full check are complete; no capacity or 20% limit was changed.
+- Date: 2026-10-25 (historical binding choices and failed checkpoints retained below)
 - Authority: François's instruction to complete remaining qualification, obtain four-agent review
-  of the complete checkpoint before publication work, and defer `make check`
+  of the complete checkpoint before publication work; the initial full-check deferral was followed
+  by the passing final integration recorded in the successor
 - Governing decisions: [ADR 0045](../adr/0045-governed-communications-audiences-and-engagement.md),
   [ADR 0047](../adr/0047-private-identity-account-source-fence.md)
 - Evidence owner: Coordinator; François retains accountable decisions and release authority
@@ -71,6 +70,9 @@ publication, consumer or release. Its implementation and focused results are rec
 in the binding checkpoint. A future change to choice A requires another explicit reviewed decision.
 
 ## Current execution boundary
+
+This section records the initial renewed checkpoint. The successor linked above owns the current
+local source qualification result; the publication successor above owns the later durable workflow evidence.
 
 At the initial renewed checkpoint only the qualification probe and documentation were retained;
 the incomplete source-adapter draft was removed. That six-file regression passed **69 tests**

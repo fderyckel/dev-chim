@@ -12,6 +12,9 @@ export default function nextConfig(phase: string): NextConfig {
 
   return {
     distDir: process.env.CHIMWEMWE_WEB_BUILD_DIR ?? ".next",
+    ...(process.env.CHIMWEMWE_COMM_DEMO === "true"
+      ? { devIndicators: false as const }
+      : {}),
     poweredByHeader: false,
     reactStrictMode: true,
   };

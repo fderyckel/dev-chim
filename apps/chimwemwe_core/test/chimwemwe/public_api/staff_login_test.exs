@@ -176,6 +176,96 @@ defmodule Chimwemwe.PublicApi.StaffLoginTest do
              Fixture.query(f, "SELECT count(*) FROM identity_external_identity_links")
   end
 
+  test "ordinary staff land on preferences and navigation never replaces current authorization",
+       f do
+    assert {:ok, created} =
+             StaffDirectory.provision(
+               f.persistence,
+               Fixture.context_a(),
+               Map.merge(Fixture.keys(), %{
+                 association_id: f.teacher_association.id,
+                 email: "teacher@northstar-school.test",
+                 given_name: "Synthetic",
+                 family_name: "Teacher",
+                 display_name: "Synthetic Teacher",
+                 locale: "en"
+               })
+             )
+
+    first = sign_in("teacher@northstar-school.test", created.temporary_password)
+    permanent = Base.url_encode64(:crypto.strong_rand_bytes(40), padding: false)
+
+    assert request(
+             :post,
+             "/api/v1/staff-login/replace-password",
+             %{
+               password: permanent,
+               confirmation: permanent,
+               csrf_token: data(first)["csrf_token"]
+             },
+             response_cookie(first, @login_cookie)
+           ).status == 200
+
+    login = sign_in("teacher@northstar-school.test", permanent)
+    assert login.status == 200
+    assert data(login)["next_path"] == "/my-preferences"
+    cookie = application_cookie(login)
+    self = request(:get, "/api/v1/staff-preferences", nil, cookie)
+    assert self.status == 200
+    assert get_resp_header(self, "cache-control") == ["no-store"]
+    assert data(self)["display_name"] == "Synthetic Teacher"
+    assert data(self)["navigation"] == %{"accounts" => false, "classroom" => false}
+    assert request(:get, "/api/v1/staff-preferences").status == 401
+    assert request(:get, "/api/v1/staff-accounts", nil, cookie).status == 403
+    assert request(:get, "/api/v1/classroom/classes", nil, cookie).status == 403
+
+    forged =
+      Map.merge(Fixture.keys(), %{
+        locale: "en",
+        expected_version: 1,
+        navigation: %{accounts: true}
+      })
+
+    assert request(:post, "/api/v1/staff-preferences", forged, cookie, [
+             {"x-csrf-token", session_csrf(cookie)}
+           ]).status == 400
+
+    assert {:ok, granted} =
+             StaffDirectory.set_access(
+               f.persistence,
+               Fixture.context_a(),
+               Map.merge(Fixture.keys(), %{
+                 id: created.id,
+                 expected_version: created.lock_version,
+                 profile_id: f.teacher_role_id
+               })
+             )
+
+    assert request(:get, "/api/v1/staff-preferences", nil, cookie).status == 401
+    teacher_login = sign_in("teacher@northstar-school.test", permanent)
+    assert data(teacher_login)["next_path"] == "/classroom"
+    teacher_cookie = application_cookie(teacher_login)
+
+    assert data(request(:get, "/api/v1/staff-preferences", nil, teacher_cookie))["navigation"] ==
+             %{"accounts" => false, "classroom" => true}
+
+    assert {:ok, _} =
+             StaffDirectory.revoke_access_profile(
+               f.persistence,
+               Fixture.context_a(),
+               Map.merge(Fixture.keys(), %{
+                 id: created.id,
+                 expected_version: granted.lock_version,
+                 profile_id: f.teacher_role_id
+               })
+             )
+
+    assert request(:get, "/api/v1/classroom/classes", nil, teacher_cookie).status == 401
+
+    assert data(sign_in("teacher@northstar-school.test", permanent))["next_path"] ==
+             "/my-preferences"
+  end
+
   test "pre-authentication requires origin and bound CSRF and keeps public denial neutral", f do
     initial = request(:get, "/api/v1/staff-login")
     assert initial.status == 200

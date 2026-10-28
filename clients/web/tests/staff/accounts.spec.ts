@@ -105,6 +105,16 @@ test("staff account provision, first password, classroom access and institutiona
   await expect(
     page.getByRole("heading", { name: "Staff accounts", exact: true }),
   ).toBeVisible();
+  await expect(
+    page.getByText("Signed in as Synthetic Account Administrator", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "New staff account", exact: true }),
+  ).toBeInViewport();
+  await page.getByRole("button", { name: "New staff account", exact: true }).click();
+  await expect(
+    page.getByRole("combobox", { name: "Staff member", exact: true }),
+  ).toBeFocused();
   const cookie = (await context.cookies()).find(
     (item) => item.name === "__Host-chimwemwe-session",
   );
@@ -252,16 +262,117 @@ test("staff account provision, first password, classroom access and institutiona
     await staff.getByRole("button", { name: "Sign in", exact: true }).click();
     await expect(staff).toHaveURL(/\/classroom(?:\?|$)/);
     expect((await staff.request.get("/api/v1/staff-accounts")).status()).toBe(403);
-    await staff.getByRole("button", { name: "Synthetic class", exact: true }).click();
-    await expect(staff.getByRole("group")).not.toHaveCount(0);
+    await expect(
+      staff.getByRole("button", { name: "Oak daily register", exact: true }),
+    ).toBeEnabled();
+    const entranceRequests: string[] = [];
+    const recordEntrance = (request: { url: () => string }) => {
+      if (request.url().includes("/api/v1/"))
+        entranceRequests.push(new URL(request.url()).pathname);
+    };
+    staff.on("request", recordEntrance);
+    await staff.getByRole("link", { name: "Home", exact: true }).click();
+    await expect(
+      staff.getByRole("heading", { name: "Home", exact: true }),
+    ).toBeVisible();
+    await expect(
+      staff.getByText("Signed in as Synthetic Teacher", { exact: true }),
+    ).toBeVisible();
+    await staff.getByRole("link", { name: "Apps", exact: true }).click();
+    await expect(
+      staff.getByRole("heading", { name: "Teaching & learning", exact: true }),
+    ).toBeVisible();
+    await expect(
+      staff.getByRole("link", { name: "Accounts", exact: true }),
+    ).toHaveCount(0);
+    for (const width of [1440, 768, 320]) {
+      await staff.setViewportSize({ width, height: 900 });
+      expect(
+        await staff.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+      ).toBe(true);
+      expect((await new AxeBuilder({ page: staff }).analyze()).violations).toEqual([]);
+      await staff.screenshot({
+        path: `test-results/cw1-apps-${width}.png`,
+        fullPage: true,
+      });
+    }
+    expect(
+      entranceRequests.filter(
+        (path) =>
+          path.startsWith("/api/v1/classroom") ||
+          path.startsWith("/api/v1/staff-accounts"),
+      ),
+    ).toEqual([]);
+    staff.off("request", recordEntrance);
+    await staff.getByRole("link", { name: "Classroom", exact: true }).click();
+    await staff
+      .getByRole("button", { name: "Classroom tasks: My classes", exact: true })
+      .click();
+    await expect(
+      staff.getByRole("button", { name: "My classes", exact: true }),
+    ).toBeVisible();
+    await staff.screenshot({
+      path: "test-results/cw1-classes-320.png",
+      fullPage: true,
+    });
+    await staff
+      .getByRole("button", { name: "Oak daily register", exact: true })
+      .click();
+    await expect(staff.getByRole("group")).toHaveCount(4);
+    await expect(
+      staff.getByText("4 students · 4 still to mark", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      staff.getByText("Signed in as Synthetic Teacher", { exact: true }),
+    ).toBeVisible();
+    await expect(
+      staff.getByRole("link", { name: "Accounts", exact: true }),
+    ).toHaveCount(0);
     await staff
       .getByRole("group")
       .first()
       .getByRole("radio", { name: "Present", exact: true })
       .check();
+    await staff.getByRole("link", { name: "Home", exact: true }).click();
+    await expect(
+      staff.getByRole("dialog", { name: "Discard unsaved marks?" }),
+    ).toBeVisible();
+    await expect(
+      staff.getByRole("button", { name: "Stay", exact: true }),
+    ).toBeFocused();
+    await staff.screenshot({
+      path: "test-results/cw1-draft-dialog-320.png",
+      fullPage: true,
+    });
+    expect((await new AxeBuilder({ page: staff }).analyze()).violations).toEqual([]);
+    await staff.keyboard.press("Tab");
+    await expect(
+      staff.getByRole("button", { name: "Discard", exact: true }),
+    ).toBeFocused();
+    await staff.keyboard.press("Tab");
+    await expect(
+      staff.getByRole("button", { name: "Stay", exact: true }),
+    ).toBeFocused();
+    await staff.keyboard.press("Escape");
+    await expect(staff.getByRole("link", { name: "Home", exact: true })).toBeFocused();
+    await expect(
+      staff
+        .getByRole("group")
+        .first()
+        .getByRole("radio", { name: "Present", exact: true }),
+    ).toBeChecked();
+    await staff.getByRole("button", { name: "Reload class", exact: true }).click();
+    await staff.getByRole("button", { name: "Stay", exact: true }).click();
+    await expect(
+      staff
+        .getByRole("group")
+        .first()
+        .getByRole("radio", { name: "Present", exact: true }),
+    ).toBeChecked();
     const sessionBefore = (await (await staff.request.get("/api/v1/session")).json())
       .data;
-    await staff.goto("/my-preferences");
+    await staff.getByRole("link", { name: "My preferences", exact: true }).click();
+    await staff.getByRole("button", { name: "Discard", exact: true }).click();
     await staff
       .getByRole("combobox", { name: "System language", exact: true })
       .selectOption("fr");
@@ -297,7 +408,64 @@ test("staff account provision, first password, classroom access and institutiona
       fullPage: true,
     });
     await staff.goto("/classroom");
-    await staff.getByRole("button", { name: "Synthetic class", exact: true }).click();
+    await staff
+      .getByRole("button", { name: "Oak daily register", exact: true })
+      .click();
+
+    await expect(staff.getByRole("group")).toHaveCount(4);
+    for (const group of await staff.getByRole("group").all()) {
+      await group.getByRole("radio", { name: "Present", exact: true }).check();
+    }
+    await staff.getByRole("button", { name: "Submit attendance", exact: true }).click();
+    await expect(staff.getByRole("status")).toContainText("Attendance saved");
+    await staff
+      .getByRole("button", { name: "Correct attendance", exact: true })
+      .click();
+    await staff
+      .getByRole("group")
+      .first()
+      .getByRole("radio", { name: "Late", exact: true })
+      .check();
+    await staff.route("**/api/v1/classroom/correct-attendance", async (route) => {
+      const response = await route.fetch();
+      expect(response.status()).toBe(200);
+      await route.abort("connectionfailed");
+    });
+    await staff.getByRole("button", { name: "Save correction", exact: true }).click();
+    await expect(staff.getByRole("status")).toContainText("Connection interrupted");
+    await expect(
+      staff.getByText("Correction result unconfirmed", { exact: true }),
+    ).toBeVisible();
+    await expect(staff.getByText("Saved register", { exact: true })).toHaveCount(0);
+    await expect(
+      staff.getByRole("button", { name: "Cancel correction", exact: true }),
+    ).toBeDisabled();
+    await staff.getByRole("link", { name: "Apps", exact: true }).click();
+    await expect(staff).toHaveURL(/\/classroom(?:\?|$)/);
+    await expect(staff.getByRole("status")).toContainText("reconcile");
+    await expect(
+      staff.getByRole("button", { name: "Sign out", exact: true }),
+    ).toBeEnabled();
+    await staff.screenshot({
+      path: "test-results/cw1-uncertain-320.png",
+      fullPage: true,
+    });
+    await staff.unroute("**/api/v1/classroom/correct-attendance");
+    await staff.getByRole("button", { name: "Reload class", exact: true }).click();
+    await expect(staff.getByRole("status")).toContainText(
+      "requested marks are current",
+    );
+    for (const width of [1440, 320]) {
+      await staff.setViewportSize({ width, height: 900 });
+      expect(
+        await staff.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+      ).toBe(true);
+      expect((await new AxeBuilder({ page: staff }).analyze()).violations).toEqual([]);
+      await staff.screenshot({
+        path: `test-results/cw1-confirmed-${width}.png`,
+        fullPage: true,
+      });
+    }
 
     await page.getByLabel("I confirm the institution and staff member above.").check();
     await page
@@ -345,4 +513,24 @@ test("staff account provision, first password, classroom access and institutiona
     page.getByText("Contact your account administrator if you need access."),
   ).toBeVisible();
   await expect(page.getByLabel("Sign-in email", { exact: true })).toHaveCount(0);
+});
+
+test("staff entrances block anonymous identity and classroom session failure keeps sign-in recovery", async ({
+  page,
+}) => {
+  for (const path of ["/staff/home", "/staff/apps"]) {
+    await page.goto(path);
+    await expect(
+      page.getByRole("link", { name: "Sign in", exact: true }),
+    ).toBeVisible();
+    await expect(page.getByText("Signed in as", { exact: false })).toHaveCount(0);
+    await expect(
+      page.getByRole("link", { name: "Classroom", exact: true }),
+    ).toHaveCount(0);
+  }
+  await page.route("**/api/v1/session", (route) => route.abort("connectionfailed"));
+  await page.goto("/classroom");
+  await expect(page.getByRole("status")).toContainText("Connection interrupted");
+  await page.getByRole("link", { name: "Sign in", exact: true }).click();
+  await expect(page).toHaveURL(/\/sign-in/);
 });

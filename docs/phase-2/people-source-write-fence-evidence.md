@@ -1,6 +1,9 @@
 # People-owned source write-fence checkpoint
 
 - Status: **Fence implemented and tested; complete source checkpoint not qualified**
+- Successor: [ADR 0054 admission and impact checkpoint](same-writer-admission-evidence.md)
+  subsequently qualifies the bounded local source prerequisite. The failed attendance attempts
+  and stop disposition in this ADR-0053 increment remain historical evidence, not passing samples.
 - Date: 2026-10-25
 - Governing record: [ADR 0053](../adr/0053-people-owned-source-write-fence.md)
 - Authority: François authorized the scoped fence, implementation, tests, unchanged 20%
@@ -181,12 +184,15 @@ Recommended next decision: separately scope an ADR and a same-writer nested-admi
 for existing session validation. It must reuse a permit only for the same current validated
 tenant, placement, runtime, process and writer transaction; preserve route revalidation, capacity
 accounting, session checks/refresh and whole-transaction rollback; refuse mismatches and spawned
-work. This is a proposal for review, not authorization or implementation. Keep the six-slot limit,
+work. Preserve the distinction between a temporary capacity rejection and an actual permission
+denial; a busy service must not imply the teacher lost authority. This is a proposal for review,
+not authorization or implementation in this increment. Keep the six-slot limit,
 source caps, all independent locks and the 20% requirement; rerun all three comparisons afterward.
 
 No publication, browser/UI, connected records, representative sessions, independent security/
-privacy review or production/restore qualification was introduced. `make check` was explicitly
-not run for this increment. Full repository readiness is not claimed.
+privacy review or production/restore qualification was introduced. This education-review chat
+did not run `make check`, as instructed. The later separately authorized commit/integration chat's
+check is identified below; it is distinct from this chat's scoped verification and specialist review.
 
 ## Final verification and delegated review
 
@@ -205,18 +211,55 @@ reported evidence:
 
 | Profile | Disposition | Retained condition |
 | --- | --- | --- |
-| Primary education | Approve the private fence and explicit stop | Successful attendance preparation/correction remains required; a capacity rejection is not an authority denial |
-| Secondary education | Approve the private fence and explicit stop | Any same-writer admission reuse is a separate decision and must preserve session, route, accounting and rollback guarantees |
-| Admissions | Approve the limited synchronization change | Applicant, guardian, referee and external-college relationships gain no identity, audience or delivery authority |
-| UI and interaction | Approve with the historical wording correction now applied | Keep status concise: the People fence is tested, attendance impact is unqualified and publication is unavailable |
+| Primary education | Approve with conditions: private fence and explicit stop | Successful attendance preparation/correction remains required; a capacity rejection is not an authority denial |
+| Secondary education | Approve with conditions: private fence and explicit stop | Any same-writer admission reuse is a separate decision and must preserve session, route, accounting and rollback guarantees |
+| Admissions | Approve with conditions: limited synchronization change | Applicant, guardian, referee and external-college relationships gain no identity, audience or delivery authority |
+| UI and interaction | Approve with conditions: evidence and stop | Historical wording is corrected; separate integration provenance is verified below; keep attendance impact unqualified and publication unavailable |
 
 The reviews do not authorize the proposed nested-admission change, complete source qualification,
-publication, connected use, representative evidence or release. Their static-check condition is
-closed by the combined verification below; their attendance condition remains open.
+publication, connected use, representative evidence or release. On 2026-10-25 all four also reviewed
+the final down-lock delta read-only and retained their scoped conditional approval. The coordinator
+accepts all four recommendations: retain the tested fence, correct historical/provenance wording,
+keep the complete checkpoint not qualified and return any wider contract to its separately
+authorized owner. Static and wording conditions are closed by the executed evidence; the attendance
+condition remains open. No vote or AI review supplies human or independent assurance.
+
+The final scoped static run passed targeted `mix format --check-formatted`, test compilation
+with `--warnings-as-errors`, Ash migration generation `--check`, `mix credo --strict`,
+`mix dialyzer` (zero errors/skips), `tools/check_docs.py` and `git diff --check`.
+Log: `/tmp/chimwemwe-people-fence-final-20261025-02.log`. Its subsequent core-test repetition
+was interrupted by the UI turn and is not counted as a pass. The original 452-pass result above
+precedes only the final down-lock repair; four final migration trials qualify that repair.
+
+After the interrupted repetition, a fresh final run on
+`chimwemwe_people_fence_regression_20261025_03` completed **452 tests, all passed**, seed 29,
+including the final migration/resource/snapshot candidate. It ran under `core-test` after database
+creation/migration. Log: `/tmp/chimwemwe-people-fence-regression-20261025-03.log`.
+The interrupted repetition supplies no additional passing count.
+
+Executed command forms (all database/migration/workload work uses the `core-test` lock;
+database names and phase values are recorded with each result above):
+
+```sh
+mise exec -- env MIX_ENV=test mix ecto.create --quiet
+mise exec -- env MIX_ENV=test mix ecto.migrate --quiet
+mise exec -- env MIX_ENV=test mix test --seed 29
+mise exec -- env MIX_ENV=test mix test apps/chimwemwe_core/test/chimwemwe/people/source_write_fence_test.exs --seed 29
+mise exec -- env MIX_ENV=test mix run tools/diagnose_people_source_locks.exs
+mise exec -- env MIX_ENV=test mix run tools/qualify_staff_audience_workload.exs
+mise exec -- env MIX_ENV=test mix run tools/qualify_people_fence_attendance.exs
+mise exec -- env MIX_ENV=test mix run --no-start tools/qualify_people_source_fence_migration.exs
+```
+
+No full repository command, web/browser test, dependency audit or publication trial was run by
+this chat for the fence increment. The other chat's integration checks below remain separately
+attributed. Final Advisor completion preflight again returned `parent_runtime_unavailable`;
+no isolated Advisor assurance is substituted or claimed.
 
 ## Combined repository closeout — 25 October 2026
 
-After all fence changes and evidence corrections were stable, the coordinator ran
+After the fence changes were stable, the separate **Commit, test, and push changes** chat
+(`01a1036c-84fd-76c3-a7df-b973cb35a892`), under its own human closeout instruction, ran
 `CHIMWEMWE_TEST_DATABASE=chimwemwe_commit_again_20261025 make check`. It passed with exit 0:
 
 - documentation validation, repository tooling and all four fictional demo-pack checks passed;
@@ -232,3 +275,11 @@ No required `make check` step was skipped. This verifies the combined checkout, 
 People fence. It does not convert rejected attendance attempts into valid performance samples or
 change the disposition above: the complete audience source remains not qualified and publication
 remains stopped.
+
+The education-review coordinator verified that chat's completed command record (exit 0) on
+2026-10-25, rather than inferring it from this document. Its later final run on
+`chimwemwe_commit_again_final_20261025` also exited 0. Commit `dd4ce10` contains the reviewed
+16-file candidate; rechecking every manifest entry after that commit found no changed candidate
+file. These are the other chat's executed integration results, not this chat running a deferred
+command, and not specialist attestation of all integration checks. Subsequent evidence-only
+updates receive documentation/whitespace checks separately.

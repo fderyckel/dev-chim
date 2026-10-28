@@ -1,6 +1,6 @@
 # Application navigation and workspaces proposal
 
-- Status: Proposed product architecture; first local synthetic shell authorized on 24 October 2026
+- Status: Proposed product architecture; local synthetic shell and memory-only layout editors authorized and implemented on 24–25 October 2026
 - Date: 2026-10-24
 - Amendment: 2026-10-25 — configurable navigation groups and educator-owned landing layouts
 - Decision authority: François — Project Owner
@@ -30,12 +30,18 @@ next delivery order. Core, identity, public and release boundaries retain their 
 
 ## Current foundation
 
+The next [Classroom workspace integration proposal](classroom-workspace-integration-proposal.md)
+was requested on 26 October 2026. It composes the existing staff classroom proof, preserves the
+four-pack viewer and flexible group labels, and leaves runtime integration subject to approval.
+
 The fictional institution viewer originally had a flat list of directories and Calendar. Its
 implemented first shell now has Home, Apps and a local workspace menu, with Students,
 Families & guardians or Contacts, Educators or Instructors, and Calendar retained in
 [`demo-instance-view.tsx`](../../clients/web/src/components/demo-instance-view.tsx). The current
-[`demo catalogue`](../../clients/web/src/lib/demo-navigation.ts) still supplies its groups from
-code; there is no layout editor or persisted personal Home yet.
+[`demo catalogue`](../../clients/web/src/lib/demo-navigation.ts) supplies canonical destinations;
+memory-only editors now arrange their groups and independent personal Home layouts. The
+[editor evidence](../phase-2/local-demo-layout-editor-evidence.md) records qualification and limits.
+Persistent personal Home preferences remain future work.
 The separate qualification shell already has a sidebar in
 [`app-shell.tsx`](../../clients/web/src/components/app-shell.tsx).
 Neither should acquire an ever-growing top-level link for every new school capability.
@@ -374,11 +380,11 @@ resources, modules, API reads, identity paths, real data and deployment. A subse
 workspace increment needs an explicitly authorized source and its own scope. This sequence
 preserves the classroom-first delivery priority and the separately bounded COMM-1 work.
 
-Those exclusions describe the implemented first shell. The 25 October amendment makes a bounded
-presentation editor the next proposed increment; it does not retrospectively claim that the
-current shell already has one or that durable preferences are implemented.
+Those exclusions describe the original first shell. On 25 October the Project Owner explicitly
+authorized the bounded memory-only presentation editors below. Durable preferences remain outside
+this increment.
 
-## Proposed personalization increment
+## Authorized personalization increment — 25 October 2026
 
 Prove the two editing scopes over the existing three-app synthetic catalogue. Keep the
 immutable workflow/destination declarations separate from editable group definitions and
@@ -398,9 +404,8 @@ reset on reload or institution switch. The institution editor is explicitly a lo
 preview, not simulated authority to administer a real institution. Preserve direct links,
 history, readable phone reflow and the distinction between a navigation group and a class.
 
-This turn amends the proposal and its current-shell ADR only; no editor, preference schema,
-account integration or runtime data change is implemented. Before an implementation increment,
-record its bounded authority in the Proposed ADR. Connected persistence, public access,
+The in-memory editors implement this bounded increment under the amended Proposed ADR 0048.
+They add no preference schema, account integration or domain-data change. Connected persistence, public access,
 fixed-record shortcuts and template sharing require their own reviewed contracts and evidence.
 
 ## Review record
@@ -424,9 +429,10 @@ not be verified; no Advisor approval is claimed.
 
 ### Agility amendment review on 25 October 2026
 
-The three relevant profiles independently reviewed this paper amendment. Their new editor and
-connected-preference trials are proposed, not run; the prior shell's screenshots/checks do not
-validate an editor. Admissions was not re-instantiated because no admissions meaning changes.
+The three relevant profiles independently reviewed the paper amendment before editor authorization.
+At that checkpoint their editor and connected-preference trials were proposed, not run; the prior
+shell's screenshots/checks did not validate an editor. Admissions was not re-instantiated because
+no admissions meaning changes.
 
 | Profile | Disposition and strongest concern | Conditions and owner functions | Coordinator response |
 | --- | --- | --- | --- |
@@ -434,8 +440,9 @@ validate an editor. Admissions was not re-instantiated because no admissions mea
 | Secondary education | Approve with conditions: custom headings/layouts could merge subject, pastoral and college contexts or appear to change authority | Preserve canonical task/context; explicit template adoption; treat free-text labels as potentially sensitive; no inferred role or calendar. Education product, platform and privacy ownership | Accept: context and label-classification conditions incorporated; Save Home layout reserved for durable state |
 | UI and interaction | Approve with conditions: institutional regrouping and personal Home editing could confuse orientation | Separate Organize apps/Customize my Home; stable identities with deduplicated aliases; move-to-section controls; explicit update/reset behaviour. Product experience and accessibility ownership | Accept: fixed-placement wording replaced and temporary-apply semantics made explicit |
 
-No material design objection remains unresolved at proposal level. The simple editor still
-needs implementation and rendered/interaction review. Architecture Advisor consultation was
+No material design objection remained unresolved at proposal level. The subsequent implementation
+and source/rendered review are recorded in the [editor evidence](../phase-2/local-demo-layout-editor-evidence.md).
+Architecture Advisor consultation was
 unavailable because the parent runtime could not be verified; the user-authorized specialist
 reviews are separate AI design evidence.
 
@@ -524,9 +531,9 @@ outside this documentation proposal and was not applied.
 
 ## Agility amendment verification on 25 October 2026
 
-This amendment changes only this proposal and the Proposed ADR 0048 clarification. The existing
-shell, all runtime code, staff-account/preferences work, communications work and other chats'
-records are preserved. The editor and persisted personal Home remain proposed, not implemented.
+Before the owner's subsequent editor authorization, this amendment changed only this proposal
+and the Proposed ADR 0048 clarification. Runtime code and other chats' records were preserved.
+At that checkpoint both the editor and persisted personal Home remained proposed.
 
 | Exact check | Current result |
 | --- | --- |
@@ -555,5 +562,7 @@ checkout. It passed with exit 0: **452 core tests**, **54 web unit tests**, **91
 zero findings from both npm audits, and all documentation, formatting, static analysis, contract,
 migration, build and tooling stages. No required step was skipped.
 
-This closes the proposal's historical repository-integration blocker. It does not implement the
-proposed personal Home editor, authorize connected preferences, or qualify COMM-1 publication.
+This closed the proposal's historical repository-integration blocker before the editor work.
+Current editor verification and any remaining blockers are recorded in the
+[editor evidence](../phase-2/local-demo-layout-editor-evidence.md). Neither checkpoint authorizes
+connected preferences or COMM-1 publication.

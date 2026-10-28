@@ -693,24 +693,26 @@ defmodule Chimwemwe.People.FoundationTest do
   end
 
   test "recorded timestamps stay UTC even when the database session uses another zone", f do
+    context = context_a()
+
     assert {:ok, {:ok, :verified}} =
-             Persistence.with_writer(f.persistence, context_a(), fn ->
+             Persistence.with_writer(f.persistence, context, fn ->
                Repo.transaction(fn ->
                  Repo.query!("SET LOCAL TIME ZONE 'Pacific/Kiritimati'")
-                 person = person!(f)
-                 staff = participation!(f, person, :staff)
+                 person = person!(f, context)
+                 staff = participation!(f, person, :staff, context)
 
                  assert {:ok, account} =
                           Foundation.associate_staff_account(
                             f.runtime,
-                            context_a(),
+                            context,
                             account_input(f, person, staff)
                           )
 
                  assert {:ok, _} =
                           Foundation.revoke_staff_account_association(
                             f.runtime,
-                            context_a(),
+                            context,
                             Map.merge(keys(), %{association_id: account.id, expected_version: 1})
                           )
 
@@ -736,8 +738,8 @@ defmodule Chimwemwe.People.FoundationTest do
   defp keys, do: %{idempotency_key: UUID.generate(), causation_id: UUID.generate()}
   defp person_input, do: Map.put(keys(), :display_name, "Synthetic Person")
 
-  defp person!(f) do
-    assert {:ok, person} = Foundation.register_person(f.runtime, context_a(), person_input())
+  defp person!(f, context \\ context_a()) do
+    assert {:ok, person} = Foundation.register_person(f.runtime, context, person_input())
     person
   end
 
@@ -752,11 +754,11 @@ defmodule Chimwemwe.People.FoundationTest do
         source_reference: UUID.generate()
       })
 
-  defp participation!(f, person, kind) do
+  defp participation!(f, person, kind, context \\ context_a()) do
     action = if kind == :staff, do: :record_staff_affiliation, else: :record_student_participation
 
     assert {:ok, part} =
-             apply(Foundation, action, [f.runtime, context_a(), participation_input(f, person)])
+             apply(Foundation, action, [f.runtime, context, participation_input(f, person)])
 
     part
   end
@@ -1108,6 +1110,10 @@ defmodule Chimwemwe.People.FoundationTest do
              Persistence.with_writer(runtime, context_a(), fn ->
                Repo.query!("""
                TRUNCATE
+                 communications_engagements,
+                 communications_revisions,
+                 communications_preparations,
+                 communications_notices,
                  classroom_preparation_workspaces,
                  classroom_attendance_corrections,
                  classroom_attendance_submissions,

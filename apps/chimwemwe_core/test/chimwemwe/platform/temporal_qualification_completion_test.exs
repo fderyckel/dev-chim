@@ -41,6 +41,10 @@ defmodule Chimwemwe.Platform.TemporalQualificationCompletionTest do
   ]
 
   @tables [
+    "communications_engagements",
+    "communications_revisions",
+    "communications_preparations",
+    "communications_notices",
     "classroom_preparation_workspaces",
     "classroom_attendance_corrections",
     "classroom_attendance_submissions",

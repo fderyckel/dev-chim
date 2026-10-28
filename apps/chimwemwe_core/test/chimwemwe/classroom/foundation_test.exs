@@ -668,19 +668,21 @@ defmodule Chimwemwe.Classroom.FoundationTest do
                | effective_until: Date.add(local_day, -1)
              })
 
+    context = context_a()
+
     assert {:ok, {:ok, :verified}} =
-             Persistence.with_writer(f.persistence, context_a(), fn ->
+             Persistence.with_writer(f.persistence, context, fn ->
                Repo.transaction(fn ->
                  Repo.query!("SET LOCAL TIME ZONE 'Pacific/Kiritimati'")
 
                  assert {:ok, _} =
-                          Foundation.end_teaching_assignment(f.persistence, context_a(), %{
+                          Foundation.end_teaching_assignment(f.persistence, context, %{
                             ending(:assignment_id, assignment.id)
                             | effective_until: local_day
                           })
 
                  assert {:ok, created} =
-                          Foundation.create_class(f.persistence, context_a(), class_input(scoped))
+                          Foundation.create_class(f.persistence, context, class_input(scoped))
 
                  assert %{rows: [[true]]} =
                           Repo.query!(
@@ -694,13 +696,15 @@ defmodule Chimwemwe.Classroom.FoundationTest do
   end
 
   test "unsupported transaction snapshots cannot bypass parent-lock invariants", f do
+    context = context_a()
+
     assert {:ok, {:error, :rollback}} =
-             Persistence.with_writer(f.persistence, context_a(), fn ->
+             Persistence.with_writer(f.persistence, context, fn ->
                Repo.transaction(fn ->
                  Repo.query!("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ")
 
                  assert {:error, %Error{code: :conflict}} =
-                          Foundation.create_class(f.persistence, context_a(), class_input(f))
+                          Foundation.create_class(f.persistence, context, class_input(f))
                end)
              end)
 

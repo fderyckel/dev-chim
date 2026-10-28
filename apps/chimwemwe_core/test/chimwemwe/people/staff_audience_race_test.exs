@@ -59,6 +59,13 @@ defmodule Chimwemwe.People.StaffAudienceRaceTest do
           dates: %{effective_from: Date.add(Date.utc_today(), -1)}
         )
 
+      f =
+        Map.put(
+          f,
+          :writer_context,
+          if(@operation == :session_logout, do: f.request.context, else: Fixture.context_a())
+        )
+
       candidate = prepare_operation(f, recipient, @operation)
       parent = self()
 
@@ -76,7 +83,7 @@ defmodule Chimwemwe.People.StaffAudienceRaceTest do
 
       writer =
         Task.async(fn ->
-          Persistence.with_writer(f.persistence, Fixture.context_a(), fn ->
+          Persistence.with_writer(f.persistence, f.writer_context, fn ->
             Repo.transaction(fn ->
               [[backend]] = Repo.query!("SELECT pg_backend_pid()").rows
               send(parent, {:writing, self(), backend})
@@ -252,7 +259,7 @@ defmodule Chimwemwe.People.StaffAudienceRaceTest do
     fn ->
       People.record_staff_affiliation(
         f.runtime,
-        Fixture.context_a(),
+        f.writer_context,
         Fixture.participation_input(f, person)
       )
     end
@@ -262,7 +269,7 @@ defmodule Chimwemwe.People.StaffAudienceRaceTest do
     do: fn ->
       People.end_participation(
         f.runtime,
-        Fixture.context_a(),
+        f.writer_context,
         Map.merge(Fixture.keys(), %{
           participation_id: r.part.id,
           expected_version: 1,
@@ -275,7 +282,7 @@ defmodule Chimwemwe.People.StaffAudienceRaceTest do
     do: fn ->
       People.revoke_staff_account_association(
         f.runtime,
-        Fixture.context_a(),
+        f.writer_context,
         Map.merge(Fixture.keys(), %{association_id: r.association.id, expected_version: 1})
       )
     end
@@ -353,7 +360,7 @@ defmodule Chimwemwe.People.StaffAudienceRaceTest do
     do: fn ->
       SessionFoundation.logout(
         f.persistence,
-        f.request.context,
+        f.writer_context,
         Map.merge(Fixture.keys(), %{token: f.request.session_token})
       )
     end
@@ -362,7 +369,7 @@ defmodule Chimwemwe.People.StaffAudienceRaceTest do
     do: fn ->
       Foundation.suspend_connection(
         f.persistence,
-        Fixture.context_a(),
+        f.writer_context,
         Map.merge(Fixture.keys(), %{connection_id: f.connection_id, expected_version: 3})
       )
     end
@@ -386,7 +393,7 @@ defmodule Chimwemwe.People.StaffAudienceRaceTest do
       ModuleLifecycle.deactivate(
         f.persistence,
         People.release_manifest(),
-        Fixture.context_a(),
+        f.writer_context,
         Map.merge(Fixture.keys(), %{module_key: "people.core", expected_version: 1})
       )
     end

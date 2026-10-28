@@ -139,7 +139,8 @@ defmodule Chimwemwe.Platform.ExecutionContextTest do
              Chimwemwe.InstitutionalStructure,
              Chimwemwe.AcademicCalendar,
              Chimwemwe.People,
-             Chimwemwe.Classroom
+             Chimwemwe.Classroom,
+             Chimwemwe.Communications
            ]
 
     assert Application.fetch_env!(:chimwemwe_core, :base_resources) == [
@@ -156,6 +157,8 @@ defmodule Chimwemwe.Platform.ExecutionContextTest do
     assert Info.require_actor?(Chimwemwe.AcademicCalendar)
     assert Info.authorize(Chimwemwe.People) == :always
     assert Info.require_actor?(Chimwemwe.People)
+    assert Info.authorize(Chimwemwe.Communications) == :always
+    assert Info.require_actor?(Chimwemwe.Communications)
 
     assert MapSet.new(Info.resources(Chimwemwe.Platform)) ==
              MapSet.new([

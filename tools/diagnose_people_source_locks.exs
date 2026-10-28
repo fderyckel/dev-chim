@@ -49,11 +49,12 @@ defmodule Chimwemwe.People.SourceLockDiagnosis do
     for _ <- 1..24, do: staff!(f)
 
     candidate = Fixture.class!(f)
+    assignment_context = Fixture.context_a()
 
     assignment = fn ->
       Foundation.assign_teacher(
         f.persistence,
-        Fixture.context_a(),
+        assignment_context,
         Fixture.teacher_input(f, candidate)
       )
     end
@@ -65,8 +66,8 @@ defmodule Chimwemwe.People.SourceLockDiagnosis do
       "PEOPLE_SOURCE_BLOCKING " <>
         Jason.encode!(%{
           phase: phase,
-          foundation: held_probe(f, assignment, phase == "before"),
-          attendance: held_probe(f, attendance, phase == "before")
+          foundation: held_probe(f, assignment_context, assignment, phase == "before"),
+          attendance: held_probe(f, request.context, attendance, phase == "before")
         })
     )
 
@@ -135,7 +136,7 @@ defmodule Chimwemwe.People.SourceLockDiagnosis do
     end
   end
 
-  defp held_probe(f, operation, must_block) do
+  defp held_probe(f, context, operation, must_block) do
     parent = self()
 
     source =
@@ -151,7 +152,7 @@ defmodule Chimwemwe.People.SourceLockDiagnosis do
 
     writer =
       Task.async(fn ->
-        Persistence.with_writer(f.persistence, Fixture.context_a(), fn ->
+        Persistence.with_writer(f.persistence, context, fn ->
           Repo.transaction(fn ->
             [[backend]] = Repo.query!("SELECT pg_backend_pid()").rows
             send(parent, {:writer_started, backend})

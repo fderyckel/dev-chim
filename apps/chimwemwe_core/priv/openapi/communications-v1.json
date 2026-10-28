@@ -1,0 +1,2039 @@
+{
+  "components": {
+    "schemas": {
+      "CommandOutcome": {
+        "additionalProperties": false,
+        "properties": {
+          "result": {
+            "additionalProperties": false,
+            "properties": {
+              "eligibility": {
+                "additionalProperties": false,
+                "properties": {
+                  "audience": {
+                    "maximum": 25,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "eligible": {
+                    "maximum": 25,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "no_current_access": {
+                    "maximum": 25,
+                    "minimum": 0,
+                    "type": "integer"
+                  },
+                  "no_eligible_account": {
+                    "maximum": 25,
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "audience",
+                  "eligible",
+                  "no_current_access",
+                  "no_eligible_account"
+                ],
+                "type": "object"
+              },
+              "expires_at": {
+                "type": "string"
+              },
+              "fact_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "kind": {
+                "enum": [
+                  "opening",
+                  "receipt"
+                ],
+                "type": "string"
+              },
+              "notice_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "number": {
+                "type": "integer"
+              },
+              "preparation_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "recorded_at": {
+                "type": "string"
+              },
+              "revision_id": {
+                "format": "uuid",
+                "type": "string"
+              },
+              "state": {
+                "enum": [
+                  "draft",
+                  "pending",
+                  "published",
+                  "withdrawn"
+                ],
+                "type": "string"
+              },
+              "version": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "notice_id"
+            ],
+            "type": "object"
+          },
+          "status": {
+            "enum": [
+              "committed",
+              "not_recorded"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "Error": {
+        "additionalProperties": false,
+        "properties": {
+          "errors": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "code": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "code",
+                "message"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "errors"
+        ],
+        "type": "object"
+      },
+      "NoticeResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/NoticeView"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "NoticeView": {
+        "additionalProperties": false,
+        "properties": {
+          "body": {
+            "type": "string"
+          },
+          "classification": {
+            "type": "string"
+          },
+          "collection_notice": {
+            "type": "string"
+          },
+          "eligibility": {
+            "additionalProperties": false,
+            "properties": {
+              "audience": {
+                "maximum": 25,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "eligible": {
+                "maximum": 25,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "no_current_access": {
+                "maximum": 25,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "no_eligible_account": {
+                "maximum": 25,
+                "minimum": 0,
+                "type": "integer"
+              }
+            },
+            "required": [
+              "audience",
+              "eligible",
+              "no_current_access",
+              "no_eligible_account"
+            ],
+            "type": "object"
+          },
+          "expires_at": {
+            "type": "string"
+          },
+          "fact_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "institution": {
+            "type": "string"
+          },
+          "kind": {
+            "enum": [
+              "opening",
+              "receipt"
+            ],
+            "type": "string"
+          },
+          "metrics_as_of": {
+            "type": "string"
+          },
+          "notice_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "number": {
+            "type": "integer"
+          },
+          "opened": {
+            "type": "integer"
+          },
+          "operation": {
+            "enum": [
+              "publish",
+              "correct",
+              "withdraw"
+            ],
+            "type": "string"
+          },
+          "own_receipt": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "receipt_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "recorded_at": {
+                    "type": "string"
+                  },
+                  "revision_id": {
+                    "format": "uuid",
+                    "type": "string"
+                  },
+                  "statement": {
+                    "type": "string"
+                  },
+                  "status": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "receipt_id",
+                  "recorded_at",
+                  "revision_id",
+                  "statement",
+                  "status"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "preparation_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "published_at": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "receipt_confirmed": {
+            "type": "integer"
+          },
+          "receipt_required": {
+            "type": "boolean"
+          },
+          "recorded_at": {
+            "type": "string"
+          },
+          "revision_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "draft",
+              "pending",
+              "published",
+              "withdrawn"
+            ],
+            "type": "string"
+          },
+          "statement": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "notice_id"
+        ],
+        "type": "object"
+      },
+      "OutcomeResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/CommandOutcome"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "WorkspaceResponse": {
+        "additionalProperties": false,
+        "properties": {
+          "data": {
+            "additionalProperties": false,
+            "properties": {
+              "classification": {
+                "type": "string"
+              },
+              "institution": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "classification",
+              "institution"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "type": "object"
+      },
+      "approve-operation": {
+        "additionalProperties": false,
+        "properties": {
+          "causation_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "expected_version": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "notice_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "preparation_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "causation_id",
+          "expected_version",
+          "idempotency_key",
+          "notice_id",
+          "preparation_id"
+        ],
+        "type": "object"
+      },
+      "command-outcome": {
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "enum": [
+              "create_draft",
+              "revise_draft",
+              "prepare_operation",
+              "submit_for_approval",
+              "approve_operation",
+              "open_notice",
+              "confirm_receipt"
+            ],
+            "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "notice_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "action",
+          "idempotency_key",
+          "notice_id"
+        ],
+        "type": "object"
+      },
+      "confirm-receipt": {
+        "additionalProperties": false,
+        "properties": {
+          "causation_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "notice_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "revision_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "causation_id",
+          "idempotency_key",
+          "notice_id",
+          "revision_id"
+        ],
+        "type": "object"
+      },
+      "create-draft": {
+        "additionalProperties": false,
+        "properties": {
+          "body": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "causation_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "receipt_required": {
+            "default": false,
+            "type": "boolean"
+          },
+          "title": {
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "body",
+          "causation_id",
+          "idempotency_key",
+          "receipt_required",
+          "title"
+        ],
+        "type": "object"
+      },
+      "open-notice": {
+        "additionalProperties": false,
+        "properties": {
+          "causation_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "notice_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "revision_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "causation_id",
+          "idempotency_key",
+          "notice_id",
+          "revision_id"
+        ],
+        "type": "object"
+      },
+      "prepare-operation": {
+        "additionalProperties": false,
+        "properties": {
+          "body": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "causation_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "expected_version": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "notice_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "operation": {
+            "enum": [
+              "publish",
+              "correct",
+              "withdraw"
+            ],
+            "type": "string"
+          },
+          "reason": {
+            "maxLength": 240,
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "body",
+          "causation_id",
+          "expected_version",
+          "idempotency_key",
+          "notice_id",
+          "operation",
+          "reason",
+          "title"
+        ],
+        "type": "object"
+      },
+      "revise-draft": {
+        "additionalProperties": false,
+        "properties": {
+          "body": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "type": "string"
+          },
+          "causation_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "expected_version": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "notice_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "receipt_required": {
+            "default": false,
+            "type": "boolean"
+          },
+          "title": {
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "body",
+          "causation_id",
+          "expected_version",
+          "idempotency_key",
+          "notice_id",
+          "receipt_required",
+          "title"
+        ],
+        "type": "object"
+      },
+      "submit-for-approval": {
+        "additionalProperties": false,
+        "properties": {
+          "causation_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "expected_version": {
+            "minimum": 1,
+            "type": "integer"
+          },
+          "idempotency_key": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "notice_id": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "preparation_id": {
+            "format": "uuid",
+            "type": "string"
+          }
+        },
+        "required": [
+          "causation_id",
+          "expected_version",
+          "idempotency_key",
+          "notice_id",
+          "preparation_id"
+        ],
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Local synthetic staff notices",
+    "version": "1.0.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/v1/communications/approve-operation": {
+      "post": {
+        "description": "Disabled by default; loopback synthetic only. No-store. Current session and authority required; unsafe methods require same-origin session-bound CSRF.",
+        "operationId": "communications_approve_operation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/approve-operation"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeResponse"
+                }
+              }
+            },
+            "description": "Authoritative result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        }
+      }
+    },
+    "/api/v1/communications/command-outcome": {
+      "post": {
+        "description": "Disabled by default; loopback synthetic only. No-store. Current session and authority required; unsafe methods require same-origin session-bound CSRF.",
+        "operationId": "communications_command_outcome",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/command-outcome"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutcomeResponse"
+                }
+              }
+            },
+            "description": "Authoritative result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        }
+      }
+    },
+    "/api/v1/communications/confirm-receipt": {
+      "post": {
+        "description": "Disabled by default; loopback synthetic only. No-store. Current session and authority required; unsafe methods require same-origin session-bound CSRF.",
+        "operationId": "communications_confirm_receipt",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/confirm-receipt"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeResponse"
+                }
+              }
+            },
+            "description": "Authoritative result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        }
+      }
+    },
+    "/api/v1/communications/create-draft": {
+      "post": {
+        "description": "Disabled by default; loopback synthetic only. No-store. Current session and authority required; unsafe methods require same-origin session-bound CSRF.",
+        "operationId": "communications_create_draft",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/create-draft"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeResponse"
+                }
+              }
+            },
+            "description": "Authoritative result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        }
+      }
+    },
+    "/api/v1/communications/draft": {
+      "get": {
+        "description": "Disabled by default; loopback synthetic only. No-store. Current session and authority required; unsafe methods require same-origin session-bound CSRF.",
+        "operationId": "communications_draft",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "notice_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeResponse"
+                }
+              }
+            },
+            "description": "Authoritative result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        }
+      }
+    },
+    "/api/v1/communications/metrics": {
+      "get": {
+        "description": "Disabled by default; loopback synthetic only. No-store. Current session and authority required; unsafe methods require same-origin session-bound CSRF.",
+        "operationId": "communications_metrics",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "notice_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "revision_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeResponse"
+                }
+              }
+            },
+            "description": "Authoritative result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        }
+      }
+    },
+    "/api/v1/communications/open-notice": {
+      "post": {
+        "description": "Disabled by default; loopback synthetic only. No-store. Current session and authority required; unsafe methods require same-origin session-bound CSRF.",
+        "operationId": "communications_open_notice",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/open-notice"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeResponse"
+                }
+              }
+            },
+            "description": "Authoritative result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        }
+      }
+    },
+    "/api/v1/communications/prepare-operation": {
+      "post": {
+        "description": "Disabled by default; loopback synthetic only. No-store. Current session and authority required; unsafe methods require same-origin session-bound CSRF.",
+        "operationId": "communications_prepare_operation",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/prepare-operation"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeResponse"
+                }
+              }
+            },
+            "description": "Authoritative result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        }
+      }
+    },
+    "/api/v1/communications/receipt": {
+      "get": {
+        "description": "Disabled by default; loopback synthetic only. No-store. Current session and authority required; unsafe methods require same-origin session-bound CSRF.",
+        "operationId": "communications_receipt",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "notice_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "revision_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeResponse"
+                }
+              }
+            },
+            "description": "Authoritative result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        }
+      }
+    },
+    "/api/v1/communications/review": {
+      "get": {
+        "description": "Disabled by default; loopback synthetic only. No-store. Current session and authority required; unsafe methods require same-origin session-bound CSRF.",
+        "operationId": "communications_review",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "notice_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeResponse"
+                }
+              }
+            },
+            "description": "Authoritative result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        }
+      }
+    },
+    "/api/v1/communications/revise-draft": {
+      "post": {
+        "description": "Disabled by default; loopback synthetic only. No-store. Current session and authority required; unsafe methods require same-origin session-bound CSRF.",
+        "operationId": "communications_revise_draft",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/revise-draft"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeResponse"
+                }
+              }
+            },
+            "description": "Authoritative result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        }
+      }
+    },
+    "/api/v1/communications/status": {
+      "get": {
+        "description": "Disabled by default; loopback synthetic only. No-store. Current session and authority required; unsafe methods require same-origin session-bound CSRF.",
+        "operationId": "communications_status",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "notice_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeResponse"
+                }
+              }
+            },
+            "description": "Authoritative result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        }
+      }
+    },
+    "/api/v1/communications/submit-for-approval": {
+      "post": {
+        "description": "Disabled by default; loopback synthetic only. No-store. Current session and authority required; unsafe methods require same-origin session-bound CSRF.",
+        "operationId": "communications_submit_for_approval",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/submit-for-approval"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NoticeResponse"
+                }
+              }
+            },
+            "description": "Authoritative result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        }
+      }
+    },
+    "/api/v1/communications/workspace": {
+      "get": {
+        "description": "Disabled by default; loopback synthetic only. No-store. Current session and authority required; unsafe methods require same-origin session-bound CSRF.",
+        "operationId": "communications_workspace",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkspaceResponse"
+                }
+              }
+            },
+            "description": "Authoritative result"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "409": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            },
+            "description": "Non-disclosing failure"
+          }
+        }
+      }
+    }
+  }
+}

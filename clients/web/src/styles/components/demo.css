@@ -118,6 +118,184 @@
     overflow-wrap: anywhere;
   }
 
+  .c-demo-personal-home,
+  .c-demo-layout-editor,
+  .c-demo-layout-heading,
+  .c-demo-home-section {
+    display: grid;
+    min-width: 0;
+    gap: var(--space-4);
+  }
+
+  .c-demo-personal-home,
+  .c-demo-layout-editor {
+    gap: var(--space-5);
+    padding-block: var(--space-4);
+  }
+
+  .c-demo-layout-heading {
+    gap: var(--space-2);
+  }
+
+  .c-demo-layout-heading h2 {
+    font-size: var(--font-size-md);
+  }
+
+  .c-demo-layout-toolbar,
+  .c-demo-layout-actions {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  .c-demo-layout-toolbar .c-field {
+    min-width: min(100%, 12rem);
+  }
+
+  .c-demo-layout-toolbar .c-demo-muted {
+    flex-basis: 100%;
+  }
+
+  .c-demo-layout-editor input,
+  .c-demo-layout-editor select,
+  .c-demo-personal-home select {
+    width: 100%;
+    min-width: 0;
+    min-height: 2.75rem;
+    padding: var(--space-2) var(--space-3);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font: inherit;
+  }
+
+  .c-demo-layout-editor input[aria-invalid="true"] {
+    border-color: var(--color-critical-text);
+  }
+
+  .c-demo-layout-section,
+  .c-demo-layout-preview {
+    display: grid;
+    min-width: 0;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+  }
+
+  .c-demo-layout-section legend {
+    padding-inline: var(--space-2);
+    color: var(--color-text-soft);
+    font-weight: 700;
+  }
+
+  .c-demo-layout-items {
+    display: grid;
+    gap: var(--space-4);
+    list-style: none;
+  }
+
+  .c-demo-layout-items > li {
+    display: grid;
+    min-width: 0;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border-left: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-subtle);
+  }
+
+  .c-demo-layout-items .c-field {
+    max-width: 30rem;
+  }
+
+  .c-demo-layout-heading,
+  .c-demo-layout-section,
+  .c-demo-layout-preview,
+  .c-demo-home-section {
+    overflow-wrap: anywhere;
+  }
+
+  .c-demo-layout-announcement {
+    color: var(--color-text-soft);
+    font-size: var(--font-size-sm);
+  }
+
+  .c-demo-layout-announcement:empty {
+    display: none;
+  }
+
+  .c-demo-layout-preview ul {
+    display: grid;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+    list-style: none;
+  }
+
+  .c-demo-home-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: var(--space-3);
+    list-style: none;
+  }
+
+  .c-demo-home-links a,
+  .c-demo-all-pages a {
+    display: flex;
+    min-height: 2.75rem;
+    align-items: center;
+    padding: var(--space-3);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    font-weight: 650;
+    text-decoration: none;
+  }
+
+  .c-demo-all-pages summary {
+    min-height: 2.75rem;
+    padding-block: var(--space-3);
+    border-radius: var(--radius-sm);
+    color: var(--color-action-strong);
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  .c-demo-all-pages summary:focus-visible {
+    box-shadow: var(--focus-ring);
+  }
+
+  .c-demo-all-pages ul {
+    display: grid;
+    gap: var(--space-2);
+    list-style: none;
+  }
+
+  .c-demo-layout-dialog {
+    width: min(100% - (2 * var(--space-4)), 32rem);
+    max-height: calc(100% - (2 * var(--space-4)));
+    margin: auto;
+    padding: var(--space-6);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    overflow-wrap: anywhere;
+  }
+
+  .c-demo-layout-dialog h2,
+  .c-demo-layout-dialog p {
+    margin-bottom: var(--space-4);
+  }
+
+  .c-demo-layout-dialog::backdrop {
+    background: color-mix(in srgb, var(--color-text) 35%, transparent);
+  }
+
   .c-demo-global-nav {
     display: flex;
     gap: var(--space-2);

@@ -35,12 +35,14 @@ function ActionContent({ children, icon, iconPosition = "after" }: ActionContent
 type ActionLinkProps = ActionContentProps &
   Readonly<{
     href: string;
+    reloadDocument?: boolean;
     variant?: ActionVariant;
   }>;
 
 export function ActionLink({
   children,
   href,
+  reloadDocument = false,
   icon,
   iconPosition,
   variant = "primary",
@@ -52,7 +54,7 @@ export function ActionLink({
     </ActionContent>
   );
 
-  return href.startsWith("#") ? (
+  return href.startsWith("#") || reloadDocument ? (
     <a className={className} href={href}>
       {content}
     </a>
@@ -65,6 +67,11 @@ export function ActionLink({
 
 type ActionButtonProps = ActionContentProps &
   Readonly<{
+    id?: string;
+    ariaLabel?: string;
+    ariaExpanded?: boolean;
+    ariaControls?: string;
+    ariaDescribedBy?: string;
     disabled?: boolean;
     onClick?: MouseEventHandler<HTMLButtonElement>;
     type?: "button" | "submit";
@@ -72,6 +79,11 @@ type ActionButtonProps = ActionContentProps &
   }>;
 
 export function ActionButton({
+  id,
+  ariaLabel,
+  ariaExpanded,
+  ariaControls,
+  ariaDescribedBy,
   children,
   disabled = false,
   icon,
@@ -82,6 +94,11 @@ export function ActionButton({
 }: ActionButtonProps) {
   return (
     <button
+      id={id}
+      aria-label={ariaLabel}
+      aria-expanded={ariaExpanded}
+      aria-controls={ariaControls}
+      aria-describedby={ariaDescribedBy}
       className={`c-button c-button--${variant}`}
       disabled={disabled}
       onClick={onClick}

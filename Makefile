@@ -46,7 +46,7 @@ lint:
 	shellcheck bin/with-demo-data bin/demo-instance
 	mise exec -- uv run ruff format --check tools tests/tools
 	mise exec -- uv run ruff check tools tests/tools
-	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/staff-demo bin/classroom-demo bin/bootstrap bin/check-changed bin/core-check bin/format-staged-elixir bin/organization-legal-demo bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
+	shellcheck bin/communications-demo .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/staff-demo bin/classroom-demo bin/bootstrap bin/check-changed bin/core-check bin/format-staged-elixir bin/organization-legal-demo bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
 	mise exec -- mix format --check-formatted
 	mise exec -- env MIX_ENV=test mix compile --warnings-as-errors
 	mise exec -- env MIX_ENV=test mix run tools/check_ui1_openapi.exs
@@ -98,11 +98,11 @@ check-core:
 	./bin/with-verification-lock --resource core-test -- ./bin/core-check
 
 check-web:
-	./bin/with-verification-lock --resource web-qualification -- $(MAKE) web-e2e web-core-e2e web-classroom-e2e web-demo-e2e web-staff-e2e
+	./bin/with-verification-lock --resource web-qualification -- $(MAKE) web-e2e web-core-e2e web-classroom-e2e web-demo-e2e web-staff-e2e web-communications-e2e
 
 check-tooling:
 	shellcheck bin/with-demo-data bin/demo-instance
-	shellcheck .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/staff-demo bin/classroom-demo bin/bootstrap bin/check-changed bin/core-check bin/format-staged-elixir bin/organization-legal-demo bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
+	shellcheck bin/communications-demo .githooks/pre-commit .githooks/pre-push bin/auth-demo bin/staff-demo bin/classroom-demo bin/bootstrap bin/check-changed bin/core-check bin/format-staged-elixir bin/organization-legal-demo bin/ui1-local bin/ui1-test-backend bin/with-verification-lock
 	$(MAKE) -n check-changed check-staged
 
 check-clean:
@@ -173,3 +173,10 @@ staff-demo:
 
 web-staff-e2e: web-check
 	cd clients/web && mise exec -- npm exec playwright -- test --config playwright.staff.config.ts
+
+.PHONY: communications-demo web-communications-e2e
+communications-demo:
+	./bin/communications-demo
+
+web-communications-e2e: web-check
+	cd clients/web && mise exec -- npm exec playwright -- test --config playwright.communications.config.ts

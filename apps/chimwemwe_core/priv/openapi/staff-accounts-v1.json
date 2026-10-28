@@ -445,6 +445,22 @@
               "lock_version": {
                 "minimum": 1,
                 "type": "integer"
+              },
+              "navigation": {
+                "additionalProperties": false,
+                "properties": {
+                  "accounts": {
+                    "type": "boolean"
+                  },
+                  "classroom": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "accounts",
+                  "classroom"
+                ],
+                "type": "object"
               }
             },
             "required": [
@@ -453,7 +469,8 @@
               "given_name",
               "id",
               "locale",
-              "lock_version"
+              "lock_version",
+              "navigation"
             ],
             "type": "object"
           }

@@ -17,7 +17,12 @@ import {
   type StaffReplacePasswordInput,
 } from "./staff-shared";
 
-const destinations = new Set(["/accounts", "/classroom", "/first-login/password"]);
+const destinations = new Set([
+  "/accounts",
+  "/classroom",
+  "/my-preferences",
+  "/first-login/password",
+]);
 const messages = {
   unavailable: [
     "Sign-in is unavailable. Reload the page or contact your account administrator.",

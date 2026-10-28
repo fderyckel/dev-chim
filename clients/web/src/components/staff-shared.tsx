@@ -82,6 +82,8 @@ export function navigateStaff(path: string) {
       "/sign-in",
       "/first-login/password",
       "/my-preferences",
+      "/staff/home",
+      "/staff/apps",
     ].includes(path.split("?")[0])
   )
     return;
@@ -177,6 +179,7 @@ export function StaffFrame({
   description,
   csrf,
   institution,
+  presentation,
   onSignedOut,
   children,
 }: {
@@ -185,6 +188,7 @@ export function StaffFrame({
   description: string;
   csrf?: string | null;
   institution?: string;
+  presentation?: StaffPreference | null;
   onSignedOut?: () => void;
   children: ReactNode;
 }) {
@@ -199,12 +203,15 @@ export function StaffFrame({
         title={title}
         description={description}
         aside={
-          <p>
-            {t(
-              "Fictional staff · local evaluation",
-              "Personnel fictif · évaluation locale",
-            )}
-          </p>
+          <div>
+            <StaffIdentity locale={locale} presentation={presentation} />
+            <p>
+              {t(
+                "Fictional staff · local evaluation",
+                "Personnel fictif · évaluation locale",
+              )}
+            </p>
+          </div>
         }
       />
       {csrf && (
@@ -212,15 +219,7 @@ export function StaffFrame({
           className="c-staff__actions"
           aria-label={t("Staff navigation", "Navigation du personnel")}
         >
-          <ActionLink href="/accounts" variant="quiet">
-            {t("Accounts", "Comptes")}
-          </ActionLink>
-          <ActionLink href="/classroom" variant="quiet">
-            {t("My classes", "Mes classes")}
-          </ActionLink>
-          <ActionLink href="/my-preferences" variant="quiet">
-            {t("My preferences", "Mes préférences")}
-          </ActionLink>
+          <StaffDestinations locale={locale} presentation={presentation} />
           <ActionButton
             variant="quiet"
             disabled={signingOut}
@@ -251,6 +250,60 @@ export function StaffFrame({
       )}
       {children}
     </main>
+  );
+}
+
+export function StaffIdentity({
+  locale,
+  presentation,
+}: {
+  locale: StaffLocale;
+  presentation?: StaffPreference | null;
+}) {
+  if (!presentation) return null;
+  const t = translate(locale);
+  return (
+    <p>
+      {t("Signed in as", "Connecté en tant que")}{" "}
+      <strong>{presentation.display_name}</strong>
+    </p>
+  );
+}
+
+export function StaffDestinations({
+  locale,
+  presentation,
+}: {
+  locale: StaffLocale;
+  presentation?: StaffPreference | null;
+}) {
+  const t = translate(locale);
+  return (
+    <>
+      {presentation && (
+        <>
+          <ActionLink href="/staff/home" variant="quiet" reloadDocument>
+            {t("Home", "Accueil")}
+          </ActionLink>
+          <ActionLink href="/staff/apps" variant="quiet" reloadDocument>
+            {t("Apps", "Applications")}
+          </ActionLink>
+        </>
+      )}
+      {presentation?.navigation?.accounts === true && (
+        <ActionLink href="/accounts" variant="quiet" reloadDocument>
+          {t("Accounts", "Comptes")}
+        </ActionLink>
+      )}
+      {presentation?.navigation?.classroom === true && (
+        <ActionLink href="/classroom" variant="quiet" reloadDocument>
+          {t("My classes", "Mes classes")}
+        </ActionLink>
+      )}
+      <ActionLink href="/my-preferences" variant="quiet" reloadDocument>
+        {t("My preferences", "Mes préférences")}
+      </ActionLink>
+    </>
   );
 }
 

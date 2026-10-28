@@ -59,6 +59,15 @@ export function StaffPreferences() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    const clear = () => {
+      setSaved(null);
+      setCsrf(null);
+    };
+    window.addEventListener("pagehide", clear);
+    return () => window.removeEventListener("pagehide", clear);
+  }, []);
+
   return (
     <StaffFrame
       locale={locale}
@@ -68,6 +77,7 @@ export function StaffPreferences() {
         "Choisissez la langue que vous utilisez dans Chimwemwe.",
       )}
       csrf={csrf}
+      presentation={saved}
       onSignedOut={() => {
         setCsrf(null);
         setSaved(null);
@@ -121,9 +131,14 @@ export function StaffPreferences() {
             />
             <p>
               {t(
-                "Language changes how this staff account experience is displayed. It grants no additional access. Classroom pages are currently in English.",
-                "La langue modifie l’affichage de cet espace de compte du personnel. Elle ne donne aucun accès supplémentaire. Les pages des classes sont actuellement en anglais.",
+                "Language changes this staff account experience. It grants no additional access.",
+                "La langue modifie l’affichage de cet espace de compte du personnel. Elle ne donne aucun accès supplémentaire.",
               )}
+              {saved.navigation?.classroom === true &&
+                t(
+                  " Classroom pages are currently in English.",
+                  " Les pages des classes sont actuellement en anglais.",
+                )}
             </p>
             <div className="c-staff__actions">
               <ActionButton type="submit" disabled={busy || uncertain}>

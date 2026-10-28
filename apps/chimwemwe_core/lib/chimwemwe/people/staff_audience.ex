@@ -32,15 +32,43 @@ defmodule Chimwemwe.People.StaffAudience do
 
   def capture(_config, _request, _draft, _callback), do: error(:forbidden)
 
-  defp execute(config, request, digest, callback) do
+  def capture_for_approval(
+        %__MODULE__{} = config,
+        %PublicRequestSession{support: nil} = request,
+        draft,
+        proposer_membership,
+        callback
+      )
+      when is_function(callback, 1) do
+    with {:ok, proposer_membership} <- UUID.cast(proposer_membership),
+         {:ok, digest} <- draft_digest(draft) do
+      execute(config, request, digest, callback, [proposer_membership])
+    else
+      _ -> error(:forbidden)
+    end
+  end
+
+  def capture_for_approval(_config, _request, _draft, _proposer, _callback), do: error(:forbidden)
+
+  defp execute(config, request, digest, callback, additional_memberships \\ []) do
     InternalWriter.run(config.persistence, request.context, fn actor, context ->
       budget = Clock.start()
 
       if context.purpose != "communications.staff_audience",
         do: Repo.rollback(%Error{code: :forbidden})
 
-      session = Source.session(request, actor)
-      capture_current(config, context, actor, session, digest, callback, budget)
+      session = Source.session(config.persistence, request, actor)
+
+      capture_current(
+        config,
+        context,
+        actor,
+        session,
+        digest,
+        callback,
+        budget,
+        additional_memberships
+      )
     end)
   end
 
@@ -54,6 +82,54 @@ defmodule Chimwemwe.People.StaffAudience do
       end
     end)
   end
+
+  # Only the named communications owner supplies its retained proof. This is an
+  # exact own-binding check, not caller-selected recipient resolution.
+  def with_recipient(config, request, original, callback),
+    do: with_recipient(config, request, original, fn _ -> :ok end, callback)
+
+  def with_recipient(
+        %__MODULE__{} = config,
+        %PublicRequestSession{support: nil} = request,
+        %Proof{} = original,
+        owner_policy,
+        callback
+      )
+      when is_function(owner_policy, 1) and is_function(callback, 1) do
+    InternalWriter.run(config.persistence, request.context, fn actor, context ->
+      budget = Clock.start()
+
+      if context.purpose != "communications.staff_audience" or
+           original.tenant_id != actor.tenant_id or
+           original.institution_id != config.institution_id,
+         do: Repo.rollback(%Error{code: :forbidden})
+
+      admission =
+        original.subjects
+        |> Map.values()
+        |> Enum.find_value(fn
+          %{admission: %{actor_id: id} = admission} when id == actor.actor_id -> admission
+          _ -> nil
+        end)
+
+      if is_nil(admission), do: Repo.rollback(%Error{code: :forbidden})
+      session = Source.session(config.persistence, request, actor)
+      # Read-only owner policy preserves identity -> communications -> People order.
+      case owner_policy.(context) do
+        :ok -> :ok
+        {:error, error} -> Repo.rollback(error)
+        _ -> Repo.rollback(%Error{code: :forbidden})
+      end
+
+      current = Source.recipient(context, config.institution_id, session, admission)
+      result = callback.(current.person_id)
+      Clock.within_budget(budget)
+      Clock.current_before(current.deadline)
+      result
+    end)
+  end
+
+  def with_recipient(_config, _request, _original, _policy, _callback), do: error(:forbidden)
 
   # Original intended subjects and account admission remain frozen. This is a
   # source-stage calculation only, never a notice-read authorization decision.
@@ -77,8 +153,17 @@ defmodule Chimwemwe.People.StaffAudience do
     end
   end
 
-  defp capture_current(config, context, actor, session, digest, callback, budget) do
-    source = Source.capture(context, config.institution_id, session)
+  defp capture_current(
+         config,
+         context,
+         actor,
+         session,
+         digest,
+         callback,
+         budget,
+         additional_memberships
+       ) do
+    source = Source.capture(context, config.institution_id, session, additional_memberships)
 
     proof = %Proof{
       tenant_id: actor.tenant_id,

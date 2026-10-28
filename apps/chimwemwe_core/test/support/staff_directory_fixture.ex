@@ -1,7 +1,7 @@
 defmodule Chimwemwe.Identity.StaffDirectoryFixture do
   @moduledoc false
   import ExUnit.Assertions
-  alias Chimwemwe.Classroom.Fixture
+  alias Chimwemwe.Classroom.{Fixture, ReviewFixture}
   alias Chimwemwe.Identity.{Account, PasswordHash}
   alias Chimwemwe.People.Foundation, as: People
   alias Chimwemwe.Platform.{Persistence, TrustedActor}
@@ -24,7 +24,7 @@ defmodule Chimwemwe.Identity.StaffDirectoryFixture do
 
   def admin_email, do: @admin_email
 
-  def seed!(persistence) do
+  def seed!(persistence, options \\ []) do
     {:ok, f} = Fixture.seed!(persistence)
     cleanup_accounts!(persistence)
     teacher_actor_id = UUID.generate()
@@ -68,7 +68,13 @@ defmodule Chimwemwe.Identity.StaffDirectoryFixture do
     teacher_association =
       associate!(f, teacher_staff, teacher_person, f.membership_a_peer, teacher_context)
 
-    {class, enrolment, assignment, placement} = Fixture.classroom!(%{f | staff: teacher_staff})
+    classroom_fixture = %{f | staff: teacher_staff}
+
+    {class, enrolment, assignment, placement} =
+      if Keyword.get(options, :review_rosters, false),
+        do: ReviewFixture.staff_classrooms!(classroom_fixture),
+        else: Fixture.classroom!(classroom_fixture)
+
     teacher_role_id = grant_directory_capabilities!(f)
 
     {:ok,

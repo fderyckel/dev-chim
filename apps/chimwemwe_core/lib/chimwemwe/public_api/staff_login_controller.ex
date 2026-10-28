@@ -6,10 +6,11 @@ defmodule Chimwemwe.PublicApi.StaffLoginController do
     Error,
     LocalCredentials,
     PublicSessionAdapter,
+    StaffDirectory,
     VerifiedLocalCredential
   }
 
-  alias Chimwemwe.Platform.{Authority, Persistence}
+  alias Chimwemwe.Platform.Persistence
   alias Chimwemwe.PublicApi.{ErrorResponse, StaffConfig}
   alias Chimwemwe.Repo
   @cookie "__Host-chimwemwe-staff-login"
@@ -145,16 +146,14 @@ defmodule Chimwemwe.PublicApi.StaffLoginController do
            Persistence.with_writer(config.runtime, context, fn ->
              target(config.tenant_id, proof.actor_id, locale)
            end),
+         {:ok, presentation} <- StaffDirectory.preferences(config.runtime, context),
          {:ok, cookie} <-
            PublicSessionAdapter.complete_local_sign_in(config.runtime, proof, target) do
       next_path =
-        case Authority.authorize(
-               config.runtime,
-               context,
-               "identity.staff_accounts.read"
-             ) do
-          :ok -> "/accounts"
-          _ -> "/classroom"
+        cond do
+          presentation.navigation.accounts -> "/accounts"
+          presentation.navigation.classroom -> "/classroom"
+          true -> "/my-preferences"
         end
 
       conn

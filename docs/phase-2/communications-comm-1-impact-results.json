@@ -1,0 +1,1088 @@
+{
+  "scope": "Local synthetic COMM-1 named actions including queue wait; no HTTPS/browser timing or production throughput claim",
+  "date": "2026-10-27",
+  "method": "Concurrent logical requests; same shared service gate observes existing DatabaseAdmission work before dispatch; observed zero is not an atomic reservation",
+  "final_runs": [
+    "final-12",
+    "final-13",
+    "final-14"
+  ],
+  "completed_comparisons": [
+    {
+      "run": "1",
+      "mixed": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 15.86,
+            "failures": 0,
+            "p99": 21.745,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 30.492,
+            "failures": 0,
+            "p99": 31.395,
+            "error_counts": {}
+          },
+          "comm_read": {
+            "count": 150,
+            "p95": 67.01,
+            "failures": 0,
+            "p99": 418.767,
+            "error_counts": {}
+          },
+          "receipt": {
+            "count": 25,
+            "p95": 436.04,
+            "failures": 0,
+            "p99": 443.138,
+            "error_counts": {}
+          },
+          "approval": {
+            "count": 2,
+            "p95": 456.575,
+            "failures": 0,
+            "p99": 456.575,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 357
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 177,
+          "overflow": 0,
+          "maximum_observed_waiters": 31,
+          "maximum_waiters": 32
+        }
+      },
+      "database": "chimwemwe_comm1_mixed_20261027_03",
+      "checkpoint_before": [
+        [
+          0,
+          1
+        ]
+      ],
+      "baseline": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 22.856,
+            "failures": 0,
+            "p99": 40.553,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 41.611,
+            "failures": 0,
+            "p99": 53.995,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 180
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 0,
+          "overflow": 0,
+          "maximum_observed_waiters": 0,
+          "maximum_waiters": 32
+        }
+      },
+      "checkpoint_after": [
+        [
+          0,
+          1
+        ]
+      ],
+      "accepted": true,
+      "classroom_read_p95_change_percent": -30.61,
+      "classroom_write_p95_change_percent": -26.72,
+      "receipts": 25,
+      "limits": {
+        "pool": 6,
+        "tenant": 6,
+        "placement": 12,
+        "active_communications": 1,
+        "waiting_communications": 32,
+        "queue_wait_ms": 2000
+      },
+      "log": "mixed-03.log"
+    },
+    {
+      "run": "2",
+      "mixed": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 13.545,
+            "failures": 0,
+            "p99": 19.824,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 26.568,
+            "failures": 0,
+            "p99": 26.937,
+            "error_counts": {}
+          },
+          "comm_read": {
+            "count": 150,
+            "p95": 85.57,
+            "failures": 0,
+            "p99": 361.68,
+            "error_counts": {}
+          },
+          "receipt": {
+            "count": 25,
+            "p95": 400.623,
+            "failures": 0,
+            "p99": 420.605,
+            "error_counts": {}
+          },
+          "approval": {
+            "count": 2,
+            "p95": 412.977,
+            "failures": 0,
+            "p99": 412.977,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 357
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 177,
+          "overflow": 0,
+          "maximum_observed_waiters": 31,
+          "maximum_waiters": 32
+        }
+      },
+      "database": "chimwemwe_comm1_mixed_20261027_04",
+      "checkpoint_before": [
+        [
+          0,
+          2
+        ]
+      ],
+      "baseline": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 12.301,
+            "failures": 0,
+            "p99": 17.952,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 20.328,
+            "failures": 0,
+            "p99": 30.194,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 180
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 0,
+          "overflow": 0,
+          "maximum_observed_waiters": 0,
+          "maximum_waiters": 32
+        }
+      },
+      "checkpoint_after": [
+        [
+          0,
+          2
+        ]
+      ],
+      "accepted": false,
+      "classroom_read_p95_change_percent": 10.11,
+      "classroom_write_p95_change_percent": 30.7,
+      "receipts": 25,
+      "limits": {
+        "pool": 6,
+        "tenant": 6,
+        "placement": 12,
+        "active_communications": 1,
+        "waiting_communications": 32,
+        "queue_wait_ms": 2000
+      },
+      "log": "mixed-04.log"
+    },
+    {
+      "run": "repaired-06",
+      "mixed": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 19.453,
+            "failures": 0,
+            "p99": 20.267,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 25.719,
+            "failures": 0,
+            "p99": 31.576,
+            "error_counts": {}
+          },
+          "comm_read": {
+            "count": 150,
+            "p95": 70.436,
+            "failures": 0,
+            "p99": 356.206,
+            "error_counts": {}
+          },
+          "receipt": {
+            "count": 25,
+            "p95": 395.098,
+            "failures": 0,
+            "p99": 402.13,
+            "error_counts": {}
+          },
+          "approval": {
+            "count": 2,
+            "p95": 376.046,
+            "failures": 0,
+            "p99": 376.046,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 357
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 177,
+          "overflow": 0,
+          "maximum_observed_waiters": 31,
+          "maximum_waiters": 32
+        }
+      },
+      "database": "chimwemwe_comm1_mixed_20261027_06",
+      "checkpoint_before": [
+        [
+          0,
+          3
+        ]
+      ],
+      "baseline": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 14.667,
+            "failures": 0,
+            "p99": 18.787,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 21.404,
+            "failures": 0,
+            "p99": 38.838,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 180
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 0,
+          "overflow": 0,
+          "maximum_observed_waiters": 0,
+          "maximum_waiters": 32
+        }
+      },
+      "checkpoint_after": [
+        [
+          0,
+          3
+        ]
+      ],
+      "accepted": false,
+      "classroom_read_p95_change_percent": 32.63,
+      "classroom_write_p95_change_percent": 20.16,
+      "receipts": 25,
+      "limits": {
+        "pool": 6,
+        "tenant": 6,
+        "placement": 12,
+        "active_communications": 1,
+        "waiting_communications": 32,
+        "queue_wait_ms": 2000
+      },
+      "log": "mixed-06.log"
+    },
+    {
+      "run": "priority-09",
+      "mixed": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 14.267,
+            "failures": 0,
+            "p99": 17.113,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 20.663,
+            "failures": 0,
+            "p99": 27.207,
+            "error_counts": {}
+          },
+          "comm_read": {
+            "count": 150,
+            "p95": 166.631,
+            "failures": 0,
+            "p99": 347.193,
+            "error_counts": {}
+          },
+          "receipt": {
+            "count": 25,
+            "p95": 488.897,
+            "failures": 0,
+            "p99": 494.287,
+            "error_counts": {}
+          },
+          "approval": {
+            "count": 2,
+            "p95": 483.252,
+            "failures": 0,
+            "p99": 483.252,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 357
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 177,
+          "overflow": 0,
+          "capacity_deferrals": 50,
+          "maximum_observed_waiters": 31,
+          "maximum_waiters": 32
+        }
+      },
+      "database": "chimwemwe_comm1_mixed_20261027_09",
+      "checkpoint_before": [
+        [
+          0,
+          4
+        ]
+      ],
+      "baseline": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 16.729,
+            "failures": 0,
+            "p99": 22.827,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 25.407,
+            "failures": 0,
+            "p99": 31.989,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 180
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 0,
+          "overflow": 0,
+          "capacity_deferrals": 0,
+          "maximum_observed_waiters": 0,
+          "maximum_waiters": 32
+        }
+      },
+      "checkpoint_after": [
+        [
+          0,
+          4
+        ]
+      ],
+      "accepted": true,
+      "classroom_read_p95_change_percent": -14.72,
+      "classroom_write_p95_change_percent": -18.67,
+      "receipts": 25,
+      "limits": {
+        "pool": 6,
+        "tenant": 6,
+        "placement": 12,
+        "active_communications": 1,
+        "waiting_communications": 32,
+        "queue_wait_ms": 2000
+      },
+      "log": "mixed-09.log"
+    },
+    {
+      "run": "priority-10",
+      "mixed": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 8.51,
+            "failures": 0,
+            "p99": 20.001,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 16.429,
+            "failures": 0,
+            "p99": 28.741,
+            "error_counts": {}
+          },
+          "comm_read": {
+            "count": 150,
+            "p95": 163.391,
+            "failures": 0,
+            "p99": 347.283,
+            "error_counts": {}
+          },
+          "receipt": {
+            "count": 25,
+            "p95": 484.755,
+            "failures": 0,
+            "p99": 490.349,
+            "error_counts": {}
+          },
+          "approval": {
+            "count": 2,
+            "p95": 431.393,
+            "failures": 0,
+            "p99": 431.393,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 357
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 177,
+          "overflow": 0,
+          "capacity_deferrals": 48,
+          "maximum_observed_waiters": 31,
+          "maximum_waiters": 32
+        }
+      },
+      "database": "chimwemwe_comm1_mixed_20261027_10",
+      "checkpoint_before": [
+        [
+          0,
+          5
+        ]
+      ],
+      "baseline": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 14.62,
+            "failures": 0,
+            "p99": 23.809,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 21.964,
+            "failures": 0,
+            "p99": 41.013,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 180
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 0,
+          "overflow": 0,
+          "capacity_deferrals": 0,
+          "maximum_observed_waiters": 0,
+          "maximum_waiters": 32
+        }
+      },
+      "checkpoint_after": [
+        [
+          0,
+          5
+        ]
+      ],
+      "accepted": true,
+      "classroom_read_p95_change_percent": -41.79,
+      "classroom_write_p95_change_percent": -25.2,
+      "receipts": 25,
+      "limits": {
+        "pool": 6,
+        "tenant": 6,
+        "placement": 12,
+        "active_communications": 1,
+        "waiting_communications": 32,
+        "queue_wait_ms": 2000
+      },
+      "log": "mixed-10.log"
+    },
+    {
+      "run": "priority-11",
+      "mixed": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 8.524,
+            "failures": 0,
+            "p99": 13.427,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 16.223,
+            "failures": 0,
+            "p99": 17.062,
+            "error_counts": {}
+          },
+          "comm_read": {
+            "count": 150,
+            "p95": 173.254,
+            "failures": 0,
+            "p99": 328.131,
+            "error_counts": {}
+          },
+          "receipt": {
+            "count": 25,
+            "p95": 476.683,
+            "failures": 0,
+            "p99": 482.004,
+            "error_counts": {}
+          },
+          "approval": {
+            "count": 2,
+            "p95": 449.116,
+            "failures": 0,
+            "p99": 449.116,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 357
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 177,
+          "overflow": 0,
+          "capacity_deferrals": 48,
+          "maximum_observed_waiters": 31,
+          "maximum_waiters": 32
+        }
+      },
+      "database": "chimwemwe_comm1_mixed_20261027_11",
+      "checkpoint_before": [
+        [
+          0,
+          6
+        ]
+      ],
+      "baseline": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 14.788,
+            "failures": 0,
+            "p99": 23.403,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 22.665,
+            "failures": 0,
+            "p99": 40.408,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 180
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 0,
+          "overflow": 0,
+          "capacity_deferrals": 0,
+          "maximum_observed_waiters": 0,
+          "maximum_waiters": 32
+        }
+      },
+      "checkpoint_after": [
+        [
+          0,
+          6
+        ]
+      ],
+      "accepted": true,
+      "classroom_read_p95_change_percent": -42.36,
+      "classroom_write_p95_change_percent": -28.42,
+      "receipts": 25,
+      "limits": {
+        "pool": 6,
+        "tenant": 6,
+        "placement": 12,
+        "active_communications": 1,
+        "waiting_communications": 32,
+        "queue_wait_ms": 2000
+      },
+      "log": "mixed-11.log"
+    },
+    {
+      "run": "final-12",
+      "mixed": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 8.238,
+            "failures": 0,
+            "p99": 19.917,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 16.01,
+            "failures": 0,
+            "p99": 24.767,
+            "error_counts": {}
+          },
+          "comm_read": {
+            "count": 150,
+            "p95": 163.979,
+            "failures": 0,
+            "p99": 327.966,
+            "error_counts": {}
+          },
+          "receipt": {
+            "count": 25,
+            "p95": 467.092,
+            "failures": 0,
+            "p99": 472.64,
+            "error_counts": {}
+          },
+          "approval": {
+            "count": 2,
+            "p95": 461.843,
+            "failures": 0,
+            "p99": 461.843,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 357
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 177,
+          "overflow": 0,
+          "capacity_deferrals": 47,
+          "maximum_observed_waiters": 31,
+          "maximum_waiters": 32
+        }
+      },
+      "database": "chimwemwe_comm1_mixed_20261027_12",
+      "checkpoint_before": [
+        [
+          0,
+          7
+        ]
+      ],
+      "baseline": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 14.757,
+            "failures": 0,
+            "p99": 21.209,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 20.608,
+            "failures": 0,
+            "p99": 42.118,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 180
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 0,
+          "overflow": 0,
+          "capacity_deferrals": 0,
+          "maximum_observed_waiters": 0,
+          "maximum_waiters": 32
+        }
+      },
+      "checkpoint_after": [
+        [
+          0,
+          7
+        ]
+      ],
+      "accepted": true,
+      "classroom_read_p95_change_percent": -44.18,
+      "classroom_write_p95_change_percent": -22.31,
+      "receipts": 25,
+      "limits": {
+        "pool": 6,
+        "tenant": 6,
+        "placement": 12,
+        "active_communications": 1,
+        "waiting_communications": 32,
+        "queue_wait_ms": 2000
+      },
+      "log": "mixed-12.log"
+    },
+    {
+      "run": "final-13",
+      "mixed": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 8.319,
+            "failures": 0,
+            "p99": 12.709,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 16.085,
+            "failures": 0,
+            "p99": 19.84,
+            "error_counts": {}
+          },
+          "comm_read": {
+            "count": 150,
+            "p95": 169.368,
+            "failures": 0,
+            "p99": 320.657,
+            "error_counts": {}
+          },
+          "receipt": {
+            "count": 25,
+            "p95": 465.41,
+            "failures": 0,
+            "p99": 470.757,
+            "error_counts": {}
+          },
+          "approval": {
+            "count": 2,
+            "p95": 428.2,
+            "failures": 0,
+            "p99": 428.2,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 357
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 177,
+          "overflow": 0,
+          "capacity_deferrals": 47,
+          "maximum_observed_waiters": 31,
+          "maximum_waiters": 32
+        }
+      },
+      "database": "chimwemwe_comm1_mixed_20261027_13",
+      "checkpoint_before": [
+        [
+          0,
+          8
+        ]
+      ],
+      "baseline": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 15.358,
+            "failures": 0,
+            "p99": 20.715,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 22.727,
+            "failures": 0,
+            "p99": 36.164,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 180
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 0,
+          "overflow": 0,
+          "capacity_deferrals": 0,
+          "maximum_observed_waiters": 0,
+          "maximum_waiters": 32
+        }
+      },
+      "checkpoint_after": [
+        [
+          0,
+          8
+        ]
+      ],
+      "accepted": true,
+      "classroom_read_p95_change_percent": -45.83,
+      "classroom_write_p95_change_percent": -29.23,
+      "receipts": 25,
+      "limits": {
+        "pool": 6,
+        "tenant": 6,
+        "placement": 12,
+        "active_communications": 1,
+        "waiting_communications": 32,
+        "queue_wait_ms": 2000
+      },
+      "log": "mixed-13.log"
+    },
+    {
+      "run": "final-14",
+      "mixed": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 8.177,
+            "failures": 0,
+            "p99": 12.507,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 15.588,
+            "failures": 0,
+            "p99": 21.001,
+            "error_counts": {}
+          },
+          "comm_read": {
+            "count": 150,
+            "p95": 140.136,
+            "failures": 0,
+            "p99": 340.199,
+            "error_counts": {}
+          },
+          "receipt": {
+            "count": 25,
+            "p95": 455.917,
+            "failures": 0,
+            "p99": 461.332,
+            "error_counts": {}
+          },
+          "approval": {
+            "count": 2,
+            "p95": 435.158,
+            "failures": 0,
+            "p99": 435.158,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 357
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 177,
+          "overflow": 0,
+          "capacity_deferrals": 46,
+          "maximum_observed_waiters": 31,
+          "maximum_waiters": 32
+        }
+      },
+      "database": "chimwemwe_comm1_mixed_20261027_14",
+      "checkpoint_before": [
+        [
+          0,
+          9
+        ]
+      ],
+      "baseline": {
+        "groups": {
+          "read": {
+            "count": 120,
+            "p95": 15.435,
+            "failures": 0,
+            "p99": 19.46,
+            "error_counts": {}
+          },
+          "write": {
+            "count": 30,
+            "p95": 21.225,
+            "failures": 0,
+            "p99": 41.793,
+            "error_counts": {}
+          }
+        },
+        "admission": {
+          "tenant_rejections": 0,
+          "placement_rejections": 0,
+          "admitted": 180
+        },
+        "gate": {
+          "active": 0,
+          "waiting": 0,
+          "cancelled": 0,
+          "expired": 0,
+          "admitted": 0,
+          "overflow": 0,
+          "capacity_deferrals": 0,
+          "maximum_observed_waiters": 0,
+          "maximum_waiters": 32
+        }
+      },
+      "checkpoint_after": [
+        [
+          0,
+          9
+        ]
+      ],
+      "accepted": true,
+      "classroom_read_p95_change_percent": -47.02,
+      "classroom_write_p95_change_percent": -26.56,
+      "receipts": 25,
+      "limits": {
+        "pool": 6,
+        "tenant": 6,
+        "placement": 12,
+        "active_communications": 1,
+        "waiting_communications": 32,
+        "queue_wait_ms": 2000
+      },
+      "log": "mixed-14.log"
+    }
+  ],
+  "setup_attempts": [
+    {
+      "log": "mixed-01.log",
+      "result": "failed before measurement: issuer spelling"
+    },
+    {
+      "log": "mixed-02.log",
+      "result": "failed before measurement: checkpoint repository selection"
+    }
+  ],
+  "unexecuted_suffixes": [
+    "05",
+    "07",
+    "08"
+  ],
+  "all_raw_attempts_retained_at": "/Users/francois/.local/share/chimwemwe/comm1-qualification-20261027.Llyvhi",
+  "final_runtime_workload_manifest_sha256": "45473e4d4868ce19e9c32c7f70338a14cf1ef38006fa56cf3a96b9047a6ae526",
+  "final_timed_operations": 1431,
+  "final_outer_admissions": 1611,
+  "all_final_operations_succeeded": true
+}

@@ -19,6 +19,10 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
     {:ok, Map.merge(fixture, %{runtime: runtime, account_source: account_source})}
   end
 
+  setup do
+    {:ok, source_context: Fixture.context_a()}
+  end
+
   test "locking returned participation rows does not fence a new staff phantom", f do
     person = Fixture.person!(f)
 
@@ -39,7 +43,7 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
 
   test "the existing people lifecycle lock orders a named staff insert after release", f do
     person = Fixture.person!(f)
-    {holder, holder_backend} = hold_with_backend(f, &lock_people/0)
+    {holder, holder_backend} = hold_with_backend(f, fn -> lock_people(f) end)
     writer = writer(f, fn -> record_staff(f, person) end)
     assert_receive {:writer_backend, writer_pid, writer_backend}, 1_000
     assert writer_pid == writer.pid
@@ -53,13 +57,13 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
     {person, part, membership, actor} = linked_staff!(f)
 
     assert {:ok, %{person_id: person_id}} =
-             Foundation.current_staff_account(f.runtime, Fixture.context_a(), membership)
+             Foundation.current_staff_account(f.runtime, f.source_context, membership)
 
     assert person_id == person.id
 
     holder =
       hold(f, fn ->
-        lock_people()
+        lock_people(f)
         assert %{rows: []} = lock_account(actor)
       end)
 
@@ -85,14 +89,14 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
 
     # A People association is still not an account-status or session eligibility API.
     assert {:ok, _association} =
-             Foundation.current_staff_account(f.runtime, Fixture.context_a(), membership)
+             Foundation.current_staff_account(f.runtime, f.source_context, membership)
   end
 
   test "an existing account row can be fenced against named suspension", f do
     actor = UUID.generate()
 
     assert {:ok, {:ok, account_id}} =
-             Persistence.with_writer(f.persistence, Fixture.context_a(), fn ->
+             Persistence.with_writer(f.persistence, f.source_context, fn ->
                provision(actor)
              end)
 
@@ -119,8 +123,8 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
 
     {holder, holder_backend} =
       hold_with_backend(f, fn ->
-        lock_people()
-        :ok = AccountSourceFence.lock_current_transaction(Fixture.context_a(), [actor])
+        lock_people(f)
+        :ok = AccountSourceFence.lock_current_transaction(f.source_context, [actor])
 
         assert %{rows: []} =
                  Repo.query!("SELECT id FROM identity_accounts WHERE actor_id = $1", [
@@ -141,7 +145,7 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
        f do
     {_person, _part, membership, actor} = linked_staff!(f)
     other_actor = UUID.generate()
-    tenant = TrustedActor.tenant_id(Fixture.context_a().actor)
+    tenant = TrustedActor.tenant_id(f.source_context.actor)
 
     assert {:ok, _} =
              Fixture.query(
@@ -151,14 +155,14 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
              )
 
     assert {:ok, {:ok, account_id}} =
-             Persistence.with_writer(f.persistence, Fixture.context_a(), fn ->
+             Persistence.with_writer(f.persistence, f.source_context, fn ->
                provision(actor)
              end)
 
     password = Base.url_encode64(:crypto.strong_rand_bytes(24))
 
     assert {:ok, {:ok, _account}} =
-             Persistence.with_writer(f.persistence, Fixture.context_a(), fn ->
+             Persistence.with_writer(f.persistence, f.source_context, fn ->
                LocalCredentials.complete_first_login(account_id, 1, password, password)
              end)
 
@@ -192,7 +196,7 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
 
   defp rotate_binding!(f, account_id, actor) do
     assert {:ok, :rotated} =
-             Persistence.with_writer(f.persistence, Fixture.context_a(), fn ->
+             Persistence.with_writer(f.persistence, f.source_context, fn ->
                {:ok, account} =
                  Account
                  |> Ash.Query.for_read(:get_local_account, %{id: account_id})
@@ -215,7 +219,7 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
 
   defp fenced_binding(f, membership, actor) do
     assert {:ok, {:ok, binding}} =
-             Persistence.with_writer(f.persistence, Fixture.context_a(), fn ->
+             Persistence.with_writer(f.persistence, f.source_context, fn ->
                Repo.transaction(fn -> capture_binding(f, membership, actor) end)
              end)
 
@@ -223,11 +227,11 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
   end
 
   defp capture_binding(f, membership, actor) do
-    lock_people()
-    :ok = AccountSourceFence.lock_current_transaction(Fixture.context_a(), [actor])
+    lock_people(f)
+    :ok = AccountSourceFence.lock_current_transaction(f.source_context, [actor])
 
     {:ok, association} =
-      Foundation.current_staff_account(f.runtime, Fixture.context_a(), membership)
+      Foundation.current_staff_account(f.runtime, f.source_context, membership)
 
     %{rows: rows} =
       Repo.query!(
@@ -254,7 +258,7 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
     part = Fixture.participation!(f, person, :staff)
     actor = UUID.generate()
     membership = UUID.generate()
-    tenant = TrustedActor.tenant_id(Fixture.context_a().actor)
+    tenant = TrustedActor.tenant_id(f.source_context.actor)
 
     assert {:ok, _} =
              Fixture.query(
@@ -278,7 +282,7 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
     assert {:ok, _association} =
              Foundation.associate_staff_account(
                f.runtime,
-               Fixture.context_a(),
+               f.source_context,
                Map.merge(Fixture.keys(), %{
                  participation_id: part.id,
                  expected_version: part.lock_version,
@@ -295,7 +299,7 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
     do:
       Foundation.record_staff_affiliation(
         f.runtime,
-        Fixture.context_a(),
+        f.source_context,
         Fixture.participation_input(f, person)
       )
 
@@ -306,11 +310,11 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
     end
   end
 
-  defp lock_people do
+  defp lock_people(f) do
     :ok =
       ModuleLifecycle.authorize_current_transaction(
         Foundation.release_manifest(),
-        Fixture.context_a(),
+        f.source_context,
         "people.core",
         "people.core.participations.read"
       )
@@ -337,7 +341,7 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
   end
 
   defp hold_fence(f, parent, lock) do
-    Persistence.with_writer(f.persistence, Fixture.context_a(), fn ->
+    Persistence.with_writer(f.persistence, f.source_context, fn ->
       Repo.transaction(fn -> run_held_fence(f, parent, lock) end)
     end)
   end
@@ -358,8 +362,7 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
       {:read_link, from, membership} ->
         send(
           from,
-          {:held_link,
-           Foundation.current_staff_account(f.runtime, Fixture.context_a(), membership)}
+          {:held_link, Foundation.current_staff_account(f.runtime, f.source_context, membership)}
         )
 
         serve_fence(f)
@@ -385,7 +388,7 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
   end
 
   defp run_writer(f, parent, operation) do
-    Persistence.with_writer(f.persistence, Fixture.context_a(), fn ->
+    Persistence.with_writer(f.persistence, f.source_context, fn ->
       writer_transaction(parent, operation)
     end)
   end
@@ -439,5 +442,5 @@ defmodule Chimwemwe.People.CommunicationsSourceFenceQualificationTest do
   end
 
   defp scope(f),
-    do: Enum.map([TrustedActor.tenant_id(Fixture.context_a().actor), f.unit.id], &UUID.dump!/1)
+    do: Enum.map([TrustedActor.tenant_id(f.source_context.actor), f.unit.id], &UUID.dump!/1)
 end
