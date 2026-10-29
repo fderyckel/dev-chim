@@ -1,9 +1,10 @@
 # Phase 2 identity, people, relationships, and access implementation proposal
 
-- Status: Active for authorized Slice 2.0-D; proposed for the separate Phase 2.2 follow-on
+- Status: Active for authorized Slice 2.0-D and the bounded classroom-first people programme;
+  the remaining Phase 2.2 follow-on is proposed
 - Owner: Product and platform engineering, with learning-institution domain ownership and security/privacy review
-- Decision authority: Existing Phase 2 authorization for Slice 2.0-D; Project Owner for a later
-  Phase 2.2 sequence extension; accountable deciders for new ADRs
+- Decision authority: Existing Phase 2 authorization for Slice 2.0-D and 2026-10-03 Project Owner
+  approval for the bounded classroom-first extension; accountable deciders for new ADRs
 - Scope: detailed planning for existing Slice 2.0-D and a proposed follow-on People, Relationships, and Access sequence
 - Review trigger: identity-provider selection, session or support-access decision, account-to-person linkage, child/guardian policy, membership lifecycle, role administration, public client, or any real-data use
 
@@ -30,6 +31,13 @@ wizard, a fixed school-role catalogue, or a generic administrative CRUD surface.
 
 ## Current position and authority
 
+The 2026-10-03 approved [classroom-first plan](classroom-first-six-week-plan.md) brings forward
+minimal people, staff-account association, teaching assignment, enrolment, and class placement for
+one classroom journey. Its bounded programme no longer awaits a general Phase 2.2 prioritization
+decision. The people/account-association ADR and dependent domain contracts below remain required
+before persistence. Guardians, broader relationship management, role administration, and the rest
+of this proposed follow-on are not brought forward by that approval.
+
 The accepted Phase 2.0/2.1 sequence already makes production identity, session, and support access
 an L2 gate. It also intentionally excludes learner, guardian, staff, household, identity-account,
 and employment records from the first institutional-structure module. See the
@@ -42,7 +50,8 @@ Consequently:
   2.0-D's L0 architecture decision gate. Slices 2.0-D.2a through D.2c complete the bounded internal
   synthetic foundation, but no real provider/directory connection, public session, L2 claim, or
   real-data authority exists.
-- The People, Relationships, and Access sequence below is a **proposed Phase 2.2 follow-on**. This
+- Except for the bounded classroom-first scope above, the People, Relationships, and Access
+  sequence below is a **proposed Phase 2.2 follow-on**. This
   document permits no code, migration, resource, capability, public route, session, or real data
   for it. Project-owner authorization and the stated ADRs are required before its L0 work is treated
   as an active slice.

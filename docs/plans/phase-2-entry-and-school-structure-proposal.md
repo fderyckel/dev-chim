@@ -15,6 +15,14 @@
 
 ## Purpose
 
+**Active sequencing amendment — 2026-10-03.** François approved the
+[classroom-first six-week plan](classroom-first-six-week-plan.md). For 5 October–15 November it
+takes precedence over this document's corporate-first execution order: preserve existing work,
+pause further corporate/legal expansion, and bring forward the minimum institutional, calendar,
+people, enrolment, and daily-attendance slices. The original scope below remains the structural
+module boundary; the new plan separately authorizes the bounded academic programme without
+waiving domain decisions or release gates.
+
 Phase 2 should cross one deliberate threshold: Chimwemwe moves from a qualified platform core to
 its first linked corporate/legal and learning-institution domain modules without weakening the
 tenant, authority, evidence, recovery, or client contracts established in Phases 0 and 1.
@@ -546,6 +554,15 @@ and every educational, migration, real-data, or public boundary remain deferred.
 
 ### Slice 2.1-D — educational institutions, units, and legal responsibility
 
+[ADR 0034](../adr/0034-c25-03-delegated-educational-structure-acceptance.md) closes C25-03 for
+synthetic L1 using the [five-context review](../phase-2/c25-03-educational-structure-review.md).
+The first eligible increment is unpublished educational identity/profile with exact reads, after
+applicable predecessor checks. [ADR 0035](../adr/0035-c25-04-delegated-primary-operator-acceptance.md)
+now closes C25-04 for synthetic L1, accepting initial operator assignment, internal publication,
+controlled transfer and reconciliation contracts. Implement these in bounded increments with
+their own proof; do not introduce a default operator or publication bypass. The classroom-first
+priority is unchanged, and later connected/real-use gates remain binding.
+
 Implement the educational-structure module declaration and the smallest accepted
 `InstitutionalUnit` representation with distinct educational-institution and educational-unit
 semantics. Add the exact effective primary-operator relationship for institutions and resolution
@@ -554,6 +571,14 @@ unambiguous operator, an operator transfer preserves both identities and history
 legal-module access grants no educational capability.
 
 ### Slice 2.1-E — educational parentage, sites, terminology, and affiliations
+
+The accepted synthetic C25-03 catalogue admits initial canonical parentage, minimal physical/virtual
+sites, ordinary many-to-many associations, localized labels, and scoped codes for unpublished
+records, after the required identity foundation. Persistent moves, classification changes,
+primary-site roles, affiliation types (including `shared_service` and `joint_programme`), and
+history/correction workflows remain later bounded work; the original full-slice target below is
+not blanket permission to implement them. External validation remains C25-03-R before connected
+use, real data/import, pilot, or deployment.
 
 Add `InstitutionalUnitParentage`, `Site`, `InstitutionalUnitSiteAssociation`, the bounded
 terminology profile, and only the affiliation types accepted by Slice 2.1-A. Prove several roots,
@@ -915,6 +940,12 @@ interfaces, and executable evidence before implementation or production use.
 
 ## Recommended implementation order after this proposal
 
+The sequence below records the original structural programme. The approved
+[classroom-first plan](classroom-first-six-week-plan.md#ordered-work-queue) now controls near-term
+priority. Completing the full corporate and educational hierarchy is not a prerequisite for the
+minimal academic journey; its actual institutional, operator, domain and release dependencies
+remain explicit in that plan.
+
 1. Record the project-owner authorization for this bounded sequence.
 2. Produce the Slice 2.0-A entry decision register.
 3. Close 2.0-B and 2.0-C while 2.1-A runs as research and decision work.
@@ -925,8 +956,9 @@ interfaces, and executable evidence before implementation or production use.
 7. Complete 2.0-D and 2.0-E before connecting 2.1-G.
 8. Permit 2.1-H only after the L3 deployment, review, support, recovery, and data-class gates pass.
 
-The next likely module after institutional structure is academic calendar because later domains
-need stable institutional and period references. ADR 0021 contains useful bounded calendar
-evidence, but its former `school_scope_id` and single-school framing require revision against ADR
-0025 before acceptance. This sequencing neither accepts ADR 0021 nor authorizes a calendar
-implementation.
+The original sequence deferred academic calendar until after institutional structure. The
+classroom-first amendment now brings its bounded delivery forward because later domains need
+stable institutional and period references. ADR 0021 contains useful calendar evidence, but its
+former `school_scope_id` and single-school framing still require revision against ADR 0025 before
+acceptance. Programme authorization does not itself accept that domain contract or waive its
+persistence and connected-release gates.

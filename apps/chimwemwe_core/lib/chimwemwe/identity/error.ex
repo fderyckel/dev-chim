@@ -15,6 +15,8 @@ defmodule Chimwemwe.Identity.Error do
           | :forbidden
           | :idempotency_conflict
           | :invalid_input
+          | :module_unavailable
+          | :scope_limit
           | :not_found
           | :retryable_dependency
           | :stale

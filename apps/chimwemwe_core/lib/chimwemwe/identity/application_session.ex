@@ -48,6 +48,12 @@ defmodule Chimwemwe.Identity.ApplicationSession do
         match_type: :simple
       )
 
+      reference(:local_account,
+        name: "identity_application_sessions_local_account_fkey",
+        on_delete: :restrict,
+        match_type: :simple
+      )
+
       reference(:rotated_to_session,
         name: "identity_application_sessions_rotated_to_fkey",
         on_delete: :restrict,
@@ -56,6 +62,21 @@ defmodule Chimwemwe.Identity.ApplicationSession do
     end
 
     check_constraints do
+      check_constraint(
+        [
+          :external_identity_link_id,
+          :local_account_id,
+          :local_credential_version,
+          :local_credential_fingerprint,
+          :local_access_version
+        ],
+        "identity_application_sessions_exclusive_origin",
+        check: """
+        (external_identity_link_id IS NOT NULL AND local_account_id IS NULL AND local_credential_version IS NULL AND local_credential_fingerprint IS NULL AND local_access_version IS NULL)
+        OR (external_identity_link_id IS NULL AND local_account_id IS NOT NULL AND local_credential_version IS NOT NULL AND local_credential_version > 0 AND local_credential_fingerprint IS NOT NULL AND octet_length(local_credential_fingerprint) = 32 AND local_access_version IS NOT NULL AND local_access_version > 0)
+        """
+      )
+
       check_constraint(:token_digest, "identity_application_sessions_token_digest_sha256",
         check: "octet_length(token_digest) = 32"
       )
@@ -110,6 +131,13 @@ defmodule Chimwemwe.Identity.ApplicationSession do
       public? false
     end
 
+    belongs_to :local_account, Chimwemwe.Identity.Account do
+      source_attribute :local_account_id
+      destination_attribute :id
+      define_attribute? false
+      public? false
+    end
+
     belongs_to :rotated_to_session, __MODULE__ do
       source_attribute :rotated_to_session_id
       destination_attribute :id
@@ -146,12 +174,35 @@ defmodule Chimwemwe.Identity.ApplicationSession do
     end
 
     attribute :external_identity_link_id, :uuid do
-      allow_nil? false
+      allow_nil? true
+      public? false
+    end
+
+    attribute :local_account_id, :uuid do
+      allow_nil? true
+      public? false
+    end
+
+    attribute :local_credential_version, :integer do
+      allow_nil? true
+      constraints min: 1
       public? false
     end
 
     attribute :token_digest, :binary do
       allow_nil? false
+      public? false
+    end
+
+    attribute :local_access_version, :integer do
+      allow_nil? true
+      constraints min: 1
+      public? false
+    end
+
+    attribute :local_credential_fingerprint, :binary do
+      allow_nil? true
+      sensitive? true
       public? false
     end
 

@@ -1,4 +1,5 @@
 import type {
+  AcademicCalendarPreparationViewData,
   HomeViewData,
   InstitutionalStructureViewData,
   PreviewViewData,
@@ -20,6 +21,53 @@ const context: PrototypeContext = {
   tenantKind: "synthetic",
   dateLabel: "Example day · 21 September 2026",
   connectionLabel: "Local fixture · no server connection",
+};
+
+const academicCalendarPreparation: AcademicCalendarPreparationViewData = {
+  context,
+  institution: {
+    id: "30000000-0000-4000-8000-000000000001",
+    label: "Nthambi Primary and Early Years School",
+  },
+  calendar: {
+    label: "Academic year 2026–2027",
+    code: "AY_2026_27",
+    startOn: "2026-09-01",
+    endOn: "2027-06-30",
+    timeZone: "Africa/Blantyre",
+    instructionalWeekdays: [1, 2, 3, 4, 5],
+    periods: [
+      {
+        id: "44444444-4444-4444-8444-444444444444",
+        label: "Term 1",
+        sequence: 1,
+        startOn: "2026-09-01",
+        endOn: "2026-12-18",
+      },
+      {
+        id: "55555555-5555-4555-8555-555555555555",
+        label: "Term 2",
+        sequence: 2,
+        startOn: "2027-01-11",
+        endOn: "2027-06-30",
+      },
+    ],
+    closures: [
+      {
+        id: "66666666-6666-4666-8666-666666666666",
+        label: "Mothers' Day",
+        date: "2026-10-15",
+        reasonKey: "public_holiday",
+      },
+      {
+        id: "77777777-7777-4777-8777-777777777777",
+        label: "Year-end break",
+        date: "2026-12-23",
+        reasonKey: "year_end_break",
+      },
+    ],
+  },
+  initialResolutionDate: "2026-10-15",
 };
 
 const home: HomeViewData = {
@@ -594,6 +642,9 @@ const institutionalStructure: InstitutionalStructureViewData = {
 assertSyntheticExperienceIsExplicitlyEnabled();
 
 export const syntheticViewData: ViewDataPort = {
+  async getAcademicCalendarPreparation() {
+    return academicCalendarPreparation;
+  },
   async getHome() {
     return home;
   },

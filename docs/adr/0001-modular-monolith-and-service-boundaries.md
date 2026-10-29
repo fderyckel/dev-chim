@@ -96,7 +96,7 @@ Module boundaries, deployment cells, and tenant database placements are orthogon
 
 ## Validation evidence
 
-See [service boundaries](../architecture/service-boundaries.md), [module activation and lifecycle](../architecture/module-activation-and-lifecycle.md), [module-lifecycle evidence](../phase-0/evidence/module-lifecycle.md), and the [Phase 0 architecture review record](../phase-0/review-record.md). The neutral synthetic lifecycle test proves independent gates, dependency handling, both concurrent deactivation lock orders, safe modeled job/event drain, retained-data access, and compatible reactivation. The 2026-09-16 review accepts the architecture contract while carrying real queue/outbox, idempotency, drain/replay, reconciliation, and operational ownership into the first production-module gate.
+See [service boundaries](../architecture/system-context.md#service-boundaries), [module activation and lifecycle](../architecture/module-activation-and-lifecycle.md), [module-lifecycle evidence](../phase-0/handover-evidence.md), and the [Phase 0 architecture review record](../phase-0/handover-evidence.md). The neutral synthetic lifecycle test proves independent gates, dependency handling, both concurrent deactivation lock orders, safe modeled job/event drain, retained-data access, and compatible reactivation. The 2026-09-16 review accepts the architecture contract while carrying real queue/outbox, idempotency, drain/replay, reconciliation, and operational ownership into the first production-module gate.
 
 ## Fallback and exit cost
 

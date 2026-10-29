@@ -119,7 +119,7 @@ Before this ADR can reach full Acceptance, UI-1A must prove:
    usable at narrow, medium, and wide viewports; and
 7. `make check` passes with the local integration tests included.
 
-The [UI-1A evidence record](../phase-1/evidence/local-browser-core-bridge.md) records the local
+The [UI-1A evidence record](../phase-1/handover-evidence.md) records the local
 guard, tenant-isolation, denial, non-disclosure, OpenAPI/client-drift, accessibility, viewport, and
 complete repository verification required above. Representative human review remains necessary
 before the screen or terminology is considered validated. This qualification uses synthetic data

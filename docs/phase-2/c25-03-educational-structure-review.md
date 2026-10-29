@@ -9,6 +9,12 @@
 
 ## Review authority and evidence
 
+Subsequent operator decision: [ADR 0035](../adr/0035-c25-04-delegated-primary-operator-acceptance.md)
+closes C25-04 for synthetic L1. References below to C25-04 being open or prohibiting operator
+persistence/publication describe the state at this earlier review; ADR 0035 now governs that
+dependency. Its closure does not accept an implementation, extend this review's initial educational
+catalogue or remove C25-03-R and the later adoption/release gates.
+
 François expressly requested delegated C25-03 closure for synthetic L1, equivalent to:
 
 > Use delegated Project Owner authority to complete C25-03 for synthetic L1 implementation.
@@ -214,6 +220,18 @@ instant-precision sources, and historical corrections remain later contract/qual
 
 ## Implementation admission and mandatory negatives
 
+The evidence-plan positions are disposed as follows, without importing other gates into C25-03:
+
+| Positions | Educational-domain decision |
+| --- | --- |
+| IS-01–IS-03 | Accept multiple roots, stable identity, and single-parent acyclic containment without a fixed type ladder |
+| IS-04 | Accept typed relationships as the future matrix route; explicitly defer persistent first-slice affiliations rather than leave their meanings open |
+| IS-05–IS-06 | Accept the two classifications, localized labels, separate sites, and ordinary many-to-many associations; primary-site roles are deferred |
+| IS-07–IS-09 | Accept non-inference, selector non-authority, and mandatory move-impact review; no descendant-grant or move implementation is authorized here |
+| IS-10–IS-12 | Accept separate temporal/evidence meanings, the catalogue's explicit code normalization/uniqueness, and disposable projections; physical storage and lifecycle qualification remain implementation work |
+| IS-13–IS-16 | Accept educational/legal separation, nested accountability, and non-authority; legal catalogue meaning remains ADR 0032 and operator persistence remains C25-04 |
+| IS-17–IS-21 | Retain operator approval, evidence, activation, reconciliation and resolution requirements as C25-04 dependencies; no closure of that condition is claimed |
+
 C25-03 is an accepted synthetic entry decision, not completion evidence. The first eligible work
 is unpublished educational identity/profile qualification under 2.1-D; initial parentage,
 sites/associations and minimal terminology follow under 2.1-E after applicable prerequisites.
@@ -293,4 +311,17 @@ acceptance. Jamie is not a substitute name for an actual external participant.
 
 ## Verification
 
-The documentation checks and required `make check` result are recorded here after execution.
+Verification performed on 2026-10-03:
+
+| Check actually run | Result |
+| --- | --- |
+| `make check` | Failed at `check-docs`: `clean-checkout rehearsal is stale or did not preserve a clean pass`. Direct digest inspection identifies the changed Makefile as the stale source binding |
+| `mise exec -- uv run python` calling the repository's `markdown_errors` on the thirteen affected documents, plus `adr_errors` and `threat_model_errors` | Passed with zero errors; checks document links, full ADR index/contracts, and threat-model structure |
+| `git diff --check` | Passed |
+
+The full command stopped before its Phase 0, repository-tools, core, web, and shell-tooling
+stages; those stages were not run by this review. Focused document validation is not a substitute
+full-repository pass. The clean-checkout artifact was not regenerated or its digest rewritten to
+conceal the failure. Only documentation was changed for C25-03, and no educational implementation
+or migration is accepted as complete. The recorded domain decision and retained release gates
+are independent of that outstanding implementation verification.

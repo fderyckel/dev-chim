@@ -6,8 +6,9 @@
 - Escalation owner: François — interim Security/Privacy Owner until an independent owner is named
 - Review trigger: first Slice 2.0-D implementation, connection/dependency change, deployment
   selection, incident, or production-readiness review
-- Governing decisions: [ADR 0029](../adr/0029-provider-neutral-identity-federation-and-directory-connections.md)
-  and [ADR 0030](../adr/0030-same-origin-public-session-and-named-action-boundary.md)
+- Governing decisions: [ADR 0029](../adr/0029-provider-neutral-identity-federation-and-directory-connections.md),
+  [ADR 0030](../adr/0030-same-origin-public-session-and-named-action-boundary.md), and the disabled
+  selected-educator candidate in [ADR 0042](../adr/0042-selected-oidc-educator-sign-in-candidate.md)
 - Superseded decision: [ADR 0027](../adr/0027-production-identity-session-and-support-access.md)
 
 ## Purpose and safety boundary
@@ -138,6 +139,10 @@ Until deployment and selected-connection qualification explicitly replace this s
 8. The checked session OpenAPI and generated TypeScript declarations are build artifacts. Drift,
    an added generic mutation, a caller-selected tenant or route, or an undeclared collection closes
    the endpoint. Any collection requires its own ADR 0023 review.
+9. The ADR 0042 candidate starts only when trusted `:public_api` configuration supplies one exact
+   pre-linked sign-in target and the deployment resolves its exact secret reference. The browser
+   flag changes only the button label and destination. Keep both controls disabled until the
+   selected provider, origin, registration, assurance mapping and operating evidence pass.
 
 ## Directory provisioning, if separately authorized
 

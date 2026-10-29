@@ -1,0 +1,377 @@
+{
+  "attributes": [
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"gen_random_uuid()\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": true,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "tenant_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "index_where": null,
+        "match_tenant?": true,
+        "match_type": "full",
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "classroom_classes_institutional_unit_id_fk",
+        "on_delete": "restrict",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "institutional_units"
+      },
+      "scale": null,
+      "size": null,
+      "source": "institutional_unit_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "index_where": null,
+        "match_tenant?": true,
+        "match_type": "full",
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "classroom_classes_calendar_id_fk",
+        "on_delete": "restrict",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "academic_calendars"
+      },
+      "scale": null,
+      "size": null,
+      "source": "calendar_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "index_where": null,
+        "match_tenant?": true,
+        "match_type": "full",
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "classroom_classes_academic_year_id_fk",
+        "on_delete": "restrict",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "academic_years"
+      },
+      "scale": null,
+      "size": null,
+      "source": "academic_year_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "calendar_revision",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "code",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "label",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "lock_version",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "inserted_at",
+      "type": "utc_datetime_usec"
+    }
+  ],
+  "base_filter": null,
+  "check_constraints": [
+    {
+      "attribute": [
+        "lock_version"
+      ],
+      "base_filter": null,
+      "check": "lock_version = 1",
+      "name": "classroom_classes_version"
+    },
+    {
+      "attribute": [
+        "code"
+      ],
+      "base_filter": null,
+      "check": "code ~ '^[a-z][a-z0-9_]{0,79}$'",
+      "name": "classroom_classes_code"
+    },
+    {
+      "attribute": [
+        "label"
+      ],
+      "base_filter": null,
+      "check": "char_length(btrim(label)) BETWEEN 1 AND 160",
+      "name": "classroom_classes_label"
+    },
+    {
+      "attribute": [
+        "calendar_revision"
+      ],
+      "base_filter": null,
+      "check": "calendar_revision ~ '^[0-9a-f]{64}$'",
+      "name": "classroom_classes_revision"
+    }
+  ],
+  "create_table_options": null,
+  "custom_indexes": [
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "id",
+        "tenant_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "classroom_classes_id_tenant_idx",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "tenant_id",
+        "academic_year_id",
+        "code"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        },
+        {
+          "type": "atom",
+          "value": "academic_year_id"
+        },
+        {
+          "type": "atom",
+          "value": "code"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "classroom_classes_scope_idx",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    }
+  ],
+  "custom_statements": [
+    {
+      "after_tables": [
+        "classroom_classes",
+        "classroom_enrolments",
+        "classroom_teaching_assignments",
+        "classroom_placements"
+      ],
+      "code?": false,
+      "down": "DROP FUNCTION classroom_record_guard();",
+      "global?": true,
+      "name": "classroom_record_guard",
+      "up": "CREATE FUNCTION classroom_record_guard() RETURNS trigger LANGUAGE plpgsql AS $$\nDECLARE\n  yr academic_years%ROWTYPE;\n  cal academic_calendars%ROWTYPE;\n  cls classroom_classes%ROWTYPE;\n  enr classroom_enrolments%ROWTYPE;\n  part people_participations%ROWTYPE;\n  local_day date;\nBEGIN\n  IF TG_OP = 'DELETE' THEN\n    RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'classroom history is retained';\n  END IF;\n  IF TG_TABLE_NAME = 'people_participations' THEN\n    IF NEW.effective_until IS NOT NULL AND (\n      EXISTS (SELECT 1 FROM classroom_enrolments WHERE tenant_id = NEW.tenant_id AND participation_id = NEW.id AND effective_until > NEW.effective_until)\n      OR EXISTS (SELECT 1 FROM classroom_teaching_assignments WHERE tenant_id = NEW.tenant_id AND participation_id = NEW.id AND effective_until > NEW.effective_until)) THEN\n      RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'end dependent classroom intervals first';\n    END IF;\n    RETURN NEW;\n  END IF;\n  IF TG_OP = 'INSERT' AND NEW.lock_version <> 1 THEN\n    RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'invalid initial classroom version';\n  END IF;\n  IF TG_TABLE_NAME = 'classroom_classes' THEN\n    IF TG_OP = 'UPDATE' THEN\n      RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'class identity is immutable';\n    END IF;\n    SELECT * INTO yr FROM academic_years WHERE id = NEW.academic_year_id AND tenant_id = NEW.tenant_id FOR SHARE;\n    SELECT * INTO cal FROM academic_calendars WHERE id = yr.calendar_id AND tenant_id = NEW.tenant_id FOR SHARE;\n    IF yr.id IS NULL OR cal.id IS NULL OR yr.status <> 'published' OR cal.status <> 'active'\n      OR NEW.calendar_revision <> yr.candidate_revision OR NEW.calendar_id <> cal.id\n      OR NEW.institutional_unit_id <> cal.institutional_unit_id THEN\n      RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'exact published classroom year required';\n    END IF;\n  ELSE\n    IF TG_TABLE_NAME IN ('classroom_enrolments', 'classroom_teaching_assignments') THEN\n      SELECT * INTO part FROM people_participations WHERE tenant_id = NEW.tenant_id AND id = NEW.participation_id FOR UPDATE;\n      IF part.id IS NULL OR NEW.effective_from < part.effective_from\n        OR (part.effective_until IS NOT NULL AND NEW.effective_until > part.effective_until) THEN\n        RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'classroom interval requires matching participation';\n      END IF;\n    END IF;\n    IF TG_TABLE_NAME = 'classroom_enrolments' THEN\n      SELECT * INTO yr FROM academic_years WHERE id = NEW.academic_year_id AND tenant_id = NEW.tenant_id FOR SHARE;\n      SELECT * INTO cal FROM academic_calendars WHERE id = yr.calendar_id AND tenant_id = NEW.tenant_id FOR SHARE;\n      IF part.kind <> 'student' OR yr.id IS NULL OR cal.id IS NULL OR yr.status <> 'published' OR cal.status <> 'active'\n        OR NEW.calendar_revision <> yr.candidate_revision OR part.institutional_unit_id <> cal.institutional_unit_id THEN\n        RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'student and published institution year required';\n      END IF;\n      IF TG_OP = 'UPDATE' AND EXISTS (SELECT 1 FROM classroom_placements WHERE tenant_id = NEW.tenant_id AND enrolment_id = NEW.id AND effective_until > NEW.effective_until) THEN\n        RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'end placements before enrolment';\n      END IF;\n    ELSE\n      IF TG_TABLE_NAME = 'classroom_placements' THEN\n        SELECT * INTO enr FROM classroom_enrolments WHERE tenant_id = NEW.tenant_id AND id = NEW.enrolment_id FOR UPDATE;\n        IF enr.id IS NULL OR NEW.effective_from < enr.effective_from OR NEW.effective_until > enr.effective_until THEN\n          RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'placement requires effective enrolment';\n        END IF;\n      END IF;\n      SELECT * INTO cls FROM classroom_classes WHERE tenant_id = NEW.tenant_id AND id = NEW.class_id FOR SHARE;\n      SELECT * INTO yr FROM academic_years WHERE id = cls.academic_year_id AND tenant_id = NEW.tenant_id FOR SHARE;\n      SELECT * INTO cal FROM academic_calendars WHERE id = yr.calendar_id AND tenant_id = NEW.tenant_id FOR SHARE;\n      IF cls.id IS NULL OR yr.id IS NULL OR cal.id IS NULL OR yr.status <> 'published' OR cal.status <> 'active' OR cls.calendar_revision <> yr.candidate_revision\n        OR cls.calendar_id <> cal.id OR cls.institutional_unit_id <> cal.institutional_unit_id THEN\n        RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'matching class publication required';\n      END IF;\n      IF TG_TABLE_NAME = 'classroom_teaching_assignments' THEN\n        IF part.kind <> 'staff' OR part.institutional_unit_id <> cls.institutional_unit_id OR EXISTS (\n          SELECT 1 FROM classroom_teaching_assignments WHERE tenant_id = NEW.tenant_id AND participation_id = NEW.participation_id AND class_id = NEW.class_id AND id <> NEW.id\n            AND effective_from < NEW.effective_until AND NEW.effective_from < effective_until) THEN\n          RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'invalid or overlapping teaching assignment';\n        END IF;\n      ELSIF enr.academic_year_id <> cls.academic_year_id OR enr.calendar_revision <> cls.calendar_revision OR EXISTS (\n        SELECT 1 FROM classroom_placements WHERE tenant_id = NEW.tenant_id AND enrolment_id = NEW.enrolment_id AND id <> NEW.id\n          AND effective_from < NEW.effective_until AND NEW.effective_from < effective_until) THEN\n        RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'invalid or overlapping class placement';\n      END IF;\n    END IF;\n    IF NEW.effective_from < yr.start_on OR NEW.effective_until > yr.end_on + 1 THEN\n      RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'classroom interval outside year';\n    END IF;\n    local_day := (statement_timestamp() AT TIME ZONE yr.time_zone)::date;\n    IF TG_OP = 'UPDATE' AND (\n      (to_jsonb(NEW) - ARRAY['effective_until','lock_version']) IS DISTINCT FROM (to_jsonb(OLD) - ARRAY['effective_until','lock_version'])\n      OR OLD.lock_version <> 1 OR NEW.lock_version <> 2\n      OR NEW.effective_until >= OLD.effective_until OR NEW.effective_until < local_day) THEN\n      RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'invalid classroom ending';\n    END IF;\n  END IF;\n  PERFORM 1 FROM institutional_units WHERE id = cal.institutional_unit_id AND tenant_id = NEW.tenant_id AND status = 'published' FOR SHARE;\n  IF NOT FOUND THEN\n    RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'published institution required';\n  END IF;\n  RETURN NEW;\nEND $$;\n"
+    },
+    {
+      "after_tables": [
+        "classroom_classes",
+        "classroom_enrolments",
+        "classroom_teaching_assignments",
+        "classroom_placements"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER classroom_classes_classroom_guard ON classroom_classes;",
+      "global?": true,
+      "name": "classroom_classes_classroom_guard",
+      "up": "CREATE TRIGGER classroom_classes_classroom_guard BEFORE INSERT OR UPDATE OR DELETE ON classroom_classes FOR EACH ROW EXECUTE FUNCTION classroom_record_guard();"
+    },
+    {
+      "after_tables": [
+        "classroom_classes",
+        "classroom_enrolments",
+        "classroom_teaching_assignments",
+        "classroom_placements"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER classroom_enrolments_classroom_guard ON classroom_enrolments;",
+      "global?": true,
+      "name": "classroom_enrolments_classroom_guard",
+      "up": "CREATE TRIGGER classroom_enrolments_classroom_guard BEFORE INSERT OR UPDATE OR DELETE ON classroom_enrolments FOR EACH ROW EXECUTE FUNCTION classroom_record_guard();"
+    },
+    {
+      "after_tables": [
+        "classroom_classes",
+        "classroom_enrolments",
+        "classroom_teaching_assignments",
+        "classroom_placements"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER classroom_teaching_assignments_classroom_guard ON classroom_teaching_assignments;",
+      "global?": true,
+      "name": "classroom_teaching_assignments_classroom_guard",
+      "up": "CREATE TRIGGER classroom_teaching_assignments_classroom_guard BEFORE INSERT OR UPDATE OR DELETE ON classroom_teaching_assignments FOR EACH ROW EXECUTE FUNCTION classroom_record_guard();"
+    },
+    {
+      "after_tables": [
+        "classroom_classes",
+        "classroom_enrolments",
+        "classroom_teaching_assignments",
+        "classroom_placements"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER classroom_placements_classroom_guard ON classroom_placements;",
+      "global?": true,
+      "name": "classroom_placements_classroom_guard",
+      "up": "CREATE TRIGGER classroom_placements_classroom_guard BEFORE INSERT OR UPDATE OR DELETE ON classroom_placements FOR EACH ROW EXECUTE FUNCTION classroom_record_guard();"
+    },
+    {
+      "after_tables": [
+        "classroom_classes",
+        "classroom_enrolments",
+        "classroom_teaching_assignments",
+        "classroom_placements"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER people_participations_classroom_guard ON people_participations;",
+      "global?": true,
+      "name": "people_participations_classroom_guard",
+      "up": "CREATE TRIGGER people_participations_classroom_guard BEFORE UPDATE OF effective_until ON people_participations FOR EACH ROW EXECUTE FUNCTION classroom_record_guard();"
+    }
+  ],
+  "has_create_action": false,
+  "hash": "DA303A5CB2752859EA1A777EE7FF6057DCA8EDC99DF1F23D2304D03981DB244C",
+  "identities": [],
+  "multitenancy": {
+    "attribute": "tenant_id",
+    "global": false,
+    "strategy": "attribute"
+  },
+  "repo": "Elixir.Chimwemwe.Repo",
+  "schema": null,
+  "table": "classroom_classes"
+}

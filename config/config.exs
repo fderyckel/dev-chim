@@ -7,6 +7,8 @@ config :phoenix,
     "assertion",
     "code",
     "csrf_token",
+    "confirmation",
+    "temporary_password",
     "password",
     "secret",
     "state",
@@ -14,7 +16,16 @@ config :phoenix,
   ]
 
 config :chimwemwe_core,
-  ash_domains: [Chimwemwe.Platform, Chimwemwe.Identity, Chimwemwe.OrganizationLegal],
+  ash_domains: [
+    Chimwemwe.Platform,
+    Chimwemwe.Identity,
+    Chimwemwe.OrganizationLegal,
+    Chimwemwe.InstitutionalStructure,
+    Chimwemwe.AcademicCalendar,
+    Chimwemwe.People,
+    Chimwemwe.Classroom,
+    Chimwemwe.Communications
+  ],
   base_resources: [Chimwemwe.Platform.Resource],
   ecto_repos: [Chimwemwe.Repo]
 

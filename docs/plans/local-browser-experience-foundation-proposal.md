@@ -9,7 +9,7 @@
 
 ## Implementation outcome
 
-The product owner authorized implementation on 2026-09-24. UI-0 now exists under `clients/web` with the bounded routes, guarded synthetic adapter, semantic CSS contract, repository commands, unit and accessibility tests, and real-browser viewport checks described below. The exact implementation evidence and remaining human-review gate are recorded in [the UI-0 evidence note](../phase-1/evidence/local-browser-experience.md).
+The product owner authorized implementation on 2026-09-24. UI-0 now exists under `clients/web` with the bounded routes, guarded synthetic adapter, semantic CSS contract, repository commands, unit and accessibility tests, and real-browser viewport checks described below. The exact implementation evidence and remaining human-review gate are recorded in [the UI-0 evidence note](../phase-1/handover-evidence.md).
 
 The remaining proposal language is retained as the implementation contract. It does not expand the authorization boundary.
 
@@ -199,7 +199,7 @@ clients/
     ├── package.json
     └── package-lock.json
 docs/
-└── phase-1/evidence/local-browser-experience.md
+└── phase-1/handover-evidence.md
 ```
 
 This shape is a proposal, not an instruction to create the files before UI-0 is approved.

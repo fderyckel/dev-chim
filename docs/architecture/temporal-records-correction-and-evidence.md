@@ -200,12 +200,12 @@ ADR 0018, this contract, the [synthetic scenario review](temporal-records-synthe
 
 After the core safe-write boundary is explicitly authorized, implement one neutral synthetic revisioned record and one append-only fact. Prove writer routing, tenant isolation, policy, concurrency, idempotency, effective intervals, audit/outbox atomicity, history queries, reconciliation, retention, legal hold, erasure receipt, migration, and recovery without adding an education module.
 
-The first authorized [T1-A physical-model increment](../phase-1/evidence/temporal-qualification-physical-model.md)
+The first authorized [T1-A physical-model increment](../phase-1/handover-evidence.md)
 implements only closed qualification resources and their PostgreSQL invariants. It does not
 complete T1 or any TR-01 through TR-07 gate; callable actions and reads, atomic evidence,
 retention/erasure, migration provenance, backup/restore, and performance limits remain open.
 
-The authorized [T1-B revision-boundary increment](../phase-1/evidence/temporal-qualification-revision-boundary.md)
+The authorized [T1-B revision-boundary increment](../phase-1/handover-evidence.md)
 adds separate private publication and exact-target correction actions plus capability-separated
 current/effective and exact/history reads. It proves the revision action's exact result,
 idempotency, stale/concurrent conflict, one-branch behavior, and atomic state/audit/outbox claim.
@@ -213,7 +213,7 @@ It explicitly rejects recorded-time queries. It still does not implement append-
 a downstream consumer, retention/hold/erasure, import provenance, recovery, or performance
 qualification, so T1 and TR-01 through TR-07 remain open.
 
-The authorized [T1-C fact-and-reconciliation increment](../phase-1/evidence/temporal-qualification-fact-and-reconciliation.md)
+The authorized [T1-C fact-and-reconciliation increment](../phase-1/handover-evidence.md)
 adds separate private record and reverse-and-replace actions with immutable operation identity,
 exact replay, one-winner correction races, minimized atomic evidence, and capability-separated
 exact/history reads. A neutral append-only consumer-basis chain proves that source correction does

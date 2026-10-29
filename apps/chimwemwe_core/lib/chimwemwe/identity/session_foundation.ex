@@ -7,8 +7,17 @@ defmodule Chimwemwe.Identity.SessionFoundation do
   writer rechecks that membership and never accepts placement coordinates.
   """
 
-  alias Chimwemwe.Identity.{Error, Evidence, InternalWriter, SessionResult, SessionView}
-  alias Chimwemwe.Identity.VerifiedExternalIdentity
+  alias Chimwemwe.Identity.{
+    AccountSourceFence,
+    Error,
+    Evidence,
+    InternalWriter,
+    SessionResult,
+    SessionView,
+    VerifiedExternalIdentity,
+    VerifiedLocalCredential
+  }
+
   alias Chimwemwe.Repo
   alias Ecto.UUID
 
@@ -21,8 +30,10 @@ defmodule Chimwemwe.Identity.SessionFoundation do
     :proof
   ]
   @rotate_keys [:causation_id, :idempotency_key, :membership_id, :token]
+  @sign_in_keys [:connection_id, :external_identity_link_id, :membership_id]
   @state_keys [:causation_id, :idempotency_key, :token]
   @validate_keys [:token]
+  @local_create_keys [:causation_id, :idempotency_key, :membership_id, :proof]
 
   @doc "Creates a tenant-selected opaque session after link and membership revalidation."
   @spec create(Supervisor.supervisor(), term(), map()) ::
@@ -35,12 +46,33 @@ defmodule Chimwemwe.Identity.SessionFoundation do
     end
   end
 
+  @doc "Creates a local-origin session from sealed credential proof and current staff access."
+  @spec create_local(Supervisor.supervisor(), term(), map()) ::
+          {:ok, SessionResult.t()} | {:error, term()}
+  def create_local(runtime, context, input) do
+    with {:ok, input} <- normalize_local_create(input),
+         :ok <- VerifiedLocalCredential.validate(input.proof) do
+      write(runtime, context, fn action_context ->
+        create_write(Map.put(action_context, :execution_context, context), input)
+      end)
+    end
+  end
+
+  @doc "Rechecks one pre-linked sign-in target before any provider redirect or callback exchange."
+  @spec authorize_sign_in(Supervisor.supervisor(), term(), map()) ::
+          {:ok, map()} | {:error, term()}
+  def authorize_sign_in(runtime, context, input) do
+    with {:ok, input} <- normalize_sign_in(input) do
+      write(runtime, context, &authorize_sign_in_read(&1, input))
+    end
+  end
+
   @doc "Rotates a session only after the target writer confirms current membership."
   @spec rotate_for_tenant(Supervisor.supervisor(), term(), map()) ::
           {:ok, SessionResult.t()} | {:error, term()}
   def rotate_for_tenant(runtime, context, input) do
     with {:ok, input} <- normalize_rotate(input) do
-      write(runtime, context, &rotate_write(&1, input))
+      write(runtime, context, &rotate_write(Map.put(&1, :execution_context, context), input))
     end
   end
 
@@ -50,7 +82,7 @@ defmodule Chimwemwe.Identity.SessionFoundation do
   def validate(runtime, context, input) do
     with {:ok, input} <- exact_input(input, @validate_keys),
          {:ok, token} <- token(input.token) do
-      write(runtime, context, &validate_write(&1, token))
+      write(runtime, context, &validate_write(Map.put(&1, :execution_context, context), token))
     end
   end
 
@@ -79,6 +111,58 @@ defmodule Chimwemwe.Identity.SessionFoundation do
     end
   end
 
+  defp authorize_sign_in_read(context, input) do
+    case Repo.query(
+           """
+           SELECT connection.id::text, connection.issuer,
+                  connection.application_identifier, connection.secret_reference,
+                  connection.assurance_mapping, connection.configuration_version
+           FROM platform_tenant_memberships AS membership
+           JOIN identity_external_identity_links AS link
+             ON link.id = $4 AND link.origin_tenant_id = membership.tenant_id
+             AND link.actor_id = membership.actor_id AND link.status = 'active'
+             AND link.protocol = 'oidc'
+           JOIN identity_connections AS connection
+             ON connection.id = link.connection_id AND connection.tenant_id = membership.tenant_id
+             AND connection.status = 'active' AND connection.protocol = 'oidc'
+             AND connection.issuer = link.issuer
+             AND connection.configuration_version = link.connection_configuration_version
+           WHERE membership.tenant_id = $1 AND membership.id = $2 AND membership.actor_id = $3
+             AND connection.id = $5
+           FOR KEY SHARE OF membership, link, connection
+           """,
+           [
+             dump(context.tenant_id),
+             dump(input.membership_id),
+             dump(context.actor_id),
+             dump(input.external_identity_link_id),
+             dump(input.connection_id)
+           ]
+         ) do
+      {:ok,
+       %{
+         rows: [
+           [id, issuer, application_identifier, secret_reference, assurance_mapping, version]
+         ]
+       }} ->
+        {:ok,
+         %{
+           id: id,
+           issuer: issuer,
+           application_identifier: application_identifier,
+           secret_reference: secret_reference,
+           assurance_mapping: assurance_mapping,
+           configuration_version: version
+         }}
+
+      {:ok, %{rows: []}} ->
+        error(:forbidden)
+
+      {:error, _error} ->
+        error(:retryable_dependency)
+    end
+  end
+
   defp rotate_write(context, input) do
     with :ok <- lock_writes(context.tenant_id) do
       rotate_transaction(context, input)
@@ -101,7 +185,11 @@ defmodule Chimwemwe.Identity.SessionFoundation do
   end
 
   defp create_transaction(context, input) do
-    action_name = "identity.application_session.create"
+    action_name =
+      if match?(%VerifiedLocalCredential{}, input.proof),
+        do: "identity.application_session.create_local",
+        else: "identity.application_session.create"
+
     session_id = UUID.generate()
     request_hash = request_hash(action_name, input)
 
@@ -116,7 +204,7 @@ defmodule Chimwemwe.Identity.SessionFoundation do
            ) do
       case claim do
         {:existing, stored} ->
-          replay_session(stored, context, request_hash, input.idempotency_key)
+          replay_creation(stored, context, request_hash, input)
 
         {:new, claim_id} ->
           create_session(context, input, session_id, claim_id, action_name)
@@ -124,9 +212,18 @@ defmodule Chimwemwe.Identity.SessionFoundation do
     end
   end
 
+  defp replay_creation(stored, context, request_hash, input) do
+    with :ok <- validate_replayed_origin(context, input),
+         {:ok, replayed} <- replay_session(stored, context, request_hash, input.idempotency_key),
+         :ok <- validate_replayed_session(context, input, replayed) do
+      {:ok, replayed}
+    end
+  end
+
   defp create_session(context, input, session_id, claim_id, action_name) do
     with {:ok, secret} <- session_secret(),
          :ok <- validate_create_references(context, input),
+         {:ok, input} <- bind_local_access_version(context, input),
          token <- session_token(secret, context.tenant_id, input.idempotency_key, session_id),
          {:ok, times} <- insert_session(context, input, session_id, token_digest(token)),
          result_payload <- session_payload(context, input, session_id, times, 1),
@@ -230,7 +327,11 @@ defmodule Chimwemwe.Identity.SessionFoundation do
 
   defp end_session(runtime, context, input, status) do
     with {:ok, input} <- normalize_state(input) do
-      write(runtime, context, &end_session_write(&1, input, status))
+      write(
+        runtime,
+        context,
+        &end_session_write(Map.put(&1, :execution_context, context), input, status)
+      )
     end
   end
 
@@ -364,6 +465,19 @@ defmodule Chimwemwe.Identity.SessionFoundation do
     end
   end
 
+  defp validate_create_references(context, %{proof: %VerifiedLocalCredential{} = proof} = input) do
+    with :ok <- VerifiedLocalCredential.validate(proof),
+         :ok <- ensure(proof.actor_id == context.actor_id, :forbidden) do
+      validate_local_origin(
+        context,
+        proof.account_id,
+        proof.credential_version,
+        proof.credential_fingerprint,
+        input.membership_id
+      )
+    end
+  end
+
   defp validate_create_references(context, input) do
     proof = input.proof
 
@@ -397,21 +511,147 @@ defmodule Chimwemwe.Identity.SessionFoundation do
     end
   end
 
+  defp validate_replayed_origin(context, %{proof: %VerifiedLocalCredential{}} = input),
+    do: validate_create_references(context, input)
+
+  defp validate_replayed_origin(_context, _input), do: :ok
+
+  defp validate_replayed_session(context, %{proof: %VerifiedLocalCredential{}}, replayed) do
+    with {:ok, session} <- lock_session(context.tenant_id, token_digest(replayed.token)) do
+      validate_current_session(session, context)
+    end
+  end
+
+  defp validate_replayed_session(_context, _input, _replayed), do: :ok
+
+  defp validate_local_origin(
+         context,
+         account_id,
+         credential_version,
+         credential_fingerprint,
+         membership_id,
+         access_version \\ nil
+       ) do
+    with :ok <- lock_local_source(context, account_id, membership_id, access_version),
+         :ok <- local_account_fence(context) do
+      case Repo.query(
+             "SELECT id::text, actor_id::text, hashed_password, status, principal_binding_id FROM identity_accounts WHERE id = $1 AND actor_id = $2 AND status = 'active' AND lock_version = $3",
+             [dump(account_id), dump(context.actor_id), credential_version]
+           ) do
+        {:ok, %{rows: [[id, actor_id, hash, status, binding_id]]}} ->
+          compare_credential_fingerprint(
+            %{
+              id: id,
+              actor_id: actor_id,
+              hashed_password: hash,
+              status: status,
+              principal_binding_id: binding_id
+            },
+            credential_fingerprint
+          )
+
+        {:ok, %{rows: []}} ->
+          error(:forbidden)
+
+        {:error, _error} ->
+          error(:retryable_dependency)
+      end
+    end
+  end
+
+  defp compare_credential_fingerprint(account, expected) do
+    with {:ok, current} <- VerifiedLocalCredential.credential_fingerprint(account) do
+      ensure(Plug.Crypto.secure_compare(current, expected), :forbidden)
+    end
+  end
+
+  # Directory actions lock their entry before a credential writer reaches its
+  # account trigger. Keep that order, then read the fenced account with MVCC.
+  # An account row lock after the account fence would reverse writer lock order.
+  defp lock_local_source(context, account_id, membership_id, access_version) do
+    case Repo.query(
+           """
+           SELECT entry.id::text
+           FROM identity_staff_directory_entries AS entry
+           JOIN platform_tenant_memberships AS membership
+             ON membership.id = entry.membership_id AND membership.tenant_id = entry.tenant_id
+             AND membership.actor_id = entry.actor_id
+           JOIN people_staff_account_associations AS association
+             ON association.id = entry.association_id AND association.tenant_id = entry.tenant_id
+             AND association.membership_id = entry.membership_id AND association.revoked_at IS NULL
+             AND association.verification->>'actor_id' = membership.actor_id::text
+           JOIN people_participations AS participation
+             ON participation.id = association.participation_id
+             AND participation.tenant_id = association.tenant_id
+             AND participation.person_id = association.person_id AND participation.kind = 'staff'
+           JOIN institutional_units AS institution
+             ON institution.id = participation.institutional_unit_id
+             AND institution.tenant_id = participation.tenant_id AND institution.status = 'published'
+           WHERE entry.tenant_id = $1 AND entry.membership_id = $2 AND entry.actor_id = $3
+             AND entry.account_id = $4 AND entry.enabled = TRUE
+             AND ($5::bigint IS NULL OR entry.access_version = $5)
+             AND participation.effective_from <= (statement_timestamp() AT TIME ZONE institution.time_zone)::date
+             AND (participation.effective_until IS NULL OR participation.effective_until > (statement_timestamp() AT TIME ZONE institution.time_zone)::date)
+           FOR SHARE OF entry, membership, association, participation, institution
+           """,
+           [
+             dump(context.tenant_id),
+             dump(membership_id),
+             dump(context.actor_id),
+             dump(account_id),
+             access_version
+           ]
+         ) do
+      {:ok, %{rows: [[_entry_id]]}} -> :ok
+      {:ok, %{rows: []}} -> error(:forbidden)
+      {:error, _error} -> error(:retryable_dependency)
+    end
+  end
+
+  defp local_account_fence(context) do
+    case AccountSourceFence.lock_current_transaction(context.execution_context, [context.actor_id]) do
+      :ok -> :ok
+      {:error, :retryable_dependency} -> error(:retryable_dependency)
+      {:error, _reason} -> error(:forbidden)
+    end
+  end
+
+  defp bind_local_access_version(context, %{proof: %VerifiedLocalCredential{} = proof} = input) do
+    case Repo.query(
+           "SELECT access_version FROM identity_staff_directory_entries WHERE tenant_id = $1 AND membership_id = $2 AND actor_id = $3 AND account_id = $4 AND enabled = TRUE",
+           Enum.map(
+             [context.tenant_id, input.membership_id, context.actor_id, proof.account_id],
+             &dump/1
+           )
+         ) do
+      {:ok, %{rows: [[version]]}} -> {:ok, Map.put(input, :local_access_version, version)}
+      {:ok, %{rows: []}} -> error(:forbidden)
+      {:error, _error} -> error(:retryable_dependency)
+    end
+  end
+
+  defp bind_local_access_version(_context, input),
+    do: {:ok, Map.put(input, :local_access_version, nil)}
+
   defp insert_session(context, input, session_id, digest) do
     proof = input.proof
+
+    {local_account_id, local_credential_version, local_credential_fingerprint} =
+      local_origin(proof)
 
     case Repo.query(
            """
            INSERT INTO identity_application_sessions (
              id, tenant_id, actor_id, membership_id, external_identity_link_id,
              token_digest, status, assurance, assurance_at, idle_expires_at,
-             absolute_expires_at, last_seen_at, lock_version, inserted_at, updated_at
+             absolute_expires_at, last_seen_at, lock_version, inserted_at, updated_at,
+             local_account_id, local_credential_version, local_access_version, local_credential_fingerprint
            )
            VALUES ($1, $2, $3, $4, $5, $6, 'active', $7, $8,
                    (NOW() AT TIME ZONE 'utc') + INTERVAL '30 minutes',
                    (NOW() AT TIME ZONE 'utc') + INTERVAL '12 hours',
                    (NOW() AT TIME ZONE 'utc'), 1,
-                   (NOW() AT TIME ZONE 'utc'), (NOW() AT TIME ZONE 'utc'))
+                   (NOW() AT TIME ZONE 'utc'), (NOW() AT TIME ZONE 'utc'), $9, $10, $11, $12)
            RETURNING idle_expires_at, absolute_expires_at
            """,
            [
@@ -419,10 +659,14 @@ defmodule Chimwemwe.Identity.SessionFoundation do
              dump(context.tenant_id),
              dump(context.actor_id),
              dump(input.membership_id),
-             dump(input.external_identity_link_id),
+             dump_optional(input.external_identity_link_id),
              digest,
              proof.assurance,
-             DateTime.to_naive(proof.authenticated_at)
+             DateTime.to_naive(proof.authenticated_at),
+             dump_optional(local_account_id),
+             local_credential_version,
+             input.local_access_version,
+             local_credential_fingerprint
            ]
          ) do
       {:ok, %{rows: [[idle, absolute]]}} -> {:ok, session_times(idle, absolute)}
@@ -436,12 +680,13 @@ defmodule Chimwemwe.Identity.SessionFoundation do
            INSERT INTO identity_application_sessions (
              id, tenant_id, actor_id, membership_id, external_identity_link_id,
              token_digest, status, assurance, assurance_at, idle_expires_at,
-             absolute_expires_at, last_seen_at, lock_version, inserted_at, updated_at
+             absolute_expires_at, last_seen_at, lock_version, inserted_at, updated_at,
+             local_account_id, local_credential_version, local_access_version, local_credential_fingerprint
            )
            VALUES ($1, $2, $3, $4, $5, $6, 'active', $7, $8,
                    LEAST((NOW() AT TIME ZONE 'utc') + INTERVAL '30 minutes', $9),
                    $9, (NOW() AT TIME ZONE 'utc'), 1,
-                   (NOW() AT TIME ZONE 'utc'), (NOW() AT TIME ZONE 'utc'))
+                   (NOW() AT TIME ZONE 'utc'), (NOW() AT TIME ZONE 'utc'), $10, $11, $12, $13)
            RETURNING idle_expires_at, absolute_expires_at
            """,
            [
@@ -449,11 +694,15 @@ defmodule Chimwemwe.Identity.SessionFoundation do
              dump(context.tenant_id),
              dump(context.actor_id),
              dump(input.membership_id),
-             dump(session.external_identity_link_id),
+             dump_optional(session.external_identity_link_id),
              digest,
              session.assurance,
              session.assurance_at,
-             session.absolute_expires_at
+             session.absolute_expires_at,
+             dump_optional(session.local_account_id),
+             session.local_credential_version,
+             session.local_access_version,
+             session.local_credential_fingerprint
            ]
          ) do
       {:ok, %{rows: [[idle, absolute]]}} -> {:ok, session_times(idle, absolute)}
@@ -467,7 +716,9 @@ defmodule Chimwemwe.Identity.SessionFoundation do
            SELECT session.id::text, session.actor_id::text, session.membership_id::text,
                   session.external_identity_link_id::text, session.status, session.assurance,
                   session.assurance_at, session.idle_expires_at, session.absolute_expires_at,
-                  session.lock_version,
+                  session.lock_version, session.local_account_id::text,
+                  session.local_credential_version, session.local_access_version,
+                  session.local_credential_fingerprint,
                   EXISTS (
                     SELECT 1 FROM platform_tenant_memberships AS membership
                     WHERE membership.tenant_id = session.tenant_id
@@ -494,6 +745,10 @@ defmodule Chimwemwe.Identity.SessionFoundation do
              idle,
              absolute,
              lock_version,
+             local_account_id,
+             local_credential_version,
+             local_access_version,
+             local_credential_fingerprint,
              membership_current
            ]
          ]
@@ -511,6 +766,10 @@ defmodule Chimwemwe.Identity.SessionFoundation do
            idle_expires_at: idle,
            absolute_expires_at: absolute,
            lock_version: lock_version,
+           local_account_id: local_account_id,
+           local_credential_version: local_credential_version,
+           local_access_version: local_access_version,
+           local_credential_fingerprint: local_credential_fingerprint,
            membership_current: membership_current
          }}
 
@@ -531,9 +790,27 @@ defmodule Chimwemwe.Identity.SessionFoundation do
       session.membership_current != true -> error(:forbidden)
       NaiveDateTime.compare(session.idle_expires_at, now) != :gt -> error(:expired)
       NaiveDateTime.compare(session.absolute_expires_at, now) != :gt -> error(:expired)
-      true -> :ok
+      true -> validate_session_origin(session, context)
     end
   end
+
+  defp validate_session_origin(%{local_account_id: nil}, _context), do: :ok
+
+  defp validate_session_origin(session, context) do
+    validate_local_origin(
+      context,
+      session.local_account_id,
+      session.local_credential_version,
+      session.local_credential_fingerprint,
+      session.membership_id,
+      session.local_access_version
+    )
+  end
+
+  defp local_origin(%VerifiedLocalCredential{} = proof),
+    do: {proof.account_id, proof.credential_version, proof.credential_fingerprint}
+
+  defp local_origin(%VerifiedExternalIdentity{}), do: {nil, nil, nil}
 
   defp validate_selected_membership(context, membership_id) do
     case Repo.query(
@@ -771,6 +1048,40 @@ defmodule Chimwemwe.Identity.SessionFoundation do
     end
   end
 
+  defp normalize_local_create(input) do
+    with {:ok, input} <- exact_input(input, @local_create_keys),
+         {:ok, membership_id} <- uuid(input.membership_id),
+         true <- match?(%VerifiedLocalCredential{}, input.proof),
+         {:ok, idempotency_key} <- uuid(input.idempotency_key),
+         {:ok, causation_id} <- uuid(input.causation_id) do
+      {:ok,
+       %{
+         external_identity_link_id: nil,
+         membership_id: membership_id,
+         proof: input.proof,
+         idempotency_key: idempotency_key,
+         causation_id: causation_id
+       }}
+    else
+      {:error, %Error{} = identity_error} -> {:error, identity_error}
+      _invalid -> error(:invalid_input)
+    end
+  end
+
+  defp normalize_sign_in(input) do
+    with {:ok, input} <- exact_input(input, @sign_in_keys),
+         {:ok, connection_id} <- uuid(input.connection_id),
+         {:ok, link_id} <- uuid(input.external_identity_link_id),
+         {:ok, membership_id} <- uuid(input.membership_id) do
+      {:ok,
+       %{
+         connection_id: connection_id,
+         external_identity_link_id: link_id,
+         membership_id: membership_id
+       }}
+    end
+  end
+
   defp normalize_rotate(input) do
     with {:ok, input} <- exact_input(input, @rotate_keys),
          {:ok, token} <- token(input.token),
@@ -884,5 +1195,7 @@ defmodule Chimwemwe.Identity.SessionFoundation do
   end
 
   defp dump(value), do: UUID.dump!(value)
+  defp dump_optional(nil), do: nil
+  defp dump_optional(value), do: dump(value)
   defp error(code), do: {:error, %Error{code: code}}
 end

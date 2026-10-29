@@ -1,0 +1,184 @@
+@layer components {
+  .c-staff {
+    display: grid;
+    gap: var(--space-5);
+    max-width: 68rem;
+    margin-inline: auto;
+    padding: var(--space-6);
+  }
+
+  .c-staff__login {
+    display: grid;
+    gap: var(--space-5);
+    width: 100%;
+    max-width: 34rem;
+  }
+
+  .c-staff__actions,
+  .c-staff__statuses {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .c-staff__form,
+  .c-staff__form-section {
+    display: grid;
+    gap: var(--space-4);
+    min-width: 0;
+  }
+
+  .c-staff__form {
+    padding: var(--space-5);
+  }
+
+  .c-staff__form-section + .c-staff__form-section {
+    padding-top: var(--space-5);
+    border-top: var(--border-width) solid var(--color-border);
+  }
+
+  .c-staff__form label,
+  .c-staff__language {
+    display: grid;
+    gap: var(--space-2);
+    min-width: 0;
+    max-width: 36rem;
+    font-weight: 700;
+  }
+
+  .c-staff input,
+  .c-staff select {
+    min-width: 0;
+    max-width: 100%;
+    min-height: 2.75rem;
+    padding: var(--space-2) var(--space-3);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-text);
+  }
+
+  .c-staff__field-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+    max-width: 36rem;
+  }
+
+  .c-staff__form .c-staff__check {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 2.75rem;
+    font-weight: 400;
+  }
+
+  .c-staff__check input {
+    width: 1.25rem;
+    min-height: 1.25rem;
+    height: 1.25rem;
+    flex: 0 0 auto;
+  }
+
+  .c-staff__message,
+  .c-staff__identity {
+    padding: var(--space-4);
+    border-left: var(--border-width) solid var(--color-action);
+    background: var(--color-surface-subtle);
+    overflow-wrap: anywhere;
+  }
+
+  .c-staff__account-list {
+    display: grid;
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .c-staff__account-list li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-4);
+    padding-block: var(--space-4);
+    border-bottom: var(--border-width) solid var(--color-border);
+    overflow-wrap: anywhere;
+  }
+
+  .c-staff__account-name {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    font-size: var(--font-size-md);
+    font-weight: 800;
+  }
+
+  .c-staff__help {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .c-staff__help-toggle {
+    width: 2.75rem;
+    min-height: 2.75rem;
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-round);
+    background: var(--color-surface);
+    color: var(--color-action-strong);
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .c-staff__help p {
+    max-width: 36rem;
+    padding: var(--space-3);
+    border: var(--border-width) solid var(--color-border);
+    background: var(--color-surface-subtle);
+    font-size: var(--font-size-sm);
+  }
+
+  .c-staff__secret {
+    display: block;
+    padding: var(--space-4);
+    background: var(--color-surface-subtle);
+    font-size: var(--font-size-md);
+    overflow-wrap: anywhere;
+    user-select: all;
+  }
+
+  .c-staff__workspace-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: var(--space-5);
+  }
+
+  .c-staff__workspace-entries {
+    display: grid;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    overflow-wrap: anywhere;
+  }
+
+  @media (width <= 36rem) {
+    .c-staff {
+      padding: var(--space-4);
+    }
+
+    .c-staff__field-pair {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .c-staff__form {
+      padding: var(--space-4);
+    }
+
+    .c-staff__account-list .c-staff__statuses {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+}

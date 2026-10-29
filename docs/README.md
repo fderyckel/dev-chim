@@ -2,6 +2,8 @@
 
 Documentation is part of the platform contract and changes with the code or decision it describes.
 
+- [Active six-week classroom plan](plans/classroom-first-six-week-plan.md): calendar, people,
+  enrolment, and daily attendance; approved priority for 5 October–15 November 2026.
 - [Architecture](architecture/README.md): stable boundaries, quality targets, and deferred choices.
 - [Architecture decisions](adr/README.md): numbered decisions and their evidence.
 - Development:
@@ -11,15 +13,28 @@ Documentation is part of the platform contract and changes with the code or deci
   - [Production-core migration discipline](development/migrations.md)
   - [Code conventions](development/code-conventions.md)
   - [Git and push conventions](development/git-workflow.md)
-- [Phase 0](phase-0/README.md): scope, decision register, risks, review, and evidence.
-- [Phase 1](phase-1/README.md): completed bounded core-foundation implementation and closure
-  evidence.
+  - [Delegated specialist review team](development/specialist-review-team.md): primary, secondary,
+    school/college admissions, and concise audience-specific UI reviews.
+- [Phase 0 archive](phase-0/README.md): what was decided, how it was tested, why it mattered,
+  and the consolidated handover evidence.
+- [Phase 1 archive](phase-1/README.md): what was implemented, how it was verified, why it
+  mattered, and the consolidated handover evidence.
 - [Phase 2](phase-2/README.md): entry-gate reconciliation and the recursive
   institutional-structure sequence.
 - [Security](security/threat-model.md): data classification, trust boundaries, and abuse cases.
 - [Operations](operations/README.md): bounded dispatch, replay, drain, temporal retention, and
   recovery runbooks.
-- Plans: [Phase 0](plans/phase-0-implementation-plan.md), the completed bounded [Phase 1 core foundation](plans/phase-1-core-foundation-plan.md), the accepted [Phase 2 entry sequence and revised institutional-structure proposal](plans/phase-2-entry-and-school-structure-proposal.md), the proposed [local browser experience foundation](plans/local-browser-experience-foundation-proposal.md), and the proposed [GitHub Actions CI-readiness path](plans/github-actions-ci-readiness-proposal.md).
+- Plans: the accepted [Phase 2 entry sequence and revised institutional-structure proposal](plans/phase-2-entry-and-school-structure-proposal.md), the proposed [local browser experience foundation](plans/local-browser-experience-foundation-proposal.md), and the proposed [GitHub Actions CI-readiness path](plans/github-actions-ci-readiness-proposal.md).
+- [Specialist review next steps](plans/specialist-review-next-steps.md): current authentication and
+  COMM-0 decisions, delegated paper trials, owners, and retained gates.
+- [Bounded COMM-1 proposal](plans/communications-comm-1-staff-announcement-proposal.md): resolved
+  COMM-0 paper choices and the authorized synthetic staff-announcement proof, starting with the
+  source-fence qualification and agent-review checkpoint.
+- [COMM-1 source-fence checkpoint](phase-2/communications-comm-1-source-fence-qualification.md):
+  executable counterexamples, partial controls and the smaller prerequisite decision before publication.
+- [Account source-fence prerequisite](phase-2/identity-account-source-fence-evidence.md): scoped
+  implementation, focused concurrency/migration results and four-agent checkpoint review;
+  remaining audience qualification stays separate from publication readiness.
 
 ## Documentation conventions
 

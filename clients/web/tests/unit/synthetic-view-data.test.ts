@@ -26,12 +26,18 @@ describe("the synthetic view-data adapter", () => {
     const { syntheticViewData } =
       await import("../../src/fixtures/synthetic-view-data");
 
+    const calendar = await syntheticViewData.getAcademicCalendarPreparation();
     const firstHome = await syntheticViewData.getHome();
     const secondHome = await syntheticViewData.getHome();
     const structure = await syntheticViewData.getInstitutionalStructure();
     const preview = await syntheticViewData.getPreview();
 
     expect(secondHome).toEqual(firstHome);
+    expect(calendar.calendar.timeZone).toBe("Africa/Blantyre");
+    expect(calendar.calendar.periods.map((period) => period.label)).toEqual([
+      "Term 1",
+      "Term 2",
+    ]);
     expect(firstHome.context.tenantKind).toBe("synthetic");
     expect(firstHome.context.connectionLabel).toContain("no server connection");
     expect(preview.states.map((state) => state.key)).toEqual([
@@ -104,6 +110,7 @@ describe("the synthetic view-data adapter", () => {
       structure.movePreview.impacts.some((impact) => impact.outcome === "blocks_move"),
     ).toBe(true);
     expect(Object.keys(syntheticViewData).sort()).toEqual([
+      "getAcademicCalendarPreparation",
       "getHome",
       "getInstitutionalStructure",
       "getPreview",

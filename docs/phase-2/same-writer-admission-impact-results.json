@@ -1,0 +1,2754 @@
+{
+  "date": "2026-10-25",
+  "scope": "Local fictional source-stage and attendance qualification; no publication workload",
+  "acceptance": {
+    "maximum_p95_increase_percent": 20,
+    "all_attempts_must_succeed": true,
+    "pool_size": 6,
+    "per_tenant_limit": 6,
+    "per_placement_limit": 12,
+    "intended_people": 25,
+    "readers": 4,
+    "reads_each": 30,
+    "writer_operations": 30,
+    "mixed_source_captures": 5
+  },
+  "unchanged_qualifier_sha256": {
+    "tools/qualify_staff_audience_workload.exs": "cdf68adbffc35db205f6071923bee85a876fda652d77d1a7bb5a8725f67c56ca",
+    "tools/qualify_people_fence_attendance.exs": "59a0a509a5260165b3db26a9b04bc11a32ce4da7db557529ebc6f463bafd1c6b"
+  },
+  "trials": [
+    {
+      "environment": "shared_postgresql",
+      "workload": "foundation",
+      "batch": "01",
+      "source_enabled": true,
+      "log": "/tmp/chimwemwe-nested-impact-20261025-01.log",
+      "comparisons": [
+        {
+          "run": 1,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 8.303,
+              "p99": 11.015
+            },
+            "write": {
+              "count": 30,
+              "p95": 14.232,
+              "p99": 17.728
+            },
+            "source": {
+              "count": 5,
+              "p95": 18.832,
+              "p99": 18.832
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 8.356,
+              "p99": 11.379
+            },
+            "write": {
+              "count": 30,
+              "p95": 14.638,
+              "p99": 19.276
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": -0.63,
+          "classroom_write_p95_change_percent": -2.77,
+          "accepted": true
+        },
+        {
+          "run": 2,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 7.529,
+              "p99": 8.685
+            },
+            "write": {
+              "count": 30,
+              "p95": 12.993,
+              "p99": 13.645
+            },
+            "source": {
+              "count": 5,
+              "p95": 15.2,
+              "p99": 15.2
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 6.841,
+              "p99": 8.679
+            },
+            "write": {
+              "count": 30,
+              "p95": 12.546,
+              "p99": 12.733
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": 10.06,
+          "classroom_write_p95_change_percent": 3.56,
+          "accepted": true
+        },
+        {
+          "run": 3,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 8.959,
+              "p99": 9.505
+            },
+            "write": {
+              "count": 30,
+              "p95": 15.617,
+              "p99": 16.317
+            },
+            "source": {
+              "count": 5,
+              "p95": 17.612,
+              "p99": 17.612
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 6.433,
+              "p99": 7.041
+            },
+            "write": {
+              "count": 30,
+              "p95": 11.379,
+              "p99": 11.66
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": 39.27,
+          "classroom_write_p95_change_percent": 37.24,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "environment": "shared_postgresql",
+      "workload": "attendance",
+      "batch": "01",
+      "source_enabled": true,
+      "log": "/tmp/chimwemwe-nested-attendance-20261025-01.log",
+      "comparisons": [
+        {
+          "run": 1,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 9.372,
+              "failures": 0,
+              "p99": 9.729,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 18.271,
+              "failures": 0,
+              "p99": 19.32,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 9.389,
+              "failures": 0,
+              "p99": 9.389,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 8.776,
+              "failures": 0,
+              "p99": 8.879,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 17.112,
+              "failures": 0,
+              "p99": 18.441,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 6.79,
+          "classroom_write_p95_change_percent": 6.77,
+          "impact_comparison_valid": true,
+          "accepted": true
+        },
+        {
+          "run": 2,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 9.485,
+              "failures": 0,
+              "p99": 9.761,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 17.715,
+              "failures": 0,
+              "p99": 17.961,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 9.09,
+              "failures": 0,
+              "p99": 9.09,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 8.802,
+              "failures": 0,
+              "p99": 8.967,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 16.874,
+              "failures": 0,
+              "p99": 17.334,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 7.76,
+          "classroom_write_p95_change_percent": 4.98,
+          "impact_comparison_valid": true,
+          "accepted": true
+        },
+        {
+          "run": 3,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 13.68,
+              "failures": 0,
+              "p99": 15.591,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 24.921,
+              "failures": 0,
+              "p99": 26.368,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 11.695,
+              "failures": 0,
+              "p99": 11.695,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 11.672,
+              "failures": 0,
+              "p99": 12.074,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 20.376,
+              "failures": 0,
+              "p99": 22.696,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 17.2,
+          "classroom_write_p95_change_percent": 22.31,
+          "impact_comparison_valid": true,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "environment": "shared_postgresql",
+      "workload": "foundation",
+      "batch": "02",
+      "source_enabled": true,
+      "log": "/tmp/chimwemwe-nested-foundation-20261025-02.log",
+      "comparisons": [
+        {
+          "run": 1,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 8.299,
+              "p99": 8.796
+            },
+            "write": {
+              "count": 30,
+              "p95": 15.771,
+              "p99": 15.966
+            },
+            "source": {
+              "count": 5,
+              "p95": 17.046,
+              "p99": 17.046
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 9.002,
+              "p99": 10.721
+            },
+            "write": {
+              "count": 30,
+              "p95": 17.186,
+              "p99": 17.718
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": -7.81,
+          "classroom_write_p95_change_percent": -8.23,
+          "accepted": true
+        },
+        {
+          "run": 2,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 7.642,
+              "p99": 8.022
+            },
+            "write": {
+              "count": 30,
+              "p95": 14.737,
+              "p99": 14.829
+            },
+            "source": {
+              "count": 5,
+              "p95": 17.018,
+              "p99": 17.018
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 7.672,
+              "p99": 7.741
+            },
+            "write": {
+              "count": 30,
+              "p95": 14.971,
+              "p99": 15.26
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": -0.39,
+          "classroom_write_p95_change_percent": -1.56,
+          "accepted": true
+        },
+        {
+          "run": 3,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 7.983,
+              "p99": 8.218
+            },
+            "write": {
+              "count": 30,
+              "p95": 15.205,
+              "p99": 15.912
+            },
+            "source": {
+              "count": 5,
+              "p95": 18.178,
+              "p99": 18.178
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 7.594,
+              "p99": 7.658
+            },
+            "write": {
+              "count": 30,
+              "p95": 14.966,
+              "p99": 15.184
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": 5.12,
+          "classroom_write_p95_change_percent": 1.6,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "environment": "shared_postgresql",
+      "workload": "attendance",
+      "batch": "02",
+      "source_enabled": true,
+      "log": "/tmp/chimwemwe-nested-attendance-20261025-02.log",
+      "comparisons": [
+        {
+          "run": 1,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 17.231,
+              "failures": 0,
+              "p99": 17.506,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 32.073,
+              "failures": 0,
+              "p99": 33.065,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 17.607,
+              "failures": 0,
+              "p99": 17.607,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 16.064,
+              "failures": 0,
+              "p99": 16.615,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 30.42,
+              "failures": 0,
+              "p99": 30.496,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 7.26,
+          "classroom_write_p95_change_percent": 5.43,
+          "impact_comparison_valid": true,
+          "accepted": true
+        },
+        {
+          "run": 2,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 23.485,
+              "failures": 0,
+              "p99": 33.509,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 37.07,
+              "failures": 0,
+              "p99": 54.772,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 24.481,
+              "failures": 0,
+              "p99": 24.481,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 17.887,
+              "failures": 0,
+              "p99": 22.787,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 32.117,
+              "failures": 0,
+              "p99": 37.983,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 31.3,
+          "classroom_write_p95_change_percent": 15.42,
+          "impact_comparison_valid": true,
+          "accepted": false
+        },
+        {
+          "run": 3,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 16.774,
+              "failures": 0,
+              "p99": 17.537,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 32.282,
+              "failures": 0,
+              "p99": 32.902,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 16.032,
+              "failures": 0,
+              "p99": 16.032,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 15.895,
+              "failures": 0,
+              "p99": 16.884,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 30.702,
+              "failures": 0,
+              "p99": 34.092,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 5.53,
+          "classroom_write_p95_change_percent": 5.15,
+          "impact_comparison_valid": true,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "environment": "shared_postgresql",
+      "workload": "foundation",
+      "batch": "03",
+      "source_enabled": true,
+      "log": "/tmp/chimwemwe-nested-foundation-20261025-03.log",
+      "comparisons": [
+        {
+          "run": 1,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 137.076,
+              "p99": 198.045
+            },
+            "write": {
+              "count": 30,
+              "p95": 166.741,
+              "p99": 297.973
+            },
+            "source": {
+              "count": 5,
+              "p95": 76.569,
+              "p99": 76.569
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 57.994,
+              "p99": 73.186
+            },
+            "write": {
+              "count": 30,
+              "p95": 89.681,
+              "p99": 118.461
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": 136.36,
+          "classroom_write_p95_change_percent": 85.93,
+          "accepted": false
+        },
+        {
+          "run": 2,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 30.725,
+              "p99": 30.818
+            },
+            "write": {
+              "count": 30,
+              "p95": 38.812,
+              "p99": 39.416
+            },
+            "source": {
+              "count": 5,
+              "p95": 43.648,
+              "p99": 43.648
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 13.173,
+              "p99": 16.737
+            },
+            "write": {
+              "count": 30,
+              "p95": 24.444,
+              "p99": 26.444
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": 133.24,
+          "classroom_write_p95_change_percent": 58.78,
+          "accepted": false
+        },
+        {
+          "run": 3,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 9.05,
+              "p99": 9.395
+            },
+            "write": {
+              "count": 30,
+              "p95": 17.427,
+              "p99": 18.013
+            },
+            "source": {
+              "count": 5,
+              "p95": 18.597,
+              "p99": 18.597
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 29.92,
+              "p99": 31.026
+            },
+            "write": {
+              "count": 30,
+              "p95": 38.101,
+              "p99": 38.882
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": -69.75,
+          "classroom_write_p95_change_percent": -54.26,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "environment": "shared_postgresql",
+      "workload": "attendance",
+      "batch": "03",
+      "source_enabled": true,
+      "log": "/tmp/chimwemwe-nested-attendance-20261025-03.log",
+      "comparisons": [
+        {
+          "run": 1,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 17.135,
+              "failures": 0,
+              "p99": 17.484,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 31.335,
+              "failures": 0,
+              "p99": 33.01,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 16.184,
+              "failures": 0,
+              "p99": 16.184,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 16.093,
+              "failures": 0,
+              "p99": 16.57,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 30.721,
+              "failures": 0,
+              "p99": 30.729,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 6.47,
+          "classroom_write_p95_change_percent": 2.0,
+          "impact_comparison_valid": true,
+          "accepted": true
+        },
+        {
+          "run": 2,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 16.227,
+              "failures": 0,
+              "p99": 16.553,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 30.751,
+              "failures": 0,
+              "p99": 31.51,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 16.337,
+              "failures": 0,
+              "p99": 16.337,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 17.465,
+              "failures": 0,
+              "p99": 18.084,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 33.551,
+              "failures": 0,
+              "p99": 34.195,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": -7.09,
+          "classroom_write_p95_change_percent": -8.35,
+          "impact_comparison_valid": true,
+          "accepted": true
+        },
+        {
+          "run": 3,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 17.258,
+              "failures": 0,
+              "p99": 17.402,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 31.78,
+              "failures": 0,
+              "p99": 34.527,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 16.956,
+              "failures": 0,
+              "p99": 16.956,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 16.466,
+              "failures": 0,
+              "p99": 20.094,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 31.403,
+              "failures": 0,
+              "p99": 32.807,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 4.81,
+          "classroom_write_p95_change_percent": 1.2,
+          "impact_comparison_valid": true,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "environment": "shared_postgresql",
+      "workload": "foundation",
+      "batch": "neutral_01",
+      "source_enabled": false,
+      "qualification": false,
+      "log": "/tmp/chimwemwe-neutral-foundation-20261025-01.log",
+      "comparisons": [
+        {
+          "run": 1,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 8.448,
+              "p99": 9.017
+            },
+            "write": {
+              "count": 30,
+              "p95": 15.252,
+              "p99": 17.444
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 9.802,
+              "p99": 11.145
+            },
+            "write": {
+              "count": 30,
+              "p95": 18.537,
+              "p99": 20.111
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": -13.81,
+          "classroom_write_p95_change_percent": -17.72,
+          "accepted": true
+        },
+        {
+          "run": 2,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 7.485,
+              "p99": 7.795
+            },
+            "write": {
+              "count": 30,
+              "p95": 14.446,
+              "p99": 14.946
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 9.207,
+              "p99": 9.444
+            },
+            "write": {
+              "count": 30,
+              "p95": 15.631,
+              "p99": 17.407
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": -18.7,
+          "classroom_write_p95_change_percent": -7.58,
+          "accepted": true
+        },
+        {
+          "run": 3,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 7.424,
+              "p99": 7.512
+            },
+            "write": {
+              "count": 30,
+              "p95": 14.644,
+              "p99": 14.893
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 7.709,
+              "p99": 8.084
+            },
+            "write": {
+              "count": 30,
+              "p95": 15.417,
+              "p99": 15.499
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": -3.7,
+          "classroom_write_p95_change_percent": -5.01,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "environment": "shared_postgresql",
+      "workload": "attendance",
+      "batch": "neutral_01",
+      "source_enabled": false,
+      "qualification": false,
+      "log": "/tmp/chimwemwe-neutral-attendance-20261025-01.log",
+      "comparisons": [
+        {
+          "run": 1,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 15.695,
+              "failures": 0,
+              "p99": 16.055,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 30.148,
+              "failures": 0,
+              "p99": 30.883,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 17.776,
+              "failures": 0,
+              "p99": 18.652,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 34.715,
+              "failures": 0,
+              "p99": 34.742,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": -11.71,
+          "classroom_write_p95_change_percent": -13.16,
+          "impact_comparison_valid": true,
+          "accepted": true
+        },
+        {
+          "run": 2,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 20.467,
+              "failures": 0,
+              "p99": 23.294,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 38.454,
+              "failures": 0,
+              "p99": 44.191,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 34.394,
+              "failures": 0,
+              "p99": 37.383,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 49.643,
+              "failures": 0,
+              "p99": 52.138,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": -40.49,
+          "classroom_write_p95_change_percent": -22.54,
+          "impact_comparison_valid": true,
+          "accepted": true
+        },
+        {
+          "run": 3,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 304.14,
+              "failures": 0,
+              "p99": 342.999,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 498.993,
+              "failures": 0,
+              "p99": 942.286,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 20.094,
+              "failures": 0,
+              "p99": 22.047,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 37.752,
+              "failures": 0,
+              "p99": 38.635,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 1413.59,
+          "classroom_write_p95_change_percent": 1221.77,
+          "impact_comparison_valid": true,
+          "accepted": false
+        }
+      ]
+    },
+    {
+      "environment": "private_postgresql",
+      "workload": "foundation",
+      "batch": "01",
+      "source_enabled": true,
+      "database": "chimwemwe_isolated_foundation_20261025_01",
+      "log": "/tmp/chimwemwe-isolated-foundation-20261025-01.log",
+      "qualifier_exit_code": 0,
+      "checkpointer_before": {
+        "timed": 1,
+        "requested": 1,
+        "done": 2
+      },
+      "checkpointer_after": {
+        "timed": 1,
+        "requested": 1,
+        "done": 2
+      },
+      "admission": [],
+      "comparisons": [
+        {
+          "run": 1,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 8.508,
+              "p99": 9.235
+            },
+            "write": {
+              "count": 30,
+              "p95": 16.949,
+              "p99": 18.095
+            },
+            "source": {
+              "count": 5,
+              "p95": 17.74,
+              "p99": 17.74
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 9.091,
+              "p99": 10.19
+            },
+            "write": {
+              "count": 30,
+              "p95": 16.71,
+              "p99": 17.372
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": -6.41,
+          "classroom_write_p95_change_percent": 1.43,
+          "accepted": true
+        },
+        {
+          "run": 2,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 7.163,
+              "p99": 7.221
+            },
+            "write": {
+              "count": 30,
+              "p95": 14.444,
+              "p99": 14.611
+            },
+            "source": {
+              "count": 5,
+              "p95": 16.846,
+              "p99": 16.846
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 6.826,
+              "p99": 7.259
+            },
+            "write": {
+              "count": 30,
+              "p95": 13.079,
+              "p99": 13.869
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": 4.94,
+          "classroom_write_p95_change_percent": 10.44,
+          "accepted": true
+        },
+        {
+          "run": 3,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 7.07,
+              "p99": 7.433
+            },
+            "write": {
+              "count": 30,
+              "p95": 13.89,
+              "p99": 13.928
+            },
+            "source": {
+              "count": 5,
+              "p95": 17.211,
+              "p99": 17.211
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 7.012,
+              "p99": 7.102
+            },
+            "write": {
+              "count": 30,
+              "p95": 13.821,
+              "p99": 13.827
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": 0.83,
+          "classroom_write_p95_change_percent": 0.5,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "environment": "private_postgresql",
+      "workload": "attendance",
+      "batch": "01",
+      "source_enabled": true,
+      "database": "chimwemwe_isolated_attendance_20261025_01",
+      "log": "/tmp/chimwemwe-isolated-attendance-20261025-01.log",
+      "qualifier_exit_code": 0,
+      "checkpointer_before": {
+        "timed": 1,
+        "requested": 2,
+        "done": 3
+      },
+      "checkpointer_after": {
+        "timed": 1,
+        "requested": 2,
+        "done": 3
+      },
+      "admission": [
+        {
+          "mixed": false,
+          "admitted": 180,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": true,
+          "admitted": 185,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": false,
+          "admitted": 180,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": true,
+          "admitted": 185,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": false,
+          "admitted": 180,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": true,
+          "admitted": 185,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "run": 1,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 15.676,
+              "failures": 0,
+              "p99": 16.433,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 29.982,
+              "failures": 0,
+              "p99": 30.664,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 16.183,
+              "failures": 0,
+              "p99": 16.183,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 15.184,
+              "failures": 0,
+              "p99": 16.066,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 28.832,
+              "failures": 0,
+              "p99": 29.016,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 3.24,
+          "classroom_write_p95_change_percent": 3.99,
+          "impact_comparison_valid": true,
+          "accepted": true
+        },
+        {
+          "run": 2,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 15.672,
+              "failures": 0,
+              "p99": 16.128,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 29.438,
+              "failures": 0,
+              "p99": 30.349,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 16.044,
+              "failures": 0,
+              "p99": 16.044,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 15.103,
+              "failures": 0,
+              "p99": 16.38,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 28.944,
+              "failures": 0,
+              "p99": 28.956,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 3.77,
+          "classroom_write_p95_change_percent": 1.71,
+          "impact_comparison_valid": true,
+          "accepted": true
+        },
+        {
+          "run": 3,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 15.686,
+              "failures": 0,
+              "p99": 16.179,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 29.771,
+              "failures": 0,
+              "p99": 31.202,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 15.626,
+              "failures": 0,
+              "p99": 15.626,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 15.054,
+              "failures": 0,
+              "p99": 15.876,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 28.903,
+              "failures": 0,
+              "p99": 29.356,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 4.2,
+          "classroom_write_p95_change_percent": 3.0,
+          "impact_comparison_valid": true,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "environment": "private_postgresql",
+      "workload": "foundation",
+      "batch": "02",
+      "source_enabled": true,
+      "database": "chimwemwe_isolated_foundation_20261025_02",
+      "log": "/tmp/chimwemwe-isolated-foundation-20261025-02.log",
+      "qualifier_exit_code": 0,
+      "checkpointer_before": {
+        "timed": 1,
+        "requested": 3,
+        "done": 4
+      },
+      "checkpointer_after": {
+        "timed": 1,
+        "requested": 3,
+        "done": 4
+      },
+      "admission": [],
+      "comparisons": [
+        {
+          "run": 1,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 7.901,
+              "p99": 8.023
+            },
+            "write": {
+              "count": 30,
+              "p95": 14.032,
+              "p99": 14.374
+            },
+            "source": {
+              "count": 5,
+              "p95": 15.91,
+              "p99": 15.91
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 8.606,
+              "p99": 9.474
+            },
+            "write": {
+              "count": 30,
+              "p95": 15.05,
+              "p99": 16.466
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": -8.19,
+          "classroom_write_p95_change_percent": -6.76,
+          "accepted": true
+        },
+        {
+          "run": 2,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 7.276,
+              "p99": 7.604
+            },
+            "write": {
+              "count": 30,
+              "p95": 13.976,
+              "p99": 14.359
+            },
+            "source": {
+              "count": 5,
+              "p95": 17.158,
+              "p99": 17.158
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 6.907,
+              "p99": 7.867
+            },
+            "write": {
+              "count": 30,
+              "p95": 13.61,
+              "p99": 13.972
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": 5.34,
+          "classroom_write_p95_change_percent": 2.69,
+          "accepted": true
+        },
+        {
+          "run": 3,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 7.013,
+              "p99": 7.157
+            },
+            "write": {
+              "count": 30,
+              "p95": 13.736,
+              "p99": 13.879
+            },
+            "source": {
+              "count": 5,
+              "p95": 15.752,
+              "p99": 15.752
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 6.587,
+              "p99": 6.626
+            },
+            "write": {
+              "count": 30,
+              "p95": 12.878,
+              "p99": 12.916
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": 6.47,
+          "classroom_write_p95_change_percent": 6.66,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "environment": "private_postgresql",
+      "workload": "attendance",
+      "batch": "02",
+      "source_enabled": true,
+      "database": "chimwemwe_isolated_attendance_20261025_02",
+      "log": "/tmp/chimwemwe-isolated-attendance-20261025-02.log",
+      "qualifier_exit_code": 0,
+      "checkpointer_before": {
+        "timed": 1,
+        "requested": 4,
+        "done": 5
+      },
+      "checkpointer_after": {
+        "timed": 1,
+        "requested": 4,
+        "done": 5
+      },
+      "admission": [
+        {
+          "mixed": false,
+          "admitted": 180,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": true,
+          "admitted": 185,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": false,
+          "admitted": 180,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": true,
+          "admitted": 185,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": false,
+          "admitted": 180,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": true,
+          "admitted": 185,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "run": 1,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 15.798,
+              "failures": 0,
+              "p99": 16.008,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 29.749,
+              "failures": 0,
+              "p99": 30.954,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 15.482,
+              "failures": 0,
+              "p99": 15.482,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 16.194,
+              "failures": 0,
+              "p99": 17.285,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 29.888,
+              "failures": 0,
+              "p99": 33.681,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": -2.45,
+          "classroom_write_p95_change_percent": -0.47,
+          "impact_comparison_valid": true,
+          "accepted": true
+        },
+        {
+          "run": 2,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 15.981,
+              "failures": 0,
+              "p99": 17.652,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 30.79,
+              "failures": 0,
+              "p99": 31.67,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 17.074,
+              "failures": 0,
+              "p99": 17.074,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 17.95,
+              "failures": 0,
+              "p99": 19.47,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 33.094,
+              "failures": 0,
+              "p99": 35.333,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": -10.97,
+          "classroom_write_p95_change_percent": -6.96,
+          "impact_comparison_valid": true,
+          "accepted": true
+        },
+        {
+          "run": 3,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 15.924,
+              "failures": 0,
+              "p99": 16.076,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 30.217,
+              "failures": 0,
+              "p99": 31.23,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 16.702,
+              "failures": 0,
+              "p99": 16.702,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 15.592,
+              "failures": 0,
+              "p99": 16.768,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 29.764,
+              "failures": 0,
+              "p99": 29.933,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 2.13,
+          "classroom_write_p95_change_percent": 1.52,
+          "impact_comparison_valid": true,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "environment": "private_postgresql_security_update",
+      "workload": "foundation",
+      "batch": "01",
+      "database": "chimwemwe_security_foundation_20261025_01",
+      "source_enabled": true,
+      "qualification": true,
+      "log": "/Users/francois/.local/share/chimwemwe/qualification-runs/2026-10-25-ADR0054.ut9AuN/impact-foundation-01.log",
+      "qualifier_exit_code": 0,
+      "checkpointer_before": {
+        "timed": 0,
+        "requested": 1,
+        "done": 1
+      },
+      "checkpointer_after": {
+        "timed": 0,
+        "requested": 1,
+        "done": 1
+      },
+      "admission": [],
+      "comparisons": [
+        {
+          "run": 1,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 4.163,
+              "p99": 4.239
+            },
+            "write": {
+              "count": 30,
+              "p95": 8.028,
+              "p99": 8.718
+            },
+            "source": {
+              "count": 5,
+              "p95": 9.232,
+              "p99": 9.232
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 4.75,
+              "p99": 5.025
+            },
+            "write": {
+              "count": 30,
+              "p95": 8.791,
+              "p99": 9.117
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": -12.36,
+          "classroom_write_p95_change_percent": -8.68,
+          "accepted": true
+        },
+        {
+          "run": 2,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 4.047,
+              "p99": 4.229
+            },
+            "write": {
+              "count": 30,
+              "p95": 7.827,
+              "p99": 7.834
+            },
+            "source": {
+              "count": 5,
+              "p95": 9.083,
+              "p99": 9.083
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 4.009,
+              "p99": 4.205
+            },
+            "write": {
+              "count": 30,
+              "p95": 7.94,
+              "p99": 8.122
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": 0.95,
+          "classroom_write_p95_change_percent": -1.42,
+          "accepted": true
+        },
+        {
+          "run": 3,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 4.225,
+              "p99": 4.501
+            },
+            "write": {
+              "count": 30,
+              "p95": 8.081,
+              "p99": 8.202
+            },
+            "source": {
+              "count": 5,
+              "p95": 9.884,
+              "p99": 9.884
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 3.939,
+              "p99": 4.069
+            },
+            "write": {
+              "count": 30,
+              "p95": 7.827,
+              "p99": 7.972
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": 7.26,
+          "classroom_write_p95_change_percent": 3.25,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "environment": "private_postgresql_security_update",
+      "workload": "attendance",
+      "batch": "01",
+      "database": "chimwemwe_security_attendance_20261025_01",
+      "source_enabled": true,
+      "qualification": true,
+      "log": "/Users/francois/.local/share/chimwemwe/qualification-runs/2026-10-25-ADR0054.ut9AuN/impact-attendance-01.log",
+      "qualifier_exit_code": 0,
+      "checkpointer_before": {
+        "timed": 0,
+        "requested": 2,
+        "done": 2
+      },
+      "checkpointer_after": {
+        "timed": 0,
+        "requested": 2,
+        "done": 2
+      },
+      "admission": [
+        {
+          "mixed": false,
+          "admitted": 180,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": true,
+          "admitted": 185,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": false,
+          "admitted": 180,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": true,
+          "admitted": 185,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": false,
+          "admitted": 180,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": true,
+          "admitted": 185,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "run": 1,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 8.987,
+              "failures": 0,
+              "p99": 9.062,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 16.85,
+              "failures": 0,
+              "p99": 17.488,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 8.735,
+              "failures": 0,
+              "p99": 8.735,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 8.373,
+              "failures": 0,
+              "p99": 8.649,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 16.008,
+              "failures": 0,
+              "p99": 16.348,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 7.33,
+          "classroom_write_p95_change_percent": 5.26,
+          "impact_comparison_valid": true,
+          "accepted": true
+        },
+        {
+          "run": 2,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 8.934,
+              "failures": 0,
+              "p99": 9.054,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 16.807,
+              "failures": 0,
+              "p99": 17.496,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 9.119,
+              "failures": 0,
+              "p99": 9.119,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 8.489,
+              "failures": 0,
+              "p99": 9.237,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 16.144,
+              "failures": 0,
+              "p99": 16.493,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 5.24,
+          "classroom_write_p95_change_percent": 4.11,
+          "impact_comparison_valid": true,
+          "accepted": true
+        },
+        {
+          "run": 3,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 8.889,
+              "failures": 0,
+              "p99": 9.122,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 16.906,
+              "failures": 0,
+              "p99": 17.482,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 8.909,
+              "failures": 0,
+              "p99": 8.909,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 8.483,
+              "failures": 0,
+              "p99": 8.731,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 16.361,
+              "failures": 0,
+              "p99": 18.024,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 4.79,
+          "classroom_write_p95_change_percent": 3.33,
+          "impact_comparison_valid": true,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "environment": "private_postgresql_security_update",
+      "workload": "foundation",
+      "batch": "02",
+      "database": "chimwemwe_security_foundation_20261025_02",
+      "source_enabled": true,
+      "qualification": true,
+      "log": "/Users/francois/.local/share/chimwemwe/qualification-runs/2026-10-25-ADR0054.ut9AuN/impact-foundation-02.log",
+      "qualifier_exit_code": 0,
+      "checkpointer_before": {
+        "timed": 0,
+        "requested": 3,
+        "done": 3
+      },
+      "checkpointer_after": {
+        "timed": 0,
+        "requested": 3,
+        "done": 3
+      },
+      "admission": [],
+      "comparisons": [
+        {
+          "run": 1,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 4.758,
+              "p99": 4.927
+            },
+            "write": {
+              "count": 30,
+              "p95": 9.178,
+              "p99": 9.211
+            },
+            "source": {
+              "count": 5,
+              "p95": 9.767,
+              "p99": 9.767
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 5.074,
+              "p99": 5.57
+            },
+            "write": {
+              "count": 30,
+              "p95": 8.63,
+              "p99": 9.968
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": -6.23,
+          "classroom_write_p95_change_percent": 6.35,
+          "accepted": true
+        },
+        {
+          "run": 2,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 5.198,
+              "p99": 6.24
+            },
+            "write": {
+              "count": 30,
+              "p95": 9.194,
+              "p99": 11.705
+            },
+            "source": {
+              "count": 5,
+              "p95": 10.795,
+              "p99": 10.795
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 4.451,
+              "p99": 4.553
+            },
+            "write": {
+              "count": 30,
+              "p95": 8.533,
+              "p99": 8.676
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": 16.78,
+          "classroom_write_p95_change_percent": 7.75,
+          "accepted": true
+        },
+        {
+          "run": 3,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 4.632,
+              "p99": 4.823
+            },
+            "write": {
+              "count": 30,
+              "p95": 8.99,
+              "p99": 9.146
+            },
+            "source": {
+              "count": 5,
+              "p95": 9.686,
+              "p99": 9.686
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 4.314,
+              "p99": 4.518
+            },
+            "write": {
+              "count": 30,
+              "p95": 8.48,
+              "p99": 8.482
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "p99": 0.0
+            }
+          },
+          "classroom_read_p95_change_percent": 7.37,
+          "classroom_write_p95_change_percent": 6.01,
+          "accepted": true
+        }
+      ]
+    },
+    {
+      "environment": "private_postgresql_security_update",
+      "workload": "attendance",
+      "batch": "02",
+      "database": "chimwemwe_security_attendance_20261025_02",
+      "source_enabled": true,
+      "qualification": true,
+      "log": "/Users/francois/.local/share/chimwemwe/qualification-runs/2026-10-25-ADR0054.ut9AuN/impact-attendance-02.log",
+      "qualifier_exit_code": 0,
+      "checkpointer_before": {
+        "timed": 0,
+        "requested": 4,
+        "done": 4
+      },
+      "checkpointer_after": {
+        "timed": 0,
+        "requested": 4,
+        "done": 4
+      },
+      "admission": [
+        {
+          "mixed": false,
+          "admitted": 180,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": true,
+          "admitted": 185,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": false,
+          "admitted": 180,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": true,
+          "admitted": 185,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": false,
+          "admitted": 180,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        },
+        {
+          "mixed": true,
+          "admitted": 185,
+          "tenant_rejections": 0,
+          "placement_rejections": 0
+        }
+      ],
+      "comparisons": [
+        {
+          "run": 1,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 9.428,
+              "failures": 0,
+              "p99": 9.859,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 17.181,
+              "failures": 0,
+              "p99": 18.804,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 8.834,
+              "failures": 0,
+              "p99": 8.834,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 9.061,
+              "failures": 0,
+              "p99": 9.497,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 16.978,
+              "failures": 0,
+              "p99": 17.061,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 4.05,
+          "classroom_write_p95_change_percent": 1.2,
+          "impact_comparison_valid": true,
+          "accepted": true
+        },
+        {
+          "run": 2,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 10.05,
+              "failures": 0,
+              "p99": 10.169,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 17.922,
+              "failures": 0,
+              "p99": 19.891,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 8.942,
+              "failures": 0,
+              "p99": 8.942,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 9.297,
+              "failures": 0,
+              "p99": 9.616,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 17.326,
+              "failures": 0,
+              "p99": 17.505,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 8.1,
+          "classroom_write_p95_change_percent": 3.44,
+          "impact_comparison_valid": true,
+          "accepted": true
+        },
+        {
+          "run": 3,
+          "mixed": {
+            "read": {
+              "count": 120,
+              "p95": 9.646,
+              "failures": 0,
+              "p99": 9.859,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 19.287,
+              "failures": 0,
+              "p99": 19.388,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 5,
+              "p95": 9.3,
+              "failures": 0,
+              "p99": 9.3,
+              "error_counts": {}
+            }
+          },
+          "baseline": {
+            "read": {
+              "count": 120,
+              "p95": 8.961,
+              "failures": 0,
+              "p99": 9.21,
+              "error_counts": {}
+            },
+            "write": {
+              "count": 30,
+              "p95": 16.884,
+              "failures": 0,
+              "p99": 17.04,
+              "error_counts": {}
+            },
+            "source": {
+              "count": 0,
+              "p95": 0.0,
+              "failures": 0,
+              "p99": 0.0,
+              "error_counts": {}
+            }
+          },
+          "workload": "actual_attendance",
+          "classroom_read_p95_change_percent": 7.64,
+          "classroom_write_p95_change_percent": 14.23,
+          "impact_comparison_valid": true,
+          "accepted": true
+        }
+      ]
+    }
+  ],
+  "isolated_environment": {
+    "postgresql": "18.6 Homebrew aarch64",
+    "socket_directory": "/tmp/chimwemwe-comm-impact.pPXtM7/socket",
+    "port": 5547,
+    "tcp_listener": false,
+    "fsync": true,
+    "synchronous_commit": true,
+    "max_connections": 100,
+    "shared_buffers_mb": 128,
+    "checkpoint_timeout_seconds": 300,
+    "max_wal_size_mb": 1024,
+    "hardware_logical_cpus": 10,
+    "shared_host": true,
+    "scheduler_or_priority_tuning": false,
+    "setup": "Private CHECKPOINT and one-second statistics settling barrier before each qualifier, outside measured work.",
+    "retained_cluster_state": "Stopped after measurement; temporary cluster later unavailable on resumed turn. Aggregate results retained in this artifact.",
+    "dependencies": {
+      "ash": "3.34.6",
+      "ash_postgres": "2.13.1",
+      "ash_sql": "0.7.6"
+    }
+  },
+  "candidate_manifest_sha256": "6a6ae74436073f4edffefb6615c5aaeaa6f62786c93421d183d533fbbd44c360",
+  "security_updated_environment": {
+    "postgresql": "18.6 Homebrew aarch64",
+    "socket_directory": "/tmp/chimwemwe-admission-pg.srm7Gw",
+    "port": 5547,
+    "tcp_listener": false,
+    "fsync": true,
+    "synchronous_commit": true,
+    "max_connections": 100,
+    "shared_buffers_mb": 128,
+    "checkpoint_timeout_seconds": 300,
+    "max_wal_size_mb": 1024,
+    "hardware_logical_cpus": 10,
+    "shared_host": true,
+    "scheduler_or_priority_tuning": false,
+    "setup": "Private CHECKPOINT and one-second statistics settling barrier before each qualifier, outside measured work.",
+    "retained_cluster_state": "Stopped after final verification; durable data, raw aggregate logs and runner retained.",
+    "dependencies": {
+      "ash": "3.37.1",
+      "ash_postgres": "2.15.2",
+      "ash_sql": "0.8.4"
+    },
+    "durable_run_directory": "/Users/francois/.local/share/chimwemwe/qualification-runs/2026-10-25-ADR0054.ut9AuN"
+  },
+  "qualification_environment": "private_postgresql_security_update",
+  "qualified_runtime_sha256": {
+    "apps/chimwemwe_core/lib/chimwemwe/platform/persistence.ex": "737310eeaaf02dd5317303d7c0ab738b42346df4005c85963882cdc226a47132"
+  },
+  "final_runtime_and_test_candidate_manifest_sha256": "d51443a79933934538beedb6fadf415e9a3f38cb014fe7b9ba744e108be435ec",
+  "final_verification": {
+    "command": "CHIMWEMWE_TEST_DATABASE=chimwemwe_nested_full_20261025_04 make check",
+    "exit_code": 0,
+    "log": "/Users/francois/.local/share/chimwemwe/qualification-runs/2026-10-25-ADR0054.ut9AuN/full-04.log",
+    "core_tests_passed": 462,
+    "web_unit_tests_passed": 59,
+    "browser_tests_passed": 107,
+    "required_steps_skipped": 0,
+    "candidate_manifest_verified_unchanged": true,
+    "scope": "Bounded local staff-source prerequisite before subsequent ADR0055 changes; no publication implementation or production qualification."
+  },
+  "specialist_review": {
+    "profiles": [
+      "primary_education",
+      "secondary_education",
+      "admissions",
+      "ui_experience"
+    ],
+    "disposition": "approve_with_conditions",
+    "remaining_condition": "Complete observed make check exit 0 on the final frozen candidate",
+    "condition_closed": true,
+    "independent_security_or_representative_assurance": false
+  }
+}

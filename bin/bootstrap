@@ -70,4 +70,4 @@ mise exec -- mix local.rebar --force
   mise exec -- env MIX_ENV=test mix ecto.migrate --quiet
 )
 
-echo "Phase 0, Phase 1 core, UI-0, and UI-1A environments are ready. Run: make check"
+echo "Core platform, UI-0, UI-1A, and archived lab environments are ready. Run: make check-changed"

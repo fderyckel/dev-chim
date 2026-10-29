@@ -49,6 +49,22 @@ defmodule Chimwemwe.Platform.TemporalQualificationActionTest do
   @consumer_read_capability "platform.temporal_qualification.consumers.read_history"
 
   @tables [
+    "communications_engagements",
+    "communications_revisions",
+    "communications_preparations",
+    "communications_notices",
+    "classroom_preparation_workspaces",
+    "classroom_attendance_corrections",
+    "classroom_attendance_submissions",
+    "classroom_attendance_exposures",
+    "classroom_placements",
+    "classroom_teaching_assignments",
+    "classroom_enrolments",
+    "classroom_classes",
+    "identity_staff_directory_entries",
+    "people_staff_account_associations",
+    "people_participations",
+    "people_persons",
     "identity_support_access_grants",
     "identity_application_sessions",
     "identity_invitations",

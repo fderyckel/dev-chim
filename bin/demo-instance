@@ -1,0 +1,27 @@
+#!/bin/sh
+set -eu
+
+repo_root=$(cd "$(dirname "$0")/.." && pwd -P)
+cd "$repo_root"
+demo_port=${DEMO_PORT:-3000}
+case "$demo_port" in
+  ''|*[!0-9]*) echo "DEMO_PORT must be a TCP port" >&2; exit 64 ;;
+esac
+if [ "$demo_port" -lt 1 ] || [ "$demo_port" -gt 65535 ]; then
+  echo "DEMO_PORT must be between 1 and 65535" >&2
+  exit 64
+fi
+if [ -n "${DEMO:-}" ]; then
+  CHIMWEMWE_DEMO_DATA_DIRECTORY=$(mise exec -- uv run python tools/demo_instance.py --institution "$DEMO")
+else
+  CHIMWEMWE_DEMO_DATA_DIRECTORY=$(mise exec -- uv run python tools/demo_instance.py)
+fi
+export CHIMWEMWE_DEMO_DATA_DIRECTORY
+CHIMWEMWE_DEMO_PACK_ID=$(mise exec -- uv run python -c 'import json, os; from pathlib import Path; print(json.loads((Path(os.environ["CHIMWEMWE_DEMO_DATA_DIRECTORY"]) / "instance.json").read_text())["selected_pack_id"])')
+export CHIMWEMWE_DEMO_PACK_ID
+export CHIMWEMWE_DEMO_INSTANCE=true CHIMWEMWE_UI0_SYNTHETIC=true
+export CHIMWEMWE_WEB_BUILD_DIR=.next-demo
+unset CHIMWEMWE_CLASSROOM_DEMO CHIMWEMWE_UI1_LOCAL
+printf 'Demo instance: %s\nOpen http://127.0.0.1:%s\n' "$CHIMWEMWE_DEMO_DATA_DIRECTORY" "$demo_port"
+cd clients/web
+exec mise exec -- npm run dev -- --port "$demo_port"

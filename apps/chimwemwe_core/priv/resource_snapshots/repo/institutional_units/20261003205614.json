@@ -1,0 +1,323 @@
+{
+  "attributes": [
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"gen_random_uuid()\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": true,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "tenant_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "display_name",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "\"institution\"",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "classification",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "time_zone",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "\"draft\"",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "status",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "1",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "lock_version",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "inserted_at",
+      "type": "utc_datetime_usec"
+    }
+  ],
+  "base_filter": null,
+  "check_constraints": [
+    {
+      "attribute": [
+        "classification"
+      ],
+      "base_filter": null,
+      "check": "classification = 'institution'",
+      "name": "institutional_units_classification"
+    },
+    {
+      "attribute": [
+        "display_name"
+      ],
+      "base_filter": null,
+      "check": "char_length(btrim(display_name)) BETWEEN 1 AND 200",
+      "name": "institutional_units_name"
+    },
+    {
+      "attribute": [
+        "time_zone"
+      ],
+      "base_filter": null,
+      "check": "char_length(time_zone) BETWEEN 1 AND 100",
+      "name": "institutional_units_zone"
+    },
+    {
+      "attribute": [
+        "status"
+      ],
+      "base_filter": null,
+      "check": "(status = 'draft' AND lock_version IN (1, 2)) OR (status = 'published' AND lock_version = 3)",
+      "name": "institutional_units_state"
+    }
+  ],
+  "create_table_options": null,
+  "custom_indexes": [
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "id",
+        "tenant_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "institutional_units_id_tenant_idx",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    }
+  ],
+  "custom_statements": [
+    {
+      "after_tables": [
+        "institutional_units",
+        "institution_initial_operator_assignments",
+        "institution_publications"
+      ],
+      "code?": false,
+      "down": "DROP FUNCTION institution_proof_guard();",
+      "global?": true,
+      "name": "institution_proof_guard",
+      "up": "CREATE FUNCTION institution_proof_guard() RETURNS trigger LANGUAGE plpgsql AS $$\nDECLARE\nu institutional_units%ROWTYPE;\na institution_initial_operator_assignments%ROWTYPE;\nproof jsonb; local_day date; expected_revision bigint; legal_version bigint;\nBEGIN\nSELECT * INTO STRICT u FROM institutional_units WHERE id = NEW.institutional_unit_id AND tenant_id = NEW.tenant_id FOR UPDATE;\nlocal_day := (statement_timestamp() AT TIME ZONE u.time_zone)::date;\nproof := NEW.verification;\nIF TG_TABLE_NAME = 'institution_initial_operator_assignments' THEN\na := NEW;\nexpected_revision := 1;\nELSE\nSELECT * INTO STRICT a FROM institution_initial_operator_assignments WHERE id = NEW.operator_assignment_id AND tenant_id = NEW.tenant_id;\nexpected_revision := 2;\nIF a.institutional_unit_id <> u.id OR a.effective_from <> local_day THEN\nRAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'publication basis mismatch';\nEND IF;\nEND IF;\nSELECT lock_version INTO legal_version FROM organization_legal_entities WHERE id = a.legal_entity_id AND tenant_id = a.tenant_id AND status = 'active' FOR SHARE;\nIF u.status <> 'draft' OR u.lock_version <> expected_revision OR legal_version IS DISTINCT FROM a.legal_entity_version THEN\nRAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'stale institutional basis';\nEND IF;\nIF (jsonb_typeof(proof) = 'object'\nAND proof->>'tenant_id' = NEW.tenant_id::text\nAND proof->>'institutional_unit_id' = u.id::text\nAND (proof->>'institution_version')::bigint = expected_revision\nAND proof->>'legal_entity_id' = a.legal_entity_id::text\nAND (proof->>'legal_entity_version')::bigint = legal_version\nAND proof->>'evidence_reference' = a.evidence_reference::text\nAND (proof->>'effective_from')::date = a.effective_from\nAND proof->>'policy_key' = 'synthetic.cf1.initial_operator.v1'\nAND proof->>'jurisdiction' = 'ZZ'\nAND proof->>'evidence_type' = 'synthetic_operating_instrument'\nAND proof->>'impact_policy' = 'cf1.initial_unpublished_root.v1'\nAND proof->'conditions_satisfied' = 'true'::jsonb\nAND proof->'impact_accepted' = 'true'::jsonb\nAND proof->'consumer_keys' = '[]'::jsonb\nAND (proof->>'evidence_version')::uuid IS NOT NULL\nAND (proof->>'issuer_reference')::uuid IS NOT NULL\nAND (proof->>'verifier_actor_id')::uuid IS NOT NULL\nAND (proof->>'impact_reference')::uuid IS NOT NULL\nAND (proof->>'checked_at')::timestamptz >= transaction_timestamp()\nAND (proof->>'checked_at')::timestamptz <= clock_timestamp()\nAND local_day - (proof->>'status_checked_on')::date BETWEEN 0 AND 30\nAND (proof->>'valid_from')::date <= local_day\nAND (proof->>'valid_from')::date <= a.effective_from\nAND (proof->>'valid_until')::date > local_day\nAND (proof->>'valid_until')::date > a.effective_from) IS DISTINCT FROM TRUE THEN\nRAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'invalid institutional proof';\nEND IF;\nRETURN NEW;\nEND $$;\n"
+    },
+    {
+      "after_tables": [
+        "institutional_units",
+        "institution_initial_operator_assignments",
+        "institution_publications"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER institution_initial_operator_assignments_proof ON institution_initial_operator_assignments;",
+      "global?": true,
+      "name": "institution_initial_operator_assignments_proof",
+      "up": "CREATE TRIGGER institution_initial_operator_assignments_proof BEFORE INSERT ON institution_initial_operator_assignments FOR EACH ROW EXECUTE FUNCTION institution_proof_guard();\n"
+    },
+    {
+      "after_tables": [
+        "institutional_units",
+        "institution_initial_operator_assignments",
+        "institution_publications"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER institution_publications_proof ON institution_publications;",
+      "global?": true,
+      "name": "institution_publications_proof",
+      "up": "CREATE TRIGGER institution_publications_proof BEFORE INSERT ON institution_publications FOR EACH ROW EXECUTE FUNCTION institution_proof_guard();\n"
+    },
+    {
+      "after_tables": [
+        "institutional_units",
+        "institution_initial_operator_assignments",
+        "institution_publications"
+      ],
+      "code?": false,
+      "down": "DROP FUNCTION institution_identity_guard();",
+      "global?": true,
+      "name": "institution_identity_guard",
+      "up": "CREATE FUNCTION institution_identity_guard() RETURNS trigger LANGUAGE plpgsql AS $$\nBEGIN\nIF TG_OP = 'DELETE' THEN RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'institution deletion forbidden'; END IF;\nIF TG_OP = 'INSERT' THEN\nIF NEW.status <> 'draft' OR NEW.lock_version <> 1 OR NOT EXISTS (SELECT 1 FROM pg_timezone_names WHERE name = NEW.time_zone) THEN\nRAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'invalid initial institution';\nEND IF;\nELSE\nIF ROW(NEW.id, NEW.tenant_id, NEW.display_name, NEW.classification, NEW.time_zone, NEW.inserted_at)\nIS DISTINCT FROM ROW(OLD.id, OLD.tenant_id, OLD.display_name, OLD.classification, OLD.time_zone, OLD.inserted_at)\nOR OLD.status <> 'draft' OR NEW.lock_version <> OLD.lock_version + 1 THEN\nRAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'invalid institutional transition';\nEND IF;\nEND IF;\nRETURN NEW;\nEND $$;\n"
+    },
+    {
+      "after_tables": [
+        "institutional_units",
+        "institution_initial_operator_assignments",
+        "institution_publications"
+      ],
+      "code?": false,
+      "down": "DROP FUNCTION institution_fact_guard();",
+      "global?": true,
+      "name": "institution_fact_guard",
+      "up": "CREATE FUNCTION institution_fact_guard() RETURNS trigger LANGUAGE plpgsql AS $$\nBEGIN\nRAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'institutional facts are immutable';\nEND $$;\n"
+    },
+    {
+      "after_tables": [
+        "institutional_units",
+        "institution_initial_operator_assignments",
+        "institution_publications"
+      ],
+      "code?": false,
+      "down": "DROP FUNCTION institution_consistency_guard();",
+      "global?": true,
+      "name": "institution_consistency_guard",
+      "up": "CREATE FUNCTION institution_consistency_guard() RETURNS trigger LANGUAGE plpgsql AS $$\nDECLARE\nunit_id uuid; unit_tenant uuid; version bigint; assignment uuid; publication uuid; selected_assignment uuid;\nBEGIN\nIF TG_TABLE_NAME = 'institutional_units' THEN unit_id := NEW.id; ELSE unit_id := NEW.institutional_unit_id; END IF;\nunit_tenant := NEW.tenant_id;\nSELECT lock_version INTO version FROM institutional_units WHERE id = unit_id AND tenant_id = unit_tenant FOR UPDATE;\nSELECT id INTO assignment FROM institution_initial_operator_assignments WHERE institutional_unit_id = unit_id AND tenant_id = unit_tenant;\nSELECT id, operator_assignment_id INTO publication, selected_assignment FROM institution_publications WHERE institutional_unit_id = unit_id AND tenant_id = unit_tenant;\nIF version IS NULL OR\n(version = 1 AND (assignment IS NOT NULL OR publication IS NOT NULL)) OR\n(version = 2 AND (assignment IS NULL OR publication IS NOT NULL)) OR\n(version = 3 AND (assignment IS NULL OR publication IS NULL OR selected_assignment IS DISTINCT FROM assignment)) THEN\nRAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'inconsistent institutional lifecycle';\nEND IF;\nRETURN NEW;\nEND $$;\n"
+    },
+    {
+      "after_tables": [
+        "institutional_units",
+        "institution_initial_operator_assignments",
+        "institution_publications"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER institution_identity_trigger ON institutional_units;",
+      "global?": true,
+      "name": "institution_identity_trigger",
+      "up": "CREATE TRIGGER institution_identity_trigger BEFORE INSERT OR UPDATE OR DELETE ON institutional_units FOR EACH ROW EXECUTE FUNCTION institution_identity_guard();\n"
+    },
+    {
+      "after_tables": [
+        "institutional_units",
+        "institution_initial_operator_assignments",
+        "institution_publications"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER institution_initial_operator_assignments_immutable ON institution_initial_operator_assignments;",
+      "global?": true,
+      "name": "institution_initial_operator_assignments_immutable",
+      "up": "CREATE TRIGGER institution_initial_operator_assignments_immutable BEFORE UPDATE OR DELETE ON institution_initial_operator_assignments FOR EACH ROW EXECUTE FUNCTION institution_fact_guard();\n"
+    },
+    {
+      "after_tables": [
+        "institutional_units",
+        "institution_initial_operator_assignments",
+        "institution_publications"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER institution_publications_immutable ON institution_publications;",
+      "global?": true,
+      "name": "institution_publications_immutable",
+      "up": "CREATE TRIGGER institution_publications_immutable BEFORE UPDATE OR DELETE ON institution_publications FOR EACH ROW EXECUTE FUNCTION institution_fact_guard();\n"
+    },
+    {
+      "after_tables": [
+        "institutional_units",
+        "institution_initial_operator_assignments",
+        "institution_publications"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER institutional_units_consistent ON institutional_units;",
+      "global?": true,
+      "name": "institutional_units_consistent",
+      "up": "CREATE CONSTRAINT TRIGGER institutional_units_consistent AFTER INSERT OR UPDATE ON institutional_units DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION institution_consistency_guard();\n"
+    },
+    {
+      "after_tables": [
+        "institutional_units",
+        "institution_initial_operator_assignments",
+        "institution_publications"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER institution_initial_operator_assignments_consistent ON institution_initial_operator_assignments;",
+      "global?": true,
+      "name": "institution_initial_operator_assignments_consistent",
+      "up": "CREATE CONSTRAINT TRIGGER institution_initial_operator_assignments_consistent AFTER INSERT OR UPDATE ON institution_initial_operator_assignments DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION institution_consistency_guard();\n"
+    },
+    {
+      "after_tables": [
+        "institutional_units",
+        "institution_initial_operator_assignments",
+        "institution_publications"
+      ],
+      "code?": false,
+      "down": "DROP TRIGGER institution_publications_consistent ON institution_publications;",
+      "global?": true,
+      "name": "institution_publications_consistent",
+      "up": "CREATE CONSTRAINT TRIGGER institution_publications_consistent AFTER INSERT OR UPDATE ON institution_publications DEFERRABLE INITIALLY DEFERRED FOR EACH ROW EXECUTE FUNCTION institution_consistency_guard();\n"
+    }
+  ],
+  "has_create_action": false,
+  "hash": "891D21D6FED14098CBB80BFC3F314484CA8A503B5EA5C9CFFA035D912AEA179A",
+  "identities": [],
+  "multitenancy": {
+    "attribute": "tenant_id",
+    "global": false,
+    "strategy": "attribute"
+  },
+  "repo": "Elixir.Chimwemwe.Repo",
+  "schema": null,
+  "table": "institutional_units"
+}

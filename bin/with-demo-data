@@ -1,0 +1,15 @@
+#!/bin/sh
+# Prepare all inert fixture packs for this local run; never seed application databases.
+set -eu
+
+repo_root=$(cd "$(dirname "$0")/.." && pwd -P)
+if [ "$#" -eq 0 ]; then
+  echo "usage: bin/with-demo-data command [argument ...]" >&2
+  exit 64
+fi
+
+CHIMWEMWE_DEMO_DATA_DIRECTORY=$(cd "$repo_root" && \
+  mise exec -- uv run python tools/demo_data.py prepare --environment local-synthetic)
+export CHIMWEMWE_DEMO_DATA_DIRECTORY
+printf 'All four synthetic demo packs prepared: %s\n' "$CHIMWEMWE_DEMO_DATA_DIRECTORY"
+exec "$@"

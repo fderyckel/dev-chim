@@ -155,5 +155,5 @@ Both synthetic patterns fit the proposed single-authority model after the five r
 - [Academic calendar authority](academic-calendar-authority.md)
 - [Temporal records synthetic scenario review](temporal-records-synthetic-scenario-review.md)
 - [ADR 0021](../adr/0021-academic-calendar-authority-and-template-adoption.md)
-- [Domain model authoring and metadata](domain-model-authoring-and-metadata.md)
+- [Domain model authoring and metadata workflow](../development/code-conventions.md#domain-model-authoring)
 - [Threat model](../security/threat-model.md)

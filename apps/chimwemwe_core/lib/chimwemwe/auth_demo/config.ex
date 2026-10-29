@@ -10,6 +10,17 @@ defmodule Chimwemwe.AuthDemo.Config do
   @default_port 4012
   @minimum_secret_bytes 32
   @demo_tenant_id "99999999-9999-4999-8999-999999999999"
+  @admin_actor_id "aaaaaaaa-1111-4111-8111-aaaaaaaaaaaa"
+  @staff_candidates [
+    %{
+      actor_id: "bbbbbbbb-2222-4222-8222-bbbbbbbbbbbb",
+      label: "Amara Phiri · educator"
+    },
+    %{
+      actor_id: "cccccccc-3333-4333-8333-cccccccccccc",
+      label: "Tadala Banda · registrar"
+    }
+  ]
 
   @spec application_children() :: {:ok, [Supervisor.child_spec()]} | {:error, term()}
   def application_children do
@@ -36,6 +47,14 @@ defmodule Chimwemwe.AuthDemo.Config do
   @doc false
   @spec tenant_id() :: String.t()
   def tenant_id, do: @demo_tenant_id
+
+  @doc false
+  @spec admin_actor_id() :: String.t()
+  def admin_actor_id, do: @admin_actor_id
+
+  @doc false
+  @spec staff_candidates() :: [map()]
+  def staff_candidates, do: @staff_candidates
 
   defp parse_enabled(environment) do
     with :ok <- independent_from_ui1(environment),

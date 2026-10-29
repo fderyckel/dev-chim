@@ -120,7 +120,7 @@ ADR 0021 remains Proposed. Before its calendar domain may be accepted or impleme
 
 ## Implementation progress
 
-The 2026-09-25 [T1-A physical-model evidence](../phase-1/evidence/temporal-qualification-physical-model.md)
+The 2026-09-25 [T1-A physical-model evidence](../phase-1/handover-evidence.md)
 adds a closed neutral aggregate/revision/segment/fact qualification model and proves a bounded set
 of PostgreSQL identity, tenant, immutability, interval, timestamp, concurrency, and physical query
 invariants. It introduces no callable temporal action, history interface, audit/outbox contract,
@@ -129,7 +129,7 @@ retention action, recovery proof, shared temporal library, or school module.
 T1-A is therefore progress toward TR-01, TR-02, TR-03, TR-04, and TR-07, not completion of any
 TR-01 through TR-07 gate. The Full Acceptance gate below is unchanged.
 
-The 2026-09-25 [T1-B revision-boundary evidence](../phase-1/evidence/temporal-qualification-revision-boundary.md)
+The 2026-09-25 [T1-B revision-boundary evidence](../phase-1/handover-evidence.md)
 adds separate capability-protected publication and exact-target correction actions, immutable
 operation results with exact and concurrent replay, stable stale/concurrent conflict, atomic
 state/audit/outbox/idempotency behavior, and writer-routed current, effective, exact, bounded
@@ -142,7 +142,7 @@ has no baseline import, reconciliation, backup/restore, or projection-convergenc
 through TR-07 therefore remained open at that checkpoint, and ADR 0018 remained Conditionally
 Accepted.
 
-The 2026-09-25 [T1-C fact-and-reconciliation evidence](../phase-1/evidence/temporal-qualification-fact-and-reconciliation.md)
+The 2026-09-25 [T1-C fact-and-reconciliation evidence](../phase-1/handover-evidence.md)
 adds the append-only record and reverse-and-replace actions, immutable multi-fact operation
 identity, exact replay, correction-race serialization, capability-separated operation history,
 and one append-only deliberate-reconciliation consumer chain. It proves that a source correction
@@ -203,8 +203,8 @@ Reopen this decision when:
 - [ADR 0005](../adr/0005-domain-action-and-state-transition-convention.md)
 - [ADR 0007](../adr/0007-transactional-outbox-and-event-envelope.md)
 - [ADR 0017](../adr/0017-postgresql-availability-recovery-and-consistency-aware-read-routing.md)
-- [Slice 1G role-rename evidence](../phase-1/evidence/authority-role-rename.md)
-- [ADR 0018 T1-C evidence](../phase-1/evidence/temporal-qualification-fact-and-reconciliation.md)
+- [Slice 1G role-rename evidence](../phase-1/handover-evidence.md)
+- [ADR 0018 T1-C evidence](../phase-1/handover-evidence.md)
 - [Slice 2.0-C temporal completion and recovery evidence](../phase-2/temporal-completion-and-recovery-evidence.md)
 - [Temporal retention and recovery runbook](../operations/temporal-retention-and-recovery.md)
 - [Production-core migration discipline](../development/migrations.md)

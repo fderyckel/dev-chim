@@ -43,8 +43,16 @@ without closing those reviews. The entry register and
 proof under C25-01. ADR 0031 later supersedes C25-02 only for bounded synthetic Slice 2.1-C1 and
 records its original provisional cross-country disposition. ADR 0032 subsequently closes C25-02
 under explicitly delegated Project Owner authority. ADR 0033 later authorizes only the append-only
-synthetic C2a lifecycle increment. External adoption validation and C25-03 through C25-06 continue
-to block the work that depends on their open evidence.
+synthetic C2a lifecycle increment. ADR 0034 now also closes C25-03 for synthetic L1 with the
+[completed five-context review](c25-03-educational-structure-review.md). C25-03-R retains actual
+representative validation before connected use or real adoption; C25-05/C25-06 and
+external legal adoption validation retain their separate boundaries.
+
+[ADR 0035](../adr/0035-c25-04-delegated-primary-operator-acceptance.md) and the
+[completed primary-operator review](c25-04-primary-operator-review.md) now close C25-04 for
+synthetic L1. Operator policy, the compliance/governance owner, 14-day retrospective review and
+immediate revocation controls with human reconciliation within 72 hours are settled; implementation
+and retained external adoption/release evidence remain separate.
 
 ## Decision question
 
@@ -131,10 +139,10 @@ records/migration, product-experience, or representative-institution reviewers.
 
 | Gate | Required artifact or review | Pass condition | Accountable reviewers | Current status |
 | --- | --- | --- | --- | --- |
-| G1 — scenarios and vocabulary | Completed linked scenario walkthrough and decision disposition for IS-01 through IS-21 | Every context is representable without weakening tenant, legal responsibility, identity, parentage, or separation invariants | Product owner, corporate governance/finance domain owner, institutional-structure domain owner, platform engineering | Product-owner disposition and technical packs accepted for bounded 2.1-B; ADR 0032 closes C25-02’s corporate/legal contract; later adoption validation and C25-03 educational review remain open |
-| G2 — representative institutions | Recorded review across the five approved learning environments | No unresolved rejection; local terminology maps without becoming fixed roles or arbitrary schema | Representative learning-institution domain owners and product owner | Five perspective records remain open and block educational persistence under C25-03, not minimal 2.1-B legal-entity proof |
+| G1 — scenarios and vocabulary | Linked walkthrough plus completed corporate/legal and five-context educational dispositions | Included meanings preserve tenant, identity, accountability, single canonical parentage and non-authority | Delegated Project Owner/domain review, with later actual representative and platform review | C25-02 and synthetic C25-03 domain decisions complete under ADRs 0032/0034; technical exits and later adoption reviews remain separate |
+| G2 — representative institutions | Five-context analytical review for synthetic L1; actual representative records for C25-03-R | No unresolved rejection within accepted scope; labels do not create behavior or authority | François delegates synthetic assessment to Codex; actual representatives and educational-domain owner before connected/real adoption | C25-03 closed for synthetic L1 only; C25-03-R open before connected workflows, real data/import, pilot or deployment |
 | G3 — security and privacy | Extended TM-17/AC-18 treatment matrix and negative-test specification | Cross-tenant links, cycles, enumeration, selector misuse, legal-responsibility ambiguity, and implicit widening all fail closed by design | Security/privacy and platform engineering | Technical design accepted for bounded entry; executable per-slice proof and named review remain mandatory under C25-01/C25-05/C25-06 |
-| G4 — migration and correction | Source-to-target mapping fixtures, ambiguity report, temporal classification, correction/retention disposition | The mapping preserves legal and educational source evidence separately, invents no history, creates no access, and has governed unresolved outcomes | Corporate/legal and educational domain ownership, platform engineering, records/migration review | Synthetic design accepted; no migration or real-data use is authorized, and C25-04/C25-06 remain binding |
+| G4 — migration and correction | Source-to-target mapping fixtures, ambiguity report, temporal classification, correction/retention disposition | The mapping preserves legal and educational source evidence separately, invents no history, creates no access, and has governed unresolved outcomes | Corporate/legal and educational domain ownership, platform engineering, records/migration review | Synthetic design accepted; no migration or real-data use is authorized, and C25-06 remains binding; ADR 0035 closes only the synthetic operator decision |
 | G5 — experience and accessibility | Read-only synthetic linked-structure navigation and change-preview prototype | Users can distinguish tenant, legal entity, corporate unit, educational institution/unit, site, affiliation, access scope, and the approved operator-governance states; traversal is bounded and accessible across five contexts | Product experience and representative institution reviewers | Current-contract prototype and focused checks pass; accountable/representative review remains C25-05 before connected/public structure workflow |
 | G6 — accountable decision | Signed decision record with evidence links, residual risks, and implementation conditions | Every issue is closed or narrowed through an explicit fail-closed condition owned by a later slice/release gate | Named ADR deciders | Conditionally accepted by François on 2026-09-27 with C25-01 through C25-06 |
 
@@ -175,6 +183,10 @@ The review requires five materially different operating perspectives rather than
 3. combined formal education spanning multiple levels;
 4. college or community-college operations; and
 5. university operations with schools or faculties and departments.
+
+The following actual-participant requirements remain under C25-03-R. ADR 0034 supersedes only
+their use as a prerequisite for included synthetic L1 work; it does not invent testimony or close
+the later external gate.
 
 Each reviewer receives the same scenario pack and prototype. Their record must identify the
 context they represent, scenarios reviewed, accepted terminology mappings, missing structures,
@@ -313,8 +325,8 @@ The record must include:
 | Decision date | 2026-09-27 |
 | Accountable approver | François — Project Owner and interim Security/Privacy Owner for synthetic work |
 | Corporate governance/finance domain owner | François explicitly delegated C25-02 to Codex on 2026-10-03; ADR 0032 and the completed review close that contract with `approve`. Later external adoption validation remains due by 2026-12-15 or the first affected boundary; no human reviewer is invented |
-| Institutional-structure domain owner | Open; C25-03 blocks Slices 2.1-D/2.1-E |
-| Representative reviewers and contexts | Five perspectives open; C25-03 blocks educational persistence |
+| Institutional-structure domain owner | Synthetic C25-03 accepted by Codex under François’s explicit delegation in ADR 0034; actual external domain validation remains C25-03-R |
+| Representative reviewers and contexts | Five synthetic analytical perspectives complete in the C25-03 review; actual representative records remain open before connected use/real adoption under C25-03-R |
 | Platform engineering reviewer | C25-01 executable proof recorded for minimal 2.1-B; C25-05 review remains required for the connected/public workflow |
 | Security/privacy reviewer | Interim synthetic ownership recorded; independent review remains mandatory before L3 under C25-06 |
 | Product-experience reviewer | Open; C25-05 blocks connected/public structure workflow |
@@ -386,7 +398,8 @@ conditions, generated migration review, executable tenant/authorization/concurre
 outbox evidence, and complete repository gate. ADR 0031 and the
 [Slice 2.1-C1 evidence](legal-structure-foundation-evidence.md) own the later provisional synthetic
 relationship/corporate-unit expansion. ADR 0032 closes the C25-02 logical contract. None of these
-decisions, including ADR 0033's append-only C2a increment, permits crossing C25-03 through C25-06 or
+decisions, including ADR 0033's append-only C2a increment and ADR 0034's synthetic educational
+acceptance and ADR 0035's synthetic operator decision, permits crossing C25-03-R, C25-05/C25-06, or
 the remaining external-validation boundary recorded by ADR 0031.
 
 ## Related records

@@ -1,11 +1,9 @@
 # Experience design system and governed personalization proposal
 
-- Status: DS-1 and DS-2 implemented; the DS-3 technical proof is implemented with focused local
-  verification, and its revised profiles were approved by the product owner on 2026-10-03 to
-  advance to representative testing, but DS-3 remains open for representative human evidence; the
-  repository-wide check is blocked by stale clean-checkout rehearsal evidence, the all-dependency
-  browser audit retains a development-tool advisory, ADR 0028 remains Proposed, and DS-4 through
-  DS-5 remain unauthorized
+- Status: DS-1 and DS-2 implemented; the DS-3 technical proof is implemented, its revised profiles
+  were approved to advance to representative testing on 2026-10-03, and the representative-review
+  packet was authorized on 2026-10-08, but no participant session is recorded; ADR 0028 remains
+  Proposed, and DS-4 through DS-5 remain unauthorized
 - Proposed boundary: a governed visual-language and personalization foundation for the browser,
   with portable semantics for a future native client
 - Owner: Product experience and client engineering
@@ -38,9 +36,9 @@ migration; DS-2, the shared component foundation and reviewed default refinement
 local, non-persistent governed-choice proof. UI-0 remains local and synthetic, and no production
 preference resource, identity path, public interface, school workflow, or durable preference UI
 is added. See the
-[DS-1 implementation evidence](../phase-1/evidence/design-system-token-foundation.md) and
-[DS-2 implementation evidence](../phase-1/evidence/design-system-component-foundation.md), plus
-the [DS-3 technical evidence](../phase-1/evidence/design-system-governed-choice-proof.md).
+[DS-1 implementation evidence](../phase-1/handover-evidence.md) and
+[DS-2 implementation evidence](../phase-1/handover-evidence.md), plus
+the [DS-3 technical evidence](../phase-1/handover-evidence.md).
 
 ## Why the current foundation should evolve
 
@@ -473,6 +471,14 @@ task completion, time, wrong turns, comprehension of status, preference discover
 reset, confidence, and visual comfort. Record disliked and rejected variants as evidence rather
 than retaining every choice.
 
+The Project Owner's 2026-10-08 green light authorizes the
+[representative review packet](../phase-2/design-system-representative-review-packet.md) and its
+[blank evidence register](../phase-2/design-system-representative-review-evidence.md). The packet
+uses only local synthetic UI-0, counterbalances profile order, separates lived accessibility use
+from facilitator demonstrations, and permits `retain`, `revise`, or `remove` per profile. Session
+readiness is not participant evidence; every representative row and profile disposition remains
+open until a real consented session is recorded.
+
 ## Bounded delivery sequence
 
 ### DS-0 — Decision and baseline
@@ -489,7 +495,7 @@ approved. No runtime change is needed.
 ### DS-1 — Token compiler and default parity
 
 **Implemented with focused local verification on 2026-10-03.** The evidence record is
-[design-system token foundation](../phase-1/evidence/design-system-token-foundation.md).
+[design-system token foundation](../phase-1/handover-evidence.md).
 
 - Introduce the typed token source and deterministic browser generator.
 - Generate the existing default profile first.
@@ -502,7 +508,7 @@ reproducible, and no preference UI or core resource exists.
 ### DS-2 — Component ownership and visual refinement
 
 **Implemented with focused local verification on 2026-10-03.** The evidence record is
-[design-system component foundation](../phase-1/evidence/design-system-component-foundation.md).
+[design-system component foundation](../phase-1/handover-evidence.md).
 
 - Split the component stylesheet into owned component families.
 - Introduce semantic React component APIs for the smallest repeated set.
@@ -516,9 +522,12 @@ route-local visual invention.
 ### DS-3 — Local governed-choice proof
 
 **Technical proof implemented with focused local verification and revised-profile owner approval
-to advance to representative testing on 2026-10-03; representative human evidence remains open.**
-The evidence record is
-[design-system governed-choice proof](../phase-1/evidence/design-system-governed-choice-proof.md).
+to advance to representative testing on 2026-10-03. The representative-review packet was
+authorized on 2026-10-08, but no participant session is recorded and the human-evidence gate
+remains open.** The technical evidence is consolidated in the
+[Phase 1 handover](../phase-1/handover-evidence.md); the live review material is the
+[representative review packet](../phase-2/design-system-representative-review-packet.md) and
+[evidence register](../phase-2/design-system-representative-review-evidence.md).
 
 - Add dark and one readability-focused profile.
 - Add an in-memory preference preview and reset to UI-0 only.
@@ -602,6 +611,8 @@ This proposal does not authorize:
 The initial proposal authorized only DS-0. The explicit 2026-10-03 instructions authorized DS-1,
 DS-2, and DS-3 as separate bounded slices. DS-1 and DS-2 are complete. DS-3's technical proof is
 implemented, and the product owner approved its revised profiles to enter representative testing
-on 2026-10-03, but its representative-human outcome gate remains open. DS-4 and DS-5 still need
-separate authorization. In particular, this approval does not authorize durable preferences, an
-Ash preference resource, or a production browser connection.
+on 2026-10-03. The 2026-10-08 green light authorizes only recruitment, facilitation, minimized
+evidence recording, and profile refinement or removal under the representative review packet. Its
+representative-human outcome gate remains open until real sessions and bounded dispositions are
+recorded. DS-4 and DS-5 still need separate authorization. In particular, this approval does not
+authorize durable preferences, an Ash preference resource, or a production browser connection.

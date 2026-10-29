@@ -1,62 +1,45 @@
-# Phase 0: architecture decisions and risk spikes
+# Phase 0 archive: what, how, and why
 
-- Status: Complete
-- Accountable approver: François — Project Owner
+- Status: Complete and archived
 - Decision date: 2026-09-16
-- Outcome: architecture decisions recorded; Ash conditionally accepted; production gates carried forward
+- Accountable approver: François — Project Owner
+- Outcome: the architecture baseline was decided, Ash was conditionally accepted, and the remaining production gates were transferred to later phases
 
-## Deliverables
+## Why Phase 0 existed
 
-- Decided ADR set with Accepted, Conditionally Accepted, or Deferred outcomes.
-- Ash Foundation Lab pressure-test, scorecard, and accountable adoption decision.
-- Accepted Phase 0 security/privacy baseline and abuse cases.
-- Approved numeric quality-attribute targets.
-- Workload-driven tenant-placement profiles and a five-school planning envelope backed by synthetic evidence.
-- A provider-neutral PostgreSQL availability, recovery, connection-budget, and consistency-aware read-routing contract backed by synthetic burst and failure evidence.
-- An accepted module-lifecycle contract that separates release, entitlement, activation, and authorization.
-- Reproducible local toolchain and one verification command.
-- Review record with decisions, conditions, owners, dates, and review triggers.
+Phase 0 reduced the largest architectural and operational risks before production work began. It was a decision-and-pressure-test phase, not a product implementation phase. It established which boundaries the platform must keep, which technology choices were acceptable, and which questions had to remain closed until real deployment evidence existed.
 
-## Completion snapshot
+## What was done
 
-This page is the Phase 0 completion entry point. Follow the evidence and decision links for the exact proof and the production gates carried into later work.
+- Decided the initial architecture records and accepted the security and privacy engineering baseline.
+- Pressure-tested Ash through a disposable, synthetic Foundation Lab rather than treating a framework choice as an assumption.
+- Defined tenant isolation, trusted placement, fail-closed authorization, named domain actions, transactional outbox, and independent module gates.
+- Measured local synthetic capacity, admission, migration, failover, recovery, and full-horizon restore behaviour.
+- Set numeric quality targets and a provider-neutral PostgreSQL operating contract.
+- Proved the repository could be bootstrapped and checked from a clean checkout.
 
-| Area | Final Phase 0 outcome | Authoritative detail |
-| --- | --- | --- |
-| Repository and local verification | The candidate passes local verification and isolated clean-checkout bootstrap/check rehearsal. Ash 3.33.11 closes the recorded field-policy and bulk-private-argument advisories across the Foundation Lab and bounded production core | [Clean-checkout rehearsal](evidence/clean-checkout-rehearsal.md), [development workflow](../development/testing.md), [security-patch reviews](evidence/ash-security-patch.md), and [Slice 1D evidence](../phase-1/evidence/database-admission.md) |
-| Ash Foundation Lab | Ash is conditionally accepted as the default production-core framework. All 15 scenarios and tenant-movement/non-HTTP follow-up have evidence; eight bounded production gates have named ownership, verification, fallback, and review date | [Ash pressure-test and scorecard](evidence/ash-pressure-test.md), [bounded-condition disposition](evidence/ash-bounded-condition-disposition.md), [security patch](evidence/ash-security-patch.md), [annual-envelope migration measurement](evidence/retained-data-migration-measurement.md), [non-patch upgrade](evidence/ash-nonpatch-upgrade-exercise.md), [warning baseline](evidence/ash-dependency-warning-baseline.md), [scenario 15 evidence](evidence/resource-authoring-and-governed-metadata.md), [maintenance evidence](evidence/ash-test-and-maintenance-ergonomics.md), [routing evidence](evidence/trusted-routing.md), and [module-lifecycle evidence](evidence/module-lifecycle.md) |
-| Architecture decisions | All 14 Phase 0-gated ADRs have accountable outcomes: six Accepted, five Conditionally Accepted, and three Deferred | [Decision register](decision-register.md) |
-| Security and privacy | The threat model and abuse cases are accepted as the Phase 0 engineering baseline. Independent security/privacy review remains mandatory before real restricted data | [Threat model](../security/threat-model.md) and [review record](review-record.md) |
-| Capacity, placement, and PostgreSQL recovery | Numeric targets, local pre-checkout admission, failover, and the exact 131.2-million-row local restore evidence are recorded. PostgreSQL remains provider-neutral; the earlier AWS example is withdrawn and deployment qualification moves to the infrastructure phase | [Target approval](evidence/quality-targets-approval.md), [combined measurement](evidence/capacity-and-recovery-measurement.md), [pre-checkout follow-up](evidence/precheckout-admission-measurement.md), [full-horizon restore](evidence/full-horizon-restore-measurement.md), [withdrawn AWS example](evidence/managed-postgresql-topology.md), [tenant-placement evidence](evidence/tenant-placement-capacity.md), and [PostgreSQL evidence](evidence/postgresql-availability-and-burst.md) |
-| Module lifecycle | The four independent server-side gates, concurrency, drain, retained-data, mandatory-work, and reactivation contract are accepted. Real integrations remain production gates | [Module-lifecycle evidence](evidence/module-lifecycle.md) |
-| Phase 0 exit | Complete: the named review, decisions, accountable Ash outcome, and exit verification are recorded | [Review record](review-record.md) |
+## How it was done
 
-Passing checks and accountable review now work together: the checks prove that the evidence and repository contracts remain internally consistent; the 2026-09-16 review supplies the human decisions the checks cannot make.
+The work used synthetic data, disposable databases, generated-artifact drift checks, negative authorization and tenant-isolation tests, migration apply/rollback/reapply exercises, dependency audits, static analysis, and repeated local measurements. Accountable review then separated what the evidence proved from what still required a selected deployment, real integration, independent review, or representative users.
 
-## Binding later gates
+The disposable lab remains under `spikes/ash-foundation-lab` only as historical engineering material. It is not a production framework API and is no longer part of routine Phase 2 verification.
 
-Phase 0 has no remaining exit blocker. The following are deliberately carried into the phase where they become real:
+## Decisions that still govern current work
 
-1. **Ash production gates.** Verify each of the eight [bounded conditions](evidence/ash-bounded-condition-disposition.md) before its dependent production capability ships. A failed gate uses the recorded fallback and fails closed.
-2. **Deployment qualification.** Select the actual non-AWS hosting/deployment environment later, then qualify PostgreSQL availability, recovery, connection budgets, multi-node admission, tenant movement, residency, and operations against the accepted targets. Provider selection is not a Phase 0 decision.
-3. **Independent review before real data or pilot.** François is the interim security/privacy and product/operations owner. Name an independent security/privacy reviewer before real restricted child data is used, and a school-side records owner before a pilot, no later than 2026-12-15.
-4. **Deferred capability decisions.** Reopen report rendering, AI, scheduling, native clients, and other deferred choices only when their bounded capability enters scope and has measurable requirements.
+- Tenant context is mandatory for tenant-owned work and missing or stale context fails closed.
+- Authorization is enforced at the domain boundary; interface hiding is not authorization.
+- PostgreSQL remains authoritative, while caches, projections, and search surfaces must be rebuildable.
+- Durable side effects use a transactional outbox.
+- Release availability, tenant entitlement, module activation, and actor authorization remain separate server-side gates.
+- Ash remains conditionally accepted. Its eight bounded conditions must be rechecked when the relevant production capability becomes real.
+- A selected deployment, real restricted data, production identity, and production operations each require their own later evidence.
 
-The machine-readable exit command is `mise exec -- uv run python tools/check_phase0.py --exit-review`. It is expected to remain green; any unresolved ADR status, placeholder owner/date, stale evidence binding, or broken repository contract makes it fail.
+The live architectural rules are maintained in the [ADR index](../adr/README.md), [architecture index](../architecture/README.md), and [threat model](../security/threat-model.md). Those records were not retired because they govern current work rather than merely describe Phase 0 activity.
 
-Repository-governance follow-up: the GitHub remote and `main` default branch are configured, but GitHub reported no protection for `main` on 2026-09-15. The exit checker does not enforce that external setting, so it remains a separate governance task.
+## What Phase 0 did not authorize
 
-Phase 1 work still proceeds only in explicitly authorized bounded slices. Phase 0 completion accepts the foundation decisions; it does not authorize a school business module, web shell, scheduler, AI gateway, analytics plane, or production infrastructure by itself. See the [Phase 1 scope](../phase-1/README.md).
+Phase 0 did not authorize a school business module, public or production browser surface, production identity, scheduler, AI gateway, analytics plane, production infrastructure, or real restricted data.
 
-## Navigation
+## Retained proof
 
-- [Decision register](decision-register.md)
-- [Risk register](risk-register.md)
-- [Review record](review-record.md)
-- [Evidence index](evidence/README.md)
-- [Tenant placement and workload capacity](../architecture/tenant-placement-and-capacity.md)
-- [PostgreSQL availability, recovery, and read routing](../architecture/postgresql-availability-recovery-and-read-routing.md)
-- [Module activation and lifecycle](../architecture/module-activation-and-lifecycle.md)
-- [Implementation plan](../plans/phase-0-implementation-plan.md)
-
-No production business module, user interface, scheduler, runtime AI service, analytics plane, or file/report service was added in Phase 0.
+The consolidated [Phase 0 handover evidence](handover-evidence.md) records the exit decision, the verification results needed by later phases, and the gates that were intentionally carried forward. The deleted detailed reports remain recoverable from Git history.

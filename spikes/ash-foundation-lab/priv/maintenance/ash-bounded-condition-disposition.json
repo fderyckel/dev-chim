@@ -4,7 +4,7 @@
   "prepared_on": "2026-09-16",
   "scope": "ADR 0002 Ash adoption bounded conditions",
   "source_manifest": "spikes/ash-foundation-lab/priv/maintenance/owned-boundaries.json",
-  "source_manifest_sha256": "93d3f351f09d98249817db201083f6ae1667ad53cd0c109b680e8283ad96440e",
+  "source_manifest_sha256": "9495eba7ad8a72b3d8d0c2becab35298ac3f9552ba313f70eeb525c96ba31e9e",
   "recommendation": {
     "outcome": "conditionally_accepted",
     "binding": true,
@@ -35,7 +35,7 @@
       "fallback_trigger": "Replace the action with an explicit Phoenix/Ecto domain service if the transaction cannot preserve authorization, optimistic concurrency, rollback, and stable errors, or if this escape hatch becomes the default mutation path.",
       "recheck_trigger": "Any Ash or AshPostgres upgrade, or a change to the transition validation.",
       "evidence": [
-        "docs/phase-0/evidence/ash-pressure-test.md#named-action-and-tenant-role-slice"
+        "docs/phase-0/handover-evidence.md"
       ],
       "required_reviewers": [
         "Architecture review group",
@@ -60,9 +60,9 @@
       "fallback_trigger": "Stop Ash promotion for the affected capability and use an explicit Phoenix/Ecto domain service if raw SQL becomes caller-visible, bypasses the selected repository or authorization boundary, or spreads beyond the owned adapter inventory.",
       "recheck_trigger": "A new raw SQL source file, a placement-routing change, or replacement with a reviewed Ash-native expression.",
       "evidence": [
-        "docs/phase-0/evidence/ash-test-and-maintenance-ergonomics.md",
-        "docs/phase-0/evidence/ash-pressure-test.md",
-        "docs/phase-0/evidence/trusted-routing.md"
+        "docs/phase-0/handover-evidence.md",
+        "docs/phase-0/handover-evidence.md",
+        "docs/phase-0/handover-evidence.md"
       ],
       "required_reviewers": [
         "Architecture review group",
@@ -88,8 +88,8 @@
       "fallback_trigger": "Own the public list route in a thin Phoenix adapter if the edge guard cannot be applied consistently or generator changes make the documented and enforced limits diverge.",
       "recheck_trigger": "Any AshJsonApi upgrade or generated pagination behaviour change.",
       "evidence": [
-        "docs/phase-0/evidence/ash-pressure-test.md#generated-jsonapi-policy-slice",
-        "docs/phase-0/evidence/ash-nonpatch-upgrade-exercise.md"
+        "docs/phase-0/handover-evidence.md",
+        "docs/phase-0/handover-evidence.md"
       ],
       "required_reviewers": [
         "Architecture review group",
@@ -115,7 +115,7 @@
       "fallback_trigger": "Own transient-error translation in a thin Phoenix transport layer if the generated handler cannot apply the complete contract consistently or begins leaking internal details.",
       "recheck_trigger": "Any generated error-handler, public taxonomy, or retry-policy change.",
       "evidence": [
-        "docs/phase-0/evidence/ash-pressure-test.md#stable-public-error-taxonomy-slice"
+        "docs/phase-0/handover-evidence.md"
       ],
       "required_reviewers": [
         "Architecture review group",
@@ -142,8 +142,8 @@
       "fallback_trigger": "Move contract ownership to a thin explicit interface layer if the modifier grows beyond the bounded page/error amendments, becomes order-sensitive, or cannot remain reproducible across supported upgrades.",
       "recheck_trigger": "Any AshJsonApi, OpenApiSpex, route, page-limit, or public-error change.",
       "evidence": [
-        "docs/phase-0/evidence/ash-pressure-test.md#idempotency-and-generated-typescript-client-slice",
-        "docs/phase-0/evidence/ash-nonpatch-upgrade-exercise.md"
+        "docs/phase-0/handover-evidence.md",
+        "docs/phase-0/handover-evidence.md"
       ],
       "required_reviewers": [
         "Architecture review group",
@@ -169,8 +169,8 @@
       "fallback_trigger": "Defer the destructive contract and use an explicit Ecto or operator migration runner if the selected topology misses an approved target, restore cannot be demonstrated, or lock retries cannot remain bounded; reject Ash only if schema ownership itself becomes unsafe or pervasive.",
       "recheck_trigger": "Any retained-data schema evolution, migration generator change, or production deployment strategy decision.",
       "evidence": [
-        "docs/phase-0/evidence/retained-data-migration-rehearsal.md",
-        "docs/phase-0/evidence/retained-data-migration-measurement.md"
+        "docs/phase-0/handover-evidence.md",
+        "docs/phase-0/handover-evidence.md"
       ],
       "required_reviewers": [
         "Architecture review group",
@@ -196,8 +196,8 @@
       "fallback_trigger": "Stop the metadata path and retain explicit code-owned presentation contracts if definitions duplicate domain policy, allow authority-bearing references, cannot migrate stable references safely, or require a second runtime schema engine.",
       "recheck_trigger": "Any Ash information-API upgrade, descriptor schema change, new metadata kind, new consumer, or stable-reference removal.",
       "evidence": [
-        "docs/phase-0/evidence/resource-authoring-and-governed-metadata.md",
-        "docs/phase-1/evidence/resource-descriptor.md"
+        "docs/phase-0/handover-evidence.md",
+        "docs/phase-1/handover-evidence.md"
       ],
       "required_reviewers": [
         "Architecture review group",
@@ -223,7 +223,7 @@
       "fallback_trigger": "Keep placement static and block tenant movement or the affected adapter if the durable registry, reconciliation, stale-context handling, or recovery proof cannot fail closed; never accept request-selected placement as a fallback.",
       "recheck_trigger": "Any placement model, movement choreography, routing envelope, non-HTTP adapter, tenant-owned table, or Ash authorization-boundary change.",
       "evidence": [
-        "docs/phase-0/evidence/trusted-routing.md#tenant-movement-and-non-http-interface-slice"
+        "docs/phase-0/handover-evidence.md"
       ],
       "required_reviewers": [
         "Architecture review group",

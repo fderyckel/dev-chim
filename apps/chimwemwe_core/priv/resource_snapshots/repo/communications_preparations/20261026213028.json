@@ -1,0 +1,307 @@
+{
+  "attributes": [
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"gen_random_uuid()\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": true,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "tenant_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "index_where": null,
+        "match_tenant?": true,
+        "match_type": "full",
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "communications_preparations_notice_id_fkey",
+        "on_delete": "restrict",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "communications_notices"
+      },
+      "scale": null,
+      "size": null,
+      "source": "notice_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "proposer_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "proposer_membership_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "base_version",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "operation",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "title",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "body",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "reason",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "receipt_required",
+      "type": "boolean"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "expected_revision_number",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "source_proof",
+      "type": "binary"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "eligibility",
+      "type": "map"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "expires_at",
+      "type": "utc_datetime_usec"
+    },
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "inserted_at",
+      "type": "utc_datetime_usec"
+    }
+  ],
+  "base_filter": null,
+  "check_constraints": [
+    {
+      "attribute": [
+        "eligibility"
+      ],
+      "base_filter": null,
+      "check": "COALESCE((jsonb_typeof(eligibility) = 'object' AND jsonb_typeof(eligibility->'audience') = 'number' AND jsonb_typeof(eligibility->'eligible') = 'number' AND jsonb_typeof(eligibility->'no_eligible_account') = 'number' AND jsonb_typeof(eligibility->'no_current_access') = 'number' AND (eligibility->>'audience')::integer BETWEEN 1 AND 25 AND (eligibility->>'eligible')::integer BETWEEN 0 AND 25 AND (eligibility->>'no_eligible_account')::integer BETWEEN 0 AND 25 AND (eligibility->>'no_current_access')::integer BETWEEN 0 AND 25 AND (eligibility->>'audience')::integer = (eligibility->>'eligible')::integer + (eligibility->>'no_eligible_account')::integer + (eligibility->>'no_current_access')::integer),false)",
+      "name": "communications_preparation_eligibility"
+    },
+    {
+      "attribute": [
+        "operation"
+      ],
+      "base_filter": null,
+      "check": "operation IN ('publish','correct','withdraw')",
+      "name": "communications_preparation_operation"
+    },
+    {
+      "attribute": [
+        "base_version"
+      ],
+      "base_filter": null,
+      "check": "base_version > 0 AND expected_revision_number BETWEEN 0 AND 2",
+      "name": "communications_preparation_versions"
+    },
+    {
+      "attribute": [
+        "title"
+      ],
+      "base_filter": null,
+      "check": "char_length(title) BETWEEN 1 AND 120 AND char_length(body) BETWEEN 1 AND 2000 AND char_length(reason) <= 240",
+      "name": "communications_preparation_text"
+    }
+  ],
+  "create_table_options": null,
+  "custom_indexes": [
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "id",
+        "tenant_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": "communications_preparations_id_tenant_idx",
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    }
+  ],
+  "custom_statements": [
+    {
+      "after_tables": [
+        "communications_preparations"
+      ],
+      "code?": false,
+      "down": "DO $migration$ BEGIN DROP TRIGGER communications_preparations_immutable ON communications_preparations; DROP FUNCTION communications_preparations_immutable(); END $migration$;",
+      "global?": true,
+      "name": "preparation_immutable",
+      "up": "DO $migration$ BEGIN\nCREATE FUNCTION communications_preparations_immutable() RETURNS trigger LANGUAGE plpgsql AS $$\nBEGIN RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'communication evidence is retained and immutable'; END $$;\nCREATE TRIGGER communications_preparations_immutable BEFORE UPDATE OR DELETE ON communications_preparations\n  FOR EACH ROW EXECUTE FUNCTION communications_preparations_immutable();\nEND $migration$;\n"
+    }
+  ],
+  "has_create_action": false,
+  "hash": "A617351348974B519F53EA09952B47B57D92F09D654FC080CA55FE473830926A",
+  "identities": [],
+  "multitenancy": {
+    "attribute": "tenant_id",
+    "global": false,
+    "strategy": "attribute"
+  },
+  "repo": "Elixir.Chimwemwe.Repo",
+  "schema": null,
+  "table": "communications_preparations",
+  "temporal": null
+}

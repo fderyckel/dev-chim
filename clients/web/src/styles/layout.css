@@ -87,6 +87,20 @@
     gap: var(--space-6);
   }
 
+  .l-calendar-workspace {
+    display: grid;
+    grid-template-columns: minmax(24rem, 1.1fr) minmax(20rem, 0.9fr);
+    align-items: start;
+    gap: var(--space-6);
+  }
+
+  .l-calendar-fields,
+  .l-calendar-date-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
   @media (width <= 62rem) {
     .l-body-shell {
       grid-template-columns: 1fr;
@@ -99,7 +113,8 @@
     .l-page-grid,
     .l-preview-grid,
     .l-structure-grid,
-    .l-assignment-fields {
+    .l-assignment-fields,
+    .l-calendar-workspace {
       grid-template-columns: 1fr;
     }
   }
@@ -127,6 +142,11 @@
     }
 
     .l-content-example-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .l-calendar-fields,
+    .l-calendar-date-pair {
       grid-template-columns: 1fr;
     }
   }

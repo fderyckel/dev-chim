@@ -30,14 +30,14 @@ The bootstrap command creates `.venv` through uv. Developers do not need to acti
 
 ## PostgreSQL
 
-Phase 0 uses the Homebrew PostgreSQL 18 service and a synthetic test database. Check it with:
+Local core and archived-lab tests use the Homebrew PostgreSQL 18 service and synthetic test databases. Check it with:
 
 ```sh
 brew services list
 pg_isready
 ```
 
-`make bootstrap` starts the service when needed and creates/migrates only the spike's test database. No production or personal data belongs in it.
+`make bootstrap` starts the service when needed and prepares only synthetic local databases. No production or personal data belongs in them.
 
 ## Daily loop
 
@@ -47,7 +47,6 @@ make fix
 make test-fast
 git add path/to/changed-file ...
 make check-staged
-make check
 ```
 
 See [testing.md](testing.md) for focused commands and [git-workflow.md](git-workflow.md) before pushing.
@@ -89,11 +88,21 @@ the management-reporting parent is not a statutory or accounting-framework conso
 conclusion. The demo adds no browser route, educational structure, primary-operator workflow,
 production identity, or real record. The command is non-destructive.
 
+## Selected institution demo
+
+Run `make demo` and choose an institution, or `make demo DEMO=bangkok-international`. Open
+`http://127.0.0.1:3000` for its students, family contacts, educators and academic calendar.
+The other pack IDs are `us-community-college`, `hong-kong-kindergarten` and `england-independent`.
+Use `DEMO_PORT=3035` for another local port. Stop with Control-C and restart to change institution.
+Each run retains a fresh instance directory, consumes only its selected fictional pack and
+offers read-only views. Details and remaining operational boundaries are in the
+[demo-data guide](../../demo-data/README.md).
+
 ## Troubleshooting
 
 - Run `mise doctor` when a pinned runtime is not selected.
 - Run `brew bundle check` to identify missing macOS dependencies.
 - Run `uv sync --group dev --locked` if `.venv` is missing.
 - Run `pg_isready`; if it fails, use `brew services start postgresql@18`.
-- Run the failing command from `bin/phase0-check` directly for full output.
+- Run the failing boundary command reported by `make check-changed` directly for full output.
 - Do not delete lock files or databases as a first troubleshooting step.

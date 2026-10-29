@@ -1,0 +1,446 @@
+{
+  "attributes": [
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"gen_random_uuid()\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": true,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "tenant_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "index_where": null,
+        "match_tenant?": true,
+        "match_type": "full",
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "identity_staff_directory_entries_association_id_fkey",
+        "on_delete": "restrict",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "people_staff_account_associations"
+      },
+      "scale": null,
+      "size": null,
+      "source": "association_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "index_where": null,
+        "match_tenant?": true,
+        "match_type": "full",
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "identity_staff_directory_entries_membership_id_fkey",
+        "on_delete": "restrict",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "platform_tenant_memberships"
+      },
+      "scale": null,
+      "size": null,
+      "source": "membership_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "actor_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "index_where": null,
+        "match_tenant?": false,
+        "match_type": "simple",
+        "match_with": null,
+        "multitenancy": {
+          "attribute": null,
+          "global": null,
+          "strategy": null
+        },
+        "name": "identity_staff_directory_entries_account_id_fkey",
+        "on_delete": "restrict",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "identity_accounts"
+      },
+      "scale": null,
+      "size": null,
+      "source": "account_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "given_name",
+      "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "family_name",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "display_name",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "locale",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "true",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "enabled",
+      "type": "boolean"
+    },
+    {
+      "allow_nil?": false,
+      "default": "1",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "lock_version",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": false,
+      "default": "1",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "access_version",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "inserted_at",
+      "type": "utc_datetime_usec"
+    },
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "updated_at",
+      "type": "utc_datetime_usec"
+    }
+  ],
+  "base_filter": null,
+  "check_constraints": [
+    {
+      "attribute": [
+        "locale"
+      ],
+      "base_filter": null,
+      "check": "locale IN ('en', 'fr', 'en-MW')",
+      "name": "identity_staff_directory_locale"
+    },
+    {
+      "attribute": [
+        "display_name"
+      ],
+      "base_filter": null,
+      "check": "char_length(btrim(display_name)) BETWEEN 1 AND 200",
+      "name": "identity_staff_directory_display_name"
+    },
+    {
+      "attribute": [
+        "given_name"
+      ],
+      "base_filter": null,
+      "check": "given_name IS NULL OR char_length(btrim(given_name)) BETWEEN 1 AND 200",
+      "name": "identity_staff_directory_given_name"
+    },
+    {
+      "attribute": [
+        "family_name"
+      ],
+      "base_filter": null,
+      "check": "family_name IS NULL OR char_length(btrim(family_name)) BETWEEN 1 AND 200",
+      "name": "identity_staff_directory_family_name"
+    },
+    {
+      "attribute": [
+        "lock_version"
+      ],
+      "base_filter": null,
+      "check": "lock_version >= 1",
+      "name": "identity_staff_directory_version"
+    },
+    {
+      "attribute": [
+        "access_version"
+      ],
+      "base_filter": null,
+      "check": "access_version >= 1",
+      "name": "identity_staff_directory_access_version"
+    }
+  ],
+  "create_table_options": null,
+  "custom_indexes": [
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "id",
+        "tenant_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": null,
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "association_id",
+        "tenant_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "association_id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": null,
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "membership_id",
+        "tenant_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "membership_id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": null,
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    },
+    {
+      "all_tenants?": true,
+      "concurrently": false,
+      "error_fields": [
+        "account_id",
+        "tenant_id"
+      ],
+      "fields": [
+        {
+          "type": "atom",
+          "value": "account_id"
+        },
+        {
+          "type": "atom",
+          "value": "tenant_id"
+        }
+      ],
+      "include": null,
+      "include_base_filter?": true,
+      "message": null,
+      "name": null,
+      "nulls_distinct": true,
+      "prefix": null,
+      "table": null,
+      "unique": true,
+      "using": null,
+      "where": null
+    }
+  ],
+  "custom_statements": [
+    {
+      "after_tables": [
+        "identity_staff_directory_entries"
+      ],
+      "code?": false,
+      "down": "DROP FUNCTION identity_staff_directory_guard();",
+      "global?": true,
+      "name": "staff_directory_guard_function",
+      "up": "CREATE FUNCTION identity_staff_directory_guard() RETURNS trigger LANGUAGE plpgsql AS $$\nBEGIN\n  IF TG_OP = 'DELETE' THEN\n    RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'staff directory records require retained history';\n  ELSIF TG_OP = 'UPDATE' THEN\n    IF (to_jsonb(NEW) - ARRAY['given_name','family_name','display_name','locale','enabled','access_version','lock_version','updated_at'])\n      IS DISTINCT FROM (to_jsonb(OLD) - ARRAY['given_name','family_name','display_name','locale','enabled','access_version','lock_version','updated_at'])\n      OR NEW.lock_version <> OLD.lock_version + 1\n      OR NEW.access_version NOT IN (OLD.access_version, OLD.access_version + 1)\n      OR (NEW.enabled IS DISTINCT FROM OLD.enabled AND NEW.access_version <> OLD.access_version + 1) THEN\n      RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'immutable staff directory identity';\n    END IF;\n  ELSE\n    IF NEW.lock_version <> 1 OR NEW.access_version <> 1 OR NOT EXISTS (\n      SELECT 1 FROM people_staff_account_associations s\n      JOIN people_participations p ON p.id=s.participation_id AND p.tenant_id=s.tenant_id AND p.person_id=s.person_id\n      JOIN institutional_units u ON u.id=p.institutional_unit_id AND u.tenant_id=p.tenant_id\n      JOIN platform_tenant_memberships m ON m.id=s.membership_id AND m.tenant_id=s.tenant_id\n      JOIN identity_accounts a ON a.id=NEW.account_id AND a.actor_id=m.actor_id\n      WHERE s.id=NEW.association_id AND s.tenant_id=NEW.tenant_id AND s.membership_id=NEW.membership_id\n        AND m.actor_id=NEW.actor_id AND s.verification->>'actor_id'=m.actor_id::text\n        AND s.revoked_at IS NULL AND p.kind='staff' AND u.status='published'\n        AND p.effective_from <= (statement_timestamp() AT TIME ZONE u.time_zone)::date\n        AND (p.effective_until IS NULL OR p.effective_until > (statement_timestamp() AT TIME ZONE u.time_zone)::date)\n    ) THEN\n      RAISE EXCEPTION USING ERRCODE = '23514', MESSAGE = 'current exact staff credential chain required';\n    END IF;\n  END IF;\n  RETURN NEW;\nEND $$;\n"
+    },
+    {
+      "after_tables": [
+        "identity_staff_directory_entries"
+      ],
+      "code?": false,
+      "down": "DO $$ BEGIN\n  IF EXISTS (SELECT 1 FROM identity_staff_directory_entries) THEN\n    RAISE EXCEPTION 'retained staff directory entries require forward repair';\n  END IF;\n  DROP TRIGGER identity_staff_directory_guard ON identity_staff_directory_entries;\nEND $$;\n",
+      "global?": true,
+      "name": "staff_directory_guard_trigger",
+      "up": "CREATE TRIGGER identity_staff_directory_guard BEFORE INSERT OR UPDATE OR DELETE ON identity_staff_directory_entries FOR EACH ROW EXECUTE FUNCTION identity_staff_directory_guard();"
+    }
+  ],
+  "has_create_action": false,
+  "hash": "613CD694E62BD4A7A98048995E61CE8817B69E692A6E63D091B98B6F0776A25C",
+  "identities": [],
+  "multitenancy": {
+    "attribute": "tenant_id",
+    "global": false,
+    "strategy": "attribute"
+  },
+  "repo": "Elixir.Chimwemwe.Repo",
+  "schema": null,
+  "table": "identity_staff_directory_entries"
+}

@@ -1,14 +1,25 @@
 # Institutional-structure scenario and vocabulary review
 
-- Status: Product Owner review and technical linked scenario addendum recorded; named
-  domain/platform G1 reviews remain open
+- Status: Synthetic educational-domain review completed under ADR 0034; actual representative
+  validation remains C25-03-R and platform/implementation review remains separate
 - Date: 2026-09-27
 - Gate: ADR 0025 G1
 - Scope: Logical contract only; no persistence, production route, module, or real data
-- Accountable reviewers still required: Named corporate governance/finance and institutional-
-  structure domain owners, plus platform engineering
+- Current domain decisions: C25-02 under ADR 0032; synthetic C25-03 under ADR 0034; actual
+  external domain/representative validation and platform engineering remain at their retained gates
 
 ## Outcome
+
+The [completed five-context review](c25-03-educational-structure-review.md) and
+[ADR 0034](../adr/0034-c25-03-delegated-educational-structure-acceptance.md) now accept the
+included educational contract for synthetic L1 under explicit delegated Project Owner authority.
+The tables below retain their original preparation findings; references to outstanding domain
+approval are superseded for that bounded contract. Actual representative validation remains
+C25-03-R before connected workflows, real data/import, pilot, or deployment. Operator persistence
+and publication now have their synthetic decision under
+[ADR 0035](../adr/0035-c25-04-delegated-primary-operator-acceptance.md); implementation proof
+remains separate. Affiliation examples, including `shared_service` and
+`joint_programme`, remain requirements to model later, not accepted persistent first-slice types.
 
 The original eight educational contexts, the approved standalone primary and secondary contexts,
 and [LS-01 through LS-10](linked-structure-scenario-addendum.md) can be represented by amended ADR
@@ -155,10 +166,11 @@ action.
 
 ## G1 disposition
 
-The educational walkthrough, Product Owner review, and technical linked scenario addendum are
-prepared. Corporate governance/finance, institutional-domain, and platform-engineering reviews
-remain open, so G1 is **not passed**. Representative-context validation remains a separate G2 gate
-and may require this record or the addendum to change.
+The educational walkthrough and linked addendum now have completed synthetic domain dispositions:
+C25-02 under ADR 0032 and C25-03 under ADR 0034. Wider G1 is not declared fully passed: platform
+qualification and actual representative/domain findings remain distinct. G2's synthetic review is
+complete; external representative validation remains C25-03-R and may require supersession before
+connected or real adoption.
 
 ## Related records
 

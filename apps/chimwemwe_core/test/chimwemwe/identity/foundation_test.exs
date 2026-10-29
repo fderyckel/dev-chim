@@ -13,7 +13,40 @@ defmodule Chimwemwe.Identity.TestCallbackVerifier do
     end
   end
 
+  @impl true
+  def authorization_url(state, connection, oidc) do
+    Process.put({__MODULE__, :authorization}, %{connection: connection, oidc: oidc, state: state})
+
+    query =
+      URI.encode_query(%{
+        "code_challenge" =>
+          oidc.code_verifier
+          |> then(&:crypto.hash(:sha256, &1))
+          |> Base.url_encode64(padding: false),
+        "code_challenge_method" => "S256",
+        "nonce" => oidc.nonce,
+        "state" => state
+      })
+
+    {:ok, "https://identity.example.test/authorize?#{query}"}
+  end
+
+  @impl true
+  def verify_code(code, expected_connection_id, context) do
+    key = {__MODULE__, {:oidc, code}}
+
+    case Process.delete(key) do
+      %{connection_id: ^expected_connection_id} = proof ->
+        Process.put({__MODULE__, :callback}, context)
+        {:ok, proof}
+
+      _missing_mismatch_or_replayed ->
+        {:error, %Error{code: :forbidden}}
+    end
+  end
+
   def allow_once(code, proof), do: Process.put({__MODULE__, code}, proof)
+  def allow_oidc_once(code, proof), do: Process.put({__MODULE__, {:oidc, code}}, proof)
 end
 
 defmodule Chimwemwe.Identity.FoundationTest do
@@ -745,6 +778,189 @@ defmodule Chimwemwe.Identity.FoundationTest do
                :session_read,
                "en",
                UUID.generate()
+             )
+  end
+
+  test "starts one selected OIDC educator flow and completes it into an opaque session",
+       fixture do
+    %{link: link, proof: verified_proof} = linked_identity(fixture, "selected-oidc-subject")
+
+    Application.put_env(:chimwemwe_core, :public_api,
+      runtime: fixture.runtime,
+      verifier: TestCallbackVerifier,
+      origin: "https://app.example.test",
+      sign_in: selected_sign_in(fixture, link.id, verified_proof.connection_id)
+    )
+
+    sign_in_conn =
+      :get
+      |> conn("/auth/sign-in")
+      |> fetch_query_params()
+      |> put_req_header("accept", "application/json")
+      |> PublicRouter.call(PublicRouter.init([]))
+
+    assert sign_in_conn.status == 303
+    assert [location] = get_resp_header(sign_in_conn, "location")
+    assert get_resp_header(sign_in_conn, "cache-control") == ["no-store"]
+    assert get_resp_header(sign_in_conn, "referrer-policy") == ["no-referrer"]
+
+    uri = URI.parse(location)
+    query = URI.decode_query(uri.query)
+    assert uri.scheme == "https"
+    assert uri.host == "identity.example.test"
+    assert query["code_challenge_method"] == "S256"
+    assert byte_size(query["code_challenge"]) == 43
+    assert byte_size(query["nonce"]) >= 32
+
+    %{connection: connection, oidc: oidc, state: state} =
+      Process.get({TestCallbackVerifier, :authorization})
+
+    assert connection.id == verified_proof.connection_id
+    assert connection.configuration_version == 1
+    assert query["state"] == state
+    assert query["nonce"] == oidc.nonce
+    refute state =~ oidc.nonce
+    refute state =~ oidc.code_verifier
+
+    code = "selected-oidc-code-#{UUID.generate()}"
+    TestCallbackVerifier.allow_oidc_once(code, verified_proof)
+
+    callback_conn =
+      :get
+      |> conn(
+        "/auth/callback?code=#{URI.encode_www_form(code)}&state=#{URI.encode_www_form(state)}"
+      )
+      |> fetch_query_params()
+      |> put_req_header("accept", "application/json")
+      |> PublicRouter.call(PublicRouter.init([]))
+
+    assert callback_conn.status == 303
+    assert get_resp_header(callback_conn, "location") == ["/classroom"]
+    assert [set_cookie] = get_resp_header(callback_conn, "set-cookie")
+    assert set_cookie =~ "#{PublicSessionAdapter.cookie_name()}="
+
+    %{connection: callback_connection, oidc: callback_oidc} =
+      Process.get({TestCallbackVerifier, :callback})
+
+    assert callback_connection == connection
+    assert callback_oidc.state == state
+    assert callback_oidc.code_verifier == oidc.code_verifier
+    assert callback_oidc.nonce == oidc.nonce
+  end
+
+  test "keeps selected OIDC sign-in disabled and rejects caller or stale authority", fixture do
+    disabled =
+      :get
+      |> conn("/auth/sign-in")
+      |> fetch_query_params()
+      |> put_req_header("accept", "application/json")
+      |> PublicRouter.call(PublicRouter.init([]))
+
+    assert disabled.status == 503
+
+    caller_selected =
+      :get
+      |> conn("/auth/sign-in?tenant_id=#{@tenant_b}")
+      |> fetch_query_params()
+      |> put_req_header("accept", "application/json")
+      |> PublicRouter.call(PublicRouter.init([]))
+
+    assert caller_selected.status == 400
+
+    %{link: link, proof: verified_proof} = linked_identity(fixture, "stale-oidc-subject")
+
+    Application.put_env(:chimwemwe_core, :public_api,
+      runtime: fixture.runtime,
+      verifier: TestCallbackVerifier,
+      origin: "https://app.example.test",
+      sign_in: selected_sign_in(fixture, link.id, verified_proof.connection_id)
+    )
+
+    started =
+      :get
+      |> conn("/auth/sign-in")
+      |> fetch_query_params()
+      |> put_req_header("accept", "application/json")
+      |> PublicRouter.call(PublicRouter.init([]))
+
+    assert started.status == 303
+    %{state: state} = Process.get({TestCallbackVerifier, :authorization})
+    remove_membership(fixture.runtime, fixture.target_membership_a)
+    Process.delete({TestCallbackVerifier, :callback})
+    code = "stale-oidc-code-#{UUID.generate()}"
+    TestCallbackVerifier.allow_oidc_once(code, verified_proof)
+
+    denied =
+      :get
+      |> conn(
+        "/auth/callback?code=#{URI.encode_www_form(code)}&state=#{URI.encode_www_form(state)}"
+      )
+      |> fetch_query_params()
+      |> put_req_header("accept", "application/json")
+      |> PublicRouter.call(PublicRouter.init([]))
+
+    assert denied.status == 401
+    assert is_nil(Process.get({TestCallbackVerifier, :callback}))
+  end
+
+  test "rechecks the exact OIDC membership, link, and connection before redirect", fixture do
+    %{link: link, proof: verified_proof} = linked_identity(fixture, "preflight-subject")
+
+    assert {:ok, %{id: connection_id, configuration_version: 1}} =
+             SessionFoundation.authorize_sign_in(
+               fixture.runtime,
+               context_target_a(),
+               %{
+                 connection_id: verified_proof.connection_id,
+                 external_identity_link_id: link.id,
+                 membership_id: fixture.target_membership_a
+               }
+             )
+
+    assert connection_id == verified_proof.connection_id
+
+    assert {:error, %Error{code: :forbidden}} =
+             SessionFoundation.authorize_sign_in(
+               fixture.runtime,
+               context_target_a(),
+               %{
+                 connection_id: verified_proof.connection_id,
+                 external_identity_link_id: UUID.generate(),
+                 membership_id: fixture.target_membership_a
+               }
+             )
+
+    deactivate_link(fixture.runtime, link.id)
+
+    assert {:error, %Error{code: :forbidden}} =
+             SessionFoundation.authorize_sign_in(
+               fixture.runtime,
+               context_target_a(),
+               %{
+                 connection_id: verified_proof.connection_id,
+                 external_identity_link_id: link.id,
+                 membership_id: fixture.target_membership_a
+               }
+             )
+
+    %{link: other_link, proof: other_proof} = linked_identity(fixture, "suspended-subject")
+
+    assert {:ok, %ConnectionResult{status: :suspended}} =
+             Foundation.suspend_connection(
+               fixture.runtime,
+               context_admin_a(),
+               transition_input(other_proof.connection_id, 3)
+             )
+
+    assert {:error, %Error{code: :forbidden}} =
+             SessionFoundation.authorize_sign_in(
+               fixture.runtime,
+               context_target_a(),
+               %{
+                 connection_id: other_proof.connection_id,
+                 external_identity_link_id: other_link.id,
+                 membership_id: fixture.target_membership_a
+               }
              )
   end
 
@@ -1545,6 +1761,18 @@ defmodule Chimwemwe.Identity.FoundationTest do
     }
   end
 
+  defp selected_sign_in(fixture, link_id, connection_id) do
+    [
+      actor_id: @target_a,
+      tenant_id: @tenant_a,
+      membership_id: fixture.target_membership_a,
+      external_identity_link_id: link_id,
+      connection_id: connection_id,
+      locale: "en",
+      redirect_to: "/classroom"
+    ]
+  end
+
   defp connection_input do
     %{
       name: "Synthetic institution #{UUID.generate()}",
@@ -1746,6 +1974,16 @@ defmodule Chimwemwe.Identity.FoundationTest do
                Repo.query!(
                  "UPDATE platform_tenant_memberships SET actor_id = $3, updated_at = NOW() WHERE tenant_id = $1 AND id = $2",
                  Enum.map([@tenant_a, membership_id, UUID.generate()], &dump/1)
+               )
+             end)
+  end
+
+  defp deactivate_link(runtime, link_id) do
+    assert {:ok, _result} =
+             Persistence.with_writer(runtime, context_admin_a(), fn ->
+               Repo.query!(
+                 "UPDATE identity_external_identity_links SET status = 'revoked', updated_at = NOW() WHERE origin_tenant_id = $1 AND id = $2",
+                 Enum.map([@tenant_a, link_id], &dump/1)
                )
              end)
   end
